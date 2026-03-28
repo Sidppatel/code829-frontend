@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Circle, RectangleHorizontal, Square, Diamond, Save, Trash2, Tags, Loader2, Check, PackagePlus, PackageMinus } from 'lucide-react';
+import { Circle, RectangleHorizontal, Square, Diamond, Save, Trash2, Tags, Loader2, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../lib/axios';
 import { useFloorPlanStore, type FloorPlanElement, type TableShape } from '../../../stores/floorPlanStore';
@@ -445,6 +445,8 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [draggingFromPalette, setDraggingFromPalette] = useState<TableType | null>(null);
   const [draggingElementId, setDraggingElementId] = useState<string | null>(null);
+  // Selected empty cells for bulk placement (stored as "row-col" keys)
+  const [selectedEmptyCells, setSelectedEmptyCells] = useState<Set<string>>(new Set());
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -581,10 +583,85 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
 
   function handleSelectCell(id: string, evt: React.MouseEvent): void {
     evt.stopPropagation();
+    setSelectedEmptyCells(new Set()); // clear empty cell selection when selecting occupied
     if (evt.shiftKey) {
       multiSelect(id);
     } else {
       select(id);
+    }
+  }
+
+  function handleSelectEmptyCell(row: number, col: number, evt: React.MouseEvent): void {
+    evt.stopPropagation();
+    clearSelection(); // clear occupied selection when selecting empty
+    const key = `${row}-${col}`;
+    setSelectedEmptyCells((prev) => {
+      const next = new Set(prev);
+      if (evt.shiftKey) {
+        if (next.has(key)) next.delete(key); else next.add(key);
+      } else {
+        if (next.has(key) && next.size === 1) { next.clear(); } else { next.clear(); next.add(key); }
+      }
+      return next;
+    });
+  }
+
+  // Apply a table type to all selected empty cells
+  function handleApplyTypeToSelected(tt: TableType): void {
+    if (selectedEmptyCells.size === 0 && selectedIds.length === 0) {
+      toast.error('Select cells first, then click a table type');
+      return;
+    }
+
+    // If empty cells are selected, place tables there
+    if (selectedEmptyCells.size > 0) {
+      const ovr = overridesEnabled ? overrides[tt.id] : undefined;
+      let placed = 0;
+      const sortedCells = [...selectedEmptyCells].sort();
+      for (const key of sortedCells) {
+        const [r, c] = key.split('-').map(Number);
+        if (occupancyMap.has(key)) continue;
+        const el: FloorPlanElement = {
+          id: `el_${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${placed}`,
+          label: `${colLabel(c)}${r + 1}`,
+          capacity: ovr?.capacity ?? tt.defaultCapacity,
+          shape: tt.defaultShape,
+          color: tt.defaultColor,
+          section: undefined,
+          priceType: 'PerTable',
+          priceCents: ovr?.priceCents ?? tt.defaultPriceCents,
+          isActive: true,
+          gridRow: r,
+          gridCol: c,
+          width: tt.defaultShape === 'Rectangle' ? 120 : 80,
+          height: 80,
+          rotation: 0,
+          sortOrder: totalTables + placed,
+          tableTypeId: tt.id,
+          tableTypeName: tt.name,
+        };
+        addElement(el);
+        placed++;
+      }
+      setSelectedEmptyCells(new Set());
+      if (placed > 0) toast.success(`Placed ${placed} ${tt.name} table${placed > 1 ? 's' : ''}`);
+      return;
+    }
+
+    // If occupied cells are selected, change their type
+    if (selectedIds.length > 0) {
+      const ovr = overridesEnabled ? overrides[tt.id] : undefined;
+      for (const id of selectedIds) {
+        updateElement(id, {
+          capacity: ovr?.capacity ?? tt.defaultCapacity,
+          shape: tt.defaultShape,
+          color: tt.defaultColor,
+          priceCents: ovr?.priceCents ?? tt.defaultPriceCents,
+          tableTypeId: tt.id,
+          tableTypeName: tt.name,
+        });
+      }
+      toast.success(`Applied ${tt.name} to ${selectedIds.length} table${selectedIds.length > 1 ? 's' : ''}`);
     }
   }
 
@@ -834,12 +911,21 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
               No active table types
             </p>
           )}
+          {/* Hint when cells are selected */}
+          {(selectedEmptyCells.size > 0 || selectedIds.length > 0) && (
+            <p style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', margin: '0 0 0.5rem', padding: '0.4rem 0.5rem', background: 'color-mix(in srgb, var(--accent-primary) 8%, transparent)', borderRadius: '0.375rem', lineHeight: 1.3 }}>
+              {selectedEmptyCells.size > 0
+                ? `${selectedEmptyCells.size} empty cell${selectedEmptyCells.size > 1 ? 's' : ''} selected — click a type below to place`
+                : `${selectedIds.length} table${selectedIds.length > 1 ? 's' : ''} selected — click a type to change`}
+            </p>
+          )}
           {tableTypes.map((tt) => (
             <div
               key={tt.id}
               draggable
               onDragStart={() => setDraggingFromPalette(tt)}
               onDragEnd={() => setDraggingFromPalette(null)}
+              onClick={() => handleApplyTypeToSelected(tt)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -848,16 +934,20 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                 borderRadius: '0.5rem',
                 border: '1px solid var(--border)',
                 background: 'var(--bg-tertiary)',
-                cursor: 'grab',
+                cursor: (selectedEmptyCells.size > 0 || selectedIds.length > 0) ? 'pointer' : 'grab',
                 marginBottom: '0.5rem',
-                transition: 'border-color 0.15s',
+                transition: 'border-color 0.15s, background 0.15s',
                 userSelect: 'none',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'var(--accent-primary)';
+                if (selectedEmptyCells.size > 0 || selectedIds.length > 0) {
+                  e.currentTarget.style.background = 'color-mix(in srgb, var(--accent-primary) 10%, var(--bg-tertiary))';
+                }
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.background = 'var(--bg-tertiary)';
               }}
             >
               <div style={{ color: tt.defaultColor || 'var(--accent-primary)', flexShrink: 0 }}>
@@ -1123,37 +1213,22 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
             Auto-label
           </button>
 
-          {/* Bulk Insert */}
-          <button
-            type="button"
-            onClick={() => setShowBulkInsert((v) => !v)}
-            style={{
-              ...toolbarBtnStyle,
-              borderColor: showBulkInsert ? 'var(--accent-primary)' : 'var(--border)',
-              color: showBulkInsert ? 'var(--accent-primary)' : 'var(--text-secondary)',
-            }}
-            title="Bulk insert tables"
-          >
-            <PackagePlus size={14} />
-            Bulk Insert
-          </button>
-
-          {/* Bulk Remove */}
+          {/* Delete selected — trash icon, enabled when any table is selected */}
           <button
             type="button"
             onClick={handleBulkRemove}
-            disabled={selectedIds.length < 2}
+            disabled={selectedIds.length === 0}
+            title={selectedIds.length > 0 ? `Delete ${selectedIds.length} selected table${selectedIds.length > 1 ? 's' : ''}` : 'Select tables to delete'}
             style={{
               ...toolbarBtnStyle,
-              borderColor: selectedIds.length >= 2 ? 'var(--color-error)' : 'var(--border)',
-              color: selectedIds.length >= 2 ? 'var(--color-error)' : 'var(--text-tertiary)',
-              opacity: selectedIds.length >= 2 ? 1 : 0.5,
-              cursor: selectedIds.length >= 2 ? 'pointer' : 'not-allowed',
+              borderColor: selectedIds.length > 0 ? 'var(--color-error)' : 'var(--border)',
+              color: selectedIds.length > 0 ? 'var(--color-error)' : 'var(--text-tertiary)',
+              opacity: selectedIds.length > 0 ? 1 : 0.4,
+              cursor: selectedIds.length > 0 ? 'pointer' : 'not-allowed',
             }}
-            title="Bulk remove selected tables"
           >
-            <PackageMinus size={14} />
-            Bulk Remove ({selectedIds.length})
+            <Trash2 size={14} />
+            {selectedIds.length > 0 ? selectedIds.length : ''}
           </button>
 
           <button
@@ -1353,6 +1428,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                   const occupantId = occupancyMap.get(key);
                   const occupant = occupantId ? elements[occupantId] : undefined;
                   const isSelected = occupantId ? selectedIds.includes(occupantId) : false;
+                  const isEmptySelected = !occupant && selectedEmptyCells.has(key);
 
                   return (
                     <div
@@ -1362,20 +1438,28 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                         e.stopPropagation();
                         handleCellDrop(r, c);
                       }}
+                      onClick={!occupant ? (e) => handleSelectEmptyCell(r, c, e) : undefined}
                       style={{
                         width: '64px',
                         height: '64px',
                         border: occupant
                           ? `1px solid ${isSelected ? 'var(--accent-primary)' : 'var(--border)'}`
+                          : isEmptySelected
+                          ? '2px solid var(--accent-primary)'
                           : '1px dashed var(--border)',
                         borderRadius: '4px',
-                        background: occupant ? 'var(--bg-secondary)' : 'transparent',
+                        background: occupant
+                          ? 'var(--bg-secondary)'
+                          : isEmptySelected
+                          ? 'color-mix(in srgb, var(--accent-primary) 8%, transparent)'
+                          : 'transparent',
                         position: 'relative',
-                        transition: 'border-color 0.1s',
+                        transition: 'border-color 0.1s, background 0.1s',
                         boxSizing: 'border-box',
+                        cursor: !occupant ? 'pointer' : 'default',
                       }}
                     >
-                      {occupant && (
+                      {occupant ? (
                         <TableCell
                           element={occupant}
                           isSelected={isSelected}
@@ -1383,7 +1467,11 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                           onContextMenu={(id, x, y) => setContextMenu({ x, y, elementId: id })}
                           onDragStart={(id) => setDraggingElementId(id)}
                         />
-                      )}
+                      ) : isEmptySelected ? (
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Check size={14} style={{ color: 'var(--accent-primary)', opacity: 0.5 }} />
+                        </div>
+                      ) : null}
                     </div>
                   );
                 })}
