@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
@@ -52,6 +52,7 @@ export default function App(): React.ReactElement {
             <Route path="/events/:id" element={<EventDetailPage />} />
             <Route path="/me/bookings" element={<MyBookingsPage />} />
             <Route path="/auth/login" element={<LoginPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
 

@@ -4,11 +4,22 @@ import { MapPin, Calendar, Tag } from 'lucide-react';
 export interface EventData {
   id: string;
   title: string;
+  slug?: string;
   category: string;
-  venue: string;
-  city: string;
-  date: string;
-  price: number | null;
+  startDate: string;
+  venueName: string;
+  venueCity: string;
+  venueState?: string;
+  minPriceCents: number | null;
+  imageUrl?: string | null;
+  isFeatured?: boolean;
+  totalCapacity?: number | null;
+  totalSold?: number | null;
+  // Legacy fallback fields for placeholder data
+  venue?: string;
+  city?: string;
+  date?: string;
+  price?: number | null;
   imageGradient?: string;
   isFomo?: boolean;
 }
@@ -19,18 +30,20 @@ interface EventCardProps {
 }
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
-  Music:
-    'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
+  Music: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
   Tech: 'linear-gradient(135deg, var(--color-info) 0%, var(--accent-primary) 100%)',
   Art: 'linear-gradient(135deg, var(--color-pink) 0%, var(--accent-secondary) 100%)',
   Food: 'linear-gradient(135deg, var(--accent-cta) 0%, var(--color-yellow) 100%)',
   Sports: 'linear-gradient(135deg, var(--color-success) 0%, var(--color-info) 100%)',
-  default:
-    'linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%)',
+  Comedy: 'linear-gradient(135deg, var(--color-yellow) 0%, var(--accent-cta) 100%)',
+  Wellness: 'linear-gradient(135deg, var(--color-success) 0%, var(--accent-secondary) 100%)',
+  Theater: 'linear-gradient(135deg, var(--accent-secondary) 0%, var(--color-pink) 100%)',
+  default: 'linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%)',
 };
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
   return d.toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
@@ -40,13 +53,23 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function formatPrice(price: number | null): string {
-  if (price === null || price === 0) return 'Free';
+function formatPriceCents(cents: number | null | undefined): string {
+  if (cents === null || cents === undefined || cents === 0) return 'Free';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 0,
-  }).format(price);
+  }).format(cents / 100);
+}
+
+function isFomoEvent(event: EventData): boolean {
+  if (event.isFomo) return true;
+  const capacity = event.totalCapacity;
+  const sold = event.totalSold;
+  if (capacity && sold && capacity > 0) {
+    return sold / capacity >= 0.8;
+  }
+  return false;
 }
 
 export default function EventCard({ event, style }: EventCardProps): React.ReactElement {
@@ -55,10 +78,18 @@ export default function EventCard({ event, style }: EventCardProps): React.React
   const [glow, setGlow] = useState({ x: 50, y: 50, opacity: 0 });
   const [isHovered, setIsHovered] = useState(false);
 
-  const gradient =
-    event.imageGradient ??
-    CATEGORY_GRADIENTS[event.category] ??
-    CATEGORY_GRADIENTS.default;
+  // Support both API shape (startDate/venueName/venueCity/minPriceCents) and legacy shape
+  const displayDate = event.startDate ?? event.date ?? '';
+  const displayVenue = event.venueName ?? event.venue ?? '';
+  const displayCity = event.venueCity ?? event.city ?? '';
+  const displayPriceCents = event.minPriceCents !== undefined
+    ? event.minPriceCents
+    : event.price !== undefined
+    ? (event.price !== null ? event.price * 100 : null)
+    : null;
+
+  const gradient = event.imageGradient ?? CATEGORY_GRADIENTS[event.category] ?? CATEGORY_GRADIENTS.default;
+  const showFomo = isFomoEvent(event);
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>): void {
     const card = cardRef.current;
@@ -92,10 +123,7 @@ export default function EventCard({ event, style }: EventCardProps): React.React
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onMouseEnter={handleMouseEnter}
-      style={{
-        perspective: '1000px',
-        ...style,
-      }}
+      style={{ perspective: '1000px', ...style }}
       className="flex-shrink-0"
     >
       <div
@@ -106,9 +134,7 @@ export default function EventCard({ event, style }: EventCardProps): React.React
           overflow: 'hidden',
           background: 'var(--bg-secondary)',
           border: '1px solid var(--border)',
-          boxShadow: isHovered
-            ? 'var(--shadow-card-hover)'
-            : 'var(--shadow-card)',
+          boxShadow: isHovered ? 'var(--shadow-card-hover)' : 'var(--shadow-card)',
           position: 'relative',
           cursor: 'pointer',
         }}
@@ -132,12 +158,21 @@ export default function EventCard({ event, style }: EventCardProps): React.React
         <div
           style={{
             aspectRatio: '3/4',
-            background: gradient,
             position: 'relative',
             overflow: 'hidden',
           }}
         >
-          {event.isFomo && (
+          {event.imageUrl ? (
+            <img
+              src={event.imageUrl}
+              alt={event.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          ) : (
+            <div style={{ width: '100%', height: '100%', background: gradient }} />
+          )}
+
+          {showFomo && (
             <div
               style={{
                 position: 'absolute',
@@ -157,14 +192,35 @@ export default function EventCard({ event, style }: EventCardProps): React.React
               Almost Full
             </div>
           )}
+
+          {event.isFeatured && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '0.75rem',
+                left: '0.75rem',
+                background: 'var(--accent-primary)',
+                color: 'var(--bg-primary)',
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                padding: '0.2rem 0.55rem',
+                borderRadius: '999px',
+                zIndex: 3,
+              }}
+            >
+              Featured
+            </div>
+          )}
+
           {/* Gradient overlay at bottom */}
           <div
             aria-hidden="true"
             style={{
               position: 'absolute',
               inset: 0,
-              background:
-                'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%)',
+              background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%)',
             }}
           />
         </div>
@@ -211,54 +267,58 @@ export default function EventCard({ event, style }: EventCardProps): React.React
           </h3>
 
           {/* Venue */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              fontSize: '0.8rem',
-              color: 'var(--text-secondary)',
-              marginBottom: '0.3rem',
-            }}
-          >
-            <MapPin size={12} style={{ flexShrink: 0 }} />
-            <span
+          {(displayVenue || displayCity) && (
+            <div
               style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)',
+                marginBottom: '0.3rem',
               }}
             >
-              {event.venue}, {event.city}
-            </span>
-          </div>
+              <MapPin size={12} style={{ flexShrink: 0 }} />
+              <span
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {displayVenue}{displayVenue && displayCity ? ', ' : ''}{displayCity}
+              </span>
+            </div>
+          )}
 
           {/* Date */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              fontSize: '0.8rem',
-              color: 'var(--text-secondary)',
-              marginBottom: '0.75rem',
-            }}
-          >
-            <Calendar size={12} style={{ flexShrink: 0 }} />
-            <span>{formatDate(event.date)}</span>
-          </div>
+          {displayDate && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)',
+                marginBottom: '0.75rem',
+              }}
+            >
+              <Calendar size={12} style={{ flexShrink: 0 }} />
+              <span>{formatDate(displayDate)}</span>
+            </div>
+          )}
 
           {/* Price */}
           <div
             style={{
               fontSize: '1rem',
               fontWeight: 700,
-              color: event.price === 0 || event.price === null
+              color: displayPriceCents === 0 || displayPriceCents === null
                 ? 'var(--color-success)'
                 : 'var(--accent-cta)',
             }}
           >
-            {formatPrice(event.price)}
+            {formatPriceCents(displayPriceCents)}
           </div>
         </div>
       </div>

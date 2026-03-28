@@ -9,6 +9,35 @@ import apiClient from '../lib/axios';
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+interface ApiEventItem {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  category: string;
+  startDate: string;
+  endDate: string | null;
+  imageUrl: string | null;
+  isFeatured: boolean;
+  venueName: string;
+  venueCity: string;
+  venueState: string;
+  minPriceCents: number | null;
+  maxPriceCents: number | null;
+  totalCapacity: number | null;
+  totalSold: number | null;
+}
+
+interface ApiEventsResponse {
+  items: ApiEventItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 type TimeGroup = 'Today' | 'This Weekend' | 'Next Week' | 'Later This Month' | 'Upcoming';
 
 interface GroupedEvents {
@@ -16,22 +45,40 @@ interface GroupedEvents {
   events: EventData[];
 }
 
+function apiItemToEventData(item: ApiEventItem): EventData {
+  return {
+    id: item.id,
+    title: item.title,
+    slug: item.slug,
+    category: item.category,
+    startDate: item.startDate,
+    venueName: item.venueName,
+    venueCity: item.venueCity,
+    venueState: item.venueState,
+    minPriceCents: item.minPriceCents,
+    imageUrl: item.imageUrl,
+    isFeatured: item.isFeatured,
+    totalCapacity: item.totalCapacity,
+    totalSold: item.totalSold,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Placeholder data
 // ---------------------------------------------------------------------------
 const ALL_PLACEHOLDER_EVENTS: EventData[] = [
-  { id: '1', title: 'Neon Frequencies Festival', category: 'Music', venue: 'Amphitheater Park', city: 'Austin', date: new Date(Date.now() + 3600000 * 4).toISOString(), price: 89, isFomo: true },
-  { id: '2', title: 'React Summit 2026', category: 'Tech', venue: 'Convention Center', city: 'San Francisco', date: new Date(Date.now() + 3600000 * 8).toISOString(), price: 199 },
-  { id: '3', title: 'Urban Art Walk', category: 'Art', venue: 'Downtown Gallery District', city: 'New York', date: new Date(Date.now() + 86400000 * 2).toISOString(), price: 0 },
-  { id: '4', title: 'Street Food & Wine', category: 'Food', venue: 'Riverside Park', city: 'Chicago', date: new Date(Date.now() + 86400000 * 2).toISOString(), price: 35 },
-  { id: '5', title: 'Jazz Under the Stars', category: 'Music', venue: 'Rooftop Lounge 42', city: 'New Orleans', date: new Date(Date.now() + 86400000 * 3).toISOString(), price: 55 },
-  { id: '6', title: 'Hackathon: Build the Future', category: 'Tech', venue: 'Innovation Hub', city: 'Seattle', date: new Date(Date.now() + 86400000 * 6).toISOString(), price: 0, isFomo: true },
-  { id: '7', title: 'Midnight Cinema Classics', category: 'Art', venue: 'The Criterion', city: 'Los Angeles', date: new Date(Date.now() + 86400000 * 8).toISOString(), price: 18 },
-  { id: '8', title: 'Marathon City Run 2026', category: 'Sports', venue: 'City Hall Plaza', city: 'Boston', date: new Date(Date.now() + 86400000 * 9).toISOString(), price: 45 },
-  { id: '9', title: 'Farm-to-Table Dinner', category: 'Food', venue: 'Verdana Estate', city: 'Portland', date: new Date(Date.now() + 86400000 * 11).toISOString(), price: 120 },
-  { id: '10', title: 'Electronic Music Night', category: 'Music', venue: 'Club Zenith', city: 'Miami', date: new Date(Date.now() + 86400000 * 14).toISOString(), price: 40, isFomo: true },
-  { id: '11', title: 'Photography Masterclass', category: 'Art', venue: 'Studio 12', city: 'Denver', date: new Date(Date.now() + 86400000 * 15).toISOString(), price: 75 },
-  { id: '12', title: 'Comedy Showcase', category: 'Comedy', venue: 'The Laugh Factory', city: 'Chicago', date: new Date(Date.now() + 86400000 * 20).toISOString(), price: 30 },
+  { id: '1', title: 'Neon Frequencies Festival', category: 'Music', venueName: 'Amphitheater Park', venueCity: 'Austin', startDate: new Date(Date.now() + 3600000 * 4).toISOString(), minPriceCents: 8900, totalCapacity: 500, totalSold: 450 },
+  { id: '2', title: 'React Summit 2026', category: 'Tech', venueName: 'Convention Center', venueCity: 'San Francisco', startDate: new Date(Date.now() + 3600000 * 8).toISOString(), minPriceCents: 19900 },
+  { id: '3', title: 'Urban Art Walk', category: 'Art', venueName: 'Downtown Gallery District', venueCity: 'New York', startDate: new Date(Date.now() + 86400000 * 2).toISOString(), minPriceCents: 0 },
+  { id: '4', title: 'Street Food & Wine', category: 'Food', venueName: 'Riverside Park', venueCity: 'Chicago', startDate: new Date(Date.now() + 86400000 * 2).toISOString(), minPriceCents: 3500 },
+  { id: '5', title: 'Jazz Under the Stars', category: 'Music', venueName: 'Rooftop Lounge 42', venueCity: 'New Orleans', startDate: new Date(Date.now() + 86400000 * 3).toISOString(), minPriceCents: 5500 },
+  { id: '6', title: 'Hackathon: Build the Future', category: 'Tech', venueName: 'Innovation Hub', venueCity: 'Seattle', startDate: new Date(Date.now() + 86400000 * 6).toISOString(), minPriceCents: 0, totalCapacity: 200, totalSold: 185 },
+  { id: '7', title: 'Midnight Cinema Classics', category: 'Art', venueName: 'The Criterion', venueCity: 'Los Angeles', startDate: new Date(Date.now() + 86400000 * 8).toISOString(), minPriceCents: 1800 },
+  { id: '8', title: 'Marathon City Run 2026', category: 'Sports', venueName: 'City Hall Plaza', venueCity: 'Boston', startDate: new Date(Date.now() + 86400000 * 9).toISOString(), minPriceCents: 4500 },
+  { id: '9', title: 'Farm-to-Table Dinner', category: 'Food', venueName: 'Verdana Estate', venueCity: 'Portland', startDate: new Date(Date.now() + 86400000 * 11).toISOString(), minPriceCents: 12000 },
+  { id: '10', title: 'Electronic Music Night', category: 'Music', venueName: 'Club Zenith', venueCity: 'Miami', startDate: new Date(Date.now() + 86400000 * 14).toISOString(), minPriceCents: 4000, totalCapacity: 300, totalSold: 270 },
+  { id: '11', title: 'Photography Masterclass', category: 'Art', venueName: 'Studio 12', venueCity: 'Denver', startDate: new Date(Date.now() + 86400000 * 15).toISOString(), minPriceCents: 7500 },
+  { id: '12', title: 'Comedy Showcase', category: 'Comedy', venueName: 'The Laugh Factory', venueCity: 'Chicago', startDate: new Date(Date.now() + 86400000 * 20).toISOString(), minPriceCents: 3000 },
 ];
 
 const CATEGORIES = ['All', 'Music', 'Tech', 'Art', 'Food', 'Sports', 'Comedy', 'Wellness', 'Theater'];
@@ -39,9 +86,8 @@ const CITIES = ['All Cities', 'New York', 'San Francisco', 'Chicago', 'Los Angel
 const DATE_FILTERS = [
   { label: 'Any Date', value: '' },
   { label: 'Today', value: 'today' },
-  { label: 'This Weekend', value: 'weekend' },
-  { label: 'This Week', value: 'week' },
-  { label: 'This Month', value: 'month' },
+  { label: 'This Week', value: 'this-week' },
+  { label: 'This Month', value: 'this-month' },
 ];
 
 const TYPING_PLACEHOLDERS = [
@@ -85,7 +131,9 @@ function groupEventsByTime(events: EventData[]): GroupedEvents[] {
   };
 
   for (const event of events) {
-    const ts = new Date(event.date).getTime();
+    const dateStr = event.startDate ?? event.date ?? '';
+    if (!dateStr) continue;
+    const ts = new Date(dateStr).getTime();
     if (ts < now) continue;
     if (ts <= endOfToday.getTime()) {
       groups.Today.push(event);
@@ -155,7 +203,7 @@ function FomoBadge(): React.ReactElement {
       marginLeft: '0.5rem',
       animation: 'fomoPulse 2s ease-in-out infinite',
     }}>
-      🔥 Selling Fast
+      Selling Fast
       <style>{`@keyframes fomoPulse { 0%,100%{opacity:1} 50%{opacity:0.7} }`}</style>
     </span>
   );
@@ -168,11 +216,12 @@ export default function EventsPage(): React.ReactElement {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
   const [category, setCategory] = useState(searchParams.get('category') ?? 'All');
-  const [dateFilter, setDateFilter] = useState(searchParams.get('timeframe') ?? '');
+  const [dateFilter, setDateFilter] = useState(searchParams.get('dateFilter') ?? '');
   const [city, setCity] = useState('All Cities');
   const [showDateDropdown, setShowDateDropdown] = useState(false);
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [events, setEvents] = useState<EventData[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const placeholder = useTypingPlaceholder();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -204,20 +253,24 @@ export default function EventsPage(): React.ReactElement {
     async function fetchEvents(): Promise<void> {
       try {
         const params = new URLSearchParams();
-        if (query) params.set('q', query);
+        if (query) params.set('search', query);
         if (category !== 'All') params.set('category', category);
-        if (dateFilter) params.set('timeframe', dateFilter);
+        if (dateFilter) params.set('dateFilter', dateFilter);
         if (city !== 'All Cities') params.set('city', city);
 
-        const res = await apiClient.get<{ data: EventData[] }>(`/events?${params.toString()}`);
-        if (!cancelled) setEvents(res.data.data);
+        const res = await apiClient.get<ApiEventsResponse>(`/events?${params.toString()}`);
+        if (!cancelled) {
+          setEvents((res.data.items ?? []).map(apiItemToEventData));
+          setTotalCount(res.data.totalCount ?? 0);
+        }
       } catch {
         if (!cancelled) {
           let filtered = ALL_PLACEHOLDER_EVENTS;
           if (query) filtered = filtered.filter((e) => e.title.toLowerCase().includes(query.toLowerCase()));
           if (category !== 'All') filtered = filtered.filter((e) => e.category === category);
-          if (city !== 'All Cities') filtered = filtered.filter((e) => e.city === city);
+          if (city !== 'All Cities') filtered = filtered.filter((e) => (e.venueCity ?? e.city) === city);
           setEvents(filtered);
+          setTotalCount(filtered.length);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -392,7 +445,7 @@ export default function EventsPage(): React.ReactElement {
                     key={d.value}
                     onClick={() => {
                       setDateFilter(d.value);
-                      updateParams({ timeframe: d.value });
+                      updateParams({ dateFilter: d.value });
                       setShowDateDropdown(false);
                     }}
                     style={{
@@ -513,6 +566,11 @@ export default function EventsPage(): React.ReactElement {
 
       {/* Events content */}
       <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem 1.5rem 4rem' }}>
+        {!loading && totalCount > 0 && (
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', marginBottom: '1.5rem' }}>
+            {totalCount} {totalCount === 1 ? 'event' : 'events'} found
+          </p>
+        )}
         {loading ? (
           <div>
             <div style={{
@@ -584,7 +642,7 @@ export default function EventsPage(): React.ReactElement {
                 gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
                 gap: '1.5rem',
               }}>
-                {group.events.map((event, i) => (
+                {(group.events ?? []).map((event, i) => (
                   <Link
                     key={event.id}
                     to={`/events/${event.id}`}

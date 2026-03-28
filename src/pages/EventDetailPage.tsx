@@ -11,12 +11,53 @@ import apiClient from '../lib/axios';
 import { useAuthStore } from '../stores/authStore';
 
 // ---------------------------------------------------------------------------
-// Types
+// Types matching actual API response
 // ---------------------------------------------------------------------------
+interface ApiTicketType {
+  id: string;
+  name: string;
+  description: string;
+  priceCents: number;
+  quantityTotal: number;
+  quantitySold: number;
+  quantityRemaining: number;
+  sortOrder: number;
+}
+
+interface ApiVenue {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  capacity: number;
+}
+
+interface ApiEventDetail {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  status: string;
+  category: string;
+  startDate: string;
+  endDate: string | null;
+  imageUrl: string | null;
+  isFeatured: boolean;
+  venueId: string;
+  venue: ApiVenue;
+  organizerId: string;
+  organizerName: string;
+  ticketTypes: ApiTicketType[];
+  createdAt: string;
+}
+
+// Internal display shape
 interface TicketTier {
   id: string;
   name: string;
-  price: number;
+  priceCents: number;
   description: string;
   available: number;
   total: number;
@@ -27,17 +68,51 @@ interface EventDetail {
   title: string;
   category: string;
   description: string;
-  venue: string;
-  city: string;
-  address: string;
-  date: string;
-  endDate?: string;
-  imageGradient?: string;
+  venueName: string;
+  venueCity: string;
+  venueAddress: string;
+  startDate: string;
+  endDate: string | null;
+  imageUrl: string | null;
   organizer: string;
   attendeeCount: number;
   maxAttendees: number;
   tickets: TicketTier[];
-  tags: string[];
+}
+
+function apiToEventDetail(api: ApiEventDetail): EventDetail {
+  const totalSold = api.ticketTypes.reduce((sum, t) => sum + t.quantitySold, 0);
+  const totalCapacity = api.ticketTypes.reduce((sum, t) => sum + t.quantityTotal, 0);
+
+  const tickets: TicketTier[] = [...api.ticketTypes]
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((t) => ({
+      id: t.id,
+      name: t.name,
+      priceCents: t.priceCents,
+      description: t.description,
+      available: t.quantityRemaining,
+      total: t.quantityTotal,
+    }));
+
+  return {
+    id: api.id,
+    title: api.title,
+    category: api.category,
+    description: api.description,
+    venueName: api.venue?.name ?? '',
+    venueCity: api.venue?.city ?? '',
+    venueAddress: api.venue
+      ? `${api.venue.address}, ${api.venue.city}, ${api.venue.state} ${api.venue.zipCode}`
+      : '',
+    startDate: api.startDate,
+    endDate: api.endDate,
+    imageUrl: api.imageUrl,
+    organizer: api.organizerName,
+    attendeeCount: totalSold,
+    maxAttendees: totalCapacity,
+    tickets,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -50,22 +125,33 @@ const PLACEHOLDER_EVENT: EventDetail = {
   description: `Join the world's largest React conference for two days of keynotes, workshops, and networking with the best minds in the React ecosystem. Explore the latest in React 19, Server Components, concurrent features, and much more.
 
 This year's summit features over 40 speakers from companies like Meta, Vercel, and the open-source community. Whether you're a beginner or a senior engineer, you'll leave with new skills, inspiration, and connections that will shape your career.`,
-  venue: 'Moscone Convention Center',
-  city: 'San Francisco',
-  address: '747 Howard St, San Francisco, CA 94103',
-  date: new Date(Date.now() + 86400000 * 4).toISOString(),
+  venueName: 'Moscone Convention Center',
+  venueCity: 'San Francisco',
+  venueAddress: '747 Howard St, San Francisco, CA 94103',
+  startDate: new Date(Date.now() + 86400000 * 4).toISOString(),
   endDate: new Date(Date.now() + 86400000 * 6).toISOString(),
-  imageGradient: 'linear-gradient(135deg, var(--color-info) 0%, var(--accent-primary) 100%)',
+  imageUrl: null,
   organizer: 'GitNation',
   attendeeCount: 1847,
   maxAttendees: 2000,
   tickets: [
-    { id: 't1', name: 'General Admission', price: 199, description: 'Access to all talks and networking sessions', available: 153, total: 500 },
-    { id: 't2', name: 'Workshop Pass', price: 349, description: 'All talks + 2 hands-on workshops of your choice', available: 28, total: 100 },
-    { id: 't3', name: 'VIP Experience', price: 699, description: 'Full access + speaker dinner + priority seating', available: 7, total: 30 },
+    { id: 't1', name: 'General Admission', priceCents: 19900, description: 'Access to all talks and networking sessions', available: 153, total: 500 },
+    { id: 't2', name: 'Workshop Pass', priceCents: 34900, description: 'All talks + 2 hands-on workshops of your choice', available: 28, total: 100 },
+    { id: 't3', name: 'VIP Experience', priceCents: 69900, description: 'Full access + speaker dinner + priority seating', available: 7, total: 30 },
   ],
-  tags: ['React', 'JavaScript', 'TypeScript', 'Web Dev', 'Open Source'],
 };
+
+// ---------------------------------------------------------------------------
+// Price formatting
+// ---------------------------------------------------------------------------
+function formatCents(cents: number): string {
+  if (cents === 0) return 'Free';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+}
 
 // ---------------------------------------------------------------------------
 // Ticket tier card
@@ -79,8 +165,8 @@ function TicketCard({
   selected: boolean;
   onSelect: () => void;
 }): React.ReactElement {
-  const availabilityPct = (tier.available / tier.total) * 100;
-  const isLow = tier.available <= tier.total * 0.2;
+  const availabilityPct = tier.total > 0 ? (tier.available / tier.total) * 100 : 0;
+  const isLow = tier.available > 0 && tier.available <= tier.total * 0.2;
   const isSoldOut = tier.available === 0;
 
   return (
@@ -116,7 +202,7 @@ function TicketCard({
           whiteSpace: 'nowrap',
           marginLeft: '1rem',
         }}>
-          ${tier.price}
+          {formatCents(tier.priceCents)}
         </div>
       </div>
 
@@ -187,6 +273,8 @@ function ParallaxHero({ event }: { event: EventDetail }): React.ReactElement {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const fallbackGradient = 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)';
+
   return (
     <div
       ref={heroRef}
@@ -202,11 +290,18 @@ function ParallaxHero({ event }: { event: EventDetail }): React.ReactElement {
         style={{
           position: 'absolute',
           inset: '-20%',
-          background: event.imageGradient ??
-            'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
+          background: event.imageUrl ? undefined : fallbackGradient,
           willChange: 'transform',
         }}
-      />
+      >
+        {event.imageUrl && (
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        )}
+      </div>
       <div
         aria-hidden="true"
         style={{
@@ -274,7 +369,9 @@ function ParallaxHero({ event }: { event: EventDetail }): React.ReactElement {
 // Social proof strip
 // ---------------------------------------------------------------------------
 function SocialProof({ event }: { event: EventDetail }): React.ReactElement {
-  const pct = Math.round((event.attendeeCount / event.maxAttendees) * 100);
+  const pct = event.maxAttendees > 0
+    ? Math.round((event.attendeeCount / event.maxAttendees) * 100)
+    : 0;
   return (
     <div style={{
       padding: '1rem',
@@ -337,15 +434,16 @@ export default function EventDetailPage(): React.ReactElement {
 
     async function fetchEvent(): Promise<void> {
       try {
-        const res = await apiClient.get<{ data: EventDetail }>(`/events/${id}`);
+        const res = await apiClient.get<ApiEventDetail>(`/events/${id ?? ''}`);
         if (!cancelled) {
-          setEvent(res.data.data);
-          setSelectedTier(res.data.data.tickets[0]?.id ?? null);
+          const detail = apiToEventDetail(res.data);
+          setEvent(detail);
+          setSelectedTier(detail.tickets[0]?.id ?? null);
         }
       } catch {
         if (!cancelled) {
           setEvent(PLACEHOLDER_EVENT);
-          setSelectedTier(PLACEHOLDER_EVENT.tickets[0].id);
+          setSelectedTier(PLACEHOLDER_EVENT.tickets[0]?.id ?? null);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -357,7 +455,7 @@ export default function EventDetailPage(): React.ReactElement {
   }, [id]);
 
   const selectedTierData = event?.tickets.find((t) => t.id === selectedTier);
-  const totalPrice = selectedTierData ? selectedTierData.price * quantity : 0;
+  const totalCents = selectedTierData ? selectedTierData.priceCents * quantity : 0;
 
   if (loading) {
     return (
@@ -374,7 +472,13 @@ export default function EventDetailPage(): React.ReactElement {
     );
   }
 
-  if (!event) return <div style={{ paddingTop: '64px', textAlign: 'center', color: 'var(--text-secondary)', padding: '4rem' }}>Event not found.</div>;
+  if (!event) {
+    return (
+      <div style={{ paddingTop: '64px', textAlign: 'center', color: 'var(--text-secondary)', padding: '4rem' }}>
+        Event not found.
+      </div>
+    );
+  }
 
   return (
     <>
@@ -393,7 +497,7 @@ export default function EventDetailPage(): React.ReactElement {
             gap: '3rem',
             alignItems: 'start',
           }}>
-            {/* LEFT: 60% — event details */}
+            {/* LEFT: event details */}
             <div>
               {/* Quick meta */}
               <div style={{
@@ -405,10 +509,26 @@ export default function EventDetailPage(): React.ReactElement {
                 borderBottom: '1px solid var(--border)',
               }}>
                 {[
-                  { Icon: Calendar, label: new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) },
-                  { Icon: Clock, label: new Date(event.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) },
-                  { Icon: MapPin, label: `${event.venue}, ${event.city}` },
-                  { Icon: Users, label: `${event.attendeeCount.toLocaleString()} attending` },
+                  {
+                    Icon: Calendar,
+                    label: new Date(event.startDate).toLocaleDateString('en-US', {
+                      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+                    }),
+                  },
+                  {
+                    Icon: Clock,
+                    label: new Date(event.startDate).toLocaleTimeString('en-US', {
+                      hour: '2-digit', minute: '2-digit',
+                    }),
+                  },
+                  {
+                    Icon: MapPin,
+                    label: `${event.venueName}${event.venueCity ? `, ${event.venueCity}` : ''}`,
+                  },
+                  {
+                    Icon: Users,
+                    label: `${event.attendeeCount.toLocaleString()} attending`,
+                  },
                 ].map(({ Icon, label }) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                     <Icon size={14} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
@@ -483,22 +603,6 @@ export default function EventDetailPage(): React.ReactElement {
                 ))}
               </div>
 
-              {/* Tags */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem' }}>
-                {event.tags.map((tag) => (
-                  <span key={tag} style={{
-                    padding: '0.3rem 0.75rem',
-                    borderRadius: '999px',
-                    background: 'var(--bg-tertiary)',
-                    border: '1px solid var(--border)',
-                    fontSize: '0.8rem',
-                    color: 'var(--text-secondary)',
-                  }}>
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-
               {/* Venue */}
               <div style={{
                 padding: '1.25rem',
@@ -512,14 +616,18 @@ export default function EventDetailPage(): React.ReactElement {
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
                   <MapPin size={14} style={{ color: 'var(--accent-primary)', marginTop: '2px', flexShrink: 0 }} />
                   <div>
-                    <p style={{ fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 0.2rem', fontSize: '0.9rem' }}>{event.venue}</p>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{event.address}</p>
+                    <p style={{ fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 0.2rem', fontSize: '0.9rem' }}>
+                      {event.venueName}
+                    </p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
+                      {event.venueAddress}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* RIGHT: 40% — sticky sidebar */}
+            {/* RIGHT: sticky sidebar */}
             <div style={{ position: 'sticky', top: '80px' }}>
               <div style={{
                 background: 'var(--bg-secondary)',
@@ -538,11 +646,11 @@ export default function EventDetailPage(): React.ReactElement {
                   Get Tickets
                 </h3>
 
-                <SocialProof event={event} />
+                {event.maxAttendees > 0 && <SocialProof event={event} />}
 
                 {/* Ticket tiers */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
-                  {event.tickets.map((tier) => (
+                  {(event.tickets ?? []).map((tier) => (
                     <TicketCard
                       key={tier.id}
                       tier={tier}
@@ -607,7 +715,7 @@ export default function EventDetailPage(): React.ReactElement {
                       fontWeight: 800,
                       color: 'var(--accent-cta)',
                     }}>
-                      {totalPrice === 0 ? 'Free' : `$${totalPrice}`}
+                      {formatCents(totalCents)}
                     </span>
                   </div>
                 )}
@@ -655,18 +763,8 @@ export default function EventDetailPage(): React.ReactElement {
       </div>
 
       {/* Mobile sticky bottom bar */}
-      <div style={{
-        display: 'none', // shown via media query in-page style
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'var(--glass-bg)',
-        backdropFilter: 'blur(12px)',
-        borderTop: '1px solid var(--border)',
-        padding: '1rem 1.5rem',
-        zIndex: 80,
-      }}
+      <div
+        style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--glass-bg)', backdropFilter: 'blur(12px)', borderTop: '1px solid var(--border)', padding: '1rem 1.5rem', zIndex: 80 }}
         className="mobile-booking-bar"
       >
         <style>{`
@@ -677,7 +775,7 @@ export default function EventDetailPage(): React.ReactElement {
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>From</div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-cta)' }}>
-            ${event.tickets[0]?.price ?? 0}
+            {formatCents(event.tickets[0]?.priceCents ?? 0)}
           </div>
         </div>
         <MagneticButton style={{ flex: 1, justifyContent: 'center' }}>

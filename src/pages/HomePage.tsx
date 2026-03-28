@@ -16,16 +16,53 @@ interface Category {
   id: string;
   name: string;
   icon: string;
-  count: number;
 }
 
-interface ComingSoonEvent {
+interface ApiEventItem {
   id: string;
   title: string;
+  slug: string;
+  status: string;
   category: string;
-  date: string;
-  city: string;
-  imageGradient: string;
+  startDate: string;
+  endDate: string | null;
+  imageUrl: string | null;
+  isFeatured: boolean;
+  venueName: string;
+  venueCity: string;
+  venueState: string;
+  minPriceCents: number | null;
+  maxPriceCents: number | null;
+  totalCapacity: number | null;
+  totalSold: number | null;
+}
+
+interface ApiEventsResponse {
+  items: ApiEventItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+function apiItemToEventData(item: ApiEventItem): EventData {
+  return {
+    id: item.id,
+    title: item.title,
+    slug: item.slug,
+    category: item.category,
+    startDate: item.startDate,
+    venueName: item.venueName,
+    venueCity: item.venueCity,
+    venueState: item.venueState,
+    minPriceCents: item.minPriceCents,
+    imageUrl: item.imageUrl,
+    isFeatured: item.isFeatured,
+    totalCapacity: item.totalCapacity,
+    totalSold: item.totalSold,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -34,86 +71,63 @@ interface ComingSoonEvent {
 const PLACEHOLDER_EVENTS: EventData[] = [
   {
     id: '1', title: 'Neon Frequencies Festival', category: 'Music',
-    venue: 'Amphitheater Park', city: 'Austin', date: new Date(Date.now() + 86400000 * 2).toISOString(),
-    price: 89,
+    venueName: 'Amphitheater Park', venueCity: 'Austin', startDate: new Date(Date.now() + 86400000 * 2).toISOString(),
+    minPriceCents: 8900,
   },
   {
     id: '2', title: 'React Summit 2026', category: 'Tech',
-    venue: 'Convention Center', city: 'San Francisco', date: new Date(Date.now() + 86400000 * 4).toISOString(),
-    price: 199, isFomo: true,
+    venueName: 'Convention Center', venueCity: 'San Francisco', startDate: new Date(Date.now() + 86400000 * 4).toISOString(),
+    minPriceCents: 19900, totalCapacity: 500, totalSold: 450,
   },
   {
     id: '3', title: 'Urban Art Walk', category: 'Art',
-    venue: 'Downtown Gallery District', city: 'New York', date: new Date(Date.now() + 86400000 * 1).toISOString(),
-    price: 0,
+    venueName: 'Downtown Gallery District', venueCity: 'New York', startDate: new Date(Date.now() + 86400000 * 1).toISOString(),
+    minPriceCents: 0,
   },
   {
     id: '4', title: 'Street Food & Wine', category: 'Food',
-    venue: 'Riverside Park', city: 'Chicago', date: new Date(Date.now() + 86400000 * 3).toISOString(),
-    price: 35,
+    venueName: 'Riverside Park', venueCity: 'Chicago', startDate: new Date(Date.now() + 86400000 * 3).toISOString(),
+    minPriceCents: 3500,
   },
   {
     id: '5', title: 'Jazz Under the Stars', category: 'Music',
-    venue: 'Rooftop Lounge 42', city: 'New Orleans', date: new Date(Date.now() + 86400000 * 5).toISOString(),
-    price: 55,
+    venueName: 'Rooftop Lounge 42', venueCity: 'New Orleans', startDate: new Date(Date.now() + 86400000 * 5).toISOString(),
+    minPriceCents: 5500,
   },
 ];
 
 const PLACEHOLDER_TRENDING: EventData[] = [
   {
     id: '6', title: 'Hackathon: Build the Future', category: 'Tech',
-    venue: 'Innovation Hub', city: 'Seattle', date: new Date(Date.now() + 86400000 * 6).toISOString(),
-    price: 0, isFomo: true,
+    venueName: 'Innovation Hub', venueCity: 'Seattle', startDate: new Date(Date.now() + 86400000 * 6).toISOString(),
+    minPriceCents: 0, totalCapacity: 200, totalSold: 180,
   },
   {
     id: '7', title: 'Midnight Cinema Classics', category: 'Art',
-    venue: 'The Criterion', city: 'Los Angeles', date: new Date(Date.now() + 86400000 * 7).toISOString(),
-    price: 18,
+    venueName: 'The Criterion', venueCity: 'Los Angeles', startDate: new Date(Date.now() + 86400000 * 7).toISOString(),
+    minPriceCents: 1800,
   },
   {
     id: '8', title: 'Marathon City Run 2026', category: 'Sports',
-    venue: 'City Hall Plaza', city: 'Boston', date: new Date(Date.now() + 86400000 * 8).toISOString(),
-    price: 45,
+    venueName: 'City Hall Plaza', venueCity: 'Boston', startDate: new Date(Date.now() + 86400000 * 8).toISOString(),
+    minPriceCents: 4500,
   },
   {
     id: '9', title: 'Farm-to-Table Dinner', category: 'Food',
-    venue: 'Verdana Estate', city: 'Portland', date: new Date(Date.now() + 86400000 * 9).toISOString(),
-    price: 120, isFomo: true,
+    venueName: 'Verdana Estate', venueCity: 'Portland', startDate: new Date(Date.now() + 86400000 * 9).toISOString(),
+    minPriceCents: 12000, totalCapacity: 60, totalSold: 55,
   },
 ];
 
 const CATEGORIES: Category[] = [
-  { id: 'music', name: 'Music', icon: '🎵', count: 284 },
-  { id: 'tech', name: 'Tech', icon: '💻', count: 156 },
-  { id: 'art', name: 'Art', icon: '🎨', count: 203 },
-  { id: 'food', name: 'Food', icon: '🍽️', count: 178 },
-  { id: 'sports', name: 'Sports', icon: '⚡', count: 97 },
-  { id: 'comedy', name: 'Comedy', icon: '😂', count: 64 },
-  { id: 'wellness', name: 'Wellness', icon: '🧘', count: 88 },
-  { id: 'theater', name: 'Theater', icon: '🎭', count: 112 },
-];
-
-const COMING_SOON: ComingSoonEvent[] = [
-  {
-    id: 'cs1', title: 'Blockchain & Beyond: Web3 Summit', category: 'Tech',
-    date: new Date(Date.now() + 86400000 * 21).toISOString(), city: 'Miami',
-    imageGradient: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--color-info) 100%)',
-  },
-  {
-    id: 'cs2', title: 'Global Street Art Festival', category: 'Art',
-    date: new Date(Date.now() + 86400000 * 28).toISOString(), city: 'Chicago',
-    imageGradient: 'linear-gradient(135deg, var(--color-pink) 0%, var(--accent-secondary) 100%)',
-  },
-  {
-    id: 'cs3', title: 'International Jazz Festival', category: 'Music',
-    date: new Date(Date.now() + 86400000 * 35).toISOString(), city: 'New Orleans',
-    imageGradient: 'linear-gradient(135deg, var(--accent-cta) 0%, var(--color-yellow) 100%)',
-  },
-  {
-    id: 'cs4', title: 'Culinary World Expo', category: 'Food',
-    date: new Date(Date.now() + 86400000 * 42).toISOString(), city: 'New York',
-    imageGradient: 'linear-gradient(135deg, var(--color-success) 0%, var(--color-info) 100%)',
-  },
+  { id: 'Music', name: 'Music', icon: '🎵' },
+  { id: 'Tech', name: 'Tech', icon: '💻' },
+  { id: 'Art', name: 'Art', icon: '🎨' },
+  { id: 'Food', name: 'Food', icon: '🍽️' },
+  { id: 'Sports', name: 'Sports', icon: '⚡' },
+  { id: 'Comedy', name: 'Comedy', icon: '😂' },
+  { id: 'Wellness', name: 'Wellness', icon: '🧘' },
+  { id: 'Theater', name: 'Theater', icon: '🎭' },
 ];
 
 const SEARCH_PLACEHOLDERS = [
@@ -483,7 +497,7 @@ function CarouselSection({
           ? Array.from({ length: 4 }).map((_, i) => (
               <SkeletonCard key={i} className="w-56 sm:w-64" />
             ))
-          : events.map((event, i) => (
+          : (events ?? []).map((event, i) => (
               <Link
                 key={event.id}
                 to={`/events/${event.id}`}
@@ -514,6 +528,9 @@ function FeaturedSection({ event }: { event: EventData | null }): React.ReactEle
   const gradient = event.imageGradient ??
     'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)';
 
+  const displayVenue = event.venueName ?? event.venue ?? '';
+  const displayCity = event.venueCity ?? event.city ?? '';
+
   return (
     <section
       ref={ref}
@@ -531,12 +548,19 @@ function FeaturedSection({ event }: { event: EventData | null }): React.ReactEle
               overflow: 'hidden',
               position: 'relative',
               minHeight: '400px',
-              background: gradient,
+              background: event.imageUrl ? undefined : gradient,
               display: 'flex',
               alignItems: 'flex-end',
               cursor: 'pointer',
             }}
           >
+            {event.imageUrl && (
+              <img
+                src={event.imageUrl}
+                alt={event.title}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            )}
             <div
               aria-hidden="true"
               style={{
@@ -569,7 +593,7 @@ function FeaturedSection({ event }: { event: EventData | null }): React.ReactEle
                 {event.title}
               </h3>
               <p style={{ fontSize: '0.95rem', opacity: 0.85, margin: 0 }}>
-                {event.venue} · {event.city}
+                {displayVenue}{displayVenue && displayCity ? ' · ' : ''}{displayCity}
               </p>
             </div>
           </div>
@@ -630,9 +654,6 @@ function CategorySection(): React.ReactElement {
             >
               <span>{cat.icon}</span>
               <span>{cat.name}</span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                {cat.count}
-              </span>
             </Link>
           ))}
         </div>
@@ -644,7 +665,13 @@ function CategorySection(): React.ReactElement {
 // ---------------------------------------------------------------------------
 // Coming Soon vertical feed
 // ---------------------------------------------------------------------------
-function ComingSoonSection(): React.ReactElement {
+function ComingSoonSection({
+  events,
+  loading,
+}: {
+  events: EventData[];
+  loading: boolean;
+}): React.ReactElement {
   const ref = useScrollReveal<HTMLElement>();
 
   return (
@@ -654,76 +681,111 @@ function ComingSoonSection(): React.ReactElement {
     >
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         <SectionHeader title="Coming Soon" subtitle="Mark your calendar" linkTo="/events" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {COMING_SOON.map((event, i) => (
-            <Link
-              key={event.id}
-              to={`/events/${event.id}`}
-              style={{
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'center',
-                padding: '1rem',
-                borderRadius: '1rem',
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border)',
-                textDecoration: 'none',
-                transition: 'box-shadow 0.2s, transform 0.2s',
-                animationDelay: `${i * 0.08}s`,
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'var(--shadow-card-hover)';
-                (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none';
-                (e.currentTarget as HTMLAnchorElement).style.transform = 'none';
-              }}
-            >
-              {/* Thumbnail */}
+
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {Array.from({ length: 4 }).map((_, i) => (
               <div
+                key={i}
                 style={{
-                  width: '72px',
-                  height: '72px',
-                  borderRadius: '0.75rem',
-                  background: event.imageGradient,
-                  flexShrink: 0,
+                  height: '88px',
+                  borderRadius: '1rem',
+                  background: 'var(--skeleton-base)',
+                  animation: 'shimmer 1.5s infinite',
                 }}
               />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <span style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                  color: 'var(--accent-primary)',
-                }}>
-                  {event.category}
-                </span>
-                <h4 style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '1rem',
-                  fontWeight: 700,
-                  color: 'var(--text-primary)',
-                  margin: '0.15rem 0 0.25rem',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}>
-                  {event.title}
-                </h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-                  {new Date(event.date).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })} · {event.city}
-                </p>
-              </div>
-              <ChevronRight size={16} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
-            </Link>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (events ?? []).length === 0 ? null : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {(events ?? []).map((event, i) => {
+              const displayDate = event.startDate ?? event.date ?? '';
+              const displayVenue = event.venueName ?? event.venue ?? '';
+              const displayCity = event.venueCity ?? event.city ?? '';
+              const gradient = event.imageGradient ??
+                'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)';
+
+              return (
+                <Link
+                  key={event.id}
+                  to={`/events/${event.id}`}
+                  style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    alignItems: 'center',
+                    padding: '1rem',
+                    borderRadius: '1rem',
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border)',
+                    textDecoration: 'none',
+                    transition: 'box-shadow 0.2s, transform 0.2s',
+                    animationDelay: `${i * 0.08}s`,
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'var(--shadow-card-hover)';
+                    (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none';
+                    (e.currentTarget as HTMLAnchorElement).style.transform = 'none';
+                  }}
+                >
+                  {/* Thumbnail */}
+                  <div
+                    style={{
+                      width: '72px',
+                      height: '72px',
+                      borderRadius: '0.75rem',
+                      background: gradient,
+                      flexShrink: 0,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {event.imageUrl && (
+                      <img
+                        src={event.imageUrl}
+                        alt={event.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      color: 'var(--accent-primary)',
+                    }}>
+                      {event.category}
+                    </span>
+                    <h4 style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      color: 'var(--text-primary)',
+                      margin: '0.15rem 0 0.25rem',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {event.title}
+                    </h4>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
+                      {displayDate ? new Date(displayDate).toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      }) : ''}
+                      {displayDate && displayCity ? ' · ' : ''}{displayCity || displayVenue}
+                    </p>
+                  </div>
+                  <ChevronRight size={16} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -735,8 +797,10 @@ function ComingSoonSection(): React.ReactElement {
 export default function HomePage(): React.ReactElement {
   const [weekendEvents, setWeekendEvents] = useState<EventData[]>([]);
   const [trendingEvents, setTrendingEvents] = useState<EventData[]>([]);
+  const [comingSoonEvents, setComingSoonEvents] = useState<EventData[]>([]);
   const [loadingWeekend, setLoadingWeekend] = useState(true);
   const [loadingTrending, setLoadingTrending] = useState(true);
+  const [loadingComingSoon, setLoadingComingSoon] = useState(true);
   const [featuredEvent, setFeaturedEvent] = useState<EventData | null>(null);
 
   useEffect(() => {
@@ -744,10 +808,19 @@ export default function HomePage(): React.ReactElement {
 
     async function fetchWeekend(): Promise<void> {
       try {
-        const res = await apiClient.get<{ data: EventData[] }>('/events?timeframe=weekend&limit=8');
+        const res = await apiClient.get<ApiEventsResponse>('/events?dateFilter=this-week&pageSize=8');
         if (!cancelled) {
-          setWeekendEvents(res.data.data);
-          setFeaturedEvent(res.data.data[0] ?? null);
+          const items = (res.data.items ?? []).map(apiItemToEventData);
+          if (items.length > 0) {
+            setWeekendEvents(items);
+            setFeaturedEvent(items.find((e) => e.isFeatured) ?? items[0] ?? null);
+          } else {
+            // No events this week — fetch all upcoming instead
+            const allRes = await apiClient.get<ApiEventsResponse>('/events?pageSize=8');
+            const allItems = (allRes.data.items ?? []).map(apiItemToEventData);
+            setWeekendEvents(allItems.length > 0 ? allItems : PLACEHOLDER_EVENTS);
+            setFeaturedEvent(allItems.find((e) => e.isFeatured) ?? allItems[0] ?? PLACEHOLDER_EVENTS[0]);
+          }
         }
       } catch {
         if (!cancelled) {
@@ -761,8 +834,10 @@ export default function HomePage(): React.ReactElement {
 
     async function fetchTrending(): Promise<void> {
       try {
-        const res = await apiClient.get<{ data: EventData[] }>('/events?sort=trending&limit=8');
-        if (!cancelled) setTrendingEvents(res.data.data);
+        const res = await apiClient.get<ApiEventsResponse>('/events?pageSize=8');
+        if (!cancelled) {
+          setTrendingEvents((res.data.items ?? []).map(apiItemToEventData));
+        }
       } catch {
         if (!cancelled) setTrendingEvents(PLACEHOLDER_TRENDING);
       } finally {
@@ -770,8 +845,29 @@ export default function HomePage(): React.ReactElement {
       }
     }
 
+    async function fetchComingSoon(): Promise<void> {
+      try {
+        const res = await apiClient.get<ApiEventsResponse>('/events?dateFilter=this-month&pageSize=10');
+        if (!cancelled) {
+          const items = (res.data.items ?? []).map(apiItemToEventData);
+          if (items.length === 0) {
+            // No events this month — show all upcoming
+            const allRes = await apiClient.get<ApiEventsResponse>('/events?pageSize=10');
+            setComingSoonEvents((allRes.data.items ?? []).map(apiItemToEventData));
+          } else {
+            setComingSoonEvents(items);
+          }
+        }
+      } catch {
+        if (!cancelled) setComingSoonEvents([]);
+      } finally {
+        if (!cancelled) setLoadingComingSoon(false);
+      }
+    }
+
     void fetchWeekend();
     void fetchTrending();
+    void fetchComingSoon();
 
     return () => { cancelled = true; };
   }, []);
@@ -787,10 +883,10 @@ export default function HomePage(): React.ReactElement {
 
       <CarouselSection
         title="This Weekend"
-        subtitle="Events happening in the next 3 days"
+        subtitle="Events happening in the next few days"
         events={weekendEvents}
         loading={loadingWeekend}
-        linkTo="/events?timeframe=weekend"
+        linkTo="/events?dateFilter=this-week"
       />
 
       <FeaturedSection event={featuredEvent} />
@@ -802,10 +898,10 @@ export default function HomePage(): React.ReactElement {
         subtitle="What everyone's talking about"
         events={trendingEvents}
         loading={loadingTrending}
-        linkTo="/events?sort=trending"
+        linkTo="/events"
       />
 
-      <ComingSoonSection />
+      <ComingSoonSection events={comingSoonEvents} loading={loadingComingSoon} />
 
       {/* Footer spacer */}
       <div style={{ height: '4rem', background: 'var(--bg-primary)' }} />

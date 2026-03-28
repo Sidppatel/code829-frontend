@@ -1,38 +1,47 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { Mail, ArrowRight, CheckCircle, Bug } from 'lucide-react';
 import { useAuthStore, type UserRole } from '../stores/authStore';
 import MagneticButton from '../components/MagneticButton';
 import apiClient from '../lib/axios';
 
 // ---------------------------------------------------------------------------
-// Dev role presets
+// Dev role presets — emails must match backend dev-login config
 // ---------------------------------------------------------------------------
-interface DevRole {
-  role: UserRole;
+interface DevPreset {
   label: string;
   description: string;
   email: string;
+  redirectTo: string;
 }
 
-const DEV_ROLES: DevRole[] = [
-  { role: 'admin', label: 'Admin', description: 'Full platform access', email: 'admin@code829.dev' },
-  { role: 'organizer', label: 'Organizer', description: 'Event management', email: 'organizer@code829.dev' },
-  { role: 'attendee', label: 'Attendee', description: 'Browse & book events', email: 'user@code829.dev' },
-  { role: 'guest', label: 'Guest', description: 'Read-only access', email: 'guest@code829.dev' },
+const DEV_PRESETS: DevPreset[] = [
+  { label: 'Developer', description: 'Full dev access', email: 'developer@code829.local', redirectTo: '/' },
+  { label: 'Admin', description: 'Full platform access', email: 'admin@code829.local', redirectTo: '/' },
+  { label: 'Staff', description: 'Event management', email: 'staff@code829.local', redirectTo: '/' },
+  { label: 'User', description: 'Browse & book events', email: 'user@code829.local', redirectTo: '/' },
 ];
+
+const ROLE_REDIRECTS: Partial<Record<UserRole, string>> = {
+  admin: '/',
+  organizer: '/',
+  staff: '/',
+  developer: '/',
+  attendee: '/',
+  guest: '/',
+};
 
 // ---------------------------------------------------------------------------
 // Main page
 // ---------------------------------------------------------------------------
 export default function LoginPage(): React.ReactElement {
-  const { isAuthenticated, login } = useAuthStore();
+  const { isAuthenticated, devLogin, login } = useAuthStore();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [devLoading, setDevLoading] = useState<UserRole | null>(null);
+  const [devLoading, setDevLoading] = useState<string | null>(null);
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -41,37 +50,31 @@ export default function LoginPage(): React.ReactElement {
   async function handleMagicLink(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     if (!email.trim()) return;
-    setError('');
     setLoading(true);
     try {
       await apiClient.post('/auth/magic-link', { email });
-      setSubmitted(true);
-    } catch {
-      // In dev/no-API scenarios, still show success
-      setSubmitted(true);
     } finally {
       setLoading(false);
+      setSubmitted(true);
     }
   }
 
-  async function handleDevLogin(preset: DevRole): Promise<void> {
-    setDevLoading(preset.role);
+  async function handleDevLogin(preset: DevPreset): Promise<void> {
+    setDevLoading(preset.email);
     try {
-      const res = await apiClient.post<{ token: string }>('/auth/dev-login', { email: preset.email, role: preset.role });
-      login(res.data.token, {
-        id: `dev-${preset.role}`,
-        email: preset.email,
-        name: `Dev ${preset.label}`,
-        role: preset.role,
-      });
+      await devLogin(preset.email);
+      const user = useAuthStore.getState().user;
+      const redirect = (user?.role ? ROLE_REDIRECTS[user.role] : null) ?? preset.redirectTo;
+      navigate(redirect, { replace: true });
     } catch {
-      // Offline fallback — issue a fake token so navigation works
-      login(`dev-token-${preset.role}-${Date.now()}`, {
-        id: `dev-${preset.role}`,
+      // Offline fallback — issue a synthetic token so local dev still works
+      login(`dev-token-${preset.email}-${Date.now()}`, {
+        id: preset.email,
         email: preset.email,
         name: `Dev ${preset.label}`,
-        role: preset.role,
+        role: 'developer' as UserRole,
       });
+      navigate(preset.redirectTo, { replace: true });
     } finally {
       setDevLoading(null);
     }
@@ -187,10 +190,6 @@ export default function LoginPage(): React.ReactElement {
                     />
                   </div>
 
-                  {error && (
-                    <p style={{ color: 'var(--color-error)', fontSize: '0.8rem', margin: 0 }}>{error}</p>
-                  )}
-
                   <MagneticButton
                     type="submit"
                     disabled={loading || !email.trim()}
@@ -279,34 +278,37 @@ export default function LoginPage(): React.ReactElement {
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
-                {DEV_ROLES.map((preset) => (
-                  <button
-                    key={preset.role}
-                    onClick={() => { void handleDevLogin(preset); }}
-                    disabled={devLoading !== null}
-                    style={{
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '0.75rem',
-                      border: '1px solid color-mix(in srgb, var(--color-warning) 40%, transparent)',
-                      background: devLoading === preset.role
-                        ? 'var(--color-warning)'
-                        : 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-                      color: devLoading === preset.role ? 'var(--bg-primary)' : 'var(--color-warning)',
-                      cursor: devLoading !== null ? 'not-allowed' : 'pointer',
-                      fontFamily: 'var(--font-body)',
-                      textAlign: 'left',
-                      opacity: devLoading !== null && devLoading !== preset.role ? 0.5 : 1,
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                      {devLoading === preset.role ? 'Logging in…' : preset.label}
-                    </div>
-                    <div style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '0.15rem' }}>
-                      {preset.description}
-                    </div>
-                  </button>
-                ))}
+                {DEV_PRESETS.map((preset) => {
+                  const isLoading = devLoading === preset.email;
+                  return (
+                    <button
+                      key={preset.email}
+                      onClick={() => { void handleDevLogin(preset); }}
+                      disabled={devLoading !== null}
+                      style={{
+                        padding: '0.65rem 0.85rem',
+                        borderRadius: '0.75rem',
+                        border: '1px solid color-mix(in srgb, var(--color-warning) 40%, transparent)',
+                        background: isLoading
+                          ? 'var(--color-warning)'
+                          : 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+                        color: isLoading ? 'var(--bg-primary)' : 'var(--color-warning)',
+                        cursor: devLoading !== null ? 'not-allowed' : 'pointer',
+                        fontFamily: 'var(--font-body)',
+                        textAlign: 'left',
+                        opacity: devLoading !== null && !isLoading ? 0.5 : 1,
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                        {isLoading ? 'Logging in…' : preset.label}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '0.15rem' }}>
+                        {preset.description}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

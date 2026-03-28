@@ -1,31 +1,84 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Navigate, Link } from 'react-router-dom';
-import { Calendar, MapPin, QrCode, ChevronRight, Ticket } from 'lucide-react';
+import { Calendar, QrCode, ChevronRight, Ticket } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { SkeletonCard } from '../components/Skeleton';
 import apiClient from '../lib/axios';
 
 // ---------------------------------------------------------------------------
-// Types
+// Types matching actual API response
 // ---------------------------------------------------------------------------
 type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'used';
 
-interface Booking {
+interface ApiBookingItem {
   id: string;
+  bookingNumber: string;
+  status: BookingStatus;
+  userId: string;
+  userName: string;
   eventId: string;
   eventTitle: string;
-  eventDate: string;
-  venue: string;
-  city: string;
-  category: string;
-  tierName: string;
-  quantity: number;
-  totalPrice: number;
-  status: BookingStatus;
+  subtotalCents: number;
+  feeCents: number;
+  totalCents: number;
   qrToken: string;
-  imageGradient?: string;
-  bookedAt: string;
+  items: ApiBookingLineItem[];
+  payment: ApiPayment | null;
+  createdAt: string;
+}
+
+interface ApiBookingLineItem {
+  id: string;
+  ticketTypeId: string;
+  ticketTypeName: string;
+  quantity: number;
+  unitPriceCents: number;
+  subtotalCents: number;
+}
+
+interface ApiPayment {
+  id: string;
+  status: string;
+  method: string;
+}
+
+interface ApiBookingsResponse {
+  items: ApiBookingItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
+// Internal display shape
+interface Booking {
+  id: string;
+  bookingNumber: string;
+  eventId: string;
+  eventTitle: string;
+  status: BookingStatus;
+  totalCents: number;
+  qrToken: string;
+  tierSummary: string;
+  createdAt: string;
+}
+
+function apiToBooking(api: ApiBookingItem): Booking {
+  const tierSummary = (api.items ?? [])
+    .map((item) => `${item.ticketTypeName} ×${item.quantity}`)
+    .join(', ');
+
+  return {
+    id: api.id,
+    bookingNumber: api.bookingNumber,
+    eventId: api.eventId,
+    eventTitle: api.eventTitle,
+    status: api.status,
+    totalCents: api.totalCents,
+    qrToken: api.qrToken,
+    tierSummary,
+    createdAt: api.createdAt,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -33,42 +86,36 @@ interface Booking {
 // ---------------------------------------------------------------------------
 const PLACEHOLDER_BOOKINGS: Booking[] = [
   {
-    id: 'b1', eventId: '2', eventTitle: 'React Summit 2026', category: 'Tech',
-    eventDate: new Date(Date.now() + 86400000 * 4).toISOString(),
-    venue: 'Moscone Convention Center', city: 'San Francisco',
-    tierName: 'Workshop Pass', quantity: 1, totalPrice: 349,
-    status: 'confirmed', qrToken: 'EVT-RSM26-WRK-A1B2C3',
-    imageGradient: 'linear-gradient(135deg, var(--color-info) 0%, var(--accent-primary) 100%)',
-    bookedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    id: 'b1', bookingNumber: 'BK-001', eventId: '2', eventTitle: 'React Summit 2026',
+    status: 'confirmed', totalCents: 34900, qrToken: 'EVT-RSM26-WRK-A1B2C3',
+    tierSummary: 'Workshop Pass ×1',
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
   },
   {
-    id: 'b2', eventId: '1', eventTitle: 'Neon Frequencies Festival', category: 'Music',
-    eventDate: new Date(Date.now() + 86400000 * 2).toISOString(),
-    venue: 'Amphitheater Park', city: 'Austin',
-    tierName: 'General Admission', quantity: 2, totalPrice: 178,
-    status: 'confirmed', qrToken: 'EVT-NEO26-GA-D4E5F6',
-    imageGradient: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
-    bookedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+    id: 'b2', bookingNumber: 'BK-002', eventId: '1', eventTitle: 'Neon Frequencies Festival',
+    status: 'confirmed', totalCents: 17800, qrToken: 'EVT-NEO26-GA-D4E5F6',
+    tierSummary: 'General Admission ×2',
+    createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
   },
   {
-    id: 'b3', eventId: '10', eventTitle: 'Electronic Music Night', category: 'Music',
-    eventDate: new Date(Date.now() - 86400000 * 10).toISOString(),
-    venue: 'Club Zenith', city: 'Miami',
-    tierName: 'VIP', quantity: 1, totalPrice: 80,
-    status: 'used', qrToken: 'EVT-EMN26-VIP-G7H8I9',
-    imageGradient: 'linear-gradient(135deg, var(--accent-cta) 0%, var(--accent-secondary) 100%)',
-    bookedAt: new Date(Date.now() - 86400000 * 14).toISOString(),
-  },
-  {
-    id: 'b4', eventId: '9', eventTitle: 'Farm-to-Table Dinner', category: 'Food',
-    eventDate: new Date(Date.now() - 86400000 * 20).toISOString(),
-    venue: 'Verdana Estate', city: 'Portland',
-    tierName: 'Standard', quantity: 2, totalPrice: 240,
-    status: 'used', qrToken: 'EVT-FTT26-STD-J0K1L2',
-    imageGradient: 'linear-gradient(135deg, var(--color-success) 0%, var(--color-info) 100%)',
-    bookedAt: new Date(Date.now() - 86400000 * 25).toISOString(),
+    id: 'b3', bookingNumber: 'BK-003', eventId: '10', eventTitle: 'Electronic Music Night',
+    status: 'used', totalCents: 8000, qrToken: 'EVT-EMN26-VIP-G7H8I9',
+    tierSummary: 'VIP ×1',
+    createdAt: new Date(Date.now() - 86400000 * 14).toISOString(),
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+function formatCents(cents: number): string {
+  if (cents === 0) return 'Free';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+}
 
 // ---------------------------------------------------------------------------
 // Status badge
@@ -81,7 +128,7 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; bg: string; color: s
 };
 
 function StatusBadge({ status }: { status: BookingStatus }): React.ReactElement {
-  const cfg = STATUS_CONFIG[status];
+  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
   return (
     <span style={{
       display: 'inline-block',
@@ -186,8 +233,6 @@ function QRDisplay({ token }: { token: string }): React.ReactElement {
 // Booking card
 // ---------------------------------------------------------------------------
 function BookingCard({ booking }: { booking: Booking }): React.ReactElement {
-  const gradient = booking.imageGradient ??
-    'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)';
   const isPast = booking.status === 'used' || booking.status === 'cancelled';
 
   return (
@@ -200,81 +245,58 @@ function BookingCard({ booking }: { booking: Booking }): React.ReactElement {
       boxShadow: 'var(--shadow-card)',
       opacity: isPast ? 0.75 : 1,
     }}>
-      {/* Thumbnail */}
+      {/* Status stripe */}
       <div style={{
-        width: '120px',
+        width: '6px',
         flexShrink: 0,
-        background: gradient,
-        position: 'relative',
-      }}>
-        {isPast && (
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'rgba(0,0,0,0.45)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <span style={{
-              fontSize: '0.6rem',
-              fontWeight: 700,
-              letterSpacing: '0.06em',
-              color: 'rgba(255,255,255,0.85)',
-              textTransform: 'uppercase',
-              transform: 'rotate(-30deg)',
-              border: '1.5px solid rgba(255,255,255,0.6)',
-              padding: '0.2rem 0.5rem',
-              borderRadius: '4px',
-            }}>
-              {booking.status === 'used' ? 'Attended' : 'Cancelled'}
-            </span>
-          </div>
-        )}
-      </div>
+        background: STATUS_CONFIG[booking.status]?.color ?? 'var(--border)',
+      }} />
 
       {/* Content */}
       <div style={{ flex: 1, padding: '1.25rem', minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <h3 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '1.05rem',
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-            margin: 0,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>
-            {booking.eventTitle}
-          </h3>
+          <div style={{ minWidth: 0 }}>
+            <h3 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '1.05rem',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              margin: '0 0 0.15rem',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>
+              {booking.eventTitle}
+            </h3>
+            <p style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', margin: 0, fontFamily: 'var(--font-mono)' }}>
+              #{booking.bookingNumber}
+            </p>
+          </div>
           <StatusBadge status={booking.status} />
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
             <Calendar size={12} style={{ color: 'var(--accent-primary)' }} />
-            {new Date(booking.eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            {new Date(booking.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            <MapPin size={12} style={{ color: 'var(--accent-primary)' }} />
-            {booking.venue}, {booking.city}
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            <Ticket size={12} style={{ color: 'var(--accent-primary)' }} />
-            {booking.tierName} × {booking.quantity}
-          </span>
+          {booking.tierSummary && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <Ticket size={12} style={{ color: 'var(--accent-primary)' }} />
+              {booking.tierSummary}
+            </span>
+          )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div>
-            {booking.status === 'confirmed' && (
+            {booking.status === 'confirmed' && booking.qrToken && (
               <QRDisplay token={booking.qrToken} />
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span style={{ fontWeight: 700, color: 'var(--accent-cta)', fontSize: '1rem' }}>
-              ${booking.totalPrice}
+              {formatCents(booking.totalCents)}
             </span>
             <Link
               to={`/events/${booking.eventId}`}
@@ -317,8 +339,10 @@ export default function MyBookingsPage(): React.ReactElement {
 
     async function fetchBookings(): Promise<void> {
       try {
-        const res = await apiClient.get<{ data: Booking[] }>('/me/bookings');
-        if (!cancelled) setBookings(res.data.data);
+        const res = await apiClient.get<ApiBookingsResponse>('/bookings/mine');
+        if (!cancelled) {
+          setBookings((res.data.items ?? []).map(apiToBooking));
+        }
       } catch {
         if (!cancelled) setBookings(PLACEHOLDER_BOOKINGS);
       } finally {
@@ -330,14 +354,14 @@ export default function MyBookingsPage(): React.ReactElement {
     return () => { cancelled = true; };
   }, []);
 
-  const now = Date.now();
-  const upcoming = bookings.filter(
-    (b) => new Date(b.eventDate).getTime() > now && b.status !== 'cancelled'
-  );
-  const past = bookings.filter(
-    (b) => new Date(b.eventDate).getTime() <= now || b.status === 'cancelled'
-  );
+  // Split by status rather than date since API doesn't return event dates in booking list
+  const upcoming = bookings.filter((b) => b.status === 'confirmed' || b.status === 'pending');
+  const past = bookings.filter((b) => b.status === 'used' || b.status === 'cancelled');
   const displayed = activeTab === 'upcoming' ? upcoming : past;
+
+  const totalSpent = bookings
+    .filter((b) => b.status !== 'cancelled')
+    .reduce((sum, b) => sum + b.totalCents, 0);
 
   return (
     <>
@@ -359,7 +383,7 @@ export default function MyBookingsPage(): React.ReactElement {
               My Bookings
             </h1>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
-              Welcome back, {user?.name.split(' ')[0]}
+              Welcome back, {user?.name?.split(' ')[0] ?? 'there'}
             </p>
           </div>
 
@@ -373,7 +397,7 @@ export default function MyBookingsPage(): React.ReactElement {
             {[
               { label: 'Upcoming', value: upcoming.length, color: 'var(--accent-primary)' },
               { label: 'Attended', value: bookings.filter((b) => b.status === 'used').length, color: 'var(--color-success)' },
-              { label: 'Total Spent', value: `$${bookings.reduce((sum, b) => sum + b.totalPrice, 0)}`, color: 'var(--accent-cta)' },
+              { label: 'Total Spent', value: formatCents(totalSpent), color: 'var(--accent-cta)' },
             ].map(({ label, value, color }) => (
               <div key={label} style={{
                 padding: '1.25rem',
@@ -433,11 +457,7 @@ export default function MyBookingsPage(): React.ReactElement {
               ))}
             </div>
           ) : displayed.length === 0 ? (
-            <div style={{
-              textAlign: 'center',
-              padding: '4rem 0',
-              color: 'var(--text-secondary)',
-            }}>
+            <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-secondary)' }}>
               <Ticket size={40} style={{ color: 'var(--text-tertiary)', margin: '0 auto 1rem' }} />
               <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
                 No {activeTab} bookings
