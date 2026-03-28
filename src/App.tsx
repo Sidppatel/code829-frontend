@@ -14,6 +14,8 @@ const AdminLayout = React.lazy(() => import('./layouts/AdminLayout'));
 const AdminDashboardPage = React.lazy(() => import('./pages/admin/AdminDashboardPage'));
 const VenuesPage = React.lazy(() => import('./pages/admin/VenuesPage'));
 const VenueFormPage = React.lazy(() => import('./pages/admin/VenueFormPage'));
+const EventsListPage = React.lazy(() => import('./pages/admin/EventsListPage'));
+const EventWizardPage = React.lazy(() => import('./pages/admin/EventWizardPage'));
 
 function PageLoader(): React.ReactElement {
   return (
@@ -67,6 +69,9 @@ function AppRoutes(): React.ReactElement {
             <Route path="venues" element={<VenuesPage />} />
             <Route path="venues/new" element={<VenueFormPage />} />
             <Route path="venues/:id/edit" element={<VenueFormPage />} />
+            <Route path="events" element={<EventsListPage />} />
+            <Route path="events/new" element={<EventWizardPage />} />
+            <Route path="events/:id/edit" element={<EventWizardPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
