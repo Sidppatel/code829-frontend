@@ -359,8 +359,7 @@ export default function TableTypesPage(): React.ReactElement {
   async function handleEdit(id: string, data: TableTypeFormData): Promise<void> {
     setSaving(true);
     try {
-      await apiClient.post('/admin/table-types', {
-        id,
+      await apiClient.put(`/admin/table-types/${id}`, {
         name: data.name,
         defaultShape: data.shape,
         defaultCapacity: data.defaultCapacity,

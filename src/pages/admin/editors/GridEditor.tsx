@@ -1133,7 +1133,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                         if (editingTypeData) {
                           const isDuplicate = tableTypes.some((t) => t.id !== tt.id && t.name.toLowerCase() === editingTypeData.name.toLowerCase());
                           if (isDuplicate) { toast.error('A type with this name already exists'); return; }
-                          apiClient.post('/admin/table-types', {
+                          apiClient.put(`/admin/table-types/${tt.id}`, {
                             name: editingTypeData.name,
                             defaultCapacity: editingTypeData.capacity,
                             defaultShape: editingTypeData.shape,
