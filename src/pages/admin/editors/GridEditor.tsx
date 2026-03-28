@@ -1075,19 +1075,12 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                   {/* Fill Color */}
                   <div style={{ marginBottom: '0.375rem' }}>
                     <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.15rem', textTransform: 'uppercase' }}>Fill Color</div>
-                    <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                       <input
                         type="color"
                         value={editingTypeData?.color || '#4f46e5'}
                         onChange={(e) => setEditingTypeData((p) => p ? { ...p, color: e.target.value } : p)}
-                        style={{ width: '32px', height: '28px', border: '1px solid var(--border)', borderRadius: '0.25rem', cursor: 'pointer', padding: 0 }}
-                      />
-                      <input
-                        type="text"
-                        value={editingTypeData?.color ?? ''}
-                        onChange={(e) => setEditingTypeData((p) => p ? { ...p, color: e.target.value } : p)}
-                        placeholder="#4f46e5"
-                        style={{ flex: 1, padding: '0.35rem 0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.75rem', fontFamily: 'var(--font-mono)', outline: 'none', boxSizing: 'border-box' }}
+                        style={{ width: '100%', height: '32px', border: '1px solid var(--border)', borderRadius: '0.375rem', cursor: 'pointer', padding: '2px' }}
                       />
                     </div>
                   </div>
