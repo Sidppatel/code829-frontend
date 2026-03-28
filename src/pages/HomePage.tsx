@@ -380,26 +380,6 @@ function HeroSection(): React.ReactElement {
 }
 
 // ---------------------------------------------------------------------------
-// Section wrapper with scroll reveal
-// ---------------------------------------------------------------------------
-function RevealSection({
-  children,
-  className = '',
-  style,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  style?: React.CSSProperties;
-}): React.ReactElement {
-  const ref = useScrollReveal<HTMLElement>();
-  return (
-    <section ref={ref} className={className} style={style}>
-      {children}
-    </section>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Section header
 // ---------------------------------------------------------------------------
 function SectionHeader({

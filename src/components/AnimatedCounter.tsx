@@ -6,6 +6,7 @@ interface AnimatedCounterProps {
   prefix?: string;
   duration?: number;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 function easeOutQuart(t: number): number {
@@ -18,6 +19,7 @@ export default function AnimatedCounter({
   prefix = '',
   duration = 1800,
   className = '',
+  style,
 }: AnimatedCounterProps): React.ReactElement {
   const [value, setValue] = useState(0);
   const [hasStarted, setHasStarted] = useState(false);
@@ -67,7 +69,7 @@ export default function AnimatedCounter({
   }, [hasStarted, target, duration]);
 
   return (
-    <span ref={containerRef} className={className} aria-live="polite">
+    <span ref={containerRef} className={className} style={style} aria-live="polite">
       {prefix}{value.toLocaleString()}{suffix}
     </span>
   );
