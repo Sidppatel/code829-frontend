@@ -322,13 +322,14 @@ function ParallaxHero({ event }: { event: EventDetail }): React.ReactElement {
           <Link
             to="/events"
             style={{
-              display: 'inline-flex',
+              display: 'flex',
               alignItems: 'center',
               gap: '0.3rem',
               color: 'rgba(255,255,255,0.8)',
               textDecoration: 'none',
               fontSize: '0.85rem',
               marginBottom: '1rem',
+              width: 'fit-content',
             }}
           >
             <ChevronLeft size={14} /> All Events
@@ -341,7 +342,7 @@ function ParallaxHero({ event }: { event: EventDetail }): React.ReactElement {
             fontWeight: 700,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            padding: '0.2rem 0.65rem',
+            padding: '0.25rem 0.75rem',
             borderRadius: '999px',
             marginBottom: '0.75rem',
           }}>
@@ -487,7 +488,7 @@ export default function EventDetailPage(): React.ReactElement {
         <meta name="description" content={event.description.slice(0, 160)} />
       </Helmet>
 
-      <div style={{ paddingTop: '64px' }}>
+      <div>
         <ParallaxHero event={event} />
 
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2.5rem 1.5rem 6rem' }}>

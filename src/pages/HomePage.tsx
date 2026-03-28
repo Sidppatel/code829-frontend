@@ -347,6 +347,7 @@ function HeroSection(): React.ReactElement {
             width: '100%',
             maxWidth: '560px',
             marginBottom: '2rem',
+            zIndex: 10,
             opacity: 0,
             animation: 'wordIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.72s forwards',
           }}
@@ -475,7 +476,7 @@ function HeroSection(): React.ReactElement {
             animation: 'wordIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.88s forwards',
           }}
         >
-          <MagneticButton onClick={() => {}}>
+          <MagneticButton onClick={() => navigate('/events')}>
             Browse All Events <ArrowRight size={16} />
           </MagneticButton>
         </div>
