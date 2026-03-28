@@ -475,6 +475,7 @@ interface Step2LayoutPanelProps {
   layoutModeError: string | undefined;
   maxCapacityError: string | undefined;
   onLayoutModeChange: (v: LayoutMode) => void;
+  onMaxCapacityChange: (v: string) => void;
   eventId: string | null;
   isEdit: boolean;
 }
@@ -487,6 +488,7 @@ function Step2LayoutPanel({
   layoutModeError,
   maxCapacityError,
   onLayoutModeChange,
+  onMaxCapacityChange,
   eventId,
   isEdit,
 }: Step2LayoutPanelProps): React.ReactElement {
@@ -579,6 +581,7 @@ function Step2LayoutPanel({
             type="number"
             min={1}
             value={maxCapacityValue}
+            onChange={(e) => onMaxCapacityChange(e.target.value)}
             placeholder=" "
             style={{
               width: '100%',
@@ -592,7 +595,6 @@ function Step2LayoutPanel({
               outline: 'none',
               boxSizing: 'border-box',
             }}
-            readOnly
           />
           <label htmlFor="maxCapacity-step2" style={{ position: 'absolute', left: '0.875rem', top: '0.35rem', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', pointerEvents: 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Max Capacity *
@@ -1001,8 +1003,11 @@ export default function EventWizardPage(): React.ReactElement {
     );
   }
 
+  // Step 2 with Assigned Seating needs full width for the layout editor
+  const isFullWidthStep = step === 2 && watchedValues.layoutMode === 'Grid';
+
   return (
-    <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+    <div style={{ maxWidth: isFullWidthStep ? '100%' : '720px', margin: '0 auto', transition: 'max-width 0.3s ease' }}>
       {/* Header */}
       <div style={{ marginBottom: '1.5rem' }}>
         <h1
@@ -1026,13 +1031,13 @@ export default function EventWizardPage(): React.ReactElement {
       {/* Step indicator */}
       <StepIndicator currentStep={step} onStepClick={handleStepClick} />
 
-      {/* Card */}
+      {/* Card — uses reduced padding when editor is full width */}
       <div
         style={{
           background: 'var(--bg-secondary)',
           border: '1px solid var(--border)',
           borderRadius: '0.875rem',
-          padding: '1.75rem',
+          padding: isFullWidthStep ? '1rem' : '1.75rem',
           boxShadow: 'var(--shadow-card)',
         }}
       >
@@ -1293,6 +1298,7 @@ export default function EventWizardPage(): React.ReactElement {
             layoutModeError={errors.layoutMode?.message}
             maxCapacityError={errors.maxCapacity?.message}
             onLayoutModeChange={(v) => setValue('layoutMode', v, { shouldValidate: true })}
+            onMaxCapacityChange={(v) => setValue('maxCapacity', v, { shouldValidate: true })}
             eventId={id ?? null}
             isEdit={isEdit}
           />
