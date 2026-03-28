@@ -19,6 +19,7 @@ import type { LayoutMode } from '../../stores/eventWizardStore';
 
 const GridEditor = lazy(() => import('./editors/GridEditor'));
 const CanvasEditor = lazy(() => import('./editors/CanvasEditor'));
+const PricingStep = lazy(() => import('./editors/PricingStep'));
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -882,6 +883,27 @@ export default function EventWizardPage(): React.ReactElement {
       if (watchedValues.layoutMode === 'CapacityOnly') {
         fieldsToValidate.push('maxCapacity');
       }
+    } else if (step === 3 && id) {
+      // Validate: at least one active pricing rule must exist
+      try {
+        const res = await apiClient.get<Array<{ id: string; isActive: boolean; type: string }>>(
+          `/admin/events/${id}/pricing`
+        );
+        const activeRules = res.data.filter((r) => r.isActive);
+        if (activeRules.length === 0) {
+          toast.error('Add at least one active pricing rule before continuing.');
+          return;
+        }
+        const hasStandard = activeRules.some((r) => r.type === 'Standard');
+        if (!hasStandard) {
+          toast('No Standard pricing rule found. Consider adding one for default ticket pricing.', {
+            icon: '⚠️',
+          });
+        }
+      } catch {
+        toast.error('Could not validate pricing rules. Please try again.');
+        return;
+      }
     }
 
     const valid = await trigger(fieldsToValidate);
@@ -1277,32 +1299,40 @@ export default function EventWizardPage(): React.ReactElement {
 
         {/* ── Step 3: Pricing ────────────────────────────────────────────── */}
         {step === 3 && (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '3rem 2rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.75rem',
-            }}
+          <Suspense
+            fallback={
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  padding: '1rem 0',
+                }}
+              >
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      height: '80px',
+                      borderRadius: '0.75rem',
+                      background: 'var(--bg-tertiary)',
+                      animation: 'pulse 1.5s ease-in-out infinite',
+                    }}
+                  />
+                ))}
+              </div>
+            }
           >
-            <Ticket size={48} color="var(--text-tertiary)" />
-            <h2
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                margin: 0,
-              }}
-            >
-              Pricing Configuration
-            </h2>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
-              Pricing configuration coming in next phase
-            </p>
-          </div>
+            <PricingStep
+              eventId={id ?? null}
+              layoutMode={(watchedValues.layoutMode as 'Grid' | 'CapacityOnly' | 'None') ?? 'None'}
+              maxCapacity={
+                watchedValues.maxCapacity && !isNaN(Number(watchedValues.maxCapacity))
+                  ? Number(watchedValues.maxCapacity)
+                  : undefined
+              }
+            />
+          </Suspense>
         )}
 
         {/* ── Step 4: Review ─────────────────────────────────────────────── */}
