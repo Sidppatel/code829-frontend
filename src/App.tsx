@@ -1,0 +1,73 @@
+import React, { Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import { Toaster } from 'react-hot-toast';
+import Navbar from './components/Navbar';
+
+const HomePage = React.lazy(() => import('./pages/HomePage'));
+const EventsPage = React.lazy(() => import('./pages/EventsPage'));
+const EventDetailPage = React.lazy(() => import('./pages/EventDetailPage'));
+const MyBookingsPage = React.lazy(() => import('./pages/MyBookingsPage'));
+const LoginPage = React.lazy(() => import('./pages/LoginPage'));
+
+function PageLoader(): React.ReactElement {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--bg-primary)',
+      }}
+    >
+      <div
+        style={{
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          border: '3px solid var(--border)',
+          borderTopColor: 'var(--accent-primary)',
+          animation: 'spin 0.8s linear infinite',
+        }}
+      />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+export default function App(): React.ReactElement {
+  return (
+    <HelmetProvider>
+      <BrowserRouter>
+        {/* Noise grain overlay */}
+        <div className="noise-overlay" aria-hidden="true" />
+
+        <Navbar />
+
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/events/:id" element={<EventDetailPage />} />
+            <Route path="/me/bookings" element={<MyBookingsPage />} />
+            <Route path="/auth/login" element={<LoginPage />} />
+          </Routes>
+        </Suspense>
+
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border)',
+              borderRadius: '0.75rem',
+              fontFamily: 'var(--font-body)',
+            },
+          }}
+        />
+      </BrowserRouter>
+    </HelmetProvider>
+  );
+}
