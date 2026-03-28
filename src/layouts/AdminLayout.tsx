@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  Armchair,
 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 
@@ -22,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', to: '/admin', Icon: LayoutDashboard },
   { label: 'Events', to: '/admin/events', Icon: CalendarDays },
   { label: 'Venues', to: '/admin/venues', Icon: MapPin },
+  { label: 'Table Types', to: '/admin/table-types', Icon: Armchair },
   { label: 'Analytics', to: '/admin/analytics', Icon: BarChart3 },
   { label: 'Settings', to: '/admin/settings', Icon: Settings },
 ];

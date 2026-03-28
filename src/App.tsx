@@ -17,6 +17,9 @@ const VenueFormPage = React.lazy(() => import('./pages/admin/VenueFormPage'));
 const EventsListPage = React.lazy(() => import('./pages/admin/EventsListPage'));
 const EventWizardPage = React.lazy(() => import('./pages/admin/EventWizardPage'));
 const EventManagePage = React.lazy(() => import('./pages/admin/EventManagePage'));
+const AnalyticsPage = React.lazy(() => import('./pages/admin/AnalyticsPage'));
+const SettingsPage = React.lazy(() => import('./pages/admin/SettingsPage'));
+const TableTypesPage = React.lazy(() => import('./pages/admin/TableTypesPage'));
 
 function PageLoader(): React.ReactElement {
   return (
@@ -74,6 +77,9 @@ function AppRoutes(): React.ReactElement {
             <Route path="events/new" element={<EventWizardPage />} />
             <Route path="events/:id" element={<EventManagePage />} />
             <Route path="events/:id/edit" element={<EventWizardPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="table-types" element={<TableTypesPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

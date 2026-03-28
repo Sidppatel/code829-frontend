@@ -395,6 +395,10 @@ export default function CanvasEditor({ eventId }: CanvasEditorProps): React.Reac
   // Autosave debounce
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Event Overrides (FIX 6)
+  const [overridesEnabled, setOverridesEnabled] = useState(false);
+  const [overrides, setOverrides] = useState<Record<string, { priceCents: number; capacity: number }>>({});
+
   // Load table types
   useEffect(() => {
     let cancelled = false;
@@ -436,7 +440,7 @@ export default function CanvasEditor({ eventId }: CanvasEditorProps): React.Reac
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
     autosaveTimer.current = setTimeout(() => {
       void performSave(true);
-    }, 30_000);
+    }, 2_000);
     return () => {
       if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
     };
@@ -692,15 +696,16 @@ export default function CanvasEditor({ eventId }: CanvasEditorProps): React.Reac
 
     const totalTables = elementOrder.length;
     const tt = draggingPaletteType;
+    const ovr = overridesEnabled ? overrides[tt.id] : undefined;
     const el: FloorPlanElement = {
       id: generateId(),
       label: `T${totalTables + 1}`,
-      capacity: tt.defaultCapacity,
+      capacity: ovr?.capacity ?? tt.defaultCapacity,
       shape: tt.defaultShape,
       color: tt.defaultColor,
       section: undefined,
       priceType: 'PerTable',
-      priceCents: tt.defaultPriceCents,
+      priceCents: ovr?.priceCents ?? tt.defaultPriceCents,
       isActive: true,
       posX: Math.max(0, x),
       posY: Math.max(0, y),
@@ -791,7 +796,7 @@ export default function CanvasEditor({ eventId }: CanvasEditorProps): React.Reac
 
   return (
     <div
-      style={{ display: 'flex', height: '100%', minHeight: '640px', background: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '0.75rem', overflow: 'hidden' }}
+      style={{ display: 'flex', height: '100%', minHeight: '640px', background: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '0.75rem', overflow: 'hidden', position: 'relative' }}
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
@@ -859,11 +864,93 @@ export default function CanvasEditor({ eventId }: CanvasEditorProps): React.Reac
               </div>
             ))}
           </div>
+
+          {/* ── Event Overrides (FIX 6) ── */}
+          {tableTypes.length > 0 && (
+            <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  marginBottom: overridesEnabled ? '0.75rem' : 0,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={overridesEnabled}
+                  onChange={(e) => setOverridesEnabled(e.target.checked)}
+                  style={{ accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                  Customize for this event
+                </span>
+              </label>
+
+              {overridesEnabled && tableTypes.map((tt) => (
+                <div
+                  key={tt.id}
+                  style={{
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '0.5rem',
+                    padding: '0.625rem 0.75rem',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                    <div style={{ color: tt.defaultColor || 'var(--accent-primary)' }}>
+                      <ShapeIcon shape={tt.defaultShape} size={12} />
+                    </div>
+                    {tt.name}
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.375rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.2rem', textTransform: 'uppercase' as const }}>Price ($)</div>
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        placeholder={String(tt.defaultPriceCents / 100)}
+                        value={overrides[tt.id]?.priceCents !== undefined ? overrides[tt.id].priceCents / 100 : ''}
+                        onChange={(e) => {
+                          const cents = Math.round(Number(e.target.value) * 100);
+                          setOverrides((prev) => ({
+                            ...prev,
+                            [tt.id]: { capacity: prev[tt.id]?.capacity ?? tt.defaultCapacity, priceCents: cents },
+                          }));
+                        }}
+                        style={{ width: '100%', padding: '0.3rem 0.4rem', borderRadius: '0.25rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontFamily: 'var(--font-body)', fontSize: '0.75rem', outline: 'none', boxSizing: 'border-box' as const }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.2rem', textTransform: 'uppercase' as const }}>Cap</div>
+                      <input
+                        type="number"
+                        min={1}
+                        placeholder={String(tt.defaultCapacity)}
+                        value={overrides[tt.id]?.capacity !== undefined ? overrides[tt.id].capacity : ''}
+                        onChange={(e) => {
+                          const cap = Math.max(1, Number(e.target.value));
+                          setOverrides((prev) => ({
+                            ...prev,
+                            [tt.id]: { priceCents: prev[tt.id]?.priceCents ?? tt.defaultPriceCents, capacity: cap },
+                          }));
+                        }}
+                        style={{ width: '100%', padding: '0.3rem 0.4rem', borderRadius: '0.25rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontFamily: 'var(--font-body)', fontSize: '0.75rem', outline: 'none', boxSizing: 'border-box' as const }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       {/* ── Center: Canvas ───────────────────────────────────────────── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', minWidth: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', minWidth: 0, minHeight: '500px' }}>
         {/* Floating toolbar */}
         <div
           style={{
@@ -930,7 +1017,7 @@ export default function CanvasEditor({ eventId }: CanvasEditorProps): React.Reac
         </div>
 
         {/* Canvas */}
-        <div ref={containerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        <div ref={containerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden', width: '100%', height: '100%', minHeight: '500px' }}>
           <canvas
             ref={canvasRef}
             style={{ display: 'block', cursor: isDragging ? 'grabbing' : draggingElementId ? 'grab' : 'default' }}

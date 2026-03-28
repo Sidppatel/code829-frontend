@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Circle, RectangleHorizontal, Square, Diamond, Save, Trash2, Tags } from 'lucide-react';
+import { Circle, RectangleHorizontal, Square, Diamond, Save, Trash2, Tags, Loader2, Check, PackagePlus, PackageMinus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../lib/axios';
 import { useFloorPlanStore, type FloorPlanElement, type TableShape } from '../../../stores/floorPlanStore';
@@ -434,17 +434,30 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     clearAll,
   } = useFloorPlanStore();
 
-  const { selectedIds, select, clearSelection } = useEditorStore();
+  const { selectedIds, select, multiSelect, clearSelection } = useEditorStore();
 
   const [tableTypes, setTableTypes] = useState<TableType[]>([]);
   const [loadingLayout, setLoadingLayout] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [rowsInput, setRowsInput] = useState(10);
   const [colsInput, setColsInput] = useState(10);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [draggingFromPalette, setDraggingFromPalette] = useState<TableType | null>(null);
   const [draggingElementId, setDraggingElementId] = useState<string | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Bulk Insert state
+  const [showBulkInsert, setShowBulkInsert] = useState(false);
+  const [bulkInsertType, setBulkInsertType] = useState<string>('');
+  const [bulkInsertCount, setBulkInsertCount] = useState(5);
+  const [bulkFillMode, setBulkFillMode] = useState<'left-to-right' | 'specific-row'>('left-to-right');
+  const [bulkTargetRow, setBulkTargetRow] = useState(0);
+
+  // Event Overrides state (FIX 6)
+  const [overridesEnabled, setOverridesEnabled] = useState(false);
+  const [overrides, setOverrides] = useState<Record<string, { priceCents: number; capacity: number }>>({});
 
   const rows = gridDimensions?.rows ?? 10;
   const cols = gridDimensions?.cols ?? 10;
@@ -500,6 +513,20 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     return () => document.removeEventListener('click', handleClick);
   }, []);
 
+  // Auto-save: 2s debounce after any change
+  useEffect(() => {
+    if (!isDirty) return;
+    setSaveStatus('idle');
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(() => {
+      void performAutoSave();
+    }, 2000);
+    return () => {
+      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDirty, elements, elementOrder]);
+
   // Stats
   const allElements = elementOrder.map((id) => elements[id]).filter(Boolean);
   const totalTables = allElements.length;
@@ -527,15 +554,16 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
       setDraggingElementId(null);
     } else if (draggingFromPalette) {
       const tt = draggingFromPalette;
+      const ovr = overridesEnabled ? overrides[tt.id] : undefined;
       const el: FloorPlanElement = {
         id: generateId(),
         label: `T${totalTables + 1}`,
-        capacity: tt.defaultCapacity,
+        capacity: ovr?.capacity ?? tt.defaultCapacity,
         shape: tt.defaultShape,
         color: tt.defaultColor,
         section: undefined,
         priceType: 'PerTable',
-        priceCents: tt.defaultPriceCents,
+        priceCents: ovr?.priceCents ?? tt.defaultPriceCents,
         isActive: true,
         gridRow: row,
         gridCol: col,
@@ -553,7 +581,11 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
 
   function handleSelectCell(id: string, evt: React.MouseEvent): void {
     evt.stopPropagation();
-    select(id);
+    if (evt.shiftKey) {
+      multiSelect(id);
+    } else {
+      select(id);
+    }
   }
 
   function handleDelete(id: string): void {
@@ -574,6 +606,127 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     });
     toast.success('Tables auto-labeled');
   }, [allElements, updateElement]);
+
+  async function performAutoSave(): Promise<void> {
+    setSaveStatus('saving');
+    try {
+      const tables = elementOrder.map((id, idx) => {
+        const el = elements[id];
+        return {
+          id: el.id,
+          label: el.label,
+          capacity: el.capacity,
+          shape: el.shape,
+          color: el.color,
+          section: el.section,
+          priceType: el.priceType,
+          priceCents: el.priceOverrideCents ?? el.priceCents,
+          isActive: el.isActive,
+          gridRow: el.gridRow,
+          gridCol: el.gridCol,
+          posX: el.posX,
+          posY: el.posY,
+          width: el.width,
+          height: el.height,
+          rotation: el.rotation,
+          sortOrder: idx,
+          tableTypeId: el.tableTypeId,
+        };
+      });
+      await apiClient.post(`/admin/events/${eventId}/layout`, {
+        editorMode: 'grid',
+        gridRows: rows,
+        gridCols: cols,
+        tables,
+      });
+      markClean();
+      setSaveStatus('saved');
+    } catch {
+      setSaveStatus('idle');
+    }
+  }
+
+  // Bulk Insert
+  function handleBulkInsert(): void {
+    const tt = tableTypes.find((t) => t.id === bulkInsertType);
+    if (!tt) { toast.error('Select a table type'); return; }
+    const count = Math.min(20, Math.max(1, bulkInsertCount));
+
+    // Collect empty cells
+    const emptyCells: Array<{ row: number; col: number }> = [];
+    if (bulkFillMode === 'specific-row') {
+      const r = Math.min(bulkTargetRow, rows - 1);
+      for (let c = 0; c < cols && emptyCells.length < count; c++) {
+        if (!occupancyMap.has(`${r}-${c}`)) {
+          emptyCells.push({ row: r, col: c });
+        }
+      }
+    } else {
+      for (let r = 0; r < rows && emptyCells.length < count; r++) {
+        for (let c = 0; c < cols && emptyCells.length < count; c++) {
+          if (!occupancyMap.has(`${r}-${c}`)) {
+            emptyCells.push({ row: r, col: c });
+          }
+        }
+      }
+    }
+
+    if (emptyCells.length === 0) {
+      toast.error('No empty cells available');
+      return;
+    }
+
+    const actualCount = Math.min(count, emptyCells.length);
+    for (let i = 0; i < actualCount; i++) {
+      const { row, col } = emptyCells[i];
+      const el: FloorPlanElement = {
+        id: `el_${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${i}`,
+        label: `T${totalTables + i + 1}`,
+        capacity: (overridesEnabled && overrides[tt.id]?.capacity) ? overrides[tt.id].capacity : tt.defaultCapacity,
+        shape: tt.defaultShape,
+        color: tt.defaultColor,
+        section: undefined,
+        priceType: 'PerTable',
+        priceCents: (overridesEnabled && overrides[tt.id]?.priceCents !== undefined) ? overrides[tt.id].priceCents : tt.defaultPriceCents,
+        isActive: true,
+        gridRow: row,
+        gridCol: col,
+        width: tt.defaultShape === 'Rectangle' ? 120 : 80,
+        height: 80,
+        rotation: 0,
+        sortOrder: totalTables + i,
+        tableTypeId: tt.id,
+        tableTypeName: tt.name,
+      };
+      addElement(el);
+    }
+    toast.success(`Inserted ${actualCount} tables`);
+    setShowBulkInsert(false);
+  }
+
+  // Bulk Remove
+  function handleBulkRemove(): void {
+    const count = selectedIds.length;
+    if (count === 0) return;
+    if (!window.confirm(`Remove ${count} selected table${count > 1 ? 's' : ''}?`)) return;
+    for (const id of selectedIds) {
+      deleteElement(id);
+    }
+    clearSelection();
+    toast.success(`Removed ${count} table${count > 1 ? 's' : ''}`);
+  }
+
+  // Select All placed tables
+  function handleSelectAll(checked: boolean): void {
+    if (checked) {
+      // Select all placed elements
+      if (allElements.length > 0) {
+        useEditorStore.setState({ selectedIds: allElements.map((el) => el.id) });
+      }
+    } else {
+      clearSelection();
+    }
+  }
 
   async function handleSave(): Promise<void> {
     setSaving(true);
@@ -649,6 +802,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
       }}
       onClick={() => clearSelection()}
     >
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       {/* ── Left Panel: Table Palette ─────────────────────────────────── */}
       <div
         style={{
@@ -739,6 +893,126 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
               />
             </div>
           ))}
+
+          {/* ── Event Overrides (FIX 6) ── */}
+          {tableTypes.length > 0 && (
+            <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  marginBottom: overridesEnabled ? '0.75rem' : 0,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={overridesEnabled}
+                  onChange={(e) => setOverridesEnabled(e.target.checked)}
+                  style={{ accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
+                />
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                  }}
+                >
+                  Customize for this event
+                </span>
+              </label>
+
+              {overridesEnabled && tableTypes.map((tt) => (
+                <div
+                  key={tt.id}
+                  style={{
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '0.5rem',
+                    padding: '0.625rem 0.75rem',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      marginBottom: '0.5rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.375rem',
+                    }}
+                  >
+                    <div style={{ color: tt.defaultColor || 'var(--accent-primary)' }}>
+                      <ShapeIcon shape={tt.defaultShape} size={12} />
+                    </div>
+                    {tt.name}
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.375rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.2rem', textTransform: 'uppercase' }}>Price ($)</div>
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        placeholder={String(tt.defaultPriceCents / 100)}
+                        value={overrides[tt.id]?.priceCents !== undefined ? overrides[tt.id].priceCents / 100 : ''}
+                        onChange={(e) => {
+                          const cents = Math.round(Number(e.target.value) * 100);
+                          setOverrides((prev) => ({
+                            ...prev,
+                            [tt.id]: { capacity: prev[tt.id]?.capacity ?? tt.defaultCapacity, priceCents: cents },
+                          }));
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '0.3rem 0.4rem',
+                          borderRadius: '0.25rem',
+                          border: '1px solid var(--border)',
+                          background: 'var(--bg-secondary)',
+                          color: 'var(--text-primary)',
+                          fontFamily: 'var(--font-body)',
+                          fontSize: '0.75rem',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.2rem', textTransform: 'uppercase' }}>Cap</div>
+                      <input
+                        type="number"
+                        min={1}
+                        placeholder={String(tt.defaultCapacity)}
+                        value={overrides[tt.id]?.capacity !== undefined ? overrides[tt.id].capacity : ''}
+                        onChange={(e) => {
+                          const cap = Math.max(1, Number(e.target.value));
+                          setOverrides((prev) => ({
+                            ...prev,
+                            [tt.id]: { priceCents: prev[tt.id]?.priceCents ?? tt.defaultPriceCents, capacity: cap },
+                          }));
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '0.3rem 0.4rem',
+                          borderRadius: '0.25rem',
+                          border: '1px solid var(--border)',
+                          background: 'var(--bg-secondary)',
+                          color: 'var(--text-primary)',
+                          fontFamily: 'var(--font-body)',
+                          fontSize: '0.75rem',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -796,7 +1070,47 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
             <strong style={{ color: 'var(--text-primary)' }}>{sections}</strong> sections
           </span>
 
+          {/* Select All */}
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              fontSize: '0.8rem',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              userSelect: 'none',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={totalTables > 0 && selectedIds.length === totalTables}
+              onChange={(e) => handleSelectAll(e.target.checked)}
+              style={{ accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
+            />
+            All
+          </label>
+
           <div style={{ flex: 1 }} />
+
+          {/* Auto-save status */}
+          {saveStatus === 'saving' && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+              <Loader2 size={12} style={{ animation: 'spin 0.8s linear infinite' }} />
+              Saving…
+            </span>
+          )}
+          {saveStatus === 'saved' && !isDirty && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: 'var(--color-success)' }}>
+              <Check size={12} />
+              All changes saved
+            </span>
+          )}
+          {isDirty && saveStatus === 'idle' && (
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+              Unsaved changes
+            </span>
+          )}
 
           {/* Actions */}
           <button
@@ -808,6 +1122,40 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
             <Tags size={14} />
             Auto-label
           </button>
+
+          {/* Bulk Insert */}
+          <button
+            type="button"
+            onClick={() => setShowBulkInsert((v) => !v)}
+            style={{
+              ...toolbarBtnStyle,
+              borderColor: showBulkInsert ? 'var(--accent-primary)' : 'var(--border)',
+              color: showBulkInsert ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            }}
+            title="Bulk insert tables"
+          >
+            <PackagePlus size={14} />
+            Bulk Insert
+          </button>
+
+          {/* Bulk Remove */}
+          <button
+            type="button"
+            onClick={handleBulkRemove}
+            disabled={selectedIds.length < 2}
+            style={{
+              ...toolbarBtnStyle,
+              borderColor: selectedIds.length >= 2 ? 'var(--color-error)' : 'var(--border)',
+              color: selectedIds.length >= 2 ? 'var(--color-error)' : 'var(--text-tertiary)',
+              opacity: selectedIds.length >= 2 ? 1 : 0.5,
+              cursor: selectedIds.length >= 2 ? 'pointer' : 'not-allowed',
+            }}
+            title="Bulk remove selected tables"
+          >
+            <PackageMinus size={14} />
+            Bulk Remove ({selectedIds.length})
+          </button>
+
           <button
             type="button"
             onClick={handleClearAll}
@@ -830,9 +1178,126 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
             }}
           >
             <Save size={14} />
-            {saving ? 'Saving…' : 'Save Layout'}
+            {saving ? 'Saving…' : 'Save'}
           </button>
         </div>
+
+        {/* Bulk Insert Panel */}
+        {showBulkInsert && (
+          <div
+            style={{
+              padding: '0.875rem 1rem',
+              borderBottom: '1px solid var(--border)',
+              background: 'color-mix(in srgb, var(--accent-primary) 5%, var(--bg-secondary))',
+              display: 'flex',
+              alignItems: 'flex-end',
+              gap: '0.75rem',
+              flexWrap: 'wrap',
+            }}
+          >
+            {/* Table Type */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <label style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Table Type
+              </label>
+              <select
+                value={bulkInsertType}
+                onChange={(e) => setBulkInsertType(e.target.value)}
+                style={{
+                  padding: '0.35rem 0.5rem',
+                  borderRadius: '0.375rem',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '0.8rem',
+                  outline: 'none',
+                }}
+              >
+                <option value="">— select —</option>
+                {tableTypes.map((tt) => (
+                  <option key={tt.id} value={tt.id}>{tt.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Count */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <label style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Count (1–20)
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={20}
+                value={bulkInsertCount}
+                onChange={(e) => setBulkInsertCount(Math.min(20, Math.max(1, Number(e.target.value))))}
+                style={{ ...smallInputStyle, width: '60px' }}
+              />
+            </div>
+
+            {/* Fill mode */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <label style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Fill Mode
+              </label>
+              <select
+                value={bulkFillMode}
+                onChange={(e) => setBulkFillMode(e.target.value as 'left-to-right' | 'specific-row')}
+                style={{
+                  padding: '0.35rem 0.5rem',
+                  borderRadius: '0.375rem',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '0.8rem',
+                  outline: 'none',
+                }}
+              >
+                <option value="left-to-right">Fill empty cells left-to-right</option>
+                <option value="specific-row">Fill specific row</option>
+              </select>
+            </div>
+
+            {/* Row selector (only for specific-row) */}
+            {bulkFillMode === 'specific-row' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <label style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Row
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={rows - 1}
+                  value={bulkTargetRow}
+                  onChange={(e) => setBulkTargetRow(Math.min(rows - 1, Math.max(0, Number(e.target.value))))}
+                  style={{ ...smallInputStyle, width: '60px' }}
+                />
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleBulkInsert}
+              style={{
+                ...toolbarBtnStyle,
+                background: 'var(--accent-primary)',
+                color: 'var(--bg-primary)',
+                borderColor: 'var(--accent-primary)',
+              }}
+            >
+              Insert
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowBulkInsert(false)}
+              style={toolbarBtnStyle}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
 
         {/* Grid */}
         <div style={{ flex: 1, overflow: 'auto', padding: '1rem' }}>
