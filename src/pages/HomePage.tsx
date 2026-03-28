@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Search, ArrowRight, Users, Star, Calendar, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import MagneticButton from '../components/MagneticButton';
 import AnimatedCounter from '../components/AnimatedCounter';
 import EventCard, { type EventData } from '../components/EventCard';
@@ -141,12 +141,61 @@ const SEARCH_PLACEHOLDERS = [
 // ---------------------------------------------------------------------------
 // Hero section
 // ---------------------------------------------------------------------------
+interface SearchSuggestion {
+  id: string;
+  title: string;
+  category: string;
+  venueName: string;
+}
+
 function HeroSection(): React.ReactElement {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [displayedPlaceholder, setDisplayedPlaceholder] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const typingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Live autocomplete: fetch suggestions as user types
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (searchQuery.length < 2) { setSuggestions([]); return; }
+    debounceRef.current = setTimeout(() => {
+      apiClient.get<ApiEventsResponse>(`/events?search=${encodeURIComponent(searchQuery)}&pageSize=5`)
+        .then((res) => {
+          setSuggestions((res.data.items ?? []).map((e) => ({
+            id: e.id, title: e.title, category: e.category, venueName: e.venueName,
+          })));
+          setShowSuggestions(true);
+        })
+        .catch(() => setSuggestions([]));
+    }, 250);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [searchQuery]);
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent): void {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  function handleSearch(): void {
+    if (searchQuery.trim()) {
+      navigate(`/events?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate('/events');
+    }
+    setShowSuggestions(false);
+  }
 
   useEffect(() => {
     const current = SEARCH_PLACEHOLDERS[placeholderIdx];
@@ -290,56 +339,128 @@ function HeroSection(): React.ReactElement {
           Thousands of live experiences — concerts, tech talks, food festivals & more.
         </p>
 
-        {/* Animated search bar */}
+        {/* Animated search bar with autocomplete */}
         <div
+          ref={searchContainerRef}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            background: 'var(--bg-secondary)',
-            border: '1.5px solid var(--border)',
-            borderRadius: '1rem',
-            padding: '0.6rem 0.6rem 0.6rem 1.2rem',
-            boxShadow: 'var(--shadow-card-hover)',
+            position: 'relative',
+            width: '100%',
+            maxWidth: '560px',
             marginBottom: '2rem',
             opacity: 0,
             animation: 'wordIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.72s forwards',
           }}
         >
-          <Search size={18} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={displayedPlaceholder}
+          <div
             style={{
-              flex: 1,
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-              fontSize: '1rem',
-              color: 'var(--text-primary)',
-              fontFamily: 'var(--font-body)',
-            }}
-          />
-          <Link
-            to={`/events${searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''}`}
-            style={{
-              display: 'inline-flex',
+              display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.6rem 1.2rem',
-              borderRadius: '0.65rem',
-              background: 'var(--accent-primary)',
-              color: 'var(--bg-primary)',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              textDecoration: 'none',
-              whiteSpace: 'nowrap',
+              gap: '0.75rem',
+              background: 'var(--bg-secondary)',
+              border: '1.5px solid var(--border)',
+              borderRadius: showSuggestions && suggestions.length > 0 ? '1rem 1rem 0 0' : '1rem',
+              padding: '0.6rem 0.6rem 0.6rem 1.2rem',
+              boxShadow: 'var(--shadow-card-hover)',
             }}
           >
-            Search <ArrowRight size={14} />
-          </Link>
+            <Search size={18} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+              placeholder={displayedPlaceholder}
+              style={{
+                flex: 1,
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                fontSize: '1rem',
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-body)',
+              }}
+            />
+            <button
+              onClick={handleSearch}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.6rem 1.2rem',
+                borderRadius: '0.65rem',
+                background: 'var(--accent-primary)',
+                color: 'var(--bg-primary)',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                border: 'none',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                fontFamily: 'var(--font-body)',
+              }}
+            >
+              Search <ArrowRight size={14} />
+            </button>
+          </div>
+
+          {/* Autocomplete dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                background: 'var(--bg-secondary)',
+                border: '1.5px solid var(--border)',
+                borderTop: 'none',
+                borderRadius: '0 0 1rem 1rem',
+                boxShadow: 'var(--shadow-card-hover)',
+                zIndex: 50,
+                overflow: 'hidden',
+              }}
+            >
+              {suggestions.map((s) => (
+                <Link
+                  key={s.id}
+                  to={`/events/${s.id}`}
+                  onClick={() => setShowSuggestions(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.7rem 1.2rem',
+                    textDecoration: 'none',
+                    borderTop: '1px solid var(--border)',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                      {s.title}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                      {s.venueName}
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      padding: '0.15rem 0.5rem',
+                      borderRadius: '999px',
+                      background: 'color-mix(in srgb, var(--accent-primary) 12%, transparent)',
+                      color: 'var(--accent-primary)',
+                    }}
+                  >
+                    {s.category}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* CTA */}
