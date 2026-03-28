@@ -694,15 +694,13 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
       }
     }
 
-    // If we selected any occupied cells, put those in the editor store
-    if (newOccupied.length > 0 && newEmpty.size === 0) {
+    // Select both occupied and empty cells from the marquee
+    if (newOccupied.length > 0) {
       useEditorStore.setState({ selectedIds: newOccupied });
-      setSelectedEmptyCells(new Set());
-    } else if (newEmpty.size > 0) {
-      // Prefer empty cell selection
+    } else {
       clearSelection();
-      setSelectedEmptyCells(newEmpty);
     }
+    setSelectedEmptyCells(newEmpty);
 
     marqueeRef.current = null;
     setMarquee(null);
@@ -714,6 +712,8 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
       toast.error('Select cells first, then click a table type');
       return;
     }
+
+    const msgs: string[] = [];
 
     // If empty cells are selected, place tables there
     if (selectedEmptyCells.size > 0) {
@@ -746,25 +746,26 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
         placed++;
       }
       setSelectedEmptyCells(new Set());
-      if (placed > 0) toast.success(`Placed ${placed} ${tt.name} table${placed > 1 ? 's' : ''}`);
-      return;
+      if (placed > 0) msgs.push(`Placed ${placed}`);
     }
 
-    // If occupied cells are selected, change their type
+    // Also change occupied cells to this type
     if (selectedIds.length > 0) {
-      const ovr = overridesEnabled ? overrides[tt.id] : undefined;
       for (const id of selectedIds) {
         updateElement(id, {
-          capacity: ovr?.capacity ?? tt.defaultCapacity,
+          capacity: tt.defaultCapacity,
           shape: tt.defaultShape,
           color: tt.defaultColor,
-          priceCents: ovr?.priceCents ?? tt.defaultPriceCents,
+          priceCents: tt.defaultPriceCents,
           tableTypeId: tt.id,
           tableTypeName: tt.name,
         });
       }
-      toast.success(`Applied ${tt.name} to ${selectedIds.length} table${selectedIds.length > 1 ? 's' : ''}`);
+      msgs.push(`Changed ${selectedIds.length}`);
+      clearSelection();
     }
+
+    if (msgs.length > 0) toast.success(`${msgs.join(', ')} ${tt.name} table${(selectedEmptyCells.size + selectedIds.length) > 1 ? 's' : ''}`);
   }
 
   function handleDelete(id: string): void {
@@ -1016,7 +1017,9 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
           {/* Hint when cells are selected */}
           {(selectedEmptyCells.size > 0 || selectedIds.length > 0) && (
             <p style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', margin: '0 0 0.5rem', padding: '0.4rem 0.5rem', background: 'color-mix(in srgb, var(--accent-primary) 8%, transparent)', borderRadius: '0.375rem', lineHeight: 1.3 }}>
-              {selectedEmptyCells.size > 0
+              {selectedEmptyCells.size > 0 && selectedIds.length > 0
+                ? `${selectedEmptyCells.size} empty + ${selectedIds.length} table${selectedIds.length > 1 ? 's' : ''} — click type to fill & change`
+                : selectedEmptyCells.size > 0
                 ? `${selectedEmptyCells.size} cell${selectedEmptyCells.size > 1 ? 's' : ''} selected — click a type to place`
                 : `${selectedIds.length} table${selectedIds.length > 1 ? 's' : ''} selected — click a type to change`}
             </p>

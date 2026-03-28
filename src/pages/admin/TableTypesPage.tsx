@@ -571,18 +571,10 @@ export default function TableTypesPage(): React.ReactElement {
                             gap: '0.5rem',
                           }}
                         >
-                          <div
-                            style={{
-                              width: '10px',
-                              height: '10px',
-                              borderRadius: '50%',
-                              background: tt.defaultColor || 'var(--accent-primary)',
-                              flexShrink: 0,
-                            }}
-                          />
-                          <span
-                            style={{ fontWeight: 600, color: 'var(--text-primary)' }}
-                          >
+                          <div style={{ color: tt.defaultColor || 'var(--accent-primary)', flexShrink: 0 }}>
+                            <ShapeIcon shape={tt.shape} size={16} fill={tt.defaultColor || undefined} />
+                          </div>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                             {tt.name}
                           </span>
                         </div>
