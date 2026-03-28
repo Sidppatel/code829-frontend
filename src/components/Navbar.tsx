@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Sun, Moon, Monitor, User, LogIn } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Sun, Moon, Monitor, User, LogIn, LogOut } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { useThemeStore, type Theme } from '../stores/themeStore';
 
@@ -22,8 +22,9 @@ const THEME_OPTIONS: { value: Theme; Icon: React.ComponentType<{ size: number }>
 
 export default function Navbar(): React.ReactElement {
   const location = useLocation();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, logout } = useAuthStore();
   const { theme, setTheme } = useThemeStore();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -149,25 +150,46 @@ export default function Navbar(): React.ReactElement {
 
         {/* Auth */}
         {isAuthenticated && user ? (
-          <Link
-            to="/me/bookings"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.35rem 0.85rem',
-              borderRadius: '999px',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: 'var(--text-primary)',
-              textDecoration: 'none',
-              background: 'var(--bg-tertiary)',
-              border: '1px solid var(--border)',
-            }}
-          >
-            <User size={14} />
-            <span>{user.name.split(' ')[0]}</span>
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Link
+              to="/me/bookings"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.35rem 0.85rem',
+                borderRadius: '999px',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                color: 'var(--text-primary)',
+                textDecoration: 'none',
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <User size={14} />
+              <span>{user.name.split(' ')[0]}</span>
+            </Link>
+            <button
+              onClick={() => { logout(); navigate('/'); }}
+              aria-label="Logout"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-tertiary)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                transition: 'background 0.2s, color 0.2s',
+              }}
+            >
+              <LogOut size={14} />
+            </button>
+          </div>
         ) : (
           <Link
             to="/auth/login"
