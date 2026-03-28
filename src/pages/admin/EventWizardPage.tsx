@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,9 @@ import {
 import apiClient from '../../lib/axios';
 import { useEventWizardStore } from '../../stores/eventWizardStore';
 import type { LayoutMode } from '../../stores/eventWizardStore';
+
+const GridEditor = lazy(() => import('./editors/GridEditor'));
+const CanvasEditor = lazy(() => import('./editors/CanvasEditor'));
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -458,6 +461,203 @@ function NewVenueModal({
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+// ─── Step 2 Layout Panel ──────────────────────────────────────────────────────
+
+interface Step2LayoutPanelProps {
+  watchedLayoutMode: string | undefined;
+  maxCapacityValue: string;
+  layoutModeError: string | undefined;
+  maxCapacityError: string | undefined;
+  onLayoutModeChange: (v: LayoutMode) => void;
+  eventId: string | null;
+  isEdit: boolean;
+}
+
+type EditorTabMode = 'grid' | 'canvas';
+
+function Step2LayoutPanel({
+  watchedLayoutMode,
+  maxCapacityValue,
+  layoutModeError,
+  maxCapacityError,
+  onLayoutModeChange,
+  eventId,
+  isEdit,
+}: Step2LayoutPanelProps): React.ReactElement {
+  const [editorTab, setEditorTab] = useState<EditorTabMode>('grid');
+  const isAssignedSeating = watchedLayoutMode === 'Grid';
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.25rem' }}>
+        Layout Mode
+      </h2>
+      <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+        Choose how your event seats and capacity will be managed.
+      </p>
+
+      {layoutModeError && (
+        <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--color-error)' }}>{layoutModeError}</p>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.875rem' }}>
+        {(
+          [
+            {
+              value: 'Grid' as LayoutMode,
+              icon: <Grid3X3 size={28} />,
+              title: 'Assigned Seating',
+              subtitle: 'Tables & seats on an interactive floor plan',
+              desc: 'Best for galas, dinners, restaurant events',
+            },
+            {
+              value: 'CapacityOnly' as LayoutMode,
+              icon: <Users size={28} />,
+              title: 'General Admission',
+              subtitle: 'Capacity-based, no assigned seats',
+              desc: 'Best for concerts, festivals, open events',
+            },
+            {
+              value: 'None' as LayoutMode,
+              icon: <Ticket size={28} />,
+              title: 'Tickets Only',
+              subtitle: 'Simple ticketed access',
+              desc: 'Best for online events, workshops',
+            },
+          ] as const
+        ).map((card) => {
+          const isSelected = watchedLayoutMode === card.value;
+          return (
+            <button
+              key={card.value}
+              type="button"
+              onClick={() => onLayoutModeChange(card.value)}
+              style={{
+                padding: '1.25rem',
+                borderRadius: '0.75rem',
+                border: `2px solid ${isSelected ? 'var(--accent-primary)' : 'var(--border)'}`,
+                background: isSelected
+                  ? 'color-mix(in srgb, var(--accent-primary) 8%, var(--bg-secondary))'
+                  : 'var(--bg-secondary)',
+                cursor: 'pointer',
+                textAlign: 'left',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.625rem',
+                transition: 'border-color 0.2s, background 0.2s',
+                fontFamily: 'var(--font-body)',
+              }}
+            >
+              <span style={{ color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>
+                {card.icon}
+              </span>
+              <span style={{ fontSize: '0.9rem', fontWeight: 700, color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)', display: 'block' }}>
+                {card.title}
+              </span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', lineHeight: 1.4 }}>
+                {card.subtitle}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', display: 'block', lineHeight: 1.4 }}>
+                {card.desc}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Max capacity for CapacityOnly */}
+      {watchedLayoutMode === 'CapacityOnly' && (
+        <div style={{ position: 'relative', marginTop: '0.25rem' }}>
+          <input
+            id="maxCapacity-step2"
+            type="number"
+            min={1}
+            value={maxCapacityValue}
+            placeholder=" "
+            style={{
+              width: '100%',
+              padding: '1.375rem 0.875rem 0.5rem',
+              borderRadius: '0.5rem',
+              border: `1px solid ${maxCapacityError ? 'var(--color-error)' : 'var(--border)'}`,
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              fontFamily: 'var(--font-body)',
+              fontSize: '0.9rem',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+            readOnly
+          />
+          <label htmlFor="maxCapacity-step2" style={{ position: 'absolute', left: '0.875rem', top: '0.35rem', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', pointerEvents: 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Max Capacity *
+          </label>
+          {maxCapacityError && <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--color-error)' }}>{maxCapacityError}</p>}
+        </div>
+      )}
+
+      {/* Floor plan editor for Assigned Seating */}
+      {isAssignedSeating && (
+        <div style={{ marginTop: '0.5rem' }}>
+          {/* Editor mode toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Editor:</span>
+            {(['grid', 'canvas'] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setEditorTab(tab)}
+                style={{
+                  padding: '0.3rem 0.875rem',
+                  borderRadius: '999px',
+                  border: `1px solid ${editorTab === tab ? 'var(--accent-primary)' : 'var(--border)'}`,
+                  background: editorTab === tab
+                    ? 'color-mix(in srgb, var(--accent-primary) 12%, var(--bg-secondary))'
+                    : 'var(--bg-tertiary)',
+                  color: editorTab === tab ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  fontFamily: 'var(--font-body)',
+                  fontWeight: 600,
+                  transition: 'border-color 0.15s, background 0.15s',
+                }}
+              >
+                {tab === 'grid' ? 'Grid Editor' : 'Canvas Editor'}
+              </button>
+            ))}
+          </div>
+
+          {/* Editors */}
+          {(isEdit && eventId) ? (
+            <Suspense fallback={
+              <div style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: '0.75rem', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>
+                Loading editor…
+              </div>
+            }>
+              {editorTab === 'grid'
+                ? <GridEditor eventId={eventId} />
+                : <CanvasEditor eventId={eventId} />
+              }
+            </Suspense>
+          ) : (
+            <div
+              style={{
+                padding: '1.5rem',
+                border: '1px dashed var(--border)',
+                borderRadius: '0.75rem',
+                textAlign: 'center',
+                color: 'var(--text-tertiary)',
+                fontSize: '0.875rem',
+              }}
+            >
+              Save event basics first to enable the floor plan editor.
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -1064,103 +1264,15 @@ export default function EventWizardPage(): React.ReactElement {
 
         {/* ── Step 2: Layout Mode ────────────────────────────────────────── */}
         {step === 2 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.25rem' }}>
-              Layout Mode
-            </h2>
-            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-              Choose how your event seats and capacity will be managed.
-            </p>
-
-            {errors.layoutMode && (
-              <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--color-error)' }}>{errors.layoutMode.message}</p>
-            )}
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.875rem' }}>
-              {(
-                [
-                  {
-                    value: 'Grid' as LayoutMode,
-                    icon: <Grid3X3 size={28} />,
-                    title: 'Assigned Seating',
-                    subtitle: 'Tables & seats on an interactive floor plan',
-                    desc: 'Best for galas, dinners, restaurant events',
-                  },
-                  {
-                    value: 'CapacityOnly' as LayoutMode,
-                    icon: <Users size={28} />,
-                    title: 'General Admission',
-                    subtitle: 'Capacity-based, no assigned seats',
-                    desc: 'Best for concerts, festivals, open events',
-                  },
-                  {
-                    value: 'None' as LayoutMode,
-                    icon: <Ticket size={28} />,
-                    title: 'Tickets Only',
-                    subtitle: 'Simple ticketed access',
-                    desc: 'Best for online events, workshops',
-                  },
-                ] as const
-              ).map((card) => {
-                const isSelected = watchedValues.layoutMode === card.value;
-                return (
-                  <button
-                    key={card.value}
-                    type="button"
-                    onClick={() => setValue('layoutMode', card.value, { shouldValidate: true })}
-                    style={{
-                      padding: '1.25rem',
-                      borderRadius: '0.75rem',
-                      border: `2px solid ${isSelected ? 'var(--accent-primary)' : 'var(--border)'}`,
-                      background: isSelected
-                        ? 'color-mix(in srgb, var(--accent-primary) 8%, var(--bg-secondary))'
-                        : 'var(--bg-secondary)',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.625rem',
-                      transition: 'border-color 0.2s, background 0.2s',
-                      fontFamily: 'var(--font-body)',
-                    }}
-                  >
-                    <span style={{ color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>
-                      {card.icon}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '0.9rem',
-                        fontWeight: 700,
-                        color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)',
-                        display: 'block',
-                      }}
-                    >
-                      {card.title}
-                    </span>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', lineHeight: 1.4 }}>
-                      {card.subtitle}
-                    </span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', display: 'block', lineHeight: 1.4 }}>
-                      {card.desc}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Max capacity for CapacityOnly */}
-            {watchedValues.layoutMode === 'CapacityOnly' && (
-              <FloatingInput
-                fieldId="maxCapacity"
-                label="Max Capacity *"
-                type="number"
-                min={1}
-                value={watchedValues.maxCapacity ?? ''}
-                error={errors.maxCapacity?.message}
-                {...register('maxCapacity')}
-              />
-            )}
-          </div>
+          <Step2LayoutPanel
+            watchedLayoutMode={watchedValues.layoutMode}
+            maxCapacityValue={watchedValues.maxCapacity ?? ''}
+            layoutModeError={errors.layoutMode?.message}
+            maxCapacityError={errors.maxCapacity?.message}
+            onLayoutModeChange={(v) => setValue('layoutMode', v, { shouldValidate: true })}
+            eventId={id ?? null}
+            isEdit={isEdit}
+          />
         )}
 
         {/* ── Step 3: Pricing ────────────────────────────────────────────── */}
