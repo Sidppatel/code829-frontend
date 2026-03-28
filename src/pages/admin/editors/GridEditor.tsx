@@ -813,48 +813,23 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     };
   }
 
-  // Auto-save to Redis (instant draft, no DB write)
+  // Auto-save: try Redis draft first (fast), fall back to direct DB save
   async function performAutoSave(): Promise<void> {
     setSaveStatus('saving');
     try {
       await apiClient.post(`/admin/events/${eventId}/layout/draft`, buildLayoutPayload());
       setSaveStatus('saved');
     } catch {
-      setSaveStatus('idle');
-    }
-  }
-
-  // Flush Redis draft to DB (called on page leave)
-  async function flushToDb(): Promise<void> {
-    try {
-      await apiClient.post(`/admin/events/${eventId}/layout/flush`);
-    } catch {
-      // Silently fail — best effort
-    }
-  }
-
-  // Flush to DB when navigating away
-  useEffect(() => {
-    function handleBeforeUnload(): void {
-      // Use sendBeacon for reliable flush on tab close
-      const token = localStorage.getItem('auth_token');
-      if (token && isDirty) {
-        navigator.sendBeacon(
-          `${apiClient.defaults.baseURL}/admin/events/${eventId}/layout/flush`,
-          new Blob([JSON.stringify({})], { type: 'application/json' })
-        );
+      // Redis draft failed — try direct DB save as fallback
+      try {
+        await apiClient.post(`/admin/events/${eventId}/layout`, buildLayoutPayload());
+        markClean();
+        setSaveStatus('saved');
+      } catch {
+        setSaveStatus('idle');
       }
     }
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      // Also flush when component unmounts (React navigation)
-      if (isDirty) {
-        void flushToDb();
-      }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDirty, eventId]);
+  }
 
   // Bulk Insert
   function handleBulkInsert(): void {
@@ -941,12 +916,17 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   async function handleSave(): Promise<void> {
     setSaving(true);
     try {
-      // Save draft to Redis first, then flush to DB
-      await apiClient.post(`/admin/events/${eventId}/layout/draft`, buildLayoutPayload());
-      await apiClient.post(`/admin/events/${eventId}/layout/flush`);
+      // Try Redis draft + flush first
+      try {
+        await apiClient.post(`/admin/events/${eventId}/layout/draft`, buildLayoutPayload());
+        await apiClient.post(`/admin/events/${eventId}/layout/flush`);
+      } catch {
+        // Fallback: save directly to DB
+        await apiClient.post(`/admin/events/${eventId}/layout`, buildLayoutPayload());
+      }
       markClean();
       setSaveStatus('saved');
-      toast.success('Layout saved to database');
+      toast.success('Layout saved');
     } catch {
       toast.error('Failed to save layout');
     } finally {
