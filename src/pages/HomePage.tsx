@@ -246,20 +246,12 @@ function HeroSection(): React.ReactElement {
           {words.map((word, i) => (
             <span
               key={word}
+              className={`hero-word hero-word-${i}`}
               style={{
                 display: 'inline-block',
                 opacity: 0,
                 transform: 'translateY(30px)',
-                animation: `wordIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards`,
-                animationDelay: `${i * 0.18}s`,
-                background: i === 2
-                  ? 'linear-gradient(135deg, var(--accent-cta), var(--accent-secondary))'
-                  : i === 1
-                  ? 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))'
-                  : 'var(--text-primary)',
-                WebkitBackgroundClip: i >= 1 ? 'text' : undefined,
-                WebkitTextFillColor: i >= 1 ? 'transparent' : undefined,
-                backgroundClip: i >= 1 ? 'text' : undefined,
+                animation: `wordIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${i * 0.18}s forwards`,
               }}
             >
               {word}
@@ -270,6 +262,19 @@ function HeroSection(): React.ReactElement {
         <style>{`
           @keyframes wordIn {
             to { opacity: 1; transform: translateY(0); }
+          }
+          .hero-word-0 { color: var(--text-primary); }
+          .hero-word-1 {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          }
+          .hero-word-2 {
+            background: linear-gradient(135deg, var(--accent-cta), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
           }
         `}</style>
 
