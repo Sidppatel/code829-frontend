@@ -1,5 +1,5 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -666,30 +666,10 @@ function Step2LayoutPanel({
   );
 }
 
-// ─── Review row helper ────────────────────────────────────────────────────────
-
-function ReviewRow({ label, value }: { label: string; value: string | React.ReactNode }): React.ReactElement {
-  return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '140px 1fr',
-        gap: '1rem',
-        padding: '0.625rem 0',
-        borderBottom: '1px solid var(--border)',
-      }}
-    >
-      <span style={{ fontSize: '0.8125rem', color: 'var(--text-tertiary)', fontWeight: 500 }}>{label}</span>
-      <span style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>{value}</span>
-    </div>
-  );
-}
-
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function EventWizardPage(): React.ReactElement {
   const { id } = useParams<{ id?: string }>();
-  const navigate = useNavigate();
   const isEdit = Boolean(id);
 
   const {
@@ -705,7 +685,6 @@ export default function EventWizardPage(): React.ReactElement {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [venuesLoading, setVenuesLoading] = useState(true);
   const [showNewVenueModal, setShowNewVenueModal] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(isEdit);
 
   const {
@@ -713,7 +692,6 @@ export default function EventWizardPage(): React.ReactElement {
     trigger,
     watch,
     setValue,
-    getValues,
     reset: resetForm,
     formState: { errors },
   } = useForm<WizardFormValues>({
@@ -920,47 +898,6 @@ export default function EventWizardPage(): React.ReactElement {
 
   function handleStepClick(s: number): void {
     setStep(s);
-  }
-
-  async function handleSubmit(): Promise<void> {
-    const values = getValues();
-    setSubmitting(true);
-    try {
-      const startDateTime = `${values.startDate}T${values.startTime}:00`;
-      const endDateTime = `${values.endDate}T${values.endTime}:00`;
-
-      const payload: Record<string, string | number | boolean | null | undefined> = {
-        title: values.title,
-        description: values.description,
-        category: values.category,
-        startDate: startDateTime,
-        endDate: endDateTime,
-        venueId: values.venueId,
-        bannerImageUrl: values.bannerImageUrl || null,
-        layoutMode: values.layoutMode,
-        isFeatured: values.isFeatured ?? false,
-        platformFeePercent: values.platformFeePercent ? Number(values.platformFeePercent) : 0,
-      };
-
-      if (values.layoutMode === 'CapacityOnly' && values.maxCapacity) {
-        payload.maxCapacity = Number(values.maxCapacity);
-      }
-
-      if (isEdit && id) {
-        await apiClient.put(`/admin/events/${id}`, payload);
-        toast.success('Event updated');
-      } else {
-        await apiClient.post('/admin/events', payload);
-        toast.success('Event created');
-      }
-
-      reset();
-      navigate('/admin/events');
-    } catch {
-      toast.error(isEdit ? 'Failed to update event' : 'Failed to create event');
-    } finally {
-      setSubmitting(false);
-    }
   }
 
   function handleVenueCreated(venue: Venue): void {

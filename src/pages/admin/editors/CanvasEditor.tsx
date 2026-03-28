@@ -196,9 +196,11 @@ function PropertiesPanel({ element, onUpdate, onDelete }: PropsPanelProps): Reac
   const [localColor, setLocalColor] = useState(element.color ?? '');
 
   useEffect(() => {
-    setLocalLabel(element.label);
-    setLocalSection(element.section ?? '');
-    setLocalColor(element.color ?? '');
+    queueMicrotask(() => {
+      setLocalLabel(element.label);
+      setLocalSection(element.section ?? '');
+      setLocalColor(element.color ?? '');
+    });
   }, [element.id, element.label, element.section, element.color]);
 
   function commitLabel(): void { onUpdate(element.id, { label: localLabel }); }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, lazy, Suspense } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   Pencil,
@@ -101,10 +101,6 @@ function formatDateRange(startIso: string, endIso: string): string {
   } catch {
     return startIso;
   }
-}
-
-function formatRevenue(cents: number): string {
-  return `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -480,7 +476,6 @@ function ReadOnlyLayoutGrid({ tables }: { tables: LayoutTable[] }): React.ReactE
 
 export default function EventManagePage(): React.ReactElement {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);

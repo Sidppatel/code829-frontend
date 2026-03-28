@@ -213,7 +213,7 @@ function HeroSection(): React.ReactElement {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (searchQuery.length < 2) {
-      setSuggestions([]);
+      queueMicrotask(() => { setSuggestions([]); });
       return;
     }
     debounceRef.current = setTimeout(() => {
@@ -280,8 +280,10 @@ function HeroSection(): React.ReactElement {
           setDisplayedPlaceholder(displayedPlaceholder.slice(0, -1));
         }, 30);
       } else {
-        setIsDeleting(false);
-        setPlaceholderIdx((i) => (i + 1) % SEARCH_PLACEHOLDERS.length);
+        queueMicrotask(() => {
+          setIsDeleting(false);
+          setPlaceholderIdx((i) => (i + 1) % SEARCH_PLACEHOLDERS.length);
+        });
       }
     }
     return () => {

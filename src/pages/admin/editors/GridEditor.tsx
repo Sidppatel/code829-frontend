@@ -141,9 +141,11 @@ function PropertiesPanel({ element, onUpdate, onDelete }: PropsPanelProps): Reac
 
   // Sync when a different element is selected
   useEffect(() => {
-    setLocalLabel(element.label);
-    setLocalSection(element.section ?? '');
-    setLocalColor(element.color ?? '');
+    queueMicrotask(() => {
+      setLocalLabel(element.label);
+      setLocalSection(element.section ?? '');
+      setLocalColor(element.color ?? '');
+    });
   }, [element.id, element.label, element.section, element.color]);
 
   function commitLabel(): void {

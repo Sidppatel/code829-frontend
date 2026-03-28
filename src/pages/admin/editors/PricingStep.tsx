@@ -276,6 +276,7 @@ function RuleForm({ tableTypes, defaultValues, onSave, onCancel, saving }: RuleF
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const watchedType = watch('type');
 
   const inputStyle = (hasError: boolean): React.CSSProperties => ({

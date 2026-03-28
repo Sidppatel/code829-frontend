@@ -174,8 +174,10 @@ function useTypingPlaceholder(): string {
       if (text.length > 0) {
         timerRef.current = setTimeout(() => setText(text.slice(0, -1)), 35);
       } else {
-        setDeleting(false);
-        setIdx((i) => (i + 1) % TYPING_PLACEHOLDERS.length);
+        queueMicrotask(() => {
+          setDeleting(false);
+          setIdx((i) => (i + 1) % TYPING_PLACEHOLDERS.length);
+        });
       }
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
