@@ -15,6 +15,7 @@ import {
   Calendar,
   MapPin,
   X,
+  Copy,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../lib/axios';
@@ -345,6 +346,193 @@ function SkeletonCard(): React.ReactElement {
   );
 }
 
+// ─── Duplicate dialog ─────────────────────────────────────────────────────────
+
+function DuplicateDialog({
+  event,
+  onConfirm,
+  onCancel,
+  duplicating,
+}: {
+  event: EventItem;
+  onConfirm: (startDate: string, endDate: string) => void;
+  onCancel: () => void;
+  duplicating: boolean;
+}): React.ReactElement {
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  const isValid = startDate.length > 0 && endDate.length > 0 && endDate >= startDate;
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'color-mix(in srgb, var(--bg-primary) 60%, transparent)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 200,
+        padding: '1rem',
+      }}
+    >
+      <div
+        style={{
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border)',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          maxWidth: '440px',
+          width: '100%',
+          boxShadow: 'var(--shadow-card-hover)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '1.2rem',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              margin: 0,
+            }}
+          >
+            Duplicate Event
+          </h2>
+          <button
+            type="button"
+            onClick={onCancel}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--text-tertiary)',
+              padding: '0.25rem',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <p style={{ color: 'var(--text-secondary)', margin: '0 0 1.125rem', fontSize: '0.875rem', lineHeight: 1.5 }}>
+          Create a copy of{' '}
+          <strong style={{ color: 'var(--text-primary)' }}>{event.title}</strong>. Choose dates for
+          the new event.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem', marginBottom: '1.25rem' }}>
+          <div>
+            <label
+              style={{
+                display: 'block',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--text-tertiary)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                marginBottom: '0.375rem',
+              }}
+            >
+              New Start Date *
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.55rem 0.875rem',
+                borderRadius: '0.5rem',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-tertiary)',
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-body)',
+                fontSize: '0.875rem',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+          <div>
+            <label
+              style={{
+                display: 'block',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--text-tertiary)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                marginBottom: '0.375rem',
+              }}
+            >
+              New End Date *
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              min={startDate || undefined}
+              style={{
+                width: '100%',
+                padding: '0.55rem 0.875rem',
+                borderRadius: '0.5rem',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-tertiary)',
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-body)',
+                fontSize: '0.875rem',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+          <button
+            onClick={onCancel}
+            disabled={duplicating}
+            style={{
+              padding: '0.5rem 1.25rem',
+              borderRadius: '0.5rem',
+              border: '1px solid var(--border)',
+              background: 'var(--bg-tertiary)',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-body)',
+              fontSize: '0.875rem',
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => isValid && onConfirm(startDate, endDate)}
+            disabled={!isValid || duplicating}
+            style={{
+              padding: '0.5rem 1.25rem',
+              borderRadius: '0.5rem',
+              border: 'none',
+              background: isValid ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
+              color: isValid ? 'var(--bg-primary)' : 'var(--text-tertiary)',
+              cursor: !isValid || duplicating ? 'not-allowed' : 'pointer',
+              fontFamily: 'var(--font-body)',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              opacity: duplicating ? 0.7 : 1,
+            }}
+          >
+            {duplicating ? 'Duplicating…' : 'Duplicate Event'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Delete dialog ────────────────────────────────────────────────────────────
 
 function DeleteDialog({
@@ -453,6 +641,8 @@ export default function EventsListPage(): React.ReactElement {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<EventItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [duplicateTarget, setDuplicateTarget] = useState<EventItem | null>(null);
+  const [duplicating, setDuplicating] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Debounce search
@@ -500,6 +690,21 @@ export default function EventsListPage(): React.ReactElement {
       toast.error('Failed to delete event');
     } finally {
       setDeleting(false);
+    }
+  }
+
+  async function handleDuplicate(startDate: string, endDate: string): Promise<void> {
+    if (!duplicateTarget) return;
+    setDuplicating(true);
+    try {
+      await apiClient.post(`/admin/events/${duplicateTarget.id}/duplicate`, { startDate, endDate });
+      toast.success(`"${duplicateTarget.title}" duplicated`);
+      setDuplicateTarget(null);
+      void fetchEvents();
+    } catch {
+      toast.error('Failed to duplicate event');
+    } finally {
+      setDuplicating(false);
     }
   }
 
@@ -844,6 +1049,27 @@ export default function EventsListPage(): React.ReactElement {
                           >
                             <Pencil size={13} />
                           </Link>
+                          <button
+                            type="button"
+                            onClick={() => setDuplicateTarget(event)}
+                            aria-label={`Duplicate ${event.title}`}
+                            title="Duplicate"
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '30px',
+                              height: '30px',
+                              borderRadius: '0.375rem',
+                              border: '1px solid var(--border)',
+                              background: 'var(--bg-tertiary)',
+                              color: 'var(--text-secondary)',
+                              cursor: 'pointer',
+                              transition: 'background 0.15s',
+                            }}
+                          >
+                            <Copy size={13} />
+                          </button>
                           {event.status === 'Draft' && (
                             <button
                               type="button"
@@ -1005,6 +1231,28 @@ export default function EventsListPage(): React.ReactElement {
                         <Pencil size={13} />
                         Edit
                       </Link>
+                      <button
+                        type="button"
+                        onClick={() => setDuplicateTarget(event)}
+                        title="Duplicate"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.35rem',
+                          padding: '0.4rem 0.6rem',
+                          borderRadius: '0.375rem',
+                          border: '1px solid var(--border)',
+                          background: 'var(--bg-tertiary)',
+                          color: 'var(--text-secondary)',
+                          cursor: 'pointer',
+                          fontSize: '0.8rem',
+                          fontFamily: 'var(--font-body)',
+                          transition: 'background 0.15s',
+                        }}
+                      >
+                        <Copy size={13} />
+                      </button>
                       {event.status === 'Draft' && (
                         <button
                           type="button"
@@ -1111,6 +1359,15 @@ export default function EventsListPage(): React.ReactElement {
           onConfirm={() => void handleDelete()}
           onCancel={() => setDeleteTarget(null)}
           deleting={deleting}
+        />
+      )}
+
+      {duplicateTarget && (
+        <DuplicateDialog
+          event={duplicateTarget}
+          onConfirm={(startDate, endDate) => void handleDuplicate(startDate, endDate)}
+          onCancel={() => setDuplicateTarget(null)}
+          duplicating={duplicating}
         />
       )}
 

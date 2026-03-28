@@ -20,6 +20,7 @@ import type { LayoutMode } from '../../stores/eventWizardStore';
 const GridEditor = lazy(() => import('./editors/GridEditor'));
 const CanvasEditor = lazy(() => import('./editors/CanvasEditor'));
 const PricingStep = lazy(() => import('./editors/PricingStep'));
+const ReviewStep = lazy(() => import('./editors/ReviewStep'));
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -1337,75 +1338,29 @@ export default function EventWizardPage(): React.ReactElement {
 
         {/* ── Step 4: Review ─────────────────────────────────────────────── */}
         {step === 4 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <h2
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1.15rem',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                margin: 0,
-              }}
-            >
-              Review & {isEdit ? 'Save' : 'Create'}
-            </h2>
-
-            <div
-              style={{
-                background: 'var(--bg-tertiary)',
-                border: '1px solid var(--border)',
-                borderRadius: '0.625rem',
-                padding: '1rem 1.25rem',
-              }}
-            >
-              <ReviewRow label="Title" value={watchedValues.title || '—'} />
-              <ReviewRow label="Description" value={watchedValues.description || '—'} />
-              <ReviewRow label="Category" value={watchedValues.category || '—'} />
-              <ReviewRow
-                label="Start"
-                value={
-                  watchedValues.startDate && watchedValues.startTime
-                    ? `${watchedValues.startDate} at ${watchedValues.startTime}`
-                    : '—'
-                }
-              />
-              <ReviewRow
-                label="End"
-                value={
-                  watchedValues.endDate && watchedValues.endTime
-                    ? `${watchedValues.endDate} at ${watchedValues.endTime}`
-                    : '—'
-                }
-              />
-              <ReviewRow
-                label="Venue"
-                value={
-                  selectedVenue
-                    ? `${selectedVenue.name} — ${selectedVenue.city}, ${selectedVenue.state}`
-                    : '—'
-                }
-              />
-              <ReviewRow
-                label="Layout"
-                value={
-                  watchedValues.layoutMode === 'Grid'
-                    ? 'Assigned Seating'
-                    : watchedValues.layoutMode === 'CapacityOnly'
-                    ? 'General Admission'
-                    : watchedValues.layoutMode === 'None'
-                    ? 'Tickets Only'
-                    : '—'
-                }
-              />
-              {watchedValues.layoutMode === 'CapacityOnly' && (
-                <ReviewRow label="Max Capacity" value={watchedValues.maxCapacity || '—'} />
-              )}
-              <ReviewRow label="Featured" value={watchedValues.isFeatured ? 'Yes' : 'No'} />
-              {watchedValues.bannerImageUrl && (
-                <ReviewRow label="Banner URL" value={watchedValues.bannerImageUrl} />
-              )}
-            </div>
-          </div>
+          <Suspense
+            fallback={
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem 0' }}>
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      height: '90px',
+                      borderRadius: '0.875rem',
+                      background: 'var(--bg-tertiary)',
+                      animation: 'pulse 1.5s ease-in-out infinite',
+                    }}
+                  />
+                ))}
+              </div>
+            }
+          >
+            <ReviewStep
+              eventId={id ?? null}
+              formData={formData}
+              onGoToStep={handleStepClick}
+            />
+          </Suspense>
         )}
 
         {/* ── Navigation buttons ──────────────────────────────────────────── */}
@@ -1464,29 +1419,8 @@ export default function EventWizardPage(): React.ReactElement {
               <ChevronRight size={16} />
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={() => void handleSubmit()}
-              disabled={submitting}
-              style={{
-                padding: '0.6rem 1.5rem',
-                borderRadius: '0.5rem',
-                border: 'none',
-                background: 'var(--accent-primary)',
-                color: 'var(--bg-primary)',
-                cursor: submitting ? 'not-allowed' : 'pointer',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                opacity: submitting ? 0.7 : 1,
-              }}
-            >
-              {submitting
-                ? 'Saving…'
-                : isEdit
-                ? 'Save Changes'
-                : 'Create Event'}
-            </button>
+            /* Step 4 ReviewStep renders its own Save/Publish buttons */
+            <span />
           )}
         </div>
       </div>
