@@ -364,7 +364,7 @@ export default function MyBookingsPage(): React.ReactElement {
     .reduce((sum, b) => sum + b.totalCents, 0);
 
   return (
-    <>
+    <div style={{ paddingTop: '64px' }}>
       <Helmet>
         <title>My Bookings — Code829</title>
       </Helmet>
@@ -495,6 +495,6 @@ export default function MyBookingsPage(): React.ReactElement {
           )}
         </div>
       </main>
-    </>
+    </div>
   );
 }

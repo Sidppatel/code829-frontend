@@ -346,7 +346,7 @@ function HeroSection(): React.ReactElement {
             position: 'relative',
             width: '100%',
             maxWidth: '560px',
-            marginBottom: '2rem',
+            margin: '0 auto 2rem',
             zIndex: 10,
             opacity: 0,
             animation: 'wordIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.72s forwards',

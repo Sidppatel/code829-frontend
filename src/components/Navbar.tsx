@@ -44,9 +44,9 @@ export default function Navbar(): React.ReactElement {
         right: 0,
         zIndex: 100,
         transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
-        background: scrolled ? 'var(--glass-bg)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(12px)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
+        background: 'var(--glass-bg)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         borderBottom: scrolled ? '1px solid var(--glass-border)' : '1px solid transparent',
         boxShadow: scrolled ? '0 2px 20px color-mix(in srgb, var(--text-primary) 6%, transparent)' : 'none',
       }}

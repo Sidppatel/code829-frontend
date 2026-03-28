@@ -299,7 +299,7 @@ export default function EventsPage(): React.ReactElement {
   }
 
   return (
-    <>
+    <div style={{ paddingTop: '64px' }}>
       <Helmet>
         <title>Events — Code829</title>
         <meta name="description" content="Browse and filter hundreds of events near you." />
@@ -660,6 +660,6 @@ export default function EventsPage(): React.ReactElement {
           ))
         )}
       </main>
-    </>
+    </div>
   );
 }
