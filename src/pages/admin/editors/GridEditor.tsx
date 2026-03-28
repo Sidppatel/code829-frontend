@@ -463,8 +463,11 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   const [bulkTargetRow, setBulkTargetRow] = useState(0);
 
   // Event Overrides state (FIX 6)
-  const [overridesEnabled, setOverridesEnabled] = useState(false);
-  const [overrides, setOverrides] = useState<Record<string, { priceCents: number; capacity: number }>>({});
+  const [overridesEnabled] = useState(false);
+  const [overrides] = useState<Record<string, { priceCents: number; capacity: number }>>({});
+  // Inline edit mode for table types in the palette
+  const [editingTypeId, setEditingTypeId] = useState<string | null>(null);
+  const [editingTypeData, setEditingTypeData] = useState<{ shape: TableShape; capacity: number; priceCents: number } | null>(null);
 
   const rows = gridDimensions?.rows ?? 10;
   const cols = gridDimensions?.cols ?? 10;
@@ -1013,194 +1016,164 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
           {(selectedEmptyCells.size > 0 || selectedIds.length > 0) && (
             <p style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', margin: '0 0 0.5rem', padding: '0.4rem 0.5rem', background: 'color-mix(in srgb, var(--accent-primary) 8%, transparent)', borderRadius: '0.375rem', lineHeight: 1.3 }}>
               {selectedEmptyCells.size > 0
-                ? `${selectedEmptyCells.size} empty cell${selectedEmptyCells.size > 1 ? 's' : ''} selected — click a type below to place`
+                ? `${selectedEmptyCells.size} cell${selectedEmptyCells.size > 1 ? 's' : ''} selected — click a type to place`
                 : `${selectedIds.length} table${selectedIds.length > 1 ? 's' : ''} selected — click a type to change`}
             </p>
           )}
-          {tableTypes.map((tt) => (
-            <div
-              key={tt.id}
-              draggable
-              onDragStart={() => setDraggingFromPalette(tt)}
-              onDragEnd={() => setDraggingFromPalette(null)}
-              onClick={() => handleApplyTypeToSelected(tt)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.625rem',
-                padding: '0.625rem 0.75rem',
-                borderRadius: '0.5rem',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-tertiary)',
-                cursor: (selectedEmptyCells.size > 0 || selectedIds.length > 0) ? 'pointer' : 'grab',
-                marginBottom: '0.5rem',
-                transition: 'border-color 0.15s, background 0.15s',
-                userSelect: 'none',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--accent-primary)';
-                if (selectedEmptyCells.size > 0 || selectedIds.length > 0) {
-                  e.currentTarget.style.background = 'color-mix(in srgb, var(--accent-primary) 10%, var(--bg-tertiary))';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.background = 'var(--bg-tertiary)';
-              }}
-            >
-              <div style={{ color: tt.defaultColor || 'var(--accent-primary)', flexShrink: 0 }}>
-                <ShapeIcon shape={tt.defaultShape} size={18} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {tt.name}
-                </div>
-              </div>
-              <div
-                style={{
-                  fontSize: '0.65rem',
-                  fontWeight: 700,
-                  color: 'var(--text-tertiary)',
-                  background: 'var(--bg-secondary)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '999px',
-                  padding: '1px 6px',
-                  flexShrink: 0,
-                }}
-              >
-                ×{tt.defaultCapacity}
-              </div>
-              <div
-                style={{
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  background: tt.defaultColor || 'var(--accent-primary)',
-                  flexShrink: 0,
-                }}
-              />
-            </div>
-          ))}
+          {tableTypes.map((tt) => {
+            const isEditing = editingTypeId === tt.id;
+            const hasSelection = selectedEmptyCells.size > 0 || selectedIds.length > 0;
 
-          {/* ── Event Overrides (FIX 6) ── */}
-          {tableTypes.length > 0 && (
-            <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  cursor: 'pointer',
-                  marginBottom: overridesEnabled ? '0.75rem' : 0,
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={overridesEnabled}
-                  onChange={(e) => setOverridesEnabled(e.target.checked)}
-                  style={{ accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
-                />
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    color: 'var(--text-secondary)',
-                  }}
-                >
-                  Customize for this event
-                </span>
-              </label>
-
-              {overridesEnabled && tableTypes.map((tt) => (
+            if (isEditing) {
+              return (
                 <div
                   key={tt.id}
                   style={{
-                    background: 'var(--bg-tertiary)',
-                    border: '1px solid var(--border)',
+                    padding: '0.75rem',
                     borderRadius: '0.5rem',
-                    padding: '0.625rem 0.75rem',
+                    border: '2px solid var(--accent-primary)',
+                    background: 'color-mix(in srgb, var(--accent-primary) 5%, var(--bg-tertiary))',
                     marginBottom: '0.5rem',
                   }}
                 >
-                  <div
-                    style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      color: 'var(--text-primary)',
-                      marginBottom: '0.5rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.375rem',
-                    }}
-                  >
-                    <div style={{ color: tt.defaultColor || 'var(--accent-primary)' }}>
-                      <ShapeIcon shape={tt.defaultShape} size={12} />
-                    </div>
-                    {tt.name}
+                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Edit Type
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.375rem' }}>
-                    <div>
-                      <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.2rem', textTransform: 'uppercase' }}>Price ($)</div>
-                      <input
-                        type="number"
-                        min={0}
-                        step={0.01}
-                        placeholder={String(tt.defaultPriceCents / 100)}
-                        value={overrides[tt.id]?.priceCents !== undefined ? overrides[tt.id].priceCents / 100 : ''}
-                        onChange={(e) => {
-                          const cents = Math.round(Number(e.target.value) * 100);
-                          setOverrides((prev) => ({
-                            ...prev,
-                            [tt.id]: { capacity: prev[tt.id]?.capacity ?? tt.defaultCapacity, priceCents: cents },
-                          }));
-                        }}
+                  {/* Shape selector */}
+                  <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.5rem' }}>
+                    {(['Round', 'Rectangle', 'Square', 'Cocktail'] as const).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setEditingTypeData((p) => p ? { ...p, shape: s } : p)}
                         style={{
-                          width: '100%',
-                          padding: '0.3rem 0.4rem',
-                          borderRadius: '0.25rem',
-                          border: '1px solid var(--border)',
-                          background: 'var(--bg-secondary)',
-                          color: 'var(--text-primary)',
-                          fontFamily: 'var(--font-body)',
-                          fontSize: '0.75rem',
-                          outline: 'none',
-                          boxSizing: 'border-box',
+                          flex: 1,
+                          padding: '0.35rem',
+                          borderRadius: '0.375rem',
+                          border: `1px solid ${editingTypeData?.shape === s ? 'var(--accent-primary)' : 'var(--border)'}`,
+                          background: editingTypeData?.shape === s ? 'color-mix(in srgb, var(--accent-primary) 12%, transparent)' : 'var(--bg-secondary)',
+                          color: editingTypeData?.shape === s ? 'var(--accent-primary)' : 'var(--text-tertiary)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                         }}
-                      />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.2rem', textTransform: 'uppercase' }}>Cap</div>
-                      <input
-                        type="number"
-                        min={1}
-                        placeholder={String(tt.defaultCapacity)}
-                        value={overrides[tt.id]?.capacity !== undefined ? overrides[tt.id].capacity : ''}
-                        onChange={(e) => {
-                          const cap = Math.max(1, Number(e.target.value));
-                          setOverrides((prev) => ({
-                            ...prev,
-                            [tt.id]: { priceCents: prev[tt.id]?.priceCents ?? tt.defaultPriceCents, capacity: cap },
-                          }));
-                        }}
-                        style={{
-                          width: '100%',
-                          padding: '0.3rem 0.4rem',
-                          borderRadius: '0.25rem',
-                          border: '1px solid var(--border)',
-                          background: 'var(--bg-secondary)',
-                          color: 'var(--text-primary)',
-                          fontFamily: 'var(--font-body)',
-                          fontSize: '0.75rem',
-                          outline: 'none',
-                          boxSizing: 'border-box',
-                        }}
-                      />
-                    </div>
+                      >
+                        <ShapeIcon shape={s} size={14} />
+                      </button>
+                    ))}
+                  </div>
+                  {/* Seats */}
+                  <div style={{ marginBottom: '0.375rem' }}>
+                    <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.15rem', textTransform: 'uppercase' }}>Seats</div>
+                    <input
+                      type="number"
+                      min={1}
+                      max={20}
+                      value={editingTypeData?.capacity ?? ''}
+                      onChange={(e) => setEditingTypeData((p) => p ? { ...p, capacity: Number(e.target.value) } : p)}
+                      style={{ width: '100%', padding: '0.35rem 0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.8rem', fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  {/* Price */}
+                  <div style={{ marginBottom: '0.5rem' }}>
+                    <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.15rem', textTransform: 'uppercase' }}>Price ($)</div>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={editingTypeData?.priceCents !== undefined ? editingTypeData.priceCents / 100 : ''}
+                      onChange={(e) => setEditingTypeData((p) => p ? { ...p, priceCents: Math.round(Number(e.target.value) * 100) } : p)}
+                      style={{ width: '100%', padding: '0.35rem 0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.8rem', fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  {/* Save / Cancel */}
+                  <div style={{ display: 'flex', gap: '0.375rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (editingTypeData) {
+                          apiClient.post('/admin/table-types', {
+                            name: tt.name,
+                            defaultCapacity: editingTypeData.capacity,
+                            defaultShape: editingTypeData.shape,
+                            defaultColor: tt.defaultColor,
+                            defaultPriceCents: editingTypeData.priceCents,
+                          }).then(() => {
+                            setTableTypes((prev) => prev.map((t) =>
+                              t.id === tt.id ? { ...t, defaultCapacity: editingTypeData.capacity, defaultShape: editingTypeData.shape, defaultPriceCents: editingTypeData.priceCents } : t
+                            ));
+                            toast.success('Type updated');
+                          }).catch(() => toast.error('Failed to update'));
+                        }
+                        setEditingTypeId(null);
+                        setEditingTypeData(null);
+                      }}
+                      style={{ flex: 1, padding: '0.35rem', borderRadius: '0.375rem', border: 'none', background: 'var(--accent-primary)', color: 'var(--bg-primary)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setEditingTypeId(null); setEditingTypeData(null); }}
+                      style={{ flex: 1, padding: '0.35rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}
+                    >
+                      Cancel
+                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              );
+            }
+
+            return (
+              <div
+                key={tt.id}
+                draggable={hasSelection ? undefined : true}
+                onDragStart={hasSelection ? undefined : () => setDraggingFromPalette(tt)}
+                onDragEnd={hasSelection ? undefined : () => setDraggingFromPalette(null)}
+                onClick={() => {
+                  if (hasSelection) {
+                    handleApplyTypeToSelected(tt);
+                  } else {
+                    setEditingTypeId(tt.id);
+                    setEditingTypeData({ shape: tt.defaultShape, capacity: tt.defaultCapacity, priceCents: tt.defaultPriceCents });
+                  }
+                }}
+                style={{
+                  padding: '0.625rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-tertiary)',
+                  cursor: 'pointer',
+                  marginBottom: '0.5rem',
+                  transition: 'border-color 0.15s, background 0.15s',
+                  userSelect: 'none',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+              >
+                {/* Row 1: Shape icon + Name */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
+                  <div style={{ color: tt.defaultColor || 'var(--accent-primary)', flexShrink: 0 }}>
+                    <ShapeIcon shape={tt.defaultShape} size={18} />
+                  </div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                    {tt.name}
+                  </div>
+                </div>
+                {/* Row 2: Seats + Price */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingLeft: '1.625rem' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                    {tt.defaultCapacity} seat{tt.defaultCapacity !== 1 ? 's' : ''}
+                  </span>
+                  <span style={{ fontSize: '0.6rem', color: 'var(--text-tertiary)' }}>·</span>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
+                    ${(tt.defaultPriceCents / 100).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
