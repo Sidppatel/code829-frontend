@@ -477,13 +477,32 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     return () => { cancelled = true; };
   }, []);
 
-  // Load layout
+  // Load layout: check Redis draft first, fall back to DB
   useEffect(() => {
     if (!eventId) return;
     let cancelled = false;
     async function load(): Promise<void> {
       setLoadingLayout(true);
       try {
+        // Check for Redis draft first
+        const draftRes = await apiClient.get(`/admin/events/${eventId}/layout/draft`);
+        if (!cancelled && draftRes.data.source === 'redis' && draftRes.data.data) {
+          const draft = draftRes.data.data;
+          // Reconstruct the layout response shape for loadFromApi
+          loadFromApi({
+            eventId,
+            editorMode: draft.editorMode,
+            gridRows: draft.gridRows,
+            gridCols: draft.gridCols,
+            tables: draft.tables.map((t: Record<string, unknown>) => ({
+              ...t, tableTypeName: (t.tableTypeName as string) ?? null,
+            })),
+          });
+          setRowsInput(draft.gridRows ?? 10);
+          setColsInput(draft.gridCols ?? 10);
+          return;
+        }
+        // Fall back to DB
         const res = await apiClient.get(`/admin/events/${eventId}/layout`);
         if (!cancelled) {
           loadFromApi(res.data);
@@ -491,7 +510,6 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
           setColsInput(res.data.gridCols ?? 10);
         }
       } catch {
-        // Layout may not exist yet — set defaults
         if (!cancelled) {
           setGridDimensions(10, 10);
         }
@@ -776,44 +794,67 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     toast.success('Tables auto-labeled');
   }, [allElements, updateElement]);
 
+  function buildLayoutPayload(): { editorMode: string; gridRows: number; gridCols: number; tables: Record<string, unknown>[] } {
+    return {
+      editorMode: 'grid',
+      gridRows: rows,
+      gridCols: cols,
+      tables: elementOrder.map((id, idx) => {
+        const el = elements[id];
+        return {
+          id: el.id, label: el.label, capacity: el.capacity, shape: el.shape,
+          color: el.color, section: el.section, priceType: el.priceType,
+          priceCents: el.priceOverrideCents ?? el.priceCents, isActive: el.isActive,
+          gridRow: el.gridRow, gridCol: el.gridCol, posX: el.posX, posY: el.posY,
+          width: el.width, height: el.height, rotation: el.rotation,
+          sortOrder: idx, tableTypeId: el.tableTypeId,
+        };
+      }),
+    };
+  }
+
+  // Auto-save to Redis (instant draft, no DB write)
   async function performAutoSave(): Promise<void> {
     setSaveStatus('saving');
     try {
-      const tables = elementOrder.map((id, idx) => {
-        const el = elements[id];
-        return {
-          id: el.id,
-          label: el.label,
-          capacity: el.capacity,
-          shape: el.shape,
-          color: el.color,
-          section: el.section,
-          priceType: el.priceType,
-          priceCents: el.priceOverrideCents ?? el.priceCents,
-          isActive: el.isActive,
-          gridRow: el.gridRow,
-          gridCol: el.gridCol,
-          posX: el.posX,
-          posY: el.posY,
-          width: el.width,
-          height: el.height,
-          rotation: el.rotation,
-          sortOrder: idx,
-          tableTypeId: el.tableTypeId,
-        };
-      });
-      await apiClient.post(`/admin/events/${eventId}/layout`, {
-        editorMode: 'grid',
-        gridRows: rows,
-        gridCols: cols,
-        tables,
-      });
-      markClean();
+      await apiClient.post(`/admin/events/${eventId}/layout/draft`, buildLayoutPayload());
       setSaveStatus('saved');
     } catch {
       setSaveStatus('idle');
     }
   }
+
+  // Flush Redis draft to DB (called on page leave)
+  async function flushToDb(): Promise<void> {
+    try {
+      await apiClient.post(`/admin/events/${eventId}/layout/flush`);
+    } catch {
+      // Silently fail — best effort
+    }
+  }
+
+  // Flush to DB when navigating away
+  useEffect(() => {
+    function handleBeforeUnload(): void {
+      // Use sendBeacon for reliable flush on tab close
+      const token = localStorage.getItem('auth_token');
+      if (token && isDirty) {
+        navigator.sendBeacon(
+          `${apiClient.defaults.baseURL}/admin/events/${eventId}/layout/flush`,
+          new Blob([JSON.stringify({})], { type: 'application/json' })
+        );
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Also flush when component unmounts (React navigation)
+      if (isDirty) {
+        void flushToDb();
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDirty, eventId]);
 
   // Bulk Insert
   function handleBulkInsert(): void {
@@ -900,39 +941,12 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   async function handleSave(): Promise<void> {
     setSaving(true);
     try {
-      const tables = elementOrder.map((id, idx) => {
-        const el = elements[id];
-        return {
-          id: el.id,
-          label: el.label,
-          capacity: el.capacity,
-          shape: el.shape,
-          color: el.color,
-          section: el.section,
-          priceType: el.priceType,
-          priceCents: el.priceOverrideCents ?? el.priceCents,
-          isActive: el.isActive,
-          gridRow: el.gridRow,
-          gridCol: el.gridCol,
-          posX: el.posX,
-          posY: el.posY,
-          width: el.width,
-          height: el.height,
-          rotation: el.rotation,
-          sortOrder: idx,
-          tableTypeId: el.tableTypeId,
-        };
-      });
-
-      await apiClient.post(`/admin/events/${eventId}/layout`, {
-        editorMode: 'grid',
-        gridRows: rows,
-        gridCols: cols,
-        tables,
-      });
-
+      // Save draft to Redis first, then flush to DB
+      await apiClient.post(`/admin/events/${eventId}/layout/draft`, buildLayoutPayload());
+      await apiClient.post(`/admin/events/${eventId}/layout/flush`);
       markClean();
-      toast.success('Layout saved');
+      setSaveStatus('saved');
+      toast.success('Layout saved to database');
     } catch {
       toast.error('Failed to save layout');
     } finally {
