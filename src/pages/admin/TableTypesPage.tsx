@@ -7,6 +7,17 @@ import type { TableShape } from '../../stores/floorPlanStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+// API returns defaultShape, we map it to shape for convenience
+interface ApiTableType {
+  id: string;
+  name: string;
+  defaultShape: string;
+  defaultCapacity: number;
+  defaultPriceCents: number;
+  defaultColor: string;
+  isActive: boolean;
+}
+
 interface TableType {
   id: string;
   name: string;
@@ -15,6 +26,18 @@ interface TableType {
   defaultPriceCents: number;
   defaultColor: string;
   isActive: boolean;
+}
+
+function mapApiToTableType(api: ApiTableType): TableType {
+  return {
+    id: api.id,
+    name: api.name,
+    shape: (api.defaultShape as TableShape) || 'Round',
+    defaultCapacity: api.defaultCapacity,
+    defaultPriceCents: api.defaultPriceCents,
+    defaultColor: api.defaultColor || '',
+    isActive: api.isActive,
+  };
 }
 
 interface TableTypeFormData {
@@ -35,17 +58,18 @@ const EMPTY_FORM: TableTypeFormData = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function ShapeIcon({ shape, size = 16 }: { shape: TableShape; size?: number }): React.ReactElement {
+function ShapeIcon({ shape, size = 16, fill }: { shape: TableShape; size?: number; fill?: string }): React.ReactElement {
+  const props = fill ? { size, fill, strokeWidth: 1.5 } : { size };
   switch (shape) {
     case 'Round':
-      return <Circle size={size} />;
+      return <Circle {...props} />;
     case 'Rectangle':
-      return <RectangleHorizontal size={size} />;
+      return <RectangleHorizontal {...props} />;
     case 'Cocktail':
-      return <Diamond size={size} />;
+      return <Diamond {...props} />;
     case 'Square':
     default:
-      return <Square size={size} />;
+      return <Square {...props} />;
   }
 }
 
@@ -162,31 +186,21 @@ function InlineForm({ initial = EMPTY_FORM, onSave, onCancel, saving }: InlineFo
           />
         </div>
 
-        {/* Default Color */}
+        {/* Fill Color */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
           <label style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Default Color
+            Fill Color
           </label>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <input
-              type="text"
-              value={form.defaultColor}
+              type="color"
+              value={form.defaultColor || '#4f46e5'}
               onChange={(e) => setField('defaultColor', e.target.value)}
-              placeholder="e.g. var(--accent-primary)"
-              style={{ ...inputStyle, flex: 1 }}
+              style={{ width: '40px', height: '36px', border: '1px solid var(--border)', borderRadius: '0.375rem', cursor: 'pointer', padding: '2px' }}
             />
-            {form.defaultColor && (
-              <div
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '50%',
-                  background: form.defaultColor,
-                  border: '1px solid var(--border)',
-                  flexShrink: 0,
-                }}
-              />
-            )}
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+              {form.defaultColor || '#4f46e5'}
+            </span>
           </div>
         </div>
       </div>
@@ -226,7 +240,7 @@ function InlineForm({ initial = EMPTY_FORM, onSave, onCancel, saving }: InlineFo
                 onChange={() => setField('shape', s)}
                 style={{ display: 'none' }}
               />
-              <ShapeIcon shape={s} size={13} />
+              <ShapeIcon shape={s} size={15} fill={form.shape === s ? (form.defaultColor || undefined) : undefined} />
               {s}
             </label>
           ))}
@@ -309,8 +323,8 @@ export default function TableTypesPage(): React.ReactElement {
 
   const loadTableTypes = useCallback(async (): Promise<void> => {
     try {
-      const res = await apiClient.get<TableType[]>('/admin/table-types');
-      setTableTypes(res.data);
+      const res = await apiClient.get<ApiTableType[]>('/admin/table-types');
+      setTableTypes(res.data.map(mapApiToTableType));
     } catch {
       toast.error('Failed to load table types');
     } finally {
@@ -585,13 +599,8 @@ export default function TableTypesPage(): React.ReactElement {
                             color: tt.defaultColor || 'var(--accent-primary)',
                           }}
                         >
-                          <ShapeIcon shape={tt.shape} size={15} />
-                          <span
-                            style={{
-                              fontSize: '0.8125rem',
-                              color: 'var(--text-secondary)',
-                            }}
-                          >
+                          <ShapeIcon shape={tt.shape} size={18} fill={tt.defaultColor || undefined} />
+                          <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
                             {tt.shape}
                           </span>
                         </div>
