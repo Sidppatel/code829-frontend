@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Sun, Moon, Monitor, User, LogIn, LogOut } from 'lucide-react';
+import { Sun, Moon, Monitor, User, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { useThemeStore, type Theme } from '../stores/themeStore';
 
@@ -13,6 +13,8 @@ const NAV_LINKS: NavLink[] = [
   { label: 'Events', to: '/events' },
   { label: 'My Bookings', to: '/me/bookings' },
 ];
+
+const ADMIN_ROLES = new Set(['Admin', 'Developer', 'Staff']);
 
 const THEME_OPTIONS: { value: Theme; Icon: React.ComponentType<{ size: number }> }[] = [
   { value: 'light', Icon: Sun },
@@ -104,6 +106,28 @@ export default function Navbar(): React.ReactElement {
               </Link>
             );
           })}
+          {/* Admin link — only for admin/developer/staff roles */}
+          {isAuthenticated && user && ADMIN_ROLES.has(user.role) && (
+            <Link
+              to="/admin"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                padding: '0.35rem 0.85rem',
+                borderRadius: '999px',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                color: 'var(--accent-cta)',
+                textDecoration: 'none',
+                background: 'color-mix(in srgb, var(--accent-cta) 10%, transparent)',
+                transition: 'background 0.2s, color 0.2s',
+              }}
+            >
+              <LayoutDashboard size={14} />
+              Admin
+            </Link>
+          )}
         </div>
 
         {/* Theme toggle */}

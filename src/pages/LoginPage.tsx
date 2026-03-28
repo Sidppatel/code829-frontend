@@ -21,35 +21,35 @@ const DEV_PRESETS: DevPreset[] = [
     label: "Developer",
     description: "Full dev access",
     email: "developer@code829.local",
-    redirectTo: "/",
+    redirectTo: "/admin",
   },
   {
     label: "Admin",
     description: "Full platform access",
     email: "admin@code829.local",
-    redirectTo: "/",
+    redirectTo: "/admin",
   },
   {
     label: "Staff",
     description: "Event management",
     email: "staff@code829.local",
-    redirectTo: "/",
+    redirectTo: "/admin",
   },
   {
     label: "User",
     description: "Browse & book events",
     email: "user@code829.local",
-    redirectTo: "/",
+    redirectTo: "/events",
   },
 ];
 
 const ROLE_REDIRECTS: Partial<Record<UserRole, string>> = {
-  admin: "/",
-  organizer: "/",
-  staff: "/",
-  developer: "/",
-  attendee: "/",
-  guest: "/",
+  admin: "/admin",
+  organizer: "/admin",
+  staff: "/admin",
+  developer: "/admin",
+  attendee: "/events",
+  guest: "/events",
 };
 
 // ---------------------------------------------------------------------------
