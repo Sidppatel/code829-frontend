@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
@@ -9,6 +9,11 @@ const EventsPage = React.lazy(() => import('./pages/EventsPage'));
 const EventDetailPage = React.lazy(() => import('./pages/EventDetailPage'));
 const MyBookingsPage = React.lazy(() => import('./pages/MyBookingsPage'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage'));
+
+const AdminLayout = React.lazy(() => import('./layouts/AdminLayout'));
+const AdminDashboardPage = React.lazy(() => import('./pages/admin/AdminDashboardPage'));
+const VenuesPage = React.lazy(() => import('./pages/admin/VenuesPage'));
+const VenueFormPage = React.lazy(() => import('./pages/admin/VenueFormPage'));
 
 function PageLoader(): React.ReactElement {
   return (
@@ -36,38 +41,59 @@ function PageLoader(): React.ReactElement {
   );
 }
 
+function AppRoutes(): React.ReactElement {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
+
+  return (
+    <>
+      {/* Noise grain overlay */}
+      <div className="noise-overlay" aria-hidden="true" />
+
+      {/* Public navbar hidden on admin pages (AdminLayout has its own nav) */}
+      {!isAdmin && <Navbar />}
+
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
+          <Route path="/me/bookings" element={<MyBookingsPage />} />
+          <Route path="/auth/login" element={<LoginPage />} />
+
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="venues" element={<VenuesPage />} />
+            <Route path="venues/new" element={<VenueFormPage />} />
+            <Route path="venues/:id/edit" element={<VenueFormPage />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border)',
+            borderRadius: '0.75rem',
+            fontFamily: 'var(--font-body)',
+          },
+        }}
+      />
+    </>
+  );
+}
+
 export default function App(): React.ReactElement {
   return (
     <HelmetProvider>
       <BrowserRouter>
-        {/* Noise grain overlay */}
-        <div className="noise-overlay" aria-hidden="true" />
-
-        <Navbar />
-
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/events/:id" element={<EventDetailPage />} />
-            <Route path="/me/bookings" element={<MyBookingsPage />} />
-            <Route path="/auth/login" element={<LoginPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: 'var(--bg-secondary)',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border)',
-              borderRadius: '0.75rem',
-              fontFamily: 'var(--font-body)',
-            },
-          }}
-        />
+        <AppRoutes />
       </BrowserRouter>
     </HelmetProvider>
   );
