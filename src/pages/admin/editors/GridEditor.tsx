@@ -449,6 +449,11 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   const [selectedEmptyCells, setSelectedEmptyCells] = useState<Set<string>>(new Set());
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  // Rubber-band / marquee selection state
+  const [marquee, setMarquee] = useState<{ startX: number; startY: number; currX: number; currY: number } | null>(null);
+  const marqueeRef = useRef<{ startX: number; startY: number } | null>(null);
 
   // Bulk Insert state
   const [showBulkInsert, setShowBulkInsert] = useState(false);
@@ -593,6 +598,8 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
 
   function handleSelectEmptyCell(row: number, col: number, evt: React.MouseEvent): void {
     evt.stopPropagation();
+    // Don't fire if we just finished a marquee drag
+    if (marqueeRef.current) return;
     clearSelection(); // clear occupied selection when selecting empty
     const key = `${row}-${col}`;
     setSelectedEmptyCells((prev) => {
@@ -604,6 +611,97 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
       }
       return next;
     });
+  }
+
+  // ── Marquee (rubber-band) selection ──────────────────────────────────────
+  function handleMarqueeStart(e: React.MouseEvent<HTMLDivElement>): void {
+    // Start marquee from anywhere in the grid (cells or background)
+    if (e.button !== 0) return; // left click only
+    const rect = gridRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = e.clientX - rect.left + (gridRef.current?.scrollLeft ?? 0);
+    const y = e.clientY - rect.top + (gridRef.current?.scrollTop ?? 0);
+    marqueeRef.current = { startX: x, startY: y };
+    setMarquee({ startX: x, startY: y, currX: x, currY: y });
+    // Clear previous selections unless shift is held
+    if (!e.shiftKey) {
+      clearSelection();
+      setSelectedEmptyCells(new Set());
+    }
+  }
+
+  function handleMarqueeMove(e: React.MouseEvent<HTMLDivElement>): void {
+    if (!marqueeRef.current || !gridRef.current) return;
+    const rect = gridRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left + gridRef.current.scrollLeft;
+    const y = e.clientY - rect.top + gridRef.current.scrollTop;
+    setMarquee({ startX: marqueeRef.current.startX, startY: marqueeRef.current.startY, currX: x, currY: y });
+  }
+
+  function handleMarqueeEnd(): void {
+    if (!marquee || !gridRef.current) {
+      marqueeRef.current = null;
+      setMarquee(null);
+      return;
+    }
+
+    // If the drag distance is tiny (< 5px), it was a click not a drag — ignore
+    const dx = Math.abs(marquee.currX - marquee.startX);
+    const dy = Math.abs(marquee.currY - marquee.startY);
+    if (dx < 5 && dy < 5) {
+      marqueeRef.current = null;
+      setMarquee(null);
+      return;
+    }
+
+    // Calculate the selection rectangle in grid coordinates
+    // Grid layout: 28px row header + (64px cell + 2px gap) per col, 20px col header + (64px cell + 2px gap) per row
+    const cellSize = 64;
+    const gap = 2;
+    const headerW = 28;
+    const headerH = 20;
+
+    const left = Math.min(marquee.startX, marquee.currX);
+    const right = Math.max(marquee.startX, marquee.currX);
+    const top = Math.min(marquee.startY, marquee.currY);
+    const bottom = Math.max(marquee.startY, marquee.currY);
+
+    const newEmpty = new Set(selectedEmptyCells);
+    const newOccupied: string[] = [...selectedIds];
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        // Cell position in the grid
+        const cellLeft = headerW + c * (cellSize + gap);
+        const cellTop = headerH + r * (cellSize + gap);
+        const cellRight = cellLeft + cellSize;
+        const cellBottom = cellTop + cellSize;
+
+        // Check overlap with marquee rectangle
+        if (cellRight > left && cellLeft < right && cellBottom > top && cellTop < bottom) {
+          const key = `${r}-${c}`;
+          const occupantId = occupancyMap.get(key);
+          if (occupantId) {
+            if (!newOccupied.includes(occupantId)) newOccupied.push(occupantId);
+          } else {
+            newEmpty.add(key);
+          }
+        }
+      }
+    }
+
+    // If we selected any occupied cells, put those in the editor store
+    if (newOccupied.length > 0 && newEmpty.size === 0) {
+      useEditorStore.setState({ selectedIds: newOccupied });
+      setSelectedEmptyCells(new Set());
+    } else if (newEmpty.size > 0) {
+      // Prefer empty cell selection
+      clearSelection();
+      setSelectedEmptyCells(newEmpty);
+    }
+
+    marqueeRef.current = null;
+    setMarquee(null);
   }
 
   // Apply a table type to all selected empty cells
@@ -1374,8 +1472,32 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
           </div>
         )}
 
-        {/* Grid */}
-        <div style={{ flex: 1, overflow: 'auto', padding: '1rem' }}>
+        {/* Grid with marquee selection */}
+        <div
+          ref={gridRef}
+          style={{ flex: 1, overflow: 'auto', padding: '1rem', position: 'relative', userSelect: 'none' }}
+          onMouseDown={handleMarqueeStart}
+          onMouseMove={handleMarqueeMove}
+          onMouseUp={handleMarqueeEnd}
+          onMouseLeave={handleMarqueeEnd}
+        >
+          {/* Marquee overlay */}
+          {marquee && (
+            <div
+              style={{
+                position: 'absolute',
+                left: Math.min(marquee.startX, marquee.currX),
+                top: Math.min(marquee.startY, marquee.currY),
+                width: Math.abs(marquee.currX - marquee.startX),
+                height: Math.abs(marquee.currY - marquee.startY),
+                background: 'color-mix(in srgb, var(--accent-primary) 12%, transparent)',
+                border: '1px solid var(--accent-primary)',
+                borderRadius: '2px',
+                pointerEvents: 'none',
+                zIndex: 10,
+              }}
+            />
+          )}
           <div
             style={{
               display: 'inline-grid',
@@ -1433,6 +1555,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                   return (
                     <div
                       key={`cell-${r}-${c}`}
+                      data-cell="true"
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={(e) => {
                         e.stopPropagation();
