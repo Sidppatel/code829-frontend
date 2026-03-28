@@ -95,9 +95,9 @@ function TableCell({ element, isSelected, onSelect, onContextMenu, onDragStart }
         transition: 'border-color 0.15s, background 0.15s',
       }}
     >
-      {/* Shape icon with element color */}
+      {/* Shape icon filled with element color */}
       <div style={{ color: baseColor }}>
-        <ShapeIcon shape={element.shape} size={20} />
+        <ShapeIcon shape={element.shape} size={20} fill={baseColor} />
       </div>
       <span
         style={{
@@ -224,7 +224,7 @@ function PropertiesPanel({ element, onUpdate, onDelete }: PropsPanelProps): Reac
                 gap: '0.25rem',
               }}
             >
-              <ShapeIcon shape={s} size={12} />
+              <ShapeIcon shape={s} size={12} fill={element.shape === s ? (element.color || undefined) : undefined} />
               {s}
             </button>
           ))}
