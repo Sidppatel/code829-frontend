@@ -245,29 +245,18 @@ function PropertiesPanel({ element, onUpdate, onDelete }: PropsPanelProps): Reac
       </FieldRow>
 
       {/* Color */}
-      <FieldRow label="Color">
+      <FieldRow label="Fill Color">
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <input
-            type="text"
-            placeholder="#4f46e5"
-            value={localColor}
-            onChange={(e) => setLocalColor(e.target.value)}
+            type="color"
+            value={localColor || '#4f46e5'}
+            onChange={(e) => { setLocalColor(e.target.value); }}
             onBlur={commitColor}
-            onKeyDown={(e) => e.key === 'Enter' && commitColor()}
-            style={{ ...inputStyle, flex: 1 }}
+            style={{ width: '36px', height: '30px', border: '1px solid var(--border)', borderRadius: '0.375rem', cursor: 'pointer', padding: '2px', flexShrink: 0 }}
           />
-          {localColor && (
-            <div
-              style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                background: localColor,
-                border: '1px solid var(--border)',
-                flexShrink: 0,
-              }}
-            />
-          )}
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+            {localColor || '#4f46e5'}
+          </span>
         </div>
       </FieldRow>
 
