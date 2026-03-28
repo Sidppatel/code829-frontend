@@ -35,17 +35,18 @@ function colLabel(col: number): string {
   return label;
 }
 
-function ShapeIcon({ shape, size = 16 }: { shape: TableShape; size?: number }): React.ReactElement {
+function ShapeIcon({ shape, size = 16, fill }: { shape: TableShape; size?: number; fill?: string }): React.ReactElement {
+  const props = fill ? { size, fill, strokeWidth: 1.5 } : { size };
   switch (shape) {
     case 'Round':
-      return <Circle size={size} />;
+      return <Circle {...props} />;
     case 'Rectangle':
-      return <RectangleHorizontal size={size} />;
+      return <RectangleHorizontal {...props} />;
     case 'Cocktail':
-      return <Diamond size={size} />;
+      return <Diamond {...props} />;
     case 'Square':
     default:
-      return <Square size={size} />;
+      return <Square {...props} />;
   }
 }
 
@@ -467,7 +468,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   const [overrides] = useState<Record<string, { priceCents: number; capacity: number }>>({});
   // Inline edit mode for table types in the palette
   const [editingTypeId, setEditingTypeId] = useState<string | null>(null);
-  const [editingTypeData, setEditingTypeData] = useState<{ shape: TableShape; capacity: number; priceCents: number } | null>(null);
+  const [editingTypeData, setEditingTypeData] = useState<{ name: string; shape: TableShape; capacity: number; priceCents: number; color: string } | null>(null);
 
   const rows = gridDimensions?.rows ?? 10;
   const cols = gridDimensions?.cols ?? 10;
@@ -1039,69 +1040,108 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                   <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     Edit Type
                   </div>
-                  {/* Shape selector */}
-                  <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.5rem' }}>
-                    {(['Round', 'Rectangle', 'Square', 'Cocktail'] as const).map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setEditingTypeData((p) => p ? { ...p, shape: s } : p)}
-                        style={{
-                          flex: 1,
-                          padding: '0.35rem',
-                          borderRadius: '0.375rem',
-                          border: `1px solid ${editingTypeData?.shape === s ? 'var(--accent-primary)' : 'var(--border)'}`,
-                          background: editingTypeData?.shape === s ? 'color-mix(in srgb, var(--accent-primary) 12%, transparent)' : 'var(--bg-secondary)',
-                          color: editingTypeData?.shape === s ? 'var(--accent-primary)' : 'var(--text-tertiary)',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <ShapeIcon shape={s} size={14} />
-                      </button>
-                    ))}
-                  </div>
-                  {/* Seats */}
+                  {/* Name */}
                   <div style={{ marginBottom: '0.375rem' }}>
-                    <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.15rem', textTransform: 'uppercase' }}>Seats</div>
+                    <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.15rem', textTransform: 'uppercase' }}>Name</div>
                     <input
-                      type="number"
-                      min={1}
-                      max={20}
-                      value={editingTypeData?.capacity ?? ''}
-                      onChange={(e) => setEditingTypeData((p) => p ? { ...p, capacity: Number(e.target.value) } : p)}
+                      type="text"
+                      value={editingTypeData?.name ?? ''}
+                      onChange={(e) => setEditingTypeData((p) => p ? { ...p, name: e.target.value } : p)}
                       style={{ width: '100%', padding: '0.35rem 0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.8rem', fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box' }}
                     />
+                    {editingTypeData?.name && tableTypes.some((t) => t.id !== tt.id && t.name.toLowerCase() === editingTypeData.name.toLowerCase()) && (
+                      <div style={{ fontSize: '0.65rem', color: 'var(--color-error)', marginTop: '0.15rem' }}>A type with this name already exists</div>
+                    )}
                   </div>
-                  {/* Price */}
-                  <div style={{ marginBottom: '0.5rem' }}>
-                    <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.15rem', textTransform: 'uppercase' }}>Price ($)</div>
-                    <input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      value={editingTypeData?.priceCents !== undefined ? editingTypeData.priceCents / 100 : ''}
-                      onChange={(e) => setEditingTypeData((p) => p ? { ...p, priceCents: Math.round(Number(e.target.value) * 100) } : p)}
-                      style={{ width: '100%', padding: '0.35rem 0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.8rem', fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box' }}
-                    />
+                  {/* Shape selector — filled icons */}
+                  <div style={{ marginBottom: '0.375rem' }}>
+                    <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.15rem', textTransform: 'uppercase' }}>Shape</div>
+                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                      {(['Round', 'Rectangle', 'Square', 'Cocktail'] as const).map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setEditingTypeData((p) => p ? { ...p, shape: s } : p)}
+                          style={{
+                            flex: 1,
+                            padding: '0.4rem',
+                            borderRadius: '0.375rem',
+                            border: `1.5px solid ${editingTypeData?.shape === s ? 'var(--accent-primary)' : 'var(--border)'}`,
+                            background: editingTypeData?.shape === s ? 'color-mix(in srgb, var(--accent-primary) 12%, transparent)' : 'var(--bg-secondary)',
+                            color: editingTypeData?.shape === s ? (editingTypeData.color || 'var(--accent-primary)') : 'var(--text-tertiary)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <ShapeIcon shape={s} size={16} fill={editingTypeData?.shape === s ? (editingTypeData.color || undefined) : undefined} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Fill Color */}
+                  <div style={{ marginBottom: '0.375rem' }}>
+                    <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.15rem', textTransform: 'uppercase' }}>Fill Color</div>
+                    <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+                      <input
+                        type="color"
+                        value={editingTypeData?.color || '#4f46e5'}
+                        onChange={(e) => setEditingTypeData((p) => p ? { ...p, color: e.target.value } : p)}
+                        style={{ width: '32px', height: '28px', border: '1px solid var(--border)', borderRadius: '0.25rem', cursor: 'pointer', padding: 0 }}
+                      />
+                      <input
+                        type="text"
+                        value={editingTypeData?.color ?? ''}
+                        onChange={(e) => setEditingTypeData((p) => p ? { ...p, color: e.target.value } : p)}
+                        placeholder="#4f46e5"
+                        style={{ flex: 1, padding: '0.35rem 0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.75rem', fontFamily: 'var(--font-mono)', outline: 'none', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                  </div>
+                  {/* Seats + Price side by side */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.375rem', marginBottom: '0.5rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.15rem', textTransform: 'uppercase' }}>Seats</div>
+                      <input
+                        type="number"
+                        min={1}
+                        max={20}
+                        value={editingTypeData?.capacity ?? ''}
+                        onChange={(e) => setEditingTypeData((p) => p ? { ...p, capacity: Number(e.target.value) } : p)}
+                        style={{ width: '100%', padding: '0.35rem 0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.8rem', fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.15rem', textTransform: 'uppercase' }}>Price ($)</div>
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        value={editingTypeData?.priceCents !== undefined ? editingTypeData.priceCents / 100 : ''}
+                        onChange={(e) => setEditingTypeData((p) => p ? { ...p, priceCents: Math.round(Number(e.target.value) * 100) } : p)}
+                        style={{ width: '100%', padding: '0.35rem 0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.8rem', fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box' }}
+                      />
+                    </div>
                   </div>
                   {/* Save / Cancel */}
                   <div style={{ display: 'flex', gap: '0.375rem' }}>
                     <button
                       type="button"
+                      disabled={!editingTypeData?.name || tableTypes.some((t) => t.id !== tt.id && t.name.toLowerCase() === (editingTypeData?.name ?? '').toLowerCase())}
                       onClick={() => {
                         if (editingTypeData) {
+                          const isDuplicate = tableTypes.some((t) => t.id !== tt.id && t.name.toLowerCase() === editingTypeData.name.toLowerCase());
+                          if (isDuplicate) { toast.error('A type with this name already exists'); return; }
                           apiClient.post('/admin/table-types', {
-                            name: tt.name,
+                            name: editingTypeData.name,
                             defaultCapacity: editingTypeData.capacity,
                             defaultShape: editingTypeData.shape,
-                            defaultColor: tt.defaultColor,
+                            defaultColor: editingTypeData.color,
                             defaultPriceCents: editingTypeData.priceCents,
                           }).then(() => {
                             setTableTypes((prev) => prev.map((t) =>
-                              t.id === tt.id ? { ...t, defaultCapacity: editingTypeData.capacity, defaultShape: editingTypeData.shape, defaultPriceCents: editingTypeData.priceCents } : t
+                              t.id === tt.id ? { ...t, name: editingTypeData.name, defaultCapacity: editingTypeData.capacity, defaultShape: editingTypeData.shape, defaultColor: editingTypeData.color, defaultPriceCents: editingTypeData.priceCents } : t
                             ));
                             toast.success('Type updated');
                           }).catch(() => toast.error('Failed to update'));
@@ -1136,7 +1176,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                     handleApplyTypeToSelected(tt);
                   } else {
                     setEditingTypeId(tt.id);
-                    setEditingTypeData({ shape: tt.defaultShape, capacity: tt.defaultCapacity, priceCents: tt.defaultPriceCents });
+                    setEditingTypeData({ name: tt.name, shape: tt.defaultShape, capacity: tt.defaultCapacity, priceCents: tt.defaultPriceCents, color: tt.defaultColor || '' });
                   }
                 }}
                 style={{
@@ -1155,7 +1195,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                 {/* Row 1: Shape icon + Name */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
                   <div style={{ color: tt.defaultColor || 'var(--accent-primary)', flexShrink: 0 }}>
-                    <ShapeIcon shape={tt.defaultShape} size={18} />
+                    <ShapeIcon shape={tt.defaultShape} size={18} fill={tt.defaultColor || undefined} />
                   </div>
                   <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
                     {tt.name}
