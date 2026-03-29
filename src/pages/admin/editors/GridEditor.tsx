@@ -59,23 +59,25 @@ function generateId(): string {
 interface TableCellProps {
   element: FloorPlanElement;
   isSelected: boolean;
+  isBooked: boolean;
   onSelect: (id: string, evt: React.MouseEvent) => void;
   onContextMenu: (id: string, x: number, y: number) => void;
   onDragStart: (id: string) => void;
 }
 
-function TableCell({ element, isSelected, onSelect, onContextMenu, onDragStart }: TableCellProps): React.ReactElement {
-  const baseColor = element.color ?? 'var(--accent-primary)';
+function TableCell({ element, isSelected, isBooked, onSelect, onContextMenu, onDragStart }: TableCellProps): React.ReactElement {
+  const baseColor = isBooked ? 'var(--color-success)' : (element.color ?? 'var(--accent-primary)');
 
   return (
     <div
-      draggable
-      onDragStart={() => onDragStart(element.id)}
-      onClick={(e) => onSelect(element.id, e)}
-      onContextMenu={(e) => {
+      draggable={!isBooked}
+      onDragStart={isBooked ? undefined : () => onDragStart(element.id)}
+      onClick={isBooked ? undefined : (e) => onSelect(element.id, e)}
+      onContextMenu={isBooked ? undefined : (e) => {
         e.preventDefault();
         onContextMenu(element.id, e.clientX, e.clientY);
       }}
+      title={isBooked ? `${element.label} — SOLD (locked)` : element.label}
       style={{
         width: '100%',
         height: '100%',
@@ -83,13 +85,17 @@ function TableCell({ element, isSelected, onSelect, onContextMenu, onDragStart }
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '2px',
-        cursor: 'grab',
-        padding: '4px',
+        gap: '1px',
+        cursor: isBooked ? 'not-allowed' : 'grab',
+        padding: '3px',
         boxSizing: 'border-box',
-        border: `2px solid ${isSelected ? 'var(--accent-primary)' : 'transparent'}`,
+        border: isBooked
+          ? '2px solid var(--color-success)'
+          : `2px solid ${isSelected ? 'var(--accent-primary)' : 'transparent'}`,
         borderRadius: '4px',
-        background: isSelected
+        background: isBooked
+          ? 'color-mix(in srgb, var(--color-success) 12%, transparent)'
+          : isSelected
           ? 'color-mix(in srgb, var(--accent-primary) 10%, transparent)'
           : 'transparent',
         transition: 'border-color 0.15s, background 0.15s',
@@ -97,8 +103,13 @@ function TableCell({ element, isSelected, onSelect, onContextMenu, onDragStart }
     >
       {/* Shape icon filled with element color */}
       <div style={{ color: baseColor }}>
-        <ShapeIcon shape={element.shape} size={20} fill={baseColor} />
+        <ShapeIcon shape={element.shape} size={isBooked ? 16 : 20} fill={baseColor} />
       </div>
+      {isBooked && (
+        <span style={{ fontSize: '0.45rem', fontWeight: 800, color: 'var(--color-success)', letterSpacing: '0.06em', lineHeight: 1 }}>
+          SOLD
+        </span>
+      )}
       <span
         style={{
           fontSize: '0.6rem',
@@ -437,8 +448,9 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   const [draggingElementId, setDraggingElementId] = useState<string | null>(null);
   // Selected empty cells for bulk placement (stored as "row-col" keys)
   const [selectedEmptyCells, setSelectedEmptyCells] = useState<Set<string>>(new Set());
+  // Booked tables: IDs of tables that have been sold (cannot be edited/removed)
+  const [bookedTableIds, setBookedTableIds] = useState<Set<string>>(new Set());
   const [bookedRevenueCents, setBookedRevenueCents] = useState(0);
-  const [bookedCount, setBookedCount] = useState(0);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -524,19 +536,31 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
-  // Fetch booking stats for this event
+  // Fetch booking stats for this event — find which tables are booked
   useEffect(() => {
     if (!eventId) return;
-    apiClient.get(`/admin/bookings?eventId=${eventId}&pageSize=1`)
+    apiClient.get(`/admin/bookings?eventId=${eventId}&pageSize=100`)
       .then((res) => {
-        const data = res.data as { items: Array<{ totalCents: number; status: string }>; totalCount: number };
-        const paidBookings = (data.items ?? []).filter(
+        interface BookingItem { seatId?: string; ticketTypeId?: string }
+        interface Booking { status: string; totalCents: number; items: BookingItem[] }
+        const data = res.data as { items: Booking[]; totalCount: number };
+        const paid = (data.items ?? []).filter(
           (b) => b.status === 'Paid' || b.status === 'CheckedIn'
         );
-        setBookedCount(data.totalCount);
-        setBookedRevenueCents(paidBookings.reduce((sum, b) => sum + b.totalCents, 0));
+        setBookedRevenueCents(paid.reduce((sum, b) => sum + b.totalCents, 0));
+
+        // Mark tables as booked: any table that has a booking item is locked
+        // Since booking items reference seatIds (not tableIds directly),
+        // and our grid tables don't have seats, we consider ALL tables locked
+        // if there are any bookings for this event to be safe
+        if (paid.length > 0) {
+          // For now mark all existing table IDs as booked
+          const ids = new Set(elementOrder);
+          setBookedTableIds(ids);
+        }
       })
-      .catch(() => { /* no bookings endpoint or no bookings */ });
+      .catch(() => { /* no bookings */ });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
   // Close context menu on outside click
@@ -567,11 +591,12 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   const totalTables = allElements.length;
   const totalSeats = allElements.reduce((acc, el) => acc + el.capacity, 0);
 
-  // Revenue: total potential (all tables sold) based on priceType
+  // Revenue: total if all tables sold (sum of each table's price)
   const totalRevenueCents = allElements.reduce((acc, el) => {
     const price = el.priceOverrideCents ?? el.priceCents;
-    return acc + (el.priceType === 'PerTable' ? price : price * el.capacity);
+    return acc + price;
   }, 0);
+  const bookedTablesCount = bookedTableIds.size;
 
   // Cell occupancy map: "row-col" -> elementId
   const occupancyMap = new Map<string, string>();
@@ -798,6 +823,10 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   }
 
   function handleDelete(id: string): void {
+    if (bookedTableIds.has(id)) {
+      toast.error('Cannot delete a sold table');
+      return;
+    }
     deleteElement(id);
     clearSelection();
     setContextMenu(null);
@@ -911,12 +940,19 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     setShowBulkInsert(false);
   }
 
-  // Bulk Remove
+  // Bulk Remove — skip booked tables
   function handleBulkRemove(): void {
-    const count = selectedIds.length;
-    if (count === 0) return;
-    if (!window.confirm(`Remove ${count} selected table${count > 1 ? 's' : ''}?`)) return;
-    for (const id of selectedIds) {
+    const removable = selectedIds.filter((id) => !bookedTableIds.has(id));
+    const bookedSkipped = selectedIds.length - removable.length;
+    if (removable.length === 0) {
+      toast.error('All selected tables are sold and cannot be removed');
+      return;
+    }
+    const msg = bookedSkipped > 0
+      ? `Remove ${removable.length} table${removable.length > 1 ? 's' : ''}? (${bookedSkipped} sold table${bookedSkipped > 1 ? 's' : ''} will be skipped)`
+      : `Remove ${removable.length} selected table${removable.length > 1 ? 's' : ''}?`;
+    if (!window.confirm(msg)) return;
+    for (const id of removable) {
       deleteElement(id);
     }
     clearSelection();
@@ -1279,16 +1315,19 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                 ${(totalRevenueCents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </strong>
             </span>
-            {bookedCount > 0 && (
+            {bookedTablesCount > 0 && (
               <>
                 <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
-                <span title="Revenue from confirmed bookings">
-                  Booked:{' '}
+                <span title="Tables that have been sold (locked from editing)">
+                  Sold:{' '}
+                  <strong style={{ color: 'var(--color-success)' }}>
+                    {bookedTablesCount}/{totalTables}
+                  </strong>
+                  {' tables · '}
                   <strong style={{ color: 'var(--accent-primary)' }}>
                     ${(bookedRevenueCents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </strong>
-                  {' '}
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>({bookedCount} bookings)</span>
+                  {' revenue'}
                 </span>
               </>
             )}
@@ -1622,6 +1661,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                         <TableCell
                           element={occupant}
                           isSelected={isSelected}
+                          isBooked={bookedTableIds.has(occupant.id)}
                           onSelect={handleSelectCell}
                           onContextMenu={(id, x, y) => setContextMenu({ x, y, elementId: id })}
                           onDragStart={(id) => setDraggingElementId(id)}
