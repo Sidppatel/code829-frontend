@@ -94,6 +94,7 @@ export default function LoginPage(): React.ReactElement {
         email: preset.email,
         name: `Dev ${preset.label}`,
         role: "developer" as UserRole,
+        hasCompletedOnboarding: true,
       });
       navigate(preset.redirectTo, { replace: true });
     } finally {

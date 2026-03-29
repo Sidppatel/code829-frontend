@@ -1,8 +1,11 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
+import { useAuthStore } from './stores/authStore';
+
+const OnboardingScreen = React.lazy(() => import('./components/OnboardingScreen'));
 
 const HomePage = React.lazy(() => import('./pages/HomePage'));
 const EventsPage = React.lazy(() => import('./pages/EventsPage'));
@@ -55,12 +58,16 @@ function PageLoader(): React.ReactElement {
 }
 
 function AppRoutes(): React.ReactElement {
-  const location = useLocation();
+  const { user, isAuthenticated } = useAuthStore();
   const isAdmin = location.pathname.startsWith('/admin') || location.pathname.startsWith('/developer');
 
   return (
     <>
-      {/* Noise grain overlay */}
+      {isAuthenticated && user && !user.hasCompletedOnboarding && (
+        <Suspense fallback={<PageLoader />}>
+          <OnboardingScreen />
+        </Suspense>
+      )}      {/* Noise grain overlay */}
       <div className="noise-overlay" aria-hidden="true" />
 
       {/* Public navbar hidden on admin/developer pages */}
