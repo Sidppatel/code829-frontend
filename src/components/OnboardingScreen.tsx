@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -6,6 +6,52 @@ import toast from 'react-hot-toast';
 import { User, MapPin, Phone, CheckCircle2, ArrowRight } from 'lucide-react';
 import apiClient from '../lib/axios';
 import { useAuthStore } from '../stores/authStore';
+
+// ─── Nominatim Types & Helpers ───────────────────────────────────────────────
+
+interface NominatimResult {
+  place_id: number;
+  display_name: string;
+  address: {
+    house_number?: string;
+    road?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+    state?: string;
+    postcode?: string;
+    country_code?: string;
+  };
+}
+
+interface ParsedAddress {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
+const STATE_ABBR: Record<string, string> = {
+  alabama: 'AL', alaska: 'AK', arizona: 'AZ', arkansas: 'AR', california: 'CA',
+  colorado: 'CO', connecticut: 'CT', delaware: 'DE', florida: 'FL', georgia: 'GA',
+  hawaii: 'HI', idaho: 'ID', illinois: 'IL', indiana: 'IN', iowa: 'IA',
+  kansas: 'KS', kentucky: 'KY', louisiana: 'LA', maine: 'ME', maryland: 'MD',
+  massachusetts: 'MA', michigan: 'MI', minnesota: 'MN', mississippi: 'MS', missouri: 'MO',
+  montana: 'MT', nebraska: 'NE', nevada: 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+  'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND',
+  ohio: 'OH', oklahoma: 'OK', oregon: 'OR', pennsylvania: 'PA', 'rhode island': 'RI',
+  'south carolina': 'SC', 'south dakota': 'SD', tennessee: 'TN', texas: 'TX', utah: 'UT',
+  vermont: 'VT', virginia: 'VA', washington: 'WA', 'west virginia': 'WV',
+  wisconsin: 'WI', wyoming: 'WY',
+};
+
+function toStateAbbr(state: string): string {
+  if (!state) return '';
+  if (state.length === 2) return state.toUpperCase();
+  return STATE_ABBR[state.toLowerCase()] ?? state.slice(0, 2).toUpperCase();
+}
+
+// ─── Zod Schema ──────────────────────────────────────────────────────────────
 
 const onboardingSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -19,6 +65,146 @@ const onboardingSchema = z.object({
 
 type OnboardingValues = z.infer<typeof onboardingSchema>;
 
+// ─── AddressAutocomplete Component ───────────────────────────────────────────
+
+interface AddressAutocompleteProps {
+  value: string;
+  error?: string;
+  onAddressChange: (addr: ParsedAddress) => void;
+  onRawChange: (value: string) => void;
+}
+
+function AddressAutocomplete({ value, error, onAddressChange, onRawChange }: AddressAutocompleteProps): React.ReactElement {
+  const [query, setQuery] = useState(value || '');
+  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  function handleInputChange(newValue: string): void {
+    setQuery(newValue);
+    onRawChange(newValue);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (newValue.length < 3) { setSuggestions([]); setShowDropdown(false); return; }
+    
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(newValue)}&format=json&addressdetails=1`
+        );
+        const data: NominatimResult[] = await res.json();
+        setSuggestions(data.slice(0, 5));
+        setShowDropdown(data.length > 0);
+      } catch {
+        setSuggestions([]);
+      }
+    }, 400);
+  }
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent): void {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  function handleSelect(result: NominatimResult): void {
+    const a = result.address;
+    const street = [a.house_number, a.road].filter(Boolean).join(' ') || result.display_name.split(',')[0];
+    const city = a.city || a.town || a.village || '';
+    const state = a.state ? toStateAbbr(a.state) : '';
+    const zipCode = a.postcode || '';
+
+    setQuery(street);
+    setShowDropdown(false);
+    onAddressChange({ street, city, state, zipCode });
+  }
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative' }}>
+      <div style={{ position: 'relative' }}>
+        <MapPin size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: focused ? 'var(--accent-primary)' : 'var(--text-tertiary)', zIndex: 10 }} />
+        <input
+          type="text"
+          placeholder="Street Address"
+          value={query}
+          onChange={(e) => handleInputChange(e.target.value)}
+          onFocus={() => { setFocused(true); if (suggestions.length > 0) setShowDropdown(true); }}
+          onBlur={() => setFocused(false)}
+          autoComplete="off"
+          style={{
+            ...inputStyle(!!error),
+            paddingLeft: '2.75rem',
+            borderRadius: showDropdown ? '0.875rem 0.875rem 0 0' : '0.875rem',
+          }}
+        />
+      </div>
+      
+      {showDropdown && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border)',
+            borderTop: 'none',
+            borderRadius: '0 0 0.875rem 0.875rem',
+            boxShadow: 'var(--shadow-card-hover)',
+            zIndex: 100,
+            maxHeight: '200px',
+            overflowY: 'auto',
+          }}
+        >
+          {suggestions.map((s) => {
+            const a = s.address;
+            const street = [a.house_number, a.road].filter(Boolean).join(' ');
+            const city = a.city || a.town || a.village || '';
+            const state = a.state ? toStateAbbr(a.state) : '';
+
+            return (
+              <button
+                key={s.place_id}
+                type="button"
+                onClick={() => handleSelect(s)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  border: 'none',
+                  borderTop: '1px solid var(--border)',
+                  background: 'transparent',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <span style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 500 }}>
+                  {street || s.display_name.split(',')[0]}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                  {[city, state, a.postcode].filter(Boolean).join(', ')}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Onboarding Screen ──────────────────────────────────────────────────
+
 export default function OnboardingScreen(): React.ReactElement {
   const { user, fetchMe } = useAuthStore();
   const [loading, setLoading] = useState(false);
@@ -26,6 +212,8 @@ export default function OnboardingScreen(): React.ReactElement {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<OnboardingValues>({
     resolver: zodResolver(onboardingSchema),
@@ -40,12 +228,14 @@ export default function OnboardingScreen(): React.ReactElement {
     },
   });
 
+  const watchedValues = watch();
+
   async function onSubmit(data: OnboardingValues) {
     setLoading(true);
     try {
       await apiClient.put('/auth/profile', data);
       toast.success('Welcome aboard! Profile completed.');
-      await fetchMe(); // Refresh user state
+      await fetchMe();
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to update profile');
     } finally {
@@ -67,7 +257,6 @@ export default function OnboardingScreen(): React.ReactElement {
         overflowY: 'auto',
       }}
     >
-      {/* Background decoration */}
       <div
         style={{
           position: 'absolute',
@@ -173,34 +362,37 @@ export default function OnboardingScreen(): React.ReactElement {
             {errors.phone && <p style={errorStyle}>{errors.phone.message}</p>}
           </div>
 
-          {/* Address */}
+          {/* Address Autocomplete */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Street Address
             </label>
-            <div style={{ position: 'relative' }}>
-              <MapPin size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
-              <input
-                {...register('address')}
-                placeholder="123 Main St"
-                style={inputStyle(!!errors.address)}
-              />
-            </div>
+            <AddressAutocomplete
+              value={watchedValues.address}
+              error={errors.address?.message}
+              onRawChange={(v) => setValue('address', v, { shouldValidate: true })}
+              onAddressChange={(addr) => {
+                setValue('address', addr.street, { shouldValidate: true });
+                setValue('city', addr.city, { shouldValidate: true });
+                setValue('state', addr.state, { shouldValidate: true });
+                setValue('zipCode', addr.zipCode, { shouldValidate: true });
+              }}
+            />
             {errors.address && <p style={errorStyle}>{errors.address.message}</p>}
           </div>
 
           {/* City State Zip */}
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr', gap: '0.75rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <input {...register('city')} placeholder="City" style={inputStyle(!!errors.city)} />
+              <input {...register('city')} placeholder="City" style={inputStyle(!!errors.city, true)} />
               {errors.city && <p style={errorStyle}>{errors.city.message}</p>}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <input {...register('state')} placeholder="ST" maxLength={2} style={inputStyle(!!errors.state)} />
+              <input {...register('state')} placeholder="ST" maxLength={2} style={inputStyle(!!errors.state, true)} />
               {errors.state && <p style={errorStyle}>{errors.state.message}</p>}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <input {...register('zipCode')} placeholder="ZIP" style={inputStyle(!!errors.zipCode)} />
+              <input {...register('zipCode')} placeholder="ZIP" style={inputStyle(!!errors.zipCode, true)} />
               {errors.zipCode && <p style={errorStyle}>{errors.zipCode.message}</p>}
             </div>
           </div>
@@ -310,9 +502,9 @@ export default function OnboardingScreen(): React.ReactElement {
   );
 }
 
-const inputStyle = (hasError: boolean): React.CSSProperties => ({
+const inputStyle = (hasError: boolean, smallPadding = false): React.CSSProperties => ({
   width: '100%',
-  padding: '0.75rem 1rem 0.75rem 2.75rem',
+  padding: smallPadding ? '0.75rem 1rem' : '0.75rem 1rem 0.75rem 2.75rem',
   borderRadius: '0.875rem',
   border: `1px solid ${hasError ? 'var(--color-error)' : 'var(--border)'}`,
   background: 'var(--bg-tertiary)',
