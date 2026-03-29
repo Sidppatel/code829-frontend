@@ -106,28 +106,33 @@ export default function Navbar(): React.ReactElement {
               </Link>
             );
           })}
-          {/* Admin link — only for admin/developer/staff roles */}
-          {isAuthenticated && user && ADMIN_ROLES.has(user.role) && (
-            <Link
-              to="/admin"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.3rem',
-                padding: '0.35rem 0.85rem',
-                borderRadius: '999px',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                color: 'var(--accent-cta)',
-                textDecoration: 'none',
-                background: 'color-mix(in srgb, var(--accent-cta) 10%, transparent)',
-                transition: 'background 0.2s, color 0.2s',
-              }}
-            >
-              <LayoutDashboard size={14} />
-              Admin
-            </Link>
-          )}
+          {/* Admin/Developer link — only for admin/developer/staff roles */}
+          {isAuthenticated && user && ADMIN_ROLES.has(user.role) && (() => {
+            const isDeveloper = (user.role as string) === 'Developer';
+            const dashboardPath = isDeveloper ? '/developer' : '/admin';
+            const dashboardLabel = isDeveloper ? 'Developer' : 'Admin';
+            return (
+              <Link
+                to={dashboardPath}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  padding: '0.35rem 0.85rem',
+                  borderRadius: '999px',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  color: 'var(--accent-cta)',
+                  textDecoration: 'none',
+                  background: 'color-mix(in srgb, var(--accent-cta) 10%, transparent)',
+                  transition: 'background 0.2s, color 0.2s',
+                }}
+              >
+                <LayoutDashboard size={14} />
+                {dashboardLabel}
+              </Link>
+            );
+          })()}
         </div>
 
         {/* Theme toggle */}
