@@ -13,10 +13,8 @@ import {
   Calendar,
   MapPin,
   Tag,
-  Settings,
   LayoutDashboard,
   DollarSign,
-  Copy,
   RotateCcw,
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
@@ -28,7 +26,7 @@ const PricingStep = lazy(() => import('./editors/PricingStep'));
 
 type EventStatus = 'Draft' | 'Published' | 'Cancelled' | 'Completed';
 type LayoutMode = 'Grid' | 'CapacityOnly' | 'None';
-type TabKey = 'overview' | 'bookings' | 'layout' | 'pricing' | 'settings';
+type TabKey = 'overview' | 'bookings' | 'layout' | 'pricing';
 
 interface Venue {
   id: string;
@@ -526,8 +524,6 @@ export default function EventManagePage(): React.ReactElement {
   const [cancelling, setCancelling] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [feeOverride, setFeeOverride] = useState('');
-  const [savingFee, setSavingFee] = useState(false);
 
   const fetchEvent = useCallback(async (): Promise<void> => {
     if (!id) return;
@@ -535,7 +531,6 @@ export default function EventManagePage(): React.ReactElement {
     try {
       const res = await apiClient.get<EventDetail>(`/admin/events/${id}`);
       setEvent(res.data);
-      setFeeOverride(String(res.data.platformFeePercent ?? 0));
     } catch {
       toast.error('Failed to load event');
     } finally {
@@ -697,37 +692,6 @@ export default function EventManagePage(): React.ReactElement {
     }
   }
 
-  async function handleSaveFeeOverride(): Promise<void> {
-    if (!id || !event) return;
-    const val = parseFloat(feeOverride);
-    if (isNaN(val) || val < 0 || val > 100) {
-      toast.error('Fee must be between 0 and 100');
-      return;
-    }
-    setSavingFee(true);
-    try {
-      await apiClient.put(`/admin/events/${id}`, {
-        title: event.title,
-        description: event.description,
-        category: event.category,
-        startDate: event.startDate,
-        endDate: event.endDate,
-        venueId: event.venueId,
-        layoutMode: event.layoutMode,
-        platformFeePercent: val,
-        isFeatured: event.isFeatured,
-        bannerImageUrl: event.bannerImageUrl,
-        maxCapacity: event.maxCapacity,
-      });
-      toast.success('Fee override saved');
-      void fetchEvent();
-    } catch {
-      toast.error('Failed to save fee override');
-    } finally {
-      setSavingFee(false);
-    }
-  }
-
   // ─── Tabs ─────────────────────────────────────────────────────────────────
 
   const tabs: Array<{ key: TabKey; label: string; icon: React.ReactNode }> = [
@@ -736,7 +700,6 @@ export default function EventManagePage(): React.ReactElement {
     { key: 'layout', label: 'Layout', icon: <Grid3X3 size={15} /> },
     // Pricing tab hidden for assigned seating — pricing is set per-table in the grid editor
     ...(event?.layoutMode !== 'Grid' ? [{ key: 'pricing' as TabKey, label: 'Pricing', icon: <DollarSign size={15} /> }] : []),
-    { key: 'settings', label: 'Settings', icon: <Settings size={15} /> },
   ];
 
   // ─── Loading ──────────────────────────────────────────────────────────────
@@ -1458,179 +1421,6 @@ export default function EventManagePage(): React.ReactElement {
         </div>
       )}
 
-      {/* ── Settings Tab ──────────────────────────────────────────────────── */}
-      {activeTab === 'settings' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {/* Platform fee override */}
-          <div
-            style={{
-              background: 'var(--glass-bg)',
-              border: '1px solid var(--border)',
-              borderRadius: '0.875rem',
-              padding: '1.25rem',
-              backdropFilter: 'blur(8px)',
-            }}
-          >
-            <h3
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1rem',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                margin: '0 0 0.5rem',
-              }}
-            >
-              Platform Fee Override
-            </h3>
-            <p
-              style={{
-                margin: '0 0 1rem',
-                fontSize: '0.8125rem',
-                color: 'var(--text-secondary)',
-                lineHeight: 1.5,
-              }}
-            >
-              Override the default platform fee for this event (0–100%). Leave at 0 for no fee.
-            </p>
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <div style={{ position: 'relative', flex: 1, minWidth: '140px', maxWidth: '200px' }}>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={0.1}
-                  value={feeOverride}
-                  onChange={(e) => setFeeOverride(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.6rem 2rem 0.6rem 0.875rem',
-                    borderRadius: '0.5rem',
-                    border: '1px solid var(--border)',
-                    background: 'var(--bg-secondary)',
-                    color: 'var(--text-primary)',
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '0.9rem',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                />
-                <span
-                  style={{
-                    position: 'absolute',
-                    right: '0.75rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: 'var(--text-tertiary)',
-                    fontSize: '0.875rem',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  %
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => void handleSaveFeeOverride()}
-                disabled={savingFee}
-                style={{
-                  padding: '0.6rem 1.25rem',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  background: 'var(--accent-primary)',
-                  color: 'var(--bg-primary)',
-                  cursor: savingFee ? 'not-allowed' : 'pointer',
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  opacity: savingFee ? 0.7 : 1,
-                }}
-              >
-                {savingFee ? 'Saving…' : 'Save'}
-              </button>
-            </div>
-          </div>
-
-          {/* Event slug */}
-          <div
-            style={{
-              background: 'var(--glass-bg)',
-              border: '1px solid var(--border)',
-              borderRadius: '0.875rem',
-              padding: '1.25rem',
-              backdropFilter: 'blur(8px)',
-            }}
-          >
-            <h3
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1rem',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                margin: '0 0 0.5rem',
-              }}
-            >
-              Event Slug
-            </h3>
-            <p
-              style={{
-                margin: '0 0 0.875rem',
-                fontSize: '0.8125rem',
-                color: 'var(--text-secondary)',
-              }}
-            >
-              The URL-friendly identifier for this event (read-only).
-            </p>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.625rem',
-                padding: '0.6rem 0.875rem',
-                borderRadius: '0.5rem',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-tertiary)',
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.875rem',
-                  color: 'var(--text-secondary)',
-                  flex: 1,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {event.slug}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  void navigator.clipboard.writeText(event.slug);
-                  toast.success('Slug copied');
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '0.375rem',
-                  border: '1px solid var(--border)',
-                  background: 'var(--bg-secondary)',
-                  color: 'var(--text-tertiary)',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                }}
-                title="Copy slug"
-              >
-                <Copy size={13} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Cancel modal ──────────────────────────────────────────────────── */}
       {showCancelModal && (
