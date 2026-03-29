@@ -76,33 +76,45 @@ function SkeletonVenueCard(): React.ReactElement {
 
 // ─── Status badge ────────────────────────────────────────────────────────────
 
-function StatusBadge({ isActive }: { isActive: boolean }): React.ReactElement {
+function StatusToggle({ isActive, onToggle }: { isActive: boolean; onToggle: () => void }): React.ReactElement {
   return (
-    <span
+    <button
+      type="button"
+      title={isActive ? 'Click to disable' : 'Click to enable'}
+      onClick={onToggle}
       style={{
-        display: 'inline-flex',
+        display: 'flex',
         alignItems: 'center',
-        gap: '0.25rem',
-        padding: '0.2rem 0.6rem',
+        gap: '0.375rem',
+        padding: '0.25rem 0.625rem',
         borderRadius: '999px',
         fontSize: '0.75rem',
         fontWeight: 600,
         background: isActive
           ? 'color-mix(in srgb, var(--color-success) 15%, transparent)'
-          : 'color-mix(in srgb, var(--color-error) 15%, transparent)',
-        color: isActive ? 'var(--color-success)' : 'var(--color-error)',
+          : 'var(--bg-tertiary)',
+        color: isActive ? 'var(--color-success)' : 'var(--text-tertiary)',
+        border: `1px solid ${isActive ? 'var(--color-success)' : 'var(--border)'}`,
+        cursor: 'pointer',
+        fontFamily: 'var(--font-body)',
+        transition: 'background 0.15s',
       }}
     >
-      <span
-        style={{
-          width: '6px',
-          height: '6px',
-          borderRadius: '50%',
-          background: isActive ? 'var(--color-success)' : 'var(--color-error)',
-        }}
-      />
-      {isActive ? 'Active' : 'Inactive'}
-    </span>
+      <div style={{
+        width: '28px', height: '16px', borderRadius: '8px',
+        background: isActive ? 'var(--color-success)' : 'var(--border)',
+        position: 'relative', transition: 'background 0.2s',
+      }}>
+        <div style={{
+          width: '12px', height: '12px', borderRadius: '50%',
+          background: 'var(--bg-primary)',
+          position: 'absolute', top: '2px',
+          left: isActive ? '14px' : '2px',
+          transition: 'left 0.2s',
+        }} />
+      </div>
+      {isActive ? 'Active' : 'Disabled'}
+    </button>
   );
 }
 
@@ -252,6 +264,20 @@ export default function VenuesPage(): React.ReactElement {
   const allCities = data
     ? Array.from(new Set(data.items.map((v) => v.city).filter(Boolean))).sort()
     : [];
+
+  async function handleToggleVenueActive(venueId: string, active: boolean): Promise<void> {
+    try {
+      if (active) {
+        await apiClient.put(`/admin/venues/${venueId}`, { isActive: true });
+      } else {
+        await apiClient.delete(`/admin/venues/${venueId}`);
+      }
+      toast.success(active ? 'Venue enabled' : 'Venue disabled');
+      void fetchVenues();
+    } catch {
+      toast.error('Failed to update venue');
+    }
+  }
 
   async function handleDelete(): Promise<void> {
     if (!deleteTarget) return;
@@ -567,7 +593,7 @@ export default function VenuesPage(): React.ReactElement {
                         {venue.city}, {venue.state}
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
-                        <StatusBadge isActive={venue.isActive} />
+                        <StatusToggle isActive={venue.isActive} onToggle={() => handleToggleVenueActive(venue.id, !venue.isActive)} />
                       </td>
                       <td style={{ padding: '0.875rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'inline-flex', gap: '0.375rem', alignItems: 'center' }}>
@@ -728,7 +754,7 @@ export default function VenuesPage(): React.ReactElement {
                     {venue.address}, {venue.city}, {venue.state} {venue.zipCode}
                   </p>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <StatusBadge isActive={venue.isActive} />
+                    <StatusToggle isActive={venue.isActive} onToggle={() => handleToggleVenueActive(venue.id, !venue.isActive)} />
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
                     <Link
