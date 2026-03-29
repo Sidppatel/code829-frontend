@@ -21,7 +21,7 @@ const DEV_PRESETS: DevPreset[] = [
     label: "Developer",
     description: "Full dev access",
     email: "developer@code829.local",
-    redirectTo: "/admin",
+    redirectTo: "/developer",
   },
   {
     label: "Admin",
@@ -47,7 +47,7 @@ const ROLE_REDIRECTS: Partial<Record<UserRole, string>> = {
   admin: "/admin",
   organizer: "/admin",
   staff: "/admin",
-  developer: "/admin",
+  developer: "/developer",
   attendee: "/events",
   guest: "/events",
 };
