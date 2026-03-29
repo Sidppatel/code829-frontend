@@ -185,9 +185,11 @@ function FloatingInput({ label, error, fieldId, ...props }: FloatingInputProps):
 function StepIndicator({
   currentStep,
   onStepClick,
+  skipPricing = false,
 }: {
   currentStep: number;
   onStepClick: (step: number) => void;
+  skipPricing?: boolean;
 }): React.ReactElement {
   return (
     <div
@@ -201,9 +203,10 @@ function StepIndicator({
     >
       {STEP_LABELS.map((label, idx) => {
         const stepNum = idx + 1;
-        const isCompleted = stepNum < currentStep;
-        const isCurrent = stepNum === currentStep;
-        const isClickable = isCompleted;
+        const isSkipped = skipPricing && stepNum === 3;
+        const isCompleted = isSkipped ? false : stepNum < currentStep;
+        const isCurrent = isSkipped ? false : stepNum === currentStep;
+        const isClickable = isCompleted && !isSkipped;
 
         return (
           <React.Fragment key={stepNum}>
@@ -232,14 +235,16 @@ function StepIndicator({
                   flexShrink: 0,
                 }}
               >
-                {isCompleted ? <Check size={16} /> : stepNum}
+                {isCompleted ? <Check size={16} /> : isSkipped ? '—' : stepNum}
               </button>
               <span
                 style={{
                   fontSize: '0.75rem',
                   fontWeight: isCurrent ? 600 : 400,
-                  color: isCurrent ? 'var(--accent-primary)' : isCompleted ? 'var(--text-secondary)' : 'var(--text-tertiary)',
+                  color: isSkipped ? 'var(--text-tertiary)' : isCurrent ? 'var(--accent-primary)' : isCompleted ? 'var(--text-secondary)' : 'var(--text-tertiary)',
                   whiteSpace: 'nowrap',
+                  textDecoration: isSkipped ? 'line-through' : 'none',
+                  opacity: isSkipped ? 0.5 : 1,
                 }}
               >
                 {label}
@@ -889,14 +894,30 @@ export default function EventWizardPage(): React.ReactElement {
 
     const valid = await trigger(fieldsToValidate);
     if (!valid) return;
-    setStep(step + 1);
+
+    // Grid layout: skip pricing step (pricing is per-table in the layout editor)
+    const isGrid = watchedValues.layoutMode === 'Grid';
+    if (step === 2 && isGrid) {
+      setStep(4); // skip step 3, go to review
+    } else {
+      setStep(step + 1);
+    }
   }
 
   function handleBack(): void {
-    setStep(step - 1);
+    // Grid layout: skip pricing step going backwards too
+    const isGrid = watchedValues.layoutMode === 'Grid';
+    if (step === 4 && isGrid) {
+      setStep(2); // skip step 3, go back to layout
+    } else {
+      setStep(step - 1);
+    }
   }
 
   function handleStepClick(s: number): void {
+    // Grid layout: don't allow clicking step 3
+    const isGrid = watchedValues.layoutMode === 'Grid';
+    if (s === 3 && isGrid) return;
     setStep(s);
   }
 
@@ -966,7 +987,7 @@ export default function EventWizardPage(): React.ReactElement {
       </div>
 
       {/* Step indicator */}
-      <StepIndicator currentStep={step} onStepClick={handleStepClick} />
+      <StepIndicator currentStep={step} onStepClick={handleStepClick} skipPricing={watchedValues.layoutMode === 'Grid'} />
 
       {/* Card — uses reduced padding when editor is full width */}
       <div
