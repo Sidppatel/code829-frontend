@@ -12,6 +12,7 @@ import {
   Tag,
   LayoutDashboard,
   DollarSign,
+  Search,
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
 import AnimatedCounter from '../../components/AnimatedCounter';
@@ -373,6 +374,8 @@ export default function EventManagePage(): React.ReactElement {
   const [bookingsPage, setBookingsPage] = useState(1);
   const [bookingsLoading, setBookingsLoading] = useState(false);
   const [bookingsStatusFilter, setBookingsStatusFilter] = useState<string>('');
+  const [bookingsSearchInput, setBookingsSearchInput] = useState('');
+  const [bookingsSearch, setBookingsSearch] = useState('');
 
 
   const fetchEvent = useCallback(async (): Promise<void> => {
@@ -413,35 +416,35 @@ export default function EventManagePage(): React.ReactElement {
     return () => { cancelled = true; };
   }, [id, event]);
 
-  // Compute stats from bookings
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setBookingsSearch(bookingsSearchInput);
+      setBookingsPage(1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [bookingsSearchInput]);
+
+  // Load stats from lightweight endpoint (no full booking data)
   useEffect(() => {
     if (!id || !event) return;
     let cancelled = false;
 
     async function loadStats(): Promise<void> {
       try {
-        const res = await apiClient.get<PagedBookings>(`/admin/bookings?eventId=${id}&pageSize=100`);
+        const res = await apiClient.get<{ total: number; paid: number; checkedIn: number; revenue: number; ticketsSold: number }>(
+          `/admin/bookings/stats?eventId=${id}`
+        );
         if (cancelled) return;
-        const all = res.data.items ?? [];
-        const paid = all.filter(b => b.status === 'Paid' || b.status === 'CheckedIn');
-        const checkedIn = all.filter(b => b.status === 'CheckedIn');
-        const revenue = paid.reduce((sum, b) => sum + b.totalCents, 0);
-        const ticketsSold = paid.reduce((sum, b) => sum + (b.items?.length ?? 0), 0);
-
         setStats({
           totalCapacity: event?.maxCapacity ?? 0,
-          ticketsSold,
-          revenueCents: revenue,
-          checkIns: checkedIn.length,
+          ticketsSold: res.data.ticketsSold,
+          revenueCents: res.data.revenue,
+          checkIns: res.data.checkedIn,
         });
       } catch {
         if (!cancelled) {
-          setStats({
-            totalCapacity: event?.maxCapacity ?? 0,
-            ticketsSold: 0,
-            revenueCents: 0,
-            checkIns: 0,
-          });
+          setStats({ totalCapacity: event?.maxCapacity ?? 0, ticketsSold: 0, revenueCents: 0, checkIns: 0 });
         }
       }
     }
@@ -464,6 +467,7 @@ export default function EventManagePage(): React.ReactElement {
           eventId: id!,
         });
         if (bookingsStatusFilter) params.set('status', bookingsStatusFilter);
+        if (bookingsSearch.trim()) params.set('search', bookingsSearch.trim());
         const res = await apiClient.get<PagedBookings>(`/admin/bookings?${params}`);
         if (!cancelled) {
           setBookings(res.data.items ?? []);
@@ -478,7 +482,7 @@ export default function EventManagePage(): React.ReactElement {
 
     void loadBookings();
     return () => { cancelled = true; };
-  }, [id, activeTab, bookingsPage, bookingsStatusFilter]);
+  }, [id, activeTab, bookingsPage, bookingsStatusFilter, bookingsSearch]);
 
 
 
@@ -778,28 +782,47 @@ export default function EventManagePage(): React.ReactElement {
       {/* ── Bookings Tab ─────────────────────────────────────────────────── */}
       {activeTab === 'bookings' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* Header + filters */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <h3 style={{
-              fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700,
-              color: 'var(--text-primary)', margin: 0,
-            }}>
-              Bookings {bookingsTotal > 0 && <span style={{ fontWeight: 400, color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>({bookingsTotal})</span>}
-            </h3>
-            <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
-              {['', 'Paid', 'CheckedIn', 'Pending', 'Cancelled', 'Refunded'].map(s => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => { setBookingsStatusFilter(s); setBookingsPage(1); }}
-                  style={{
-                    padding: '0.3rem 0.65rem', borderRadius: '999px', border: '1px solid var(--border)',
-                    background: bookingsStatusFilter === s ? 'var(--accent-primary)' : 'var(--bg-secondary)',
-                    color: bookingsStatusFilter === s ? '#fff' : 'var(--text-secondary)',
-                    fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)',
-                  }}
-                >{s || 'All'}</button>
-              ))}
+          {/* Header + search + filters */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <h3 style={{
+                fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700,
+                color: 'var(--text-primary)', margin: 0,
+              }}>
+                Bookings {bookingsTotal > 0 && <span style={{ fontWeight: 400, color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>({bookingsTotal})</span>}
+              </h3>
+              <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
+                {['', 'Paid', 'CheckedIn', 'Pending', 'Cancelled', 'Refunded'].map(s => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => { setBookingsStatusFilter(s); setBookingsPage(1); }}
+                    style={{
+                      padding: '0.3rem 0.65rem', borderRadius: '999px', border: '1px solid var(--border)',
+                      background: bookingsStatusFilter === s ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+                      color: bookingsStatusFilter === s ? '#fff' : 'var(--text-secondary)',
+                      fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)',
+                    }}
+                  >{s || 'All'}</button>
+                ))}
+              </div>
+            </div>
+            {/* Search */}
+            <div style={{ position: 'relative' }}>
+              <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+              <input
+                type="text"
+                placeholder="Search by booking #, customer name, email..."
+                value={bookingsSearchInput}
+                onChange={e => setBookingsSearchInput(e.target.value)}
+                style={{
+                  width: '100%', padding: '0.5rem 0.75rem 0.5rem 2.25rem',
+                  borderRadius: '0.5rem', border: '1px solid var(--border)',
+                  background: 'var(--bg-secondary)', color: 'var(--text-primary)',
+                  fontFamily: 'var(--font-body)', fontSize: '0.8125rem', outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
             </div>
           </div>
 
@@ -818,7 +841,7 @@ export default function EventManagePage(): React.ReactElement {
               padding: '2.5rem', textAlign: 'center', color: 'var(--text-tertiary)',
               fontSize: '0.875rem', border: '1px dashed var(--border)', borderRadius: '0.75rem',
             }}>
-              {bookingsStatusFilter ? 'No bookings with this status.' : 'No bookings yet for this event.'}
+              {bookingsSearch ? `No bookings matching "${bookingsSearch}"` : bookingsStatusFilter ? 'No bookings with this status.' : 'No bookings yet for this event.'}
             </div>
           ) : (
             <div style={{
