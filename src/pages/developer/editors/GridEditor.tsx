@@ -481,7 +481,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     let cancelled = false;
     async function load(): Promise<void> {
       try {
-        const res = await apiClient.get<TableType[]>('/admin/table-types');
+        const res = await apiClient.get<TableType[]>('/developer/table-types');
         if (!cancelled) setTableTypes(res.data.filter((t) => t.isActive));
       } catch {
         if (!cancelled) toast.error('Failed to load table types');
@@ -499,7 +499,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
       setLoadingLayout(true);
       try {
         // Check for Redis draft first
-        const draftRes = await apiClient.get(`/admin/events/${eventId}/layout/draft`);
+        const draftRes = await apiClient.get(`/developer/events/${eventId}/layout/draft`);
         if (!cancelled && draftRes.data.source === 'redis' && draftRes.data.data) {
           const draft = draftRes.data.data;
           // Reconstruct the layout response shape for loadFromApi
@@ -517,7 +517,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
           return;
         }
         // Fall back to DB
-        const res = await apiClient.get(`/admin/events/${eventId}/layout`);
+        const res = await apiClient.get(`/developer/events/${eventId}/layout`);
         if (!cancelled) {
           loadFromApi(res.data);
           setRowsInput(res.data.gridRows ?? 10);
@@ -539,7 +539,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   // Fetch booking stats for this event — find which tables are booked
   useEffect(() => {
     if (!eventId) return;
-    apiClient.get(`/admin/bookings?eventId=${eventId}&pageSize=100`)
+    apiClient.get(`/developer/bookings?eventId=${eventId}&pageSize=100`)
       .then((res) => {
         interface BookingItem { seatId?: string; ticketTypeId?: string }
         interface Booking { status: string; totalCents: number; items: BookingItem[] }
@@ -861,12 +861,12 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   async function performAutoSave(): Promise<void> {
     setSaveStatus('saving');
     try {
-      await apiClient.post(`/admin/events/${eventId}/layout/draft`, buildLayoutPayload());
+      await apiClient.post(`/developer/events/${eventId}/layout/draft`, buildLayoutPayload());
       setSaveStatus('saved');
     } catch {
       // Redis draft failed — try direct DB save as fallback
       try {
-        await apiClient.post(`/admin/events/${eventId}/layout`, buildLayoutPayload());
+        await apiClient.post(`/developer/events/${eventId}/layout`, buildLayoutPayload());
         markClean();
         setSaveStatus('saved');
       } catch {
@@ -966,11 +966,11 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     try {
       // Try Redis draft + flush first
       try {
-        await apiClient.post(`/admin/events/${eventId}/layout/draft`, buildLayoutPayload());
-        await apiClient.post(`/admin/events/${eventId}/layout/flush`);
+        await apiClient.post(`/developer/events/${eventId}/layout/draft`, buildLayoutPayload());
+        await apiClient.post(`/developer/events/${eventId}/layout/flush`);
       } catch {
         // Fallback: save directly to DB
-        await apiClient.post(`/admin/events/${eventId}/layout`, buildLayoutPayload());
+        await apiClient.post(`/developer/events/${eventId}/layout`, buildLayoutPayload());
       }
       markClean();
       setSaveStatus('saved');
@@ -1160,7 +1160,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                         if (editingTypeData) {
                           const isDuplicate = tableTypes.some((t) => t.id !== tt.id && t.name.toLowerCase() === editingTypeData.name.toLowerCase());
                           if (isDuplicate) { toast.error('A type with this name already exists'); return; }
-                          apiClient.put(`/admin/table-types/${tt.id}`, {
+                          apiClient.put(`/developer/table-types/${tt.id}`, {
                             name: editingTypeData.name,
                             defaultCapacity: editingTypeData.capacity,
                             defaultShape: editingTypeData.shape,
@@ -1805,3 +1805,4 @@ const toolbarBtnStyle: React.CSSProperties = {
   fontWeight: 500,
   transition: 'border-color 0.15s, background 0.15s',
 };
+

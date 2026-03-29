@@ -241,7 +241,7 @@ function NoUpcomingEvents(): React.ReactElement {
         real-time booking data, revenue tracking, and attendee insights.
       </p>
       <button
-        onClick={() => navigate('/admin/events')}
+        onClick={() => navigate('/developer/events')}
         style={{
           marginTop: '1.5rem', padding: '0.75rem 1.5rem',
           background: 'var(--accent-primary)', color: '#fff',
@@ -258,7 +258,7 @@ function NoUpcomingEvents(): React.ReactElement {
 
 // ─── Main Dashboard ──────────────────────────────────────────────────────────
 
-export default function AdminDashboardPage(): React.ReactElement {
+export default function DeveloperDashboardPage(): React.ReactElement {
   const [data, setData] = useState<NextEventData | null>(null);
   const [hasUpcoming, setHasUpcoming] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -268,7 +268,7 @@ export default function AdminDashboardPage(): React.ReactElement {
     let cancelled = false;
     async function fetch(): Promise<void> {
       try {
-        const res = await apiClient.get<ApiResponse>('/admin/dashboard/next-event');
+        const res = await apiClient.get<ApiResponse>('/developer/dashboard/next-event');
         if (cancelled) return;
         if (res.data.hasUpcoming && res.data.data) {
           setData(res.data.data);
@@ -339,7 +339,7 @@ export default function AdminDashboardPage(): React.ReactElement {
             </div>
 
             <h1
-              onClick={() => navigate(`/admin/events/${d.eventId}`)}
+              onClick={() => navigate(`/developer/events/${d.eventId}`)}
               style={{
                 fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800,
                 color: 'var(--text-primary)', margin: 0, lineHeight: 1.15,
@@ -364,7 +364,7 @@ export default function AdminDashboardPage(): React.ReactElement {
             {/* Action buttons */}
             <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.25rem' }}>
               <button
-                onClick={() => navigate(`/admin/events/${d.eventId}`)}
+                onClick={() => navigate(`/developer/events/${d.eventId}`)}
                 style={{
                   padding: '0.5rem 1rem', background: 'var(--accent-primary)',
                   color: '#fff', border: 'none', borderRadius: '0.5rem',
@@ -373,7 +373,7 @@ export default function AdminDashboardPage(): React.ReactElement {
                 }}
               >Manage Event <ArrowRight size={14} /></button>
               <button
-                onClick={() => navigate(`/admin/events/${d.eventId}?tab=bookings`)}
+                onClick={() => navigate(`/developer/events/${d.eventId}?tab=bookings`)}
                 style={{
                   padding: '0.5rem 1rem', background: 'var(--bg-tertiary)',
                   color: 'var(--text-primary)', border: '1px solid var(--border)',
@@ -630,7 +630,7 @@ export default function AdminDashboardPage(): React.ReactElement {
           </div>
           {d.totalBookings > 0 && (
             <button
-              onClick={() => navigate(`/admin/events/${d.eventId}?tab=bookings`)}
+              onClick={() => navigate(`/developer/events/${d.eventId}?tab=bookings`)}
               style={{
                 background: 'none', border: 'none', color: 'var(--accent-primary)',
                 fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer',
@@ -706,3 +706,4 @@ export default function AdminDashboardPage(): React.ReactElement {
     </div>
   );
 }
+
