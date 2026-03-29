@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -179,6 +179,227 @@ function FloatingTextarea({ label, error, id, ...props }: FloatingTextareaProps)
         <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--color-error)' }}>
           {error}
         </p>
+      )}
+    </div>
+  );
+}
+
+// ─── Address autocomplete (Nominatim / OpenStreetMap — free, no API key) ─────
+
+interface NominatimResult {
+  place_id: number;
+  display_name: string;
+  address: {
+    house_number?: string;
+    road?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+    state?: string;
+    postcode?: string;
+    country_code?: string;
+  };
+}
+
+interface ParsedAddress {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
+// US state abbreviations lookup
+const STATE_ABBR: Record<string, string> = {
+  alabama: 'AL', alaska: 'AK', arizona: 'AZ', arkansas: 'AR', california: 'CA',
+  colorado: 'CO', connecticut: 'CT', delaware: 'DE', florida: 'FL', georgia: 'GA',
+  hawaii: 'HI', idaho: 'ID', illinois: 'IL', indiana: 'IN', iowa: 'IA',
+  kansas: 'KS', kentucky: 'KY', louisiana: 'LA', maine: 'ME', maryland: 'MD',
+  massachusetts: 'MA', michigan: 'MI', minnesota: 'MN', mississippi: 'MS', missouri: 'MO',
+  montana: 'MT', nebraska: 'NE', nevada: 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+  'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND',
+  ohio: 'OH', oklahoma: 'OK', oregon: 'OR', pennsylvania: 'PA', 'rhode island': 'RI',
+  'south carolina': 'SC', 'south dakota': 'SD', tennessee: 'TN', texas: 'TX', utah: 'UT',
+  vermont: 'VT', virginia: 'VA', washington: 'WA', 'west virginia': 'WV',
+  wisconsin: 'WI', wyoming: 'WY',
+};
+
+function toStateAbbr(state: string): string {
+  if (state.length === 2) return state.toUpperCase();
+  return STATE_ABBR[state.toLowerCase()] ?? state.slice(0, 2).toUpperCase();
+}
+
+interface AddressAutocompleteProps {
+  value: string;
+  error?: string;
+  onAddressChange: (addr: ParsedAddress) => void;
+  register: ReturnType<typeof useForm>['register'];
+}
+
+function AddressAutocomplete({ value, error, onAddressChange, register: reg }: AddressAutocompleteProps): React.ReactElement {
+  const [query, setQuery] = useState(value);
+  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Sync external value
+  useEffect(() => { setQuery(value); }, [value]);
+
+  const fetchSuggestions = useCallback((q: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (q.length < 3) { setSuggestions([]); return; }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=us&limit=5&q=${encodeURIComponent(q)}`,
+          { headers: { 'Accept-Language': 'en' } }
+        );
+        const data: NominatimResult[] = await res.json();
+        setSuggestions(data);
+        setShowDropdown(data.length > 0);
+      } catch {
+        setSuggestions([]);
+      }
+    }, 350);
+  }, []);
+
+  // Close on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent): void {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  function handleSelect(result: NominatimResult): void {
+    const a = result.address;
+    const street = [a.house_number, a.road].filter(Boolean).join(' ') || result.display_name.split(',')[0];
+    const city = a.city || a.town || a.village || '';
+    const state = a.state ? toStateAbbr(a.state) : '';
+    const zipCode = a.postcode || '';
+
+    setQuery(street);
+    setShowDropdown(false);
+    onAddressChange({ street, city, state, zipCode });
+  }
+
+  const hasValue = Boolean(query);
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative' }}>
+      <div style={{ position: 'relative', marginTop: '0.25rem' }}>
+        <input
+          id="address"
+          type="text"
+          placeholder=" "
+          value={query}
+          {...reg('address')}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            reg('address').onChange(e);
+            fetchSuggestions(e.target.value);
+          }}
+          onFocus={() => { setFocused(true); if (suggestions.length > 0) setShowDropdown(true); }}
+          onBlur={() => setFocused(false)}
+          autoComplete="off"
+          style={{
+            width: '100%',
+            padding: '1.375rem 0.875rem 0.5rem',
+            borderRadius: showDropdown ? '0.5rem 0.5rem 0 0' : '0.5rem',
+            border: `1px solid ${error ? 'var(--color-error)' : focused ? 'var(--accent-primary)' : 'var(--border)'}`,
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            fontFamily: 'var(--font-body)',
+            fontSize: '0.9rem',
+            outline: 'none',
+            boxShadow: focused ? '0 0 0 3px color-mix(in srgb, var(--accent-primary) 18%, transparent)' : 'none',
+            transition: 'border-color 0.2s, box-shadow 0.2s',
+            boxSizing: 'border-box',
+          }}
+        />
+        <label
+          htmlFor="address"
+          style={{
+            position: 'absolute',
+            left: '0.875rem',
+            top: focused || hasValue ? '0.35rem' : '0.9rem',
+            fontSize: focused || hasValue ? '0.7rem' : '0.875rem',
+            fontWeight: focused || hasValue ? 600 : 400,
+            color: error ? 'var(--color-error)' : focused ? 'var(--accent-primary)' : 'var(--text-tertiary)',
+            transition: 'top 0.15s ease, font-size 0.15s ease, color 0.15s ease',
+            pointerEvents: 'none',
+            letterSpacing: focused || hasValue ? '0.04em' : 'normal',
+            textTransform: focused || hasValue ? 'uppercase' : 'none',
+          }}
+        >
+          Address *
+        </label>
+      </div>
+      {error && (
+        <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--color-error)' }}>{error}</p>
+      )}
+
+      {/* Dropdown */}
+      {showDropdown && suggestions.length > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border)',
+            borderTop: 'none',
+            borderRadius: '0 0 0.5rem 0.5rem',
+            boxShadow: 'var(--shadow-card-hover)',
+            zIndex: 50,
+            maxHeight: '240px',
+            overflowY: 'auto',
+          }}
+        >
+          {suggestions.map((s) => {
+            const a = s.address;
+            const street = [a.house_number, a.road].filter(Boolean).join(' ');
+            const city = a.city || a.town || a.village || '';
+            const state = a.state ? toStateAbbr(a.state) : '';
+
+            return (
+              <button
+                key={s.place_id}
+                type="button"
+                onClick={() => handleSelect(s)}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '0.6rem 0.875rem',
+                  border: 'none',
+                  borderTop: '1px solid var(--border)',
+                  background: 'transparent',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-body)',
+                  transition: 'background 0.1s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 500 }}>
+                  {street || s.display_name.split(',')[0]}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '0.1rem' }}>
+                  {[city, state, a.postcode].filter(Boolean).join(', ')}
+                </div>
+              </button>
+            );
+          })}
+          <div style={{ padding: '0.3rem 0.875rem', fontSize: '0.6rem', color: 'var(--text-tertiary)', textAlign: 'right' }}>
+            Powered by OpenStreetMap
+          </div>
+        </div>
       )}
     </div>
   );
@@ -370,17 +591,20 @@ export default function VenueFormPage(): React.ReactElement {
             />
           </div>
 
-          {/* ── Location ───────────────────────────────────── */}
+          {/* ── Location (with Nominatim autocomplete) ───── */}
           <SectionDivider title="Location" />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <FloatingInput
-              id="address"
-              label="Address *"
-              type="text"
+            <AddressAutocomplete
               value={strVal('address')}
               error={errors.address?.message}
-              {...register('address')}
+              onAddressChange={(addr) => {
+                setValue('address', addr.street, { shouldValidate: true });
+                if (addr.city) setValue('city', addr.city, { shouldValidate: true });
+                if (addr.state) setValue('state', addr.state, { shouldValidate: true });
+                if (addr.zipCode) setValue('zipCode', addr.zipCode, { shouldValidate: true });
+              }}
+              register={register}
             />
             <div
               style={{
