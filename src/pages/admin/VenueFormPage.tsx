@@ -232,10 +232,10 @@ interface AddressAutocompleteProps {
   value: string;
   error?: string;
   onAddressChange: (addr: ParsedAddress) => void;
-  register: ReturnType<typeof useForm>['register'];
+  onRawChange: (value: string) => void;
 }
 
-function AddressAutocomplete({ value, error, onAddressChange, register: reg }: AddressAutocompleteProps): React.ReactElement {
+function AddressAutocomplete({ value, error, onAddressChange, onRawChange }: AddressAutocompleteProps): React.ReactElement {
   const [query, setQuery] = useState(value);
   const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -297,11 +297,11 @@ function AddressAutocomplete({ value, error, onAddressChange, register: reg }: A
           type="text"
           placeholder=" "
           value={query}
-          {...reg('address')}
           onChange={(e) => {
-            setQuery(e.target.value);
-            reg('address').onChange(e);
-            fetchSuggestions(e.target.value);
+            const v = e.target.value;
+            setQuery(v);
+            onRawChange(v);
+            fetchSuggestions(v);
           }}
           onFocus={() => { setFocused(true); if (suggestions.length > 0) setShowDropdown(true); }}
           onBlur={() => setFocused(false)}
@@ -598,13 +598,13 @@ export default function VenueFormPage(): React.ReactElement {
             <AddressAutocomplete
               value={strVal('address')}
               error={errors.address?.message}
+              onRawChange={(v) => setValue('address', v, { shouldValidate: true })}
               onAddressChange={(addr) => {
                 setValue('address', addr.street, { shouldValidate: true });
                 if (addr.city) setValue('city', addr.city, { shouldValidate: true });
                 if (addr.state) setValue('state', addr.state, { shouldValidate: true });
                 if (addr.zipCode) setValue('zipCode', addr.zipCode, { shouldValidate: true });
               }}
-              register={register}
             />
             <div
               style={{
