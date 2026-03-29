@@ -22,13 +22,10 @@ const TableTypesPage = React.lazy(() => import('./pages/admin/TableTypesPage'));
 
 const DeveloperLayout = React.lazy(() => import('./layouts/DeveloperLayout'));
 const DeveloperDashboardPage = React.lazy(() => import('./pages/developer/DeveloperDashboardPage'));
-const DeveloperVenuesPage = React.lazy(() => import('./pages/developer/VenuesPage'));
-const DeveloperVenueFormPage = React.lazy(() => import('./pages/developer/VenueFormPage'));
 const DeveloperEventsListPage = React.lazy(() => import('./pages/developer/EventsListPage'));
 const DeveloperEventWizardPage = React.lazy(() => import('./pages/developer/EventWizardPage'));
 const DeveloperEventManagePage = React.lazy(() => import('./pages/developer/EventManagePage'));
 const DeveloperAnalyticsPage = React.lazy(() => import('./pages/developer/AnalyticsPage'));
-const DeveloperTableTypesPage = React.lazy(() => import('./pages/developer/TableTypesPage'));
 
 function PageLoader(): React.ReactElement {
   return (
@@ -93,15 +90,11 @@ function AppRoutes(): React.ReactElement {
           {/* Developer routes */}
           <Route path="/developer" element={<DeveloperLayout />}>
             <Route index element={<DeveloperDashboardPage />} />
-            <Route path="venues" element={<DeveloperVenuesPage />} />
-            <Route path="venues/new" element={<DeveloperVenueFormPage />} />
-            <Route path="venues/:id/edit" element={<DeveloperVenueFormPage />} />
             <Route path="events" element={<DeveloperEventsListPage />} />
             <Route path="events/new" element={<DeveloperEventWizardPage />} />
             <Route path="events/:id" element={<DeveloperEventManagePage />} />
             <Route path="events/:id/edit" element={<DeveloperEventWizardPage />} />
             <Route path="analytics" element={<DeveloperAnalyticsPage />} />
-            <Route path="table-types" element={<DeveloperTableTypesPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

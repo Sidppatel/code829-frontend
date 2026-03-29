@@ -3,12 +3,10 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   CalendarDays,
-  MapPin,
   BarChart3,
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Armchair,
 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 
@@ -21,8 +19,6 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', to: '/developer', Icon: LayoutDashboard },
   { label: 'Events', to: '/developer/events', Icon: CalendarDays },
-  { label: 'Venues', to: '/developer/venues', Icon: MapPin },
-  { label: 'Table Types', to: '/developer/table-types', Icon: Armchair },
   { label: 'Analytics', to: '/developer/analytics', Icon: BarChart3 },
 ];
 
