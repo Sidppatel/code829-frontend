@@ -77,7 +77,7 @@ function TableCell({ element, isSelected, isBooked, onSelect, onContextMenu, onD
         e.preventDefault();
         onContextMenu(element.id, e.clientX, e.clientY);
       }}
-      title={isBooked ? `${element.label} — SOLD (locked)` : element.label}
+      title={isBooked ? `${element.label} — LOCKED (held or booked)` : element.label}
       style={{
         width: '100%',
         height: '100%',
@@ -107,7 +107,7 @@ function TableCell({ element, isSelected, isBooked, onSelect, onContextMenu, onD
       </div>
       {isBooked && (
         <span style={{ fontSize: '0.45rem', fontWeight: 800, color: 'var(--color-success)', letterSpacing: '0.06em', lineHeight: 1 }}>
-          SOLD
+          LOCKED
         </span>
       )}
       <span
@@ -536,31 +536,22 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
-  // Fetch booking stats for this event — find which tables are booked
+  // Fetch locked table IDs (active holds + booked seats)
   useEffect(() => {
     if (!eventId) return;
-    apiClient.get(`/admin/bookings?eventId=${eventId}&pageSize=100`)
+    apiClient.get<{ lockedTableIds: string[] }>(`/admin/events/${eventId}/layout/locked`)
       .then((res) => {
-        interface BookingItem { seatId?: string; ticketTypeId?: string }
-        interface Booking { status: string; totalCents: number; items: BookingItem[] }
-        const data = res.data as { items: Booking[]; totalCount: number };
-        const paid = (data.items ?? []).filter(
-          (b) => b.status === 'Paid' || b.status === 'CheckedIn'
-        );
-        setBookedRevenueCents(paid.reduce((sum, b) => sum + b.totalCents, 0));
-
-        // Mark tables as booked: any table that has a booking item is locked
-        // Since booking items reference seatIds (not tableIds directly),
-        // and our grid tables don't have seats, we consider ALL tables locked
-        // if there are any bookings for this event to be safe
-        if (paid.length > 0) {
-          // For now mark all existing table IDs as booked
-          const ids = new Set(elementOrder);
-          setBookedTableIds(ids);
-        }
+        setBookedTableIds(new Set(res.data.lockedTableIds));
       })
-      .catch(() => { /* no bookings */ });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+      .catch(() => { /* ignore */ });
+
+    // Also fetch booking stats for revenue display
+    apiClient.get(`/admin/bookings/stats?eventId=${eventId}`)
+      .then((res) => {
+        const data = res.data as { revenue: number };
+        setBookedRevenueCents(data.revenue ?? 0);
+      })
+      .catch(() => { /* ignore */ });
   }, [eventId]);
 
   // Close context menu on outside click
@@ -818,7 +809,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
 
   function handleDelete(id: string): void {
     if (bookedTableIds.has(id)) {
-      toast.error('Cannot delete a sold table');
+      toast.error('Cannot delete a table with active holds or bookings');
       return;
     }
     deleteElement(id);
@@ -834,10 +825,12 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
       return (a.gridCol ?? 0) - (b.gridCol ?? 0);
     });
     sorted.forEach((el, idx) => {
-      updateElement(el.id, { label: `T${idx + 1}` });
+      if (!bookedTableIds.has(el.id)) {
+        updateElement(el.id, { label: `T${idx + 1}` });
+      }
     });
     toast.success('Tables auto-labeled');
-  }, [allElements, updateElement]);
+  }, [allElements, updateElement, bookedTableIds]);
 
   function buildLayoutPayload(): { editorMode: string; gridRows: number; gridCols: number; tables: Record<string, unknown>[] } {
     return {
