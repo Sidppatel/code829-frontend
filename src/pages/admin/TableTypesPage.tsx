@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Circle, RectangleHorizontal, Square, Diamond, X, Check } from 'lucide-react';
+import { Plus, Pencil, Circle, RectangleHorizontal, Square, Diamond, X, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../lib/axios';
 import { SkeletonLine } from '../../components/Skeleton';
@@ -319,7 +319,6 @@ export default function TableTypesPage(): React.ReactElement {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const loadTableTypes = useCallback(async (): Promise<void> => {
     try {
@@ -376,17 +375,25 @@ export default function TableTypesPage(): React.ReactElement {
     }
   }
 
-  async function handleDelete(id: string): Promise<void> {
+  async function handleToggleActive(id: string, active: boolean): Promise<void> {
     try {
-      await apiClient.delete(`/admin/table-types/${id}`);
-      toast.success('Table type deleted');
-      setTableTypes((prev) => prev.filter((t) => t.id !== id));
+      const tt = tableTypes.find((t) => t.id === id);
+      if (!tt) return;
+      await apiClient.put(`/admin/table-types/${id}`, {
+        name: tt.name,
+        defaultCapacity: tt.defaultCapacity,
+        defaultShape: tt.shape,
+        defaultColor: tt.defaultColor,
+        defaultPriceCents: tt.defaultPriceCents,
+      });
+      // Also toggle via delete endpoint if disabling
+      if (!active) {
+        await apiClient.delete(`/admin/table-types/${id}`).catch(() => {});
+      }
+      setTableTypes((prev) => prev.map((t) => (t.id === id ? { ...t, isActive: active } : t)));
+      toast.success(active ? 'Table type enabled' : 'Table type disabled');
     } catch {
-      // Backend may not support DELETE — mark inactive locally
-      setTableTypes((prev) => prev.map((t) => (t.id === id ? { ...t, isActive: false } : t)));
-      toast.success('Table type hidden');
-    } finally {
-      setConfirmDeleteId(null);
+      toast.error('Failed to update');
     }
   }
 
@@ -554,6 +561,7 @@ export default function TableTypesPage(): React.ReactElement {
                       style={{
                         borderBottom: '1px solid var(--border)',
                         transition: 'background 0.1s',
+                        opacity: tt.isActive ? 1 : 0.45,
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = 'var(--bg-tertiary)';
@@ -607,12 +615,17 @@ export default function TableTypesPage(): React.ReactElement {
                         {formatPrice(tt.defaultPriceCents)}
                       </td>
 
-                      {/* Status */}
+                      {/* Status toggle */}
                       <td style={{ padding: '0.875rem 1rem' }}>
-                        <span
+                        <button
+                          type="button"
+                          title={tt.isActive ? 'Click to disable' : 'Click to enable'}
+                          onClick={() => handleToggleActive(tt.id, !tt.isActive)}
                           style={{
-                            display: 'inline-block',
-                            padding: '0.2rem 0.625rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.375rem',
+                            padding: '0.25rem 0.625rem',
                             borderRadius: '999px',
                             fontSize: '0.75rem',
                             fontWeight: 600,
@@ -621,118 +634,57 @@ export default function TableTypesPage(): React.ReactElement {
                               : 'var(--bg-tertiary)',
                             color: tt.isActive ? 'var(--color-success)' : 'var(--text-tertiary)',
                             border: `1px solid ${tt.isActive ? 'var(--color-success)' : 'var(--border)'}`,
+                            cursor: 'pointer',
+                            fontFamily: 'var(--font-body)',
+                            transition: 'background 0.15s',
                           }}
                         >
-                          {tt.isActive ? 'Active' : 'Inactive'}
-                        </span>
+                          <div style={{
+                            width: '28px', height: '16px', borderRadius: '8px',
+                            background: tt.isActive ? 'var(--color-success)' : 'var(--border)',
+                            position: 'relative', transition: 'background 0.2s',
+                          }}>
+                            <div style={{
+                              width: '12px', height: '12px', borderRadius: '50%',
+                              background: 'var(--bg-primary)',
+                              position: 'absolute', top: '2px',
+                              left: tt.isActive ? '14px' : '2px',
+                              transition: 'left 0.2s',
+                            }} />
+                          </div>
+                          {tt.isActive ? 'Active' : 'Disabled'}
+                        </button>
                       </td>
 
                       {/* Actions */}
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <div style={{ display: 'flex', gap: '0.375rem' }}>
                           {/* Confirm delete dialog */}
-                          {confirmDeleteId === tt.id ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                Delete?
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => void handleDelete(tt.id)}
-                                style={{
-                                  padding: '0.2rem 0.625rem',
-                                  borderRadius: '0.375rem',
-                                  border: 'none',
-                                  background: 'var(--color-error)',
-                                  color: 'var(--bg-primary)',
-                                  cursor: 'pointer',
-                                  fontSize: '0.75rem',
-                                  fontFamily: 'var(--font-body)',
-                                  fontWeight: 600,
-                                }}
-                              >
-                                Yes
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setConfirmDeleteId(null)}
-                                style={{
-                                  padding: '0.2rem 0.625rem',
-                                  borderRadius: '0.375rem',
-                                  border: '1px solid var(--border)',
-                                  background: 'var(--bg-tertiary)',
-                                  color: 'var(--text-secondary)',
-                                  cursor: 'pointer',
-                                  fontSize: '0.75rem',
-                                  fontFamily: 'var(--font-body)',
-                                }}
-                              >
-                                No
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              <button
-                                type="button"
-                                title="Edit"
-                                onClick={() => {
-                                  setEditingId(tt.id);
-                                  setShowAddForm(false);
-                                }}
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  width: '30px',
-                                  height: '30px',
-                                  borderRadius: '0.375rem',
-                                  border: '1px solid var(--border)',
-                                  background: 'var(--bg-tertiary)',
-                                  color: 'var(--text-secondary)',
-                                  cursor: 'pointer',
-                                  transition: 'border-color 0.15s, color 0.15s',
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.borderColor = 'var(--accent-primary)';
-                                  e.currentTarget.style.color = 'var(--accent-primary)';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.borderColor = 'var(--border)';
-                                  e.currentTarget.style.color = 'var(--text-secondary)';
-                                }}
-                              >
-                                <Pencil size={13} />
-                              </button>
-                              <button
-                                type="button"
-                                title="Delete"
-                                onClick={() => setConfirmDeleteId(tt.id)}
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  width: '30px',
-                                  height: '30px',
-                                  borderRadius: '0.375rem',
-                                  border: '1px solid var(--border)',
-                                  background: 'var(--bg-tertiary)',
-                                  color: 'var(--text-secondary)',
-                                  cursor: 'pointer',
-                                  transition: 'border-color 0.15s, color 0.15s',
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.borderColor = 'var(--color-error)';
-                                  e.currentTarget.style.color = 'var(--color-error)';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.borderColor = 'var(--border)';
-                                  e.currentTarget.style.color = 'var(--text-secondary)';
-                                }}
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </>
-                          )}
+                          <button
+                            type="button"
+                            title={tt.isActive ? 'Edit' : 'Enable first to edit'}
+                            disabled={!tt.isActive}
+                            onClick={tt.isActive ? () => {
+                              setEditingId(tt.id);
+                              setShowAddForm(false);
+                            } : undefined}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '30px',
+                              height: '30px',
+                              borderRadius: '0.375rem',
+                              border: '1px solid var(--border)',
+                              background: 'var(--bg-tertiary)',
+                              color: tt.isActive ? 'var(--text-secondary)' : 'var(--text-tertiary)',
+                              cursor: tt.isActive ? 'pointer' : 'not-allowed',
+                              opacity: tt.isActive ? 1 : 0.4,
+                              transition: 'border-color 0.15s, color 0.15s',
+                            }}
+                          >
+                            <Pencil size={13} />
+                          </button>
                         </div>
                       </td>
                     </tr>
