@@ -566,7 +566,6 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   const allElements = elementOrder.map((id) => elements[id]).filter(Boolean);
   const totalTables = allElements.length;
   const totalSeats = allElements.reduce((acc, el) => acc + el.capacity, 0);
-  const sections = new Set(allElements.map((el) => el.section).filter(Boolean)).size;
 
   // Revenue: total potential (all tables sold) based on priceType
   const totalRevenueCents = allElements.reduce((acc, el) => {
