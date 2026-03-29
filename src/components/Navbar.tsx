@@ -181,7 +181,7 @@ export default function Navbar(): React.ReactElement {
         {isAuthenticated && user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Link
-              to="/me/bookings"
+              to="/me/profile"
               style={{
                 display: 'flex',
                 alignItems: 'center',

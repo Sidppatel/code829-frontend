@@ -12,6 +12,8 @@ const HomePage = React.lazy(() => import('./pages/HomePage'));
 const EventsPage = React.lazy(() => import('./pages/EventsPage'));
 const EventDetailPage = React.lazy(() => import('./pages/EventDetailPage'));
 const MyBookingsPage = React.lazy(() => import('./pages/MyBookingsPage'));
+const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
+const InvitationPage = React.lazy(() => import('./pages/InvitationPage'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage'));
 
 const AdminLayout = React.lazy(() => import('./layouts/AdminLayout'));
@@ -75,6 +77,8 @@ function AppRoutes(): React.ReactElement {
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/:id" element={<EventDetailPage />} />
           <Route path="/me/bookings" element={<MyBookingsPage />} />
+          <Route path="/me/profile" element={<ProfilePage />} />
+          <Route path="/invitation/:token" element={<InvitationPage />} />
           <Route path="/auth/login" element={<LoginPage />} />
 
           {/* Admin routes — Admin & Staff only, Developers redirected to /developer */}

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Navigate, Link } from 'react-router-dom';
-import { Calendar, QrCode, ChevronRight, Ticket } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Calendar, QrCode, ChevronRight, Ticket, Send, User, ChevronDown, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { SkeletonCard } from '../components/Skeleton';
 import apiClient from '../lib/axios';
@@ -32,9 +33,14 @@ interface ApiBookingLineItem {
   id: string;
   ticketTypeId: string;
   ticketTypeName: string;
-  quantity: number;
-  unitPriceCents: number;
-  subtotalCents: number;
+  seatId: string | null;
+  seatLabel: string | null;
+  priceCents: number;
+  qrToken: string | null;
+  guestName: string | null;
+  guestEmail: string | null;
+  invitationToken: string | null;
+  isCheckedIn: boolean;
 }
 
 interface ApiPayment {
@@ -60,13 +66,16 @@ interface Booking {
   totalCents: number;
   qrToken: string;
   tierSummary: string;
+  items: ApiBookingLineItem[];
   createdAt: string;
 }
 
 function apiToBooking(api: ApiBookingItem): Booking {
-  const tierSummary = (api.items ?? [])
-    .map((item) => `${item.ticketTypeName} ×${item.quantity}`)
-    .join(', ');
+  const names = [...new Set((api.items ?? []).map(i => i.ticketTypeName))];
+  const tierSummary = names.map(n => {
+    const count = (api.items ?? []).filter(i => i.ticketTypeName === n).length;
+    return `${n} ×${count}`;
+  }).join(', ');
 
   return {
     id: api.id,
@@ -77,6 +86,7 @@ function apiToBooking(api: ApiBookingItem): Booking {
     totalCents: api.totalCents,
     qrToken: api.qrToken,
     tierSummary,
+    items: api.items ?? [],
     createdAt: api.createdAt,
   };
 }
@@ -84,26 +94,7 @@ function apiToBooking(api: ApiBookingItem): Booking {
 // ---------------------------------------------------------------------------
 // Placeholder
 // ---------------------------------------------------------------------------
-const PLACEHOLDER_BOOKINGS: Booking[] = [
-  {
-    id: 'b1', bookingNumber: 'BK-001', eventId: '2', eventTitle: 'React Summit 2026',
-    status: 'confirmed', totalCents: 34900, qrToken: 'EVT-RSM26-WRK-A1B2C3',
-    tierSummary: 'Workshop Pass ×1',
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-  },
-  {
-    id: 'b2', bookingNumber: 'BK-002', eventId: '1', eventTitle: 'Neon Frequencies Festival',
-    status: 'confirmed', totalCents: 17800, qrToken: 'EVT-NEO26-GA-D4E5F6',
-    tierSummary: 'General Admission ×2',
-    createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-  },
-  {
-    id: 'b3', bookingNumber: 'BK-003', eventId: '10', eventTitle: 'Electronic Music Night',
-    status: 'used', totalCents: 8000, qrToken: 'EVT-EMN26-VIP-G7H8I9',
-    tierSummary: 'VIP ×1',
-    createdAt: new Date(Date.now() - 86400000 * 14).toISOString(),
-  },
-];
+const PLACEHOLDER_BOOKINGS: Booking[] = [];
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -146,85 +137,110 @@ function StatusBadge({ status }: { status: BookingStatus }): React.ReactElement 
 }
 
 // ---------------------------------------------------------------------------
-// QR Display
+// Per-seat ticket with QR code, guest info, and invitation
 // ---------------------------------------------------------------------------
-function QRDisplay({ token }: { token: string }): React.ReactElement {
-  const [expanded, setExpanded] = useState(false);
+function SeatTicket({ item, bookingId, onUpdate }: { item: ApiBookingLineItem; bookingId: string; onUpdate: () => void }): React.ReactElement {
+  const [guestName, setGuestName] = useState(item.guestName ?? '');
+  const [guestEmail, setGuestEmail] = useState(item.guestEmail ?? '');
+  const [sending, setSending] = useState(false);
+
+  async function handleSendInvite(): Promise<void> {
+    if (!guestEmail.trim()) { toast.error('Enter a guest email first'); return; }
+    setSending(true);
+    try {
+      await apiClient.put(`/bookings/${bookingId}/items/${item.id}/guest`, {
+        guestName: guestName || null, guestEmail: guestEmail || null, sendInvitation: true,
+      });
+      toast.success(`Invitation sent to ${guestEmail}`);
+      onUpdate();
+    } catch { toast.error('Failed to send invitation'); }
+    finally { setSending(false); }
+  }
+
+  async function handleSaveGuest(): Promise<void> {
+    try {
+      await apiClient.put(`/bookings/${bookingId}/items/${item.id}/guest`, {
+        guestName: guestName || null, guestEmail: guestEmail || null, sendInvitation: false,
+      });
+      toast.success('Guest info saved');
+      onUpdate();
+    } catch { toast.error('Failed to save'); }
+  }
 
   return (
-    <div>
-      <button
-        onClick={() => setExpanded((v) => !v)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.4rem',
-          padding: '0.4rem 0.85rem',
-          borderRadius: '0.65rem',
-          border: '1px solid var(--border)',
-          background: 'var(--bg-tertiary)',
-          color: 'var(--text-secondary)',
-          fontSize: '0.78rem',
-          fontWeight: 500,
-          cursor: 'pointer',
-          fontFamily: 'var(--font-body)',
-        }}
-      >
-        <QrCode size={13} />
-        {expanded ? 'Hide QR' : 'Show QR'}
-      </button>
-      {expanded && (
-        <div style={{
-          marginTop: '0.75rem',
-          padding: '1rem',
-          background: 'var(--bg-secondary)',
-          borderRadius: '0.75rem',
-          border: '1px solid var(--border)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '0.5rem',
-        }}>
-          {/* SVG QR placeholder */}
-          <div style={{
-            width: '100px',
-            height: '100px',
-            background: 'var(--text-primary)',
-            borderRadius: '0.5rem',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(7, 1fr)',
-            padding: '8px',
-            gap: '2px',
-          }}>
-            {Array.from({ length: 49 }).map((_, i) => {
-              const row = Math.floor(i / 7);
-              const col = i % 7;
-              const isCorner =
-                (row < 3 && col < 3) ||
-                (row < 3 && col > 3) ||
-                (row > 3 && col < 3);
-              const isFilled = isCorner || (Math.sin(i * 13.7) > 0.1);
-              return (
-                <div key={i} style={{
-                  background: isFilled ? 'var(--bg-primary)' : 'var(--text-primary)',
-                  borderRadius: '1px',
-                }} />
-              );
-            })}
-          </div>
-          <code style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.7rem',
-            color: 'var(--text-secondary)',
-            letterSpacing: '0.1em',
-          }}>
-            {token}
+    <div style={{
+      padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid var(--border)',
+      background: 'var(--bg-tertiary)', display: 'flex', flexDirection: 'column', gap: '0.5rem',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <Ticket size={13} style={{ color: 'var(--accent-primary)' }} />
+          <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+            {item.ticketTypeName}
+          </span>
+          {item.seatLabel && (
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', padding: '0.1rem 0.4rem', background: 'var(--bg-secondary)', borderRadius: '999px' }}>
+              Seat {item.seatLabel}
+            </span>
+          )}
+        </div>
+        {item.isCheckedIn && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.6875rem', fontWeight: 700, color: 'var(--color-success)' }}>
+            <CheckCircle size={12} /> Checked In
+          </span>
+        )}
+      </div>
+
+      {/* QR Token */}
+      {item.qrToken && !item.isCheckedIn && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.6rem', background: '#fff', borderRadius: '0.5rem' }}>
+          <QrCode size={32} style={{ color: '#000', flexShrink: 0 }} />
+          <code style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: '#333', wordBreak: 'break-all' }}>
+            {item.qrToken}
           </code>
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', margin: 0, textAlign: 'center' }}>
-            Show this at the venue entrance
-          </p>
         </div>
       )}
+
+      {/* Guest info */}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <input
+          placeholder="Guest name (optional)"
+          value={guestName}
+          onChange={e => setGuestName(e.target.value)}
+          onBlur={() => void handleSaveGuest()}
+          style={{
+            flex: 1, minWidth: '120px', padding: '0.35rem 0.5rem', borderRadius: '0.375rem',
+            border: '1px solid var(--border)', background: 'var(--bg-primary)',
+            color: 'var(--text-primary)', fontSize: '0.75rem', outline: 'none',
+          }}
+        />
+        <input
+          placeholder="Guest email (optional)"
+          type="email"
+          value={guestEmail}
+          onChange={e => setGuestEmail(e.target.value)}
+          onBlur={() => void handleSaveGuest()}
+          style={{
+            flex: 1, minWidth: '140px', padding: '0.35rem 0.5rem', borderRadius: '0.375rem',
+            border: '1px solid var(--border)', background: 'var(--bg-primary)',
+            color: 'var(--text-primary)', fontSize: '0.75rem', outline: 'none',
+          }}
+        />
+        <button
+          onClick={() => void handleSendInvite()}
+          disabled={sending || !guestEmail.trim()}
+          title="Send invitation email with QR code link"
+          style={{
+            padding: '0.35rem 0.6rem', borderRadius: '0.375rem', border: 'none',
+            background: guestEmail.trim() ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+            color: guestEmail.trim() ? '#fff' : 'var(--text-tertiary)',
+            fontSize: '0.75rem', fontWeight: 600, cursor: sending || !guestEmail.trim() ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', gap: '0.25rem',
+          }}
+        >
+          <Send size={11} /> {sending ? '...' : 'Invite'}
+        </button>
+      </div>
     </div>
   );
 }
@@ -232,8 +248,10 @@ function QRDisplay({ token }: { token: string }): React.ReactElement {
 // ---------------------------------------------------------------------------
 // Booking card
 // ---------------------------------------------------------------------------
-function BookingCard({ booking }: { booking: Booking }): React.ReactElement {
+function BookingCard({ booking, onRefresh }: { booking: Booking; onRefresh: () => void }): React.ReactElement {
   const isPast = booking.status === 'used' || booking.status === 'cancelled';
+  const [showTickets, setShowTickets] = useState(false);
+  const isConfirmed = booking.status === 'confirmed';
 
   return (
     <div style={{
@@ -244,77 +262,100 @@ function BookingCard({ booking }: { booking: Booking }): React.ReactElement {
       overflow: 'hidden',
       boxShadow: 'var(--shadow-card)',
       opacity: isPast ? 0.75 : 1,
+      flexDirection: 'column',
     }}>
-      {/* Status stripe */}
-      <div style={{
-        width: '6px',
-        flexShrink: 0,
-        background: STATUS_CONFIG[booking.status]?.color ?? 'var(--border)',
-      }} />
+      <div style={{ display: 'flex' }}>
+        {/* Status stripe */}
+        <div style={{
+          width: '6px',
+          flexShrink: 0,
+          background: STATUS_CONFIG[booking.status]?.color ?? 'var(--border)',
+        }} />
 
-      {/* Content */}
-      <div style={{ flex: 1, padding: '1.25rem', minWidth: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <div style={{ minWidth: 0 }}>
-            <h3 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.05rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: '0 0 0.15rem',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}>
-              {booking.eventTitle}
-            </h3>
-            <p style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', margin: 0, fontFamily: 'var(--font-mono)' }}>
-              #{booking.bookingNumber}
-            </p>
+        {/* Content */}
+        <div style={{ flex: 1, padding: '1.25rem', minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <div style={{ minWidth: 0 }}>
+              <h3 style={{
+                fontFamily: 'var(--font-display)', fontSize: '1.05rem', fontWeight: 700,
+                color: 'var(--text-primary)', margin: '0 0 0.15rem',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {booking.eventTitle}
+              </h3>
+              <p style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', margin: 0, fontFamily: 'var(--font-mono)' }}>
+                #{booking.bookingNumber}
+              </p>
+            </div>
+            <StatusBadge status={booking.status} />
           </div>
-          <StatusBadge status={booking.status} />
-        </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            <Calendar size={12} style={{ color: 'var(--accent-primary)' }} />
-            {new Date(booking.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-          </span>
-          {booking.tierSummary && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              <Ticket size={12} style={{ color: 'var(--accent-primary)' }} />
-              {booking.tierSummary}
+              <Calendar size={12} style={{ color: 'var(--accent-primary)' }} />
+              {new Date(booking.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <div>
-            {booking.status === 'confirmed' && booking.qrToken && (
-              <QRDisplay token={booking.qrToken} />
+            {booking.tierSummary && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                <Ticket size={12} style={{ color: 'var(--accent-primary)' }} />
+                {booking.tierSummary}
+              </span>
             )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontWeight: 700, color: 'var(--accent-cta)', fontSize: '1rem' }}>
-              {formatCents(booking.totalCents)}
-            </span>
-            <Link
-              to={`/events/${booking.eventId}`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.2rem',
-                fontSize: '0.8rem',
-                color: 'var(--accent-primary)',
-                textDecoration: 'none',
-                fontWeight: 500,
-              }}
-            >
-              View Event <ChevronRight size={13} />
-            </Link>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <div>
+              {isConfirmed && booking.items.length > 0 && (
+                <button
+                  onClick={() => setShowTickets(v => !v)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.4rem',
+                    padding: '0.4rem 0.85rem', borderRadius: '0.65rem',
+                    border: '1px solid var(--border)', background: 'var(--bg-tertiary)',
+                    color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 500,
+                    cursor: 'pointer', fontFamily: 'var(--font-body)',
+                  }}
+                >
+                  <QrCode size={13} />
+                  {showTickets ? 'Hide' : 'Show'} {booking.items.length} Ticket{booking.items.length > 1 ? 's' : ''}
+                  <ChevronDown size={12} style={{ transform: showTickets ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                </button>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <span style={{ fontWeight: 700, color: 'var(--accent-cta)', fontSize: '1rem' }}>
+                {formatCents(booking.totalCents)}
+              </span>
+              <Link
+                to={`/events/${booking.eventId}`}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.2rem',
+                  fontSize: '0.8rem', color: 'var(--accent-primary)',
+                  textDecoration: 'none', fontWeight: 500,
+                }}
+              >
+                View Event <ChevronRight size={13} />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Per-seat tickets with QR codes + guest info */}
+      {showTickets && isConfirmed && (
+        <div style={{
+          borderTop: '1px solid var(--border)', padding: '1rem 1.25rem',
+          display: 'flex', flexDirection: 'column', gap: '0.5rem',
+        }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.25rem' }}>
+            <User size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+            Individual Tickets — assign guests & share QR codes
+          </div>
+          {booking.items.map(item => (
+            <SeatTicket key={item.id} item={item} bookingId={booking.id} onUpdate={onRefresh} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -330,6 +371,13 @@ export default function MyBookingsPage(): React.ReactElement {
 
   if (!isAuthenticated) {
     return <Navigate to="/auth/login" replace />;
+  }
+
+  async function refreshBookings(): Promise<void> {
+    try {
+      const res = await apiClient.get<ApiBookingsResponse>('/bookings/mine');
+      setBookings((res.data.items ?? []).map(apiToBooking));
+    } catch { /* ignore */ }
   }
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -488,7 +536,7 @@ export default function MyBookingsPage(): React.ReactElement {
                   key={booking.id}
                   style={{ animationDelay: `${i * 0.08}s` }}
                 >
-                  <BookingCard booking={booking} />
+                  <BookingCard booking={booking} onRefresh={() => void refreshBookings()} />
                 </div>
               ))}
             </div>
