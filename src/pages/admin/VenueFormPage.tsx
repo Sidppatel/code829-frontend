@@ -262,11 +262,10 @@ function AddressAutocomplete({ value, error, onAddressChange, onRawChange }: Add
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=us&limit=5&q=${encodeURIComponent(newValue)}`,
-          { headers: { 'Accept-Language': 'en' } }
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(newValue)}&format=json&addressdetails=1`
         );
         const data: NominatimResult[] = await res.json();
-        setSuggestions(data);
+        setSuggestions(data.slice(0, 5));
         setShowDropdown(data.length > 0);
       } catch {
         setSuggestions([]);
