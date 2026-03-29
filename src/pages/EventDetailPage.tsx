@@ -25,6 +25,7 @@ interface ApiTicketType {
   name: string;
   description: string;
   priceCents: number;
+  platformFeeCents: number;
   quantityTotal: number;
   quantitySold: number;
   quantityRemaining: number;
@@ -65,6 +66,7 @@ interface TicketTier {
   id: string;
   name: string;
   priceCents: number;
+  totalPriceCents: number;
   description: string;
   available: number;
   total: number;
@@ -100,6 +102,7 @@ function apiToEventDetail(api: ApiEventDetail): EventDetail {
       id: t.id,
       name: t.name,
       priceCents: t.priceCents,
+      totalPriceCents: t.priceCents + t.platformFeeCents,
       description: t.description,
       available: t.quantityRemaining,
       total: t.quantityTotal,
@@ -149,6 +152,7 @@ This year's summit features over 40 speakers from companies like Meta, Vercel, a
       id: "t1",
       name: "General Admission",
       priceCents: 19900,
+      totalPriceCents: 19900,
       description: "Access to all talks and networking sessions",
       available: 153,
       total: 500,
@@ -157,6 +161,7 @@ This year's summit features over 40 speakers from companies like Meta, Vercel, a
       id: "t2",
       name: "Workshop Pass",
       priceCents: 34900,
+      totalPriceCents: 34900,
       description: "All talks + 2 hands-on workshops of your choice",
       available: 28,
       total: 100,
@@ -165,6 +170,7 @@ This year's summit features over 40 speakers from companies like Meta, Vercel, a
       id: "t3",
       name: "VIP Experience",
       priceCents: 69900,
+      totalPriceCents: 69900,
       description: "Full access + speaker dinner + priority seating",
       available: 7,
       total: 30,
@@ -255,7 +261,7 @@ function TicketCard({
             marginLeft: "1rem",
           }}
         >
-          {formatCents(tier.priceCents)}
+          {formatCents(tier.totalPriceCents)}
         </div>
       </div>
 
@@ -573,7 +579,7 @@ export default function EventDetailPage(): React.ReactElement {
 
   const selectedTierData = event?.tickets.find((t) => t.id === selectedTier);
   const totalCents = selectedTierData
-    ? selectedTierData.priceCents * quantity
+    ? selectedTierData.totalPriceCents * quantity
     : 0;
 
   if (loading) {

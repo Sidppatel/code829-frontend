@@ -21,12 +21,13 @@ import apiClient from '../../lib/axios';
 import AnimatedCounter from '../../components/AnimatedCounter';
 
 const PricingStep = lazy(() => import('./editors/PricingStep'));
+const ReadOnlyPlatformFees = lazy(() => import('./editors/ReadOnlyPlatformFees'));
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type EventStatus = 'Draft' | 'Published' | 'Cancelled' | 'Completed';
 type LayoutMode = 'Grid' | 'CapacityOnly' | 'None';
-type TabKey = 'overview' | 'bookings' | 'layout' | 'pricing';
+type TabKey = 'overview' | 'bookings' | 'layout' | 'pricing' | 'fees';
 
 interface Venue {
   id: string;
@@ -53,6 +54,17 @@ interface EventDetail {
   publishedAt: string | null;
   venueId: string;
   venue: Venue | null;
+  ticketTypes: TicketTypeDto[];
+}
+
+interface TicketTypeDto {
+  id: string;
+  name: string;
+  priceCents: number;
+  platformFeeCents: number;
+  quantityTotal: number;
+  quantitySold: number;
+  sortOrder: number;
 }
 
 interface LayoutTable {
@@ -64,6 +76,8 @@ interface LayoutTable {
   gridCol: number | null;
   tableTypeId: string | null;
   color: string | null;
+  priceCents: number;
+  platformFeeCents: number;
 }
 
 interface LayoutData {
@@ -700,6 +714,7 @@ export default function EventManagePage(): React.ReactElement {
     { key: 'layout', label: 'Layout', icon: <Grid3X3 size={15} /> },
     // Pricing tab hidden for assigned seating — pricing is set per-table in the grid editor
     ...(event?.layoutMode !== 'Grid' ? [{ key: 'pricing' as TabKey, label: 'Pricing', icon: <DollarSign size={15} /> }] : []),
+    { key: 'fees' as TabKey, label: 'Platform Fees', icon: <DollarSign size={15} /> },
   ];
 
   // ─── Loading ──────────────────────────────────────────────────────────────
@@ -1421,6 +1436,35 @@ export default function EventManagePage(): React.ReactElement {
         </div>
       )}
 
+
+      {/* ── Fees Tab ──────────────────────────────────────────────────────── */}
+      {activeTab === 'fees' && (
+        <div style={{ marginTop: '0.5rem' }}>
+          <Suspense
+            fallback={
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      height: '80px',
+                      borderRadius: '0.75rem',
+                      background: 'var(--bg-tertiary)',
+                      animation: 'pulse 1.5s ease-in-out infinite',
+                    }}
+                  />
+                ))}
+              </div>
+            }
+          >
+            <ReadOnlyPlatformFees
+              layoutMode={event.layoutMode}
+              ticketTypes={event.ticketTypes || []}
+              tables={layoutData?.tables || []}
+            />
+          </Suspense>
+        </div>
+      )}
 
       {/* ── Cancel modal ──────────────────────────────────────────────────── */}
       {showCancelModal && (
