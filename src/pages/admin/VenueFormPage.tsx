@@ -17,10 +17,6 @@ const venueSchema = z.object({
   zipCode: z
     .string()
     .regex(/^\d{5}(-\d{4})?$/, 'Must be a valid ZIP code (e.g. 90210 or 90210-1234)'),
-  capacity: z
-    .union([z.number().positive('Must be positive'), z.nan()])
-    .optional()
-    .transform((v) => (typeof v === 'number' && !isNaN(v) ? v : undefined)),
   description: z.string().max(4096, 'Max 4096 characters').optional().or(z.literal('')),
   phone: z.string().max(20, 'Max 20 characters').optional().or(z.literal('')),
   website: z
@@ -39,7 +35,6 @@ interface VenueData {
   city: string;
   state: string;
   zipCode: string;
-  capacity: number;
   description: string;
   phone: string;
   website: string;
@@ -469,7 +464,6 @@ export default function VenueFormPage(): React.ReactElement {
       city: '',
       state: '',
       zipCode: '',
-      capacity: undefined,
       description: '',
       phone: '',
       website: '',
@@ -493,7 +487,6 @@ export default function VenueFormPage(): React.ReactElement {
           city: v.city ?? '',
           state: v.state ?? '',
           zipCode: v.zipCode ?? '',
-          capacity: v.capacity > 0 ? v.capacity : undefined,
           description: v.description ?? '',
           phone: v.phone ?? '',
           website: v.website ?? '',
@@ -650,25 +643,14 @@ export default function VenueFormPage(): React.ReactElement {
           <SectionDivider title="Contact & Details" />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <FloatingInput
-                id="capacity"
-                label="Max Capacity"
-                type="number"
-                min={1}
-                value={strVal('capacity')}
-                error={errors.capacity?.message}
-                {...register('capacity', { valueAsNumber: true })}
-              />
-              <FloatingInput
-                id="phone"
-                label="Phone"
-                type="tel"
-                value={strVal('phone')}
-                error={errors.phone?.message}
-                {...register('phone')}
-              />
-            </div>
+            <FloatingInput
+              id="phone"
+              label="Phone"
+              type="tel"
+              value={strVal('phone')}
+              error={errors.phone?.message}
+              {...register('phone')}
+            />
             <FloatingInput
               id="website"
               label="Website URL"
