@@ -5,7 +5,6 @@ import {
   CalendarDays,
   MapPin,
   BarChart3,
-  Settings,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -25,7 +24,6 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Venues', to: '/admin/venues', Icon: MapPin },
   { label: 'Table Types', to: '/admin/table-types', Icon: Armchair },
   { label: 'Analytics', to: '/admin/analytics', Icon: BarChart3 },
-  { label: 'Settings', to: '/admin/settings', Icon: Settings },
 ];
 
 function buildBreadcrumbs(pathname: string): string[] {
