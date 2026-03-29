@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, lazy, Suspense } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   Pencil,
@@ -27,7 +27,7 @@ const PricingStep = lazy(() => import('./editors/PricingStep'));
 
 type EventStatus = 'Draft' | 'Published' | 'Cancelled' | 'Completed';
 type LayoutMode = 'Grid' | 'CapacityOnly' | 'None';
-type TabKey = 'overview' | 'layout' | 'pricing' | 'settings';
+type TabKey = 'overview' | 'bookings' | 'layout' | 'pricing' | 'settings';
 
 interface Venue {
   id: string;
@@ -59,17 +59,17 @@ interface EventDetail {
 interface LayoutTable {
   id: string;
   label: string;
-  seats: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rotation: number;
+  capacity: number;
+  shape: string;
+  gridRow: number | null;
+  gridCol: number | null;
   tableTypeId: string | null;
   color: string | null;
 }
 
 interface LayoutData {
+  gridRows: number | null;
+  gridCols: number | null;
   tables: LayoutTable[];
 }
 
@@ -78,6 +78,45 @@ interface EventStats {
   ticketsSold: number;
   revenueCents: number;
   checkIns: number;
+}
+
+interface BookingItemDto {
+  id: string;
+  ticketTypeName: string;
+  priceCents: number;
+  seatId: string | null;
+}
+
+interface PaymentDto {
+  id: string;
+  status: string;
+  amountCents: number;
+  paidAt: string | null;
+  refundedAt: string | null;
+}
+
+interface BookingDto {
+  id: string;
+  bookingNumber: string;
+  status: string;
+  userId: string;
+  userName: string;
+  eventId: string;
+  eventTitle: string;
+  subtotalCents: number;
+  feeCents: number;
+  totalCents: number;
+  qrToken: string | null;
+  items: BookingItemDto[];
+  payment: PaymentDto | null;
+  createdAt: string;
+}
+
+interface PagedBookings {
+  items: BookingDto[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -101,6 +140,12 @@ function formatDateRange(startIso: string, endIso: string): string {
   } catch {
     return startIso;
   }
+}
+
+function formatCents(cents: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 2,
+  }).format(cents / 100);
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -375,99 +420,78 @@ function CancelModal({
 
 // ─── Layout grid display ──────────────────────────────────────────────────────
 
-function ReadOnlyLayoutGrid({ tables }: { tables: LayoutTable[] }): React.ReactElement {
+function ReadOnlyLayoutGrid({ tables, gridRows, gridCols }: {
+  tables: LayoutTable[]; gridRows: number; gridCols: number;
+}): React.ReactElement {
   if (tables.length === 0) {
     return (
-      <div
-        style={{
-          padding: '2rem',
-          textAlign: 'center',
-          color: 'var(--text-tertiary)',
-          fontSize: '0.875rem',
-          border: '1px dashed var(--border)',
-          borderRadius: '0.75rem',
-        }}
-      >
+      <div style={{
+        padding: '2rem', textAlign: 'center', color: 'var(--text-tertiary)',
+        fontSize: '0.875rem', border: '1px dashed var(--border)', borderRadius: '0.75rem',
+      }}>
         No tables configured.
       </div>
     );
   }
 
-  const allX = tables.map((t) => t.x);
-  const allY = tables.map((t) => t.y);
-  const minX = Math.min(...allX);
-  const minY = Math.min(...allY);
-  const maxX = Math.max(...tables.map((t) => t.x + (t.width ?? 80)));
-  const maxY = Math.max(...tables.map((t) => t.y + (t.height ?? 80)));
+  // Build a lookup: "row,col" -> table
+  const cellMap = new Map<string, LayoutTable>();
+  for (const t of tables) {
+    if (t.gridRow != null && t.gridCol != null) {
+      cellMap.set(`${t.gridRow},${t.gridCol}`, t);
+    }
+  }
 
-  const PAD = 24;
-  const viewW = maxX - minX + PAD * 2;
-  const viewH = maxY - minY + PAD * 2;
+  const CELL = 64;
+  const GAP = 4;
 
   return (
-    <div
-      style={{
-        overflowX: 'auto',
-        overflowY: 'auto',
-        border: '1px solid var(--border)',
-        borderRadius: '0.75rem',
-        background: 'var(--bg-tertiary)',
-        maxHeight: '420px',
-        padding: '0.5rem',
-      }}
-    >
-      <svg
-        viewBox={`0 0 ${viewW} ${viewH}`}
-        style={{ display: 'block', minWidth: '100%', height: `${viewH}px` }}
-        aria-label="Floor plan layout"
-      >
-        {tables.map((table) => {
-          const x = table.x - minX + PAD;
-          const y = table.y - minY + PAD;
-          const w = table.width ?? 80;
-          const h = table.height ?? 80;
-          const fill = table.color ?? 'var(--accent-primary)';
+    <div style={{
+      overflowX: 'auto', overflowY: 'auto', border: '1px solid var(--border)',
+      borderRadius: '0.75rem', background: 'var(--bg-tertiary)', maxHeight: '420px', padding: '0.5rem',
+    }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${gridCols}, ${CELL}px)`,
+        gridTemplateRows: `repeat(${gridRows}, ${CELL}px)`,
+        gap: `${GAP}px`,
+        width: 'fit-content',
+      }}>
+        {Array.from({ length: gridRows * gridCols }).map((_, idx) => {
+          const r = Math.floor(idx / gridCols);
+          const c = idx % gridCols;
+          const t = cellMap.get(`${r},${c}`);
+          const fill = t?.color ?? 'var(--accent-primary)';
 
           return (
-            <g key={table.id} transform={`translate(${x},${y}) rotate(${table.rotation ?? 0},${w / 2},${h / 2})`}>
-              <rect
-                x={0}
-                y={0}
-                width={w}
-                height={h}
-                rx={8}
-                fill={`color-mix(in srgb, ${fill} 20%, var(--bg-secondary))`}
-                stroke={fill}
-                strokeWidth={1.5}
-              />
-              <text
-                x={w / 2}
-                y={h / 2 - 5}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize={11}
-                fontWeight={700}
-                fill={fill}
-                fontFamily="var(--font-body)"
-              >
-                {table.label ?? 'T'}
-              </text>
-              <text
-                x={w / 2}
-                y={h / 2 + 9}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize={9}
-                fill={fill}
-                fontFamily="var(--font-body)"
-                opacity={0.8}
-              >
-                {table.seats}s
-              </text>
-            </g>
+            <div
+              key={`${r}-${c}`}
+              style={{
+                width: `${CELL}px`, height: `${CELL}px`,
+                borderRadius: t?.shape === 'Round' || t?.shape === 'Cocktail' ? '50%' : '0.375rem',
+                background: t
+                  ? `color-mix(in srgb, ${fill} 20%, var(--bg-secondary))`
+                  : 'var(--bg-secondary)',
+                border: t ? `2px solid ${fill}` : '1px solid var(--border)',
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+                fontSize: '0.6875rem', fontWeight: 700,
+                color: t ? fill : 'transparent',
+                opacity: t ? 1 : 0.4,
+              }}
+            >
+              {t && (
+                <>
+                  <span>{t.label}</span>
+                  <span style={{ fontSize: '0.6rem', fontWeight: 500, opacity: 0.8 }}>
+                    {t.capacity}s
+                  </span>
+                </>
+              )}
+            </div>
           );
         })}
-      </svg>
+      </div>
     </div>
   );
 }
@@ -476,6 +500,8 @@ function ReadOnlyLayoutGrid({ tables }: { tables: LayoutTable[] }): React.ReactE
 
 export default function EventManagePage(): React.ReactElement {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const initialTab = (searchParams.get('tab') as TabKey) || 'overview';
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -487,7 +513,12 @@ export default function EventManagePage(): React.ReactElement {
     revenueCents: 0,
     checkIns: 0,
   });
-  const [activeTab, setActiveTab] = useState<TabKey>('overview');
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+  const [bookings, setBookings] = useState<BookingDto[]>([]);
+  const [bookingsTotal, setBookingsTotal] = useState(0);
+  const [bookingsPage, setBookingsPage] = useState(1);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [bookingsStatusFilter, setBookingsStatusFilter] = useState<string>('');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [completing, setCompleting] = useState(false);
@@ -589,6 +620,36 @@ export default function EventManagePage(): React.ReactElement {
     return () => { cancelled = true; };
   }, [id, event]);
 
+  // Load bookings when on bookings tab
+  useEffect(() => {
+    if (!id || activeTab !== 'bookings') return;
+    let cancelled = false;
+    setBookingsLoading(true);
+
+    async function loadBookings(): Promise<void> {
+      try {
+        const params = new URLSearchParams({
+          page: String(bookingsPage),
+          pageSize: '15',
+          eventId: id!,
+        });
+        if (bookingsStatusFilter) params.set('status', bookingsStatusFilter);
+        const res = await apiClient.get<PagedBookings>(`/admin/bookings?${params}`);
+        if (!cancelled) {
+          setBookings(res.data.items ?? []);
+          setBookingsTotal(res.data.totalCount ?? 0);
+        }
+      } catch {
+        // non-fatal
+      } finally {
+        if (!cancelled) setBookingsLoading(false);
+      }
+    }
+
+    void loadBookings();
+    return () => { cancelled = true; };
+  }, [id, activeTab, bookingsPage, bookingsStatusFilter]);
+
   // ─── Actions ───────────────────────────────────────────────────────────────
 
   async function handlePublish(): Promise<void> {
@@ -669,6 +730,7 @@ export default function EventManagePage(): React.ReactElement {
 
   const tabs: Array<{ key: TabKey; label: string; icon: React.ReactNode }> = [
     { key: 'overview', label: 'Overview', icon: <LayoutDashboard size={15} /> },
+    { key: 'bookings', label: 'Bookings', icon: <Ticket size={15} /> },
     { key: 'layout', label: 'Layout', icon: <Grid3X3 size={15} /> },
     { key: 'pricing', label: 'Pricing', icon: <DollarSign size={15} /> },
     { key: 'settings', label: 'Settings', icon: <Settings size={15} /> },
@@ -711,8 +773,8 @@ export default function EventManagePage(): React.ReactElement {
   const isEndedEvent =
     event.endDate ? new Date(event.endDate) <= new Date() : false;
 
-  const totalTables = layoutData?.tables.length ?? 0;
-  const totalSeats = layoutData?.tables.reduce((sum, t) => sum + (t.seats ?? 0), 0) ?? 0;
+  const totalTables = layoutData?.tables?.length ?? 0;
+  const totalSeats = layoutData?.tables?.reduce((sum, t) => sum + (t.capacity ?? 0), 0) ?? 0;
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto' }}>
@@ -1035,6 +1097,185 @@ export default function EventManagePage(): React.ReactElement {
         </div>
       )}
 
+      {/* ── Bookings Tab ─────────────────────────────────────────────────── */}
+      {activeTab === 'bookings' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* Header + filters */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <h3 style={{
+              fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700,
+              color: 'var(--text-primary)', margin: 0,
+            }}>
+              Bookings {bookingsTotal > 0 && <span style={{ fontWeight: 400, color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>({bookingsTotal})</span>}
+            </h3>
+            <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
+              {['', 'Paid', 'CheckedIn', 'Pending', 'Cancelled', 'Refunded'].map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => { setBookingsStatusFilter(s); setBookingsPage(1); }}
+                  style={{
+                    padding: '0.3rem 0.65rem', borderRadius: '999px', border: '1px solid var(--border)',
+                    background: bookingsStatusFilter === s ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+                    color: bookingsStatusFilter === s ? '#fff' : 'var(--text-secondary)',
+                    fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)',
+                  }}
+                >{s || 'All'}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Table */}
+          {bookingsLoading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} style={{
+                  height: '52px', borderRadius: '0.5rem', background: 'var(--bg-tertiary)',
+                  animation: 'pulse 1.5s ease-in-out infinite',
+                }} />
+              ))}
+            </div>
+          ) : bookings.length === 0 ? (
+            <div style={{
+              padding: '2.5rem', textAlign: 'center', color: 'var(--text-tertiary)',
+              fontSize: '0.875rem', border: '1px dashed var(--border)', borderRadius: '0.75rem',
+            }}>
+              {bookingsStatusFilter ? 'No bookings with this status.' : 'No bookings yet for this event.'}
+            </div>
+          ) : (
+            <div style={{
+              background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+              borderRadius: '0.75rem', overflow: 'hidden',
+            }}>
+              {/* Table header */}
+              <div style={{
+                display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.8fr 0.7fr 0.6fr',
+                gap: '0.75rem', padding: '0.65rem 1rem',
+                borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)',
+                fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase',
+                letterSpacing: '0.06em', color: 'var(--text-tertiary)',
+              }}>
+                <span>Customer</span>
+                <span>Items</span>
+                <span>Amount</span>
+                <span>Status</span>
+                <span>Date</span>
+              </div>
+
+              {/* Rows */}
+              {bookings.map((b, i) => {
+                const statusColors: Record<string, string> = {
+                  Paid: 'var(--color-success)', CheckedIn: 'var(--accent-primary)',
+                  Pending: 'var(--color-warning)', Cancelled: 'var(--color-error)',
+                  Refunded: 'var(--text-tertiary)',
+                };
+                const sColor = statusColors[b.status] ?? 'var(--text-tertiary)';
+                return (
+                  <div
+                    key={b.id}
+                    style={{
+                      display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.8fr 0.7fr 0.6fr',
+                      gap: '0.75rem', padding: '0.65rem 1rem', alignItems: 'center',
+                      borderBottom: i < bookings.length - 1 ? '1px solid var(--border)' : 'none',
+                      fontSize: '0.8125rem',
+                    }}
+                  >
+                    {/* Customer */}
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{
+                        fontWeight: 600, color: 'var(--text-primary)',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>{b.userName}</div>
+                      <div style={{
+                        fontSize: '0.7rem', color: 'var(--text-tertiary)',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>#{b.bookingNumber}</div>
+                    </div>
+
+                    {/* Items */}
+                    <div style={{ minWidth: 0 }}>
+                      {(b.items ?? []).length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                          {(b.items ?? []).slice(0, 2).map((item, idx) => (
+                            <span key={idx} style={{
+                              fontSize: '0.75rem', color: 'var(--text-secondary)',
+                              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                            }}>
+                              {item.ticketTypeName} · {formatCents(item.priceCents)}
+                            </span>
+                          ))}
+                          {(b.items ?? []).length > 2 && (
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
+                              +{(b.items ?? []).length - 2} more
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>—</span>
+                      )}
+                    </div>
+
+                    {/* Amount */}
+                    <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
+                      {formatCents(b.totalCents)}
+                    </span>
+
+                    {/* Status */}
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
+                      padding: '0.15rem 0.5rem', borderRadius: '999px', fontSize: '0.6875rem',
+                      fontWeight: 700, background: `color-mix(in srgb, ${sColor} 12%, transparent)`,
+                      color: sColor, width: 'fit-content',
+                    }}>
+                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: sColor }} />
+                      {b.status}
+                    </span>
+
+                    {/* Date */}
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                      {new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {bookingsTotal > 15 && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setBookingsPage(p => Math.max(1, p - 1))}
+                disabled={bookingsPage <= 1}
+                style={{
+                  padding: '0.4rem 0.75rem', borderRadius: '0.375rem',
+                  border: '1px solid var(--border)', background: 'var(--bg-secondary)',
+                  color: bookingsPage <= 1 ? 'var(--text-tertiary)' : 'var(--text-primary)',
+                  cursor: bookingsPage <= 1 ? 'not-allowed' : 'pointer',
+                  fontSize: '0.8125rem', fontFamily: 'var(--font-body)',
+                }}
+              >Prev</button>
+              <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                Page {bookingsPage} of {Math.ceil(bookingsTotal / 15)}
+              </span>
+              <button
+                type="button"
+                onClick={() => setBookingsPage(p => p + 1)}
+                disabled={bookingsPage >= Math.ceil(bookingsTotal / 15)}
+                style={{
+                  padding: '0.4rem 0.75rem', borderRadius: '0.375rem',
+                  border: '1px solid var(--border)', background: 'var(--bg-secondary)',
+                  color: bookingsPage >= Math.ceil(bookingsTotal / 15) ? 'var(--text-tertiary)' : 'var(--text-primary)',
+                  cursor: bookingsPage >= Math.ceil(bookingsTotal / 15) ? 'not-allowed' : 'pointer',
+                  fontSize: '0.8125rem', fontFamily: 'var(--font-body)',
+                }}
+              >Next</button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Layout Tab ────────────────────────────────────────────────────── */}
       {activeTab === 'layout' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -1105,7 +1346,11 @@ export default function EventManagePage(): React.ReactElement {
                 }}
               />
             ) : (
-              <ReadOnlyLayoutGrid tables={layoutData?.tables ?? []} />
+              <ReadOnlyLayoutGrid
+                tables={layoutData?.tables ?? []}
+                gridRows={layoutData?.gridRows ?? 5}
+                gridCols={layoutData?.gridCols ?? 5}
+              />
             )
           ) : (
             <div

@@ -18,11 +18,6 @@ export interface FloorPlanElement {
   isActive: boolean;
   gridRow?: number;
   gridCol?: number;
-  posX?: number;
-  posY?: number;
-  width: number;
-  height: number;
-  rotation: number;
   sortOrder: number;
   tableTypeId?: string;
   tableTypeName?: string;
@@ -42,11 +37,6 @@ interface ApiTable {
   isActive: boolean;
   gridRow?: number;
   gridCol?: number;
-  posX?: number;
-  posY?: number;
-  width: number;
-  height: number;
-  rotation: number;
   sortOrder: number;
   tableTypeId?: string;
   tableTypeName?: string;
@@ -54,7 +44,7 @@ interface ApiTable {
 
 export interface ApiLayoutResponse {
   eventId: string;
-  editorMode: 'grid' | 'canvas';
+  editorMode: 'grid';
   gridRows: number;
   gridCols: number;
   tables: ApiTable[];
@@ -66,7 +56,7 @@ interface FloorPlanState {
   elements: Record<string, FloorPlanElement>;
   elementOrder: string[];
   gridDimensions: { rows: number; cols: number } | null;
-  editorMode: 'grid' | 'canvas';
+  editorMode: 'grid';
   isDirty: boolean;
 
   // Actions
@@ -74,10 +64,8 @@ interface FloorPlanState {
   updateElement: (id: string, patch: Partial<FloorPlanElement>) => void;
   deleteElement: (id: string) => void;
   moveElement: (id: string, gridRow: number, gridCol: number) => void;
-  moveElementCanvas: (id: string, posX: number, posY: number) => void;
   loadFromApi: (response: ApiLayoutResponse) => void;
   setGridDimensions: (rows: number, cols: number) => void;
-  setEditorMode: (mode: 'grid' | 'canvas') => void;
   markClean: () => void;
   clearAll: () => void;
 }
@@ -133,18 +121,6 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
       };
     }),
 
-  moveElementCanvas: (id, posX, posY) =>
-    set((state) => {
-      if (!state.elements[id]) return state;
-      return {
-        elements: {
-          ...state.elements,
-          [id]: { ...state.elements[id], posX, posY },
-        },
-        isDirty: true,
-      };
-    }),
-
   loadFromApi: (response) => {
     const elements: Record<string, FloorPlanElement> = {};
     const elementOrder: string[] = [];
@@ -162,11 +138,6 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
         isActive: t.isActive,
         gridRow: t.gridRow,
         gridCol: t.gridCol,
-        posX: t.posX,
-        posY: t.posY,
-        width: t.width,
-        height: t.height,
-        rotation: t.rotation,
         sortOrder: t.sortOrder,
         tableTypeId: t.tableTypeId,
         tableTypeName: t.tableTypeName,
@@ -185,7 +156,6 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
   setGridDimensions: (rows, cols) =>
     set({ gridDimensions: { rows, cols }, isDirty: true }),
 
-  setEditorMode: (mode) => set({ editorMode: mode }),
 
   markClean: () => set({ isDirty: false }),
 

@@ -18,7 +18,6 @@ import { useEventWizardStore } from '../../stores/eventWizardStore';
 import type { LayoutMode } from '../../stores/eventWizardStore';
 
 const GridEditor = lazy(() => import('./editors/GridEditor'));
-const CanvasEditor = lazy(() => import('./editors/CanvasEditor'));
 const PricingStep = lazy(() => import('./editors/PricingStep'));
 const ReviewStep = lazy(() => import('./editors/ReviewStep'));
 
@@ -485,7 +484,6 @@ interface Step2LayoutPanelProps {
   isEdit: boolean;
 }
 
-type EditorTabMode = 'grid' | 'canvas';
 
 function Step2LayoutPanel({
   watchedLayoutMode,
@@ -497,7 +495,6 @@ function Step2LayoutPanel({
   eventId,
   isEdit,
 }: Step2LayoutPanelProps): React.ReactElement {
-  const [editorTab, setEditorTab] = useState<EditorTabMode>('grid');
   const isAssignedSeating = watchedLayoutMode === 'Grid';
 
   return (
@@ -611,45 +608,14 @@ function Step2LayoutPanel({
       {/* Floor plan editor for Assigned Seating */}
       {isAssignedSeating && (
         <div style={{ marginTop: '0.5rem' }}>
-          {/* Editor mode toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Editor:</span>
-            {(['grid', 'canvas'] as const).map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setEditorTab(tab)}
-                style={{
-                  padding: '0.3rem 0.875rem',
-                  borderRadius: '999px',
-                  border: `1px solid ${editorTab === tab ? 'var(--accent-primary)' : 'var(--border)'}`,
-                  background: editorTab === tab
-                    ? 'color-mix(in srgb, var(--accent-primary) 12%, var(--bg-secondary))'
-                    : 'var(--bg-tertiary)',
-                  color: editorTab === tab ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  fontFamily: 'var(--font-body)',
-                  fontWeight: 600,
-                  transition: 'border-color 0.15s, background 0.15s',
-                }}
-              >
-                {tab === 'grid' ? 'Grid Editor' : 'Canvas Editor'}
-              </button>
-            ))}
-          </div>
-
-          {/* Editors */}
+          {/* Grid Editor */}
           {(isEdit && eventId) ? (
             <Suspense fallback={
               <div style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: '0.75rem', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>
                 Loading editor…
               </div>
             }>
-              {editorTab === 'grid'
-                ? <GridEditor eventId={eventId} />
-                : <CanvasEditor eventId={eventId} />
-              }
+              <GridEditor eventId={eventId} />
             </Suspense>
           ) : (
             <div
