@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
-import { Save, Users, Settings, Key } from 'lucide-react';
+import { Save, Users, Settings, Key, Search } from 'lucide-react';
 import apiClient from '../../lib/axios';
 
 interface SettingItem {
@@ -24,6 +24,7 @@ export default function DeveloperSettingsPage(): React.ReactElement {
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingKeys, setSavingKeys] = useState<Record<string, boolean>>({});
+  const [userSearch, setUserSearch] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -62,6 +63,16 @@ export default function DeveloperSettingsPage(): React.ReactElement {
       setSavingKeys(prev => ({ ...prev, [key]: false }));
     }
   }
+
+  const filteredUsers = useMemo(() => {
+    if (!userSearch.trim()) return users;
+    const q = userSearch.toLowerCase();
+    return users.filter(u =>
+      u.name.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      u.role.toLowerCase().includes(q)
+    );
+  }, [users, userSearch]);
 
   async function handleRoleChange(userId: string, newRole: string): Promise<void> {
     try {
@@ -206,6 +217,29 @@ export default function DeveloperSettingsPage(): React.ReactElement {
             )}
           </div>
         ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* Search bar */}
+            <div style={{ position: 'relative' }}>
+              <Search size={16} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+              <input
+                type="text"
+                placeholder="Search users by name, email, or role..."
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.625rem 0.875rem 0.625rem 2.5rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '0.875rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
           <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '0.75rem', overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
               <thead>
@@ -217,7 +251,7 @@ export default function DeveloperSettingsPage(): React.ReactElement {
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => (
+                {filteredUsers.map((u) => (
                   <tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '0.875rem 1.25rem', color: 'var(--text-primary)', fontWeight: 500 }}>
                       {u.name}
@@ -261,15 +295,16 @@ export default function DeveloperSettingsPage(): React.ReactElement {
                     </td>
                   </tr>
                 ))}
-                {users.length === 0 && (
+                {filteredUsers.length === 0 && (
                   <tr>
                     <td colSpan={4} style={{ padding: '1.25rem', textAlign: 'center', color: 'var(--text-tertiary)' }}>
-                      No users found.
+                      {userSearch ? `No users matching "${userSearch}"` : 'No users found.'}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+          </div>
           </div>
         )}
       </div>

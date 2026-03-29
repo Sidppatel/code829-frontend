@@ -25,6 +25,7 @@ const TableTypesPage = React.lazy(() => import('./pages/admin/TableTypesPage'));
 
 const DeveloperLayout = React.lazy(() => import('./layouts/DeveloperLayout'));
 const DeveloperDashboardPage = React.lazy(() => import('./pages/developer/DeveloperDashboardPage'));
+const DeveloperEventsPage = React.lazy(() => import('./pages/developer/DeveloperEventsPage'));
 const DeveloperAnalyticsPage = React.lazy(() => import('./pages/developer/AnalyticsPage'));
 const DeveloperSettingsPage = React.lazy(() => import('./pages/developer/DeveloperSettingsPage'));
 
@@ -92,6 +93,7 @@ function AppRoutes(): React.ReactElement {
           {/* Developer routes */}
           <Route path="/developer" element={<DeveloperLayout />}>
             <Route index element={<DeveloperDashboardPage />} />
+            <Route path="events" element={<DeveloperEventsPage />} />
             <Route path="analytics" element={<DeveloperAnalyticsPage />} />
             <Route path="settings" element={<DeveloperSettingsPage />} />
           </Route>

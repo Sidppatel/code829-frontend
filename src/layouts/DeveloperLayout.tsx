@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
+  CalendarDays,
   BarChart3,
   ChevronLeft,
   ChevronRight,
@@ -18,6 +19,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', to: '/developer', Icon: LayoutDashboard },
+  { label: 'Events', to: '/developer/events', Icon: CalendarDays },
   { label: 'Analytics', to: '/developer/analytics', Icon: BarChart3 },
   { label: 'Settings', to: '/developer/settings', Icon: Settings },
 ];
