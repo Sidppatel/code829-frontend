@@ -562,8 +562,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Platform fee state
-  const [customFeePercent, setCustomFeePercent] = useState('8');
+
 
   // Drag state
   const dragIndexRef = useRef<number | null>(null);
@@ -766,11 +765,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
   const hasStandardRule = rules.some((r) => r.type === 'Standard' && r.isActive);
   const hasActiveRule = rules.some((r) => r.isActive);
 
-  // Platform fee preview
-  const effectiveFeePercent = customFeePercent ? parseFloat(customFeePercent) : 8;
-  const sampleTicketPrice = 50;
-  const sampleFee = ((sampleTicketPrice * effectiveFeePercent) / 100).toFixed(2);
-  const sampleTotal = (sampleTicketPrice + parseFloat(sampleFee)).toFixed(2);
+
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -1211,84 +1206,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
         </div>
       )}
 
-      {/* ── Section 4: Platform Fee ───────────────────────────────────────── */}
-      <div style={sectionCard}>
-        <h3 style={{ ...sectionTitle, marginBottom: '1rem' }}>Platform Fee</h3>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-          {/* Fee input */}
-          <div style={{ maxWidth: '200px' }}>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                color: 'var(--text-tertiary)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                marginBottom: '0.3rem',
-              }}
-            >
-              Fee Percentage
-            </label>
-            <div style={{ position: 'relative' }}>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={customFeePercent}
-                onChange={(e) => setCustomFeePercent(e.target.value)}
-                placeholder="e.g. 8"
-                style={{
-                  width: '100%',
-                  padding: '0.625rem 2rem 0.625rem 0.875rem',
-                  borderRadius: '0.5rem',
-                  border: '1px solid var(--border)',
-                  background: 'var(--bg-primary)',
-                  color: 'var(--text-primary)',
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '0.875rem',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
-              />
-              <span
-                style={{
-                  position: 'absolute',
-                  right: '0.75rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-tertiary)',
-                  fontSize: '0.875rem',
-                  pointerEvents: 'none',
-                }}
-              >
-                %
-              </span>
-            </div>
-          </div>
-
-          {/* Preview line */}
-          <div
-            style={{
-              padding: '0.75rem 1rem',
-              background: 'var(--bg-primary)',
-              border: '1px solid var(--border)',
-              borderRadius: '0.625rem',
-              fontSize: '0.8125rem',
-              color: 'var(--text-secondary)',
-              fontFamily: 'var(--font-body)',
-            }}
-          >
-            On a{' '}
-            <strong style={{ color: 'var(--text-primary)' }}>${sampleTicketPrice}.00</strong> ticket:{' '}
-            <strong style={{ color: 'var(--color-warning)' }}>${sampleFee} fee</strong>
-            {' '}→{' '}
-            <strong style={{ color: 'var(--text-primary)' }}>${sampleTotal} total</strong>
-          </div>
-        </div>
-      </div>
 
       {/* Delete confirm dialog */}
       {deleteTarget && (
