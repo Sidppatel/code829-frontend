@@ -563,8 +563,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
   const [deleting, setDeleting] = useState(false);
 
   // Platform fee state
-  const [useCustomFee, setUseCustomFee] = useState(false);
-  const [customFeePercent, setCustomFeePercent] = useState('');
+  const [customFeePercent, setCustomFeePercent] = useState('8');
 
   // Drag state
   const dragIndexRef = useRef<number | null>(null);
@@ -768,7 +767,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
   const hasActiveRule = rules.some((r) => r.isActive);
 
   // Platform fee preview
-  const effectiveFeePercent = useCustomFee && customFeePercent ? parseFloat(customFeePercent) : 8;
+  const effectiveFeePercent = customFeePercent ? parseFloat(customFeePercent) : 8;
   const sampleTicketPrice = 50;
   const sampleFee = ((sampleTicketPrice * effectiveFeePercent) / 100).toFixed(2);
   const sampleTotal = (sampleTicketPrice + parseFloat(sampleFee)).toFixed(2);
@@ -1217,93 +1216,58 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
         <h3 style={{ ...sectionTitle, marginBottom: '1rem' }}>Platform Fee</h3>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-          {/* Toggle */}
-          <div style={{ display: 'flex', gap: '0.625rem' }}>
-            {(
-              [
-                { label: 'Use system default (8%)', value: false },
-                { label: 'Custom fee', value: true },
-              ] as const
-            ).map(({ label, value }) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => setUseCustomFee(value)}
+          {/* Fee input */}
+          <div style={{ maxWidth: '200px' }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                color: 'var(--text-tertiary)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                marginBottom: '0.3rem',
+              }}
+            >
+              Fee Percentage
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={customFeePercent}
+                onChange={(e) => setCustomFeePercent(e.target.value)}
+                placeholder="e.g. 8"
                 style={{
-                  padding: '0.45rem 0.875rem',
-                  borderRadius: '999px',
-                  border: `1px solid ${useCustomFee === value ? 'var(--accent-primary)' : 'var(--border)'}`,
-                  background:
-                    useCustomFee === value
-                      ? 'color-mix(in srgb, var(--accent-primary) 12%, var(--bg-secondary))'
-                      : 'var(--bg-tertiary)',
-                  color: useCustomFee === value ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  fontSize: '0.8125rem',
+                  width: '100%',
+                  padding: '0.625rem 2rem 0.625rem 0.875rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-primary)',
+                  color: 'var(--text-primary)',
                   fontFamily: 'var(--font-body)',
-                  fontWeight: 600,
-                  transition: 'border-color 0.15s, background 0.15s',
+                  fontSize: '0.875rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
                 }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {/* Custom fee input */}
-          {useCustomFee && (
-            <div style={{ maxWidth: '200px' }}>
-              <label
+              />
+              <span
                 style={{
-                  display: 'block',
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
+                  position: 'absolute',
+                  right: '0.75rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
                   color: 'var(--text-tertiary)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  marginBottom: '0.3rem',
+                  fontSize: '0.875rem',
+                  pointerEvents: 'none',
                 }}
               >
-                Fee Percentage
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={customFeePercent}
-                  onChange={(e) => setCustomFeePercent(e.target.value)}
-                  placeholder="e.g. 5"
-                  style={{
-                    width: '100%',
-                    padding: '0.625rem 2rem 0.625rem 0.875rem',
-                    borderRadius: '0.5rem',
-                    border: '1px solid var(--border)',
-                    background: 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '0.875rem',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                />
-                <span
-                  style={{
-                    position: 'absolute',
-                    right: '0.75rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: 'var(--text-tertiary)',
-                    fontSize: '0.875rem',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  %
-                </span>
-              </div>
+                %
+              </span>
             </div>
-          )}
+          </div>
 
           {/* Preview line */}
           <div
