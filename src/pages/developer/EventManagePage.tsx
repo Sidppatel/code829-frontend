@@ -2,11 +2,7 @@ import React, { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
-  Pencil,
   Check,
-  X,
-  CheckCircle2,
-  XCircle,
   Users,
   Ticket,
   Grid3X3,
@@ -20,14 +16,13 @@ import {
 import apiClient from '../../lib/axios';
 import AnimatedCounter from '../../components/AnimatedCounter';
 
-const PricingStep = lazy(() => import('./editors/PricingStep'));
 const PlatformFeesStep = lazy(() => import('./editors/PlatformFeesStep'));
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type EventStatus = 'Draft' | 'Published' | 'Cancelled' | 'Completed';
 type LayoutMode = 'Grid' | 'CapacityOnly' | 'None';
-type TabKey = 'overview' | 'bookings' | 'layout' | 'pricing' | 'fees';
+type TabKey = 'overview' | 'bookings' | 'pricing' | 'fees';
 
 interface Venue {
   id: string;
@@ -274,240 +269,7 @@ function StatCard({
 
 // ─── Cancel modal ─────────────────────────────────────────────────────────────
 
-function CancelModal({
-  eventTitle,
-  onCancel,
-  onConfirm,
-  confirming,
-}: {
-  eventTitle: string;
-  onCancel: () => void;
-  onConfirm: () => void;
-  confirming: boolean;
-}): React.ReactElement {
-  const [typed, setTyped] = useState('');
-  const matches = typed === eventTitle;
 
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'color-mix(in srgb, var(--bg-primary) 65%, transparent)',
-        backdropFilter: 'blur(6px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 400,
-        padding: '1rem',
-      }}
-    >
-      <div
-        style={{
-          background: 'var(--bg-secondary)',
-          border: '1px solid var(--border)',
-          borderRadius: '1rem',
-          padding: '1.75rem',
-          maxWidth: '460px',
-          width: '100%',
-          boxShadow: 'var(--shadow-card-hover)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '1rem' }}>
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: 'color-mix(in srgb, var(--color-error) 15%, transparent)',
-              color: 'var(--color-error)',
-            }}
-          >
-            <XCircle size={18} />
-          </span>
-          <h2
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.2rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-            }}
-          >
-            Cancel Event
-          </h2>
-        </div>
-
-        <p
-          style={{
-            fontSize: '0.875rem',
-            color: 'var(--text-secondary)',
-            lineHeight: 1.6,
-            margin: '0 0 1rem',
-          }}
-        >
-          This will cancel the event and notify all attendees. This action cannot be undone.
-        </p>
-
-        <p
-          style={{
-            fontSize: '0.8125rem',
-            color: 'var(--text-secondary)',
-            margin: '0 0 0.5rem',
-          }}
-        >
-          Type{' '}
-          <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
-            {eventTitle}
-          </strong>{' '}
-          to confirm:
-        </p>
-
-        <input
-          type="text"
-          value={typed}
-          onChange={(e) => setTyped(e.target.value)}
-          placeholder="Event title…"
-          autoFocus
-          style={{
-            width: '100%',
-            padding: '0.6rem 0.875rem',
-            borderRadius: '0.5rem',
-            border: `1px solid ${matches && typed ? 'var(--color-error)' : 'var(--border)'}`,
-            background: 'var(--bg-tertiary)',
-            color: 'var(--text-primary)',
-            fontFamily: 'var(--font-body)',
-            fontSize: '0.875rem',
-            outline: 'none',
-            boxSizing: 'border-box',
-            marginBottom: '1.25rem',
-          }}
-        />
-
-        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={confirming}
-            style={{
-              padding: '0.5rem 1.25rem',
-              borderRadius: '0.5rem',
-              border: '1px solid var(--border)',
-              background: 'var(--bg-tertiary)',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.875rem',
-            }}
-          >
-            Keep Event
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={!matches || confirming}
-            style={{
-              padding: '0.5rem 1.375rem',
-              borderRadius: '0.5rem',
-              border: 'none',
-              background: matches ? 'var(--color-error)' : 'var(--bg-tertiary)',
-              color: matches ? 'var(--bg-primary)' : 'var(--text-tertiary)',
-              cursor: !matches || confirming ? 'not-allowed' : 'pointer',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.875rem',
-              fontWeight: 700,
-              opacity: confirming ? 0.7 : 1,
-              transition: 'background 0.2s',
-            }}
-          >
-            {confirming ? 'Cancelling…' : 'Cancel Event'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Layout grid display ──────────────────────────────────────────────────────
-
-function ReadOnlyLayoutGrid({ tables, gridRows, gridCols }: {
-  tables: LayoutTable[]; gridRows: number; gridCols: number;
-}): React.ReactElement {
-  if (tables.length === 0) {
-    return (
-      <div style={{
-        padding: '2rem', textAlign: 'center', color: 'var(--text-tertiary)',
-        fontSize: '0.875rem', border: '1px dashed var(--border)', borderRadius: '0.75rem',
-      }}>
-        No tables configured.
-      </div>
-    );
-  }
-
-  // Build a lookup: "row,col" -> table
-  const cellMap = new Map<string, LayoutTable>();
-  for (const t of tables) {
-    if (t.gridRow != null && t.gridCol != null) {
-      cellMap.set(`${t.gridRow},${t.gridCol}`, t);
-    }
-  }
-
-  const CELL = 64;
-  const GAP = 4;
-
-  return (
-    <div style={{
-      overflowX: 'auto', overflowY: 'auto', border: '1px solid var(--border)',
-      borderRadius: '0.75rem', background: 'var(--bg-tertiary)', maxHeight: '420px', padding: '0.5rem',
-    }}>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${gridCols}, ${CELL}px)`,
-        gridTemplateRows: `repeat(${gridRows}, ${CELL}px)`,
-        gap: `${GAP}px`,
-        width: 'fit-content',
-      }}>
-        {Array.from({ length: gridRows * gridCols }).map((_, idx) => {
-          const r = Math.floor(idx / gridCols);
-          const c = idx % gridCols;
-          const t = cellMap.get(`${r},${c}`);
-          const fill = t?.color ?? 'var(--accent-primary)';
-
-          return (
-            <div
-              key={`${r}-${c}`}
-              style={{
-                width: `${CELL}px`, height: `${CELL}px`,
-                borderRadius: t?.shape === 'Round' || t?.shape === 'Cocktail' ? '50%' : '0.375rem',
-                background: t
-                  ? `color-mix(in srgb, ${fill} 20%, var(--bg-secondary))`
-                  : 'var(--bg-secondary)',
-                border: t ? `2px solid ${fill}` : '1px solid var(--border)',
-                display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.6875rem', fontWeight: 700,
-                color: t ? fill : 'transparent',
-                opacity: t ? 1 : 0.4,
-              }}
-            >
-              {t && (
-                <>
-                  <span>{t.label}</span>
-                  <span style={{ fontSize: '0.6rem', fontWeight: 500, opacity: 0.8 }}>
-                    {t.capacity}s
-                  </span>
-                </>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -519,7 +281,6 @@ export default function EventManagePage(): React.ReactElement {
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [layoutData, setLayoutData] = useState<LayoutData | null>(null);
-  const [layoutLoading, setLayoutLoading] = useState(false);
   const [stats, setStats] = useState<EventStats>({
     totalCapacity: 0,
     ticketsSold: 0,
@@ -534,10 +295,6 @@ export default function EventManagePage(): React.ReactElement {
   const [bookingsStatusFilter, setBookingsStatusFilter] = useState<string>('');
   const [refundingId, setRefundingId] = useState<string | null>(null);
   const [confirmRefundId, setConfirmRefundId] = useState<string | null>(null);
-  const [showCancelModal, setShowCancelModal] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
-  const [completing, setCompleting] = useState(false);
-  const [publishing, setPublishing] = useState(false);
 
   const fetchEvent = useCallback(async (): Promise<void> => {
     if (!id) return;
@@ -560,7 +317,7 @@ export default function EventManagePage(): React.ReactElement {
   useEffect(() => {
     if (!id || !event || event.layoutMode !== 'Grid') return;
     let cancelled = false;
-    setLayoutLoading(true);
+
 
     async function loadLayout(): Promise<void> {
       try {
@@ -569,7 +326,9 @@ export default function EventManagePage(): React.ReactElement {
       } catch {
         // non-fatal
       } finally {
-        if (!cancelled) setLayoutLoading(false);
+        if (!cancelled) {
+          // fetch finished
+        }
       }
     }
 
@@ -663,57 +422,13 @@ export default function EventManagePage(): React.ReactElement {
 
   // ─── Actions ───────────────────────────────────────────────────────────────
 
-  async function handlePublish(): Promise<void> {
-    if (!id) return;
-    setPublishing(true);
-    try {
-      await apiClient.put(`/developer/events/${id}/status`, { status: 'Published' });
-      toast.success('Event published');
-      void fetchEvent();
-    } catch {
-      toast.error('Failed to publish event');
-    } finally {
-      setPublishing(false);
-    }
-  }
 
-  async function handleComplete(): Promise<void> {
-    if (!id) return;
-    setCompleting(true);
-    try {
-      await apiClient.put(`/developer/events/${id}/status`, { status: 'Completed' });
-      toast.success('Event marked as Completed');
-      void fetchEvent();
-    } catch {
-      toast.error('Failed to complete event');
-    } finally {
-      setCompleting(false);
-    }
-  }
-
-  async function handleCancelConfirm(): Promise<void> {
-    if (!id) return;
-    setCancelling(true);
-    try {
-      await apiClient.put(`/developer/events/${id}/status`, { status: 'Cancelled' });
-      toast.success('Event cancelled');
-      setShowCancelModal(false);
-      void fetchEvent();
-    } catch {
-      toast.error('Failed to cancel event');
-    } finally {
-      setCancelling(false);
-    }
-  }
 
   // ─── Tabs ─────────────────────────────────────────────────────────────────
 
   const tabs: Array<{ key: TabKey; label: string; icon: React.ReactNode }> = [
     { key: 'overview', label: 'Overview', icon: <LayoutDashboard size={15} /> },
     { key: 'bookings', label: 'Bookings', icon: <Ticket size={15} /> },
-    { key: 'layout', label: 'Layout', icon: <Grid3X3 size={15} /> },
-    // Pricing tab hidden for assigned seating — pricing is set per-table in the grid editor
-    ...(event?.layoutMode !== 'Grid' ? [{ key: 'pricing' as TabKey, label: 'Pricing', icon: <DollarSign size={15} /> }] : []),
     { key: 'fees' as TabKey, label: 'Platform Fees', icon: <DollarSign size={15} /> },
   ];
 
@@ -751,11 +466,9 @@ export default function EventManagePage(): React.ReactElement {
     );
   }
 
-  const isEndedEvent =
-    event.endDate ? new Date(event.endDate) <= new Date() : false;
 
-  const totalTables = layoutData?.tables?.length ?? 0;
-  const totalSeats = layoutData?.tables?.reduce((sum, t) => sum + (t.capacity ?? 0), 0) ?? 0;
+
+
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto' }}>
@@ -775,22 +488,6 @@ export default function EventManagePage(): React.ReactElement {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.375rem' }}>
             <StatusBadge status={event.status} />
-            {event.isFeatured && (
-              <span
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  padding: '0.15rem 0.5rem',
-                  borderRadius: '999px',
-                  background: 'color-mix(in srgb, var(--color-yellow) 15%, transparent)',
-                  color: 'var(--color-yellow)',
-                  border: '1px solid color-mix(in srgb, var(--color-yellow) 30%, transparent)',
-                  letterSpacing: '0.03em',
-                }}
-              >
-                FEATURED
-              </span>
-            )}
           </div>
           <h1
             style={{
@@ -815,105 +512,7 @@ export default function EventManagePage(): React.ReactElement {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
-          {/* Edit button */}
-          <Link
-            to={`/developer/events/${event.id}/edit`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.375rem',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.5rem',
-              border: '1px solid var(--border)',
-              background: 'var(--bg-secondary)',
-              color: 'var(--accent-primary)',
-              textDecoration: 'none',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              transition: 'background 0.15s',
-            }}
-          >
-            <Pencil size={14} />
-            Edit Event
-          </Link>
-
-          {/* Status action buttons */}
-          {event.status === 'Draft' && (
-            <button
-              type="button"
-              onClick={() => void handlePublish()}
-              disabled={publishing}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-                border: 'none',
-                background: 'var(--color-success)',
-                color: 'var(--bg-primary)',
-                cursor: publishing ? 'not-allowed' : 'pointer',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                fontWeight: 700,
-                opacity: publishing ? 0.7 : 1,
-              }}
-            >
-              <CheckCircle2 size={14} />
-              {publishing ? 'Publishing…' : 'Publish'}
-            </button>
-          )}
-
-          {event.status === 'Published' && isEndedEvent && (
-            <button
-              type="button"
-              onClick={() => void handleComplete()}
-              disabled={completing}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-                border: 'none',
-                background: 'var(--color-info)',
-                color: 'var(--bg-primary)',
-                cursor: completing ? 'not-allowed' : 'pointer',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                fontWeight: 700,
-                opacity: completing ? 0.7 : 1,
-              }}
-            >
-              <Check size={14} />
-              {completing ? 'Completing…' : 'Mark Complete'}
-            </button>
-          )}
-
-          {event.status === 'Published' && (
-            <button
-              type="button"
-              onClick={() => setShowCancelModal(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-                border: '1px solid color-mix(in srgb, var(--color-error) 40%, transparent)',
-                background: 'color-mix(in srgb, var(--color-error) 10%, transparent)',
-                color: 'var(--color-error)',
-                cursor: 'pointer',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                fontWeight: 700,
-              }}
-            >
-              <X size={14} />
-              Cancel Event
-            </button>
-          )}
+          {/* Developer only manages fees and bookings — high level status and general editing removed */}
         </div>
       </div>
 
@@ -1310,133 +909,6 @@ export default function EventManagePage(): React.ReactElement {
           )}
         </div>
       )}
-
-      {/* ── Layout Tab ────────────────────────────────────────────────────── */}
-      {activeTab === 'layout' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '1rem',
-                  fontWeight: 700,
-                  color: 'var(--text-primary)',
-                  margin: '0 0 0.25rem',
-                }}
-              >
-                Floor Plan
-              </h3>
-              {event.layoutMode === 'Grid' && !layoutLoading && layoutData && (
-                <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                  {totalTables} table{totalTables !== 1 ? 's' : ''} · {totalSeats} seat{totalSeats !== 1 ? 's' : ''}
-                </p>
-              )}
-              {event.layoutMode === 'CapacityOnly' && (
-                <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                  General Admission · {event.maxCapacity ?? 0} guests max
-                </p>
-              )}
-              {event.layoutMode === 'None' && (
-                <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                  Tickets Only — no floor plan
-                </p>
-              )}
-            </div>
-            <Link
-              to={`/developer/events/${event.id}/edit`}
-              onClick={() => {
-                // Navigate to wizard with step 2 pre-selected via URL state
-              }}
-              state={{ startStep: 2 }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                padding: '0.45rem 1rem',
-                borderRadius: '0.5rem',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-secondary)',
-                color: 'var(--accent-primary)',
-                textDecoration: 'none',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.8125rem',
-                fontWeight: 600,
-              }}
-            >
-              <Pencil size={13} />
-              Edit Layout
-            </Link>
-          </div>
-
-          {event.layoutMode === 'Grid' ? (
-            layoutLoading ? (
-              <div
-                style={{
-                  height: '300px',
-                  borderRadius: '0.75rem',
-                  background: 'var(--bg-tertiary)',
-                  animation: 'pulse 1.5s ease-in-out infinite',
-                  border: '1px solid var(--border)',
-                }}
-              />
-            ) : (
-              <ReadOnlyLayoutGrid
-                tables={layoutData?.tables ?? []}
-                gridRows={layoutData?.gridRows ?? 5}
-                gridCols={layoutData?.gridCols ?? 5}
-              />
-            )
-          ) : (
-            <div
-              style={{
-                padding: '2rem',
-                textAlign: 'center',
-                color: 'var(--text-tertiary)',
-                fontSize: '0.875rem',
-                border: '1px dashed var(--border)',
-                borderRadius: '0.75rem',
-                background: 'var(--bg-secondary)',
-              }}
-            >
-              {event.layoutMode === 'CapacityOnly'
-                ? 'General Admission event — no visual floor plan.'
-                : 'Tickets Only event — no floor plan needed.'}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Pricing Tab ───────────────────────────────────────────────────── */}
-      {activeTab === 'pricing' && (
-        <div>
-          <Suspense
-            fallback={
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    style={{
-                      height: '80px',
-                      borderRadius: '0.75rem',
-                      background: 'var(--bg-tertiary)',
-                      animation: 'pulse 1.5s ease-in-out infinite',
-                    }}
-                  />
-                ))}
-              </div>
-            }
-          >
-            <PricingStep
-              eventId={event.id}
-              layoutMode={event.layoutMode}
-              maxCapacity={event.maxCapacity ?? undefined}
-            />
-          </Suspense>
-        </div>
-      )}
-
-
       {/* ── Fees Tab ──────────────────────────────────────────────────────── */}
       {activeTab === 'fees' && (
         <div style={{ marginTop: '0.5rem' }}>
@@ -1466,16 +938,6 @@ export default function EventManagePage(): React.ReactElement {
             />
           </Suspense>
         </div>
-      )}
-
-      {/* ── Cancel modal ──────────────────────────────────────────────────── */}
-      {showCancelModal && (
-        <CancelModal
-          eventTitle={event.title}
-          onCancel={() => setShowCancelModal(false)}
-          onConfirm={() => void handleCancelConfirm()}
-          confirming={cancelling}
-        />
       )}
     </div>
   );

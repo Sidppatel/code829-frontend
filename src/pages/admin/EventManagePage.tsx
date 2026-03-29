@@ -4,9 +4,6 @@ import toast from 'react-hot-toast';
 import {
   Pencil,
   Check,
-  X,
-  CheckCircle2,
-  XCircle,
   Users,
   Ticket,
   Grid3X3,
@@ -15,7 +12,6 @@ import {
   Tag,
   LayoutDashboard,
   DollarSign,
-  RotateCcw,
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
 import AnimatedCounter from '../../components/AnimatedCounter';
@@ -274,162 +270,7 @@ function StatCard({
 
 // ─── Cancel modal ─────────────────────────────────────────────────────────────
 
-function CancelModal({
-  eventTitle,
-  onCancel,
-  onConfirm,
-  confirming,
-}: {
-  eventTitle: string;
-  onCancel: () => void;
-  onConfirm: () => void;
-  confirming: boolean;
-}): React.ReactElement {
-  const [typed, setTyped] = useState('');
-  const matches = typed === eventTitle;
 
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'color-mix(in srgb, var(--bg-primary) 65%, transparent)',
-        backdropFilter: 'blur(6px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 400,
-        padding: '1rem',
-      }}
-    >
-      <div
-        style={{
-          background: 'var(--bg-secondary)',
-          border: '1px solid var(--border)',
-          borderRadius: '1rem',
-          padding: '1.75rem',
-          maxWidth: '460px',
-          width: '100%',
-          boxShadow: 'var(--shadow-card-hover)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '1rem' }}>
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: 'color-mix(in srgb, var(--color-error) 15%, transparent)',
-              color: 'var(--color-error)',
-            }}
-          >
-            <XCircle size={18} />
-          </span>
-          <h2
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.2rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-            }}
-          >
-            Cancel Event
-          </h2>
-        </div>
-
-        <p
-          style={{
-            fontSize: '0.875rem',
-            color: 'var(--text-secondary)',
-            lineHeight: 1.6,
-            margin: '0 0 1rem',
-          }}
-        >
-          This will cancel the event and notify all attendees. This action cannot be undone.
-        </p>
-
-        <p
-          style={{
-            fontSize: '0.8125rem',
-            color: 'var(--text-secondary)',
-            margin: '0 0 0.5rem',
-          }}
-        >
-          Type{' '}
-          <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
-            {eventTitle}
-          </strong>{' '}
-          to confirm:
-        </p>
-
-        <input
-          type="text"
-          value={typed}
-          onChange={(e) => setTyped(e.target.value)}
-          placeholder="Event title…"
-          autoFocus
-          style={{
-            width: '100%',
-            padding: '0.6rem 0.875rem',
-            borderRadius: '0.5rem',
-            border: `1px solid ${matches && typed ? 'var(--color-error)' : 'var(--border)'}`,
-            background: 'var(--bg-tertiary)',
-            color: 'var(--text-primary)',
-            fontFamily: 'var(--font-body)',
-            fontSize: '0.875rem',
-            outline: 'none',
-            boxSizing: 'border-box',
-            marginBottom: '1.25rem',
-          }}
-        />
-
-        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={confirming}
-            style={{
-              padding: '0.5rem 1.25rem',
-              borderRadius: '0.5rem',
-              border: '1px solid var(--border)',
-              background: 'var(--bg-tertiary)',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.875rem',
-            }}
-          >
-            Keep Event
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={!matches || confirming}
-            style={{
-              padding: '0.5rem 1.375rem',
-              borderRadius: '0.5rem',
-              border: 'none',
-              background: matches ? 'var(--color-error)' : 'var(--bg-tertiary)',
-              color: matches ? 'var(--bg-primary)' : 'var(--text-tertiary)',
-              cursor: !matches || confirming ? 'not-allowed' : 'pointer',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.875rem',
-              fontWeight: 700,
-              opacity: confirming ? 0.7 : 1,
-              transition: 'background 0.2s',
-            }}
-          >
-            {confirming ? 'Cancelling…' : 'Cancel Event'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─── Layout grid display ──────────────────────────────────────────────────────
 
@@ -532,12 +373,7 @@ export default function EventManagePage(): React.ReactElement {
   const [bookingsPage, setBookingsPage] = useState(1);
   const [bookingsLoading, setBookingsLoading] = useState(false);
   const [bookingsStatusFilter, setBookingsStatusFilter] = useState<string>('');
-  const [refundingId, setRefundingId] = useState<string | null>(null);
-  const [confirmRefundId, setConfirmRefundId] = useState<string | null>(null);
-  const [showCancelModal, setShowCancelModal] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
-  const [completing, setCompleting] = useState(false);
-  const [publishing, setPublishing] = useState(false);
+
 
   const fetchEvent = useCallback(async (): Promise<void> => {
     if (!id) return;
@@ -644,67 +480,7 @@ export default function EventManagePage(): React.ReactElement {
     return () => { cancelled = true; };
   }, [id, activeTab, bookingsPage, bookingsStatusFilter]);
 
-  async function handleRefund(bookingId: string): Promise<void> {
-    setRefundingId(bookingId);
-    try {
-      await apiClient.post(`/admin/bookings/${bookingId}/refund`);
-      toast.success('Booking refunded successfully');
-      setBookings(prev => prev.map(b =>
-        b.id === bookingId ? { ...b, status: 'Refunded', payment: b.payment ? { ...b.payment, status: 'Refunded', refundedAt: new Date().toISOString() } : null } : b
-      ));
-      setConfirmRefundId(null);
-    } catch (err) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to refund booking';
-      toast.error(msg);
-    } finally {
-      setRefundingId(null);
-    }
-  }
 
-  // ─── Actions ───────────────────────────────────────────────────────────────
-
-  async function handlePublish(): Promise<void> {
-    if (!id) return;
-    setPublishing(true);
-    try {
-      await apiClient.put(`/admin/events/${id}/status`, { status: 'Published' });
-      toast.success('Event published');
-      void fetchEvent();
-    } catch {
-      toast.error('Failed to publish event');
-    } finally {
-      setPublishing(false);
-    }
-  }
-
-  async function handleComplete(): Promise<void> {
-    if (!id) return;
-    setCompleting(true);
-    try {
-      await apiClient.put(`/admin/events/${id}/status`, { status: 'Completed' });
-      toast.success('Event marked as Completed');
-      void fetchEvent();
-    } catch {
-      toast.error('Failed to complete event');
-    } finally {
-      setCompleting(false);
-    }
-  }
-
-  async function handleCancelConfirm(): Promise<void> {
-    if (!id) return;
-    setCancelling(true);
-    try {
-      await apiClient.put(`/admin/events/${id}/status`, { status: 'Cancelled' });
-      toast.success('Event cancelled');
-      setShowCancelModal(false);
-      void fetchEvent();
-    } catch {
-      toast.error('Failed to cancel event');
-    } finally {
-      setCancelling(false);
-    }
-  }
 
   // ─── Tabs ─────────────────────────────────────────────────────────────────
 
@@ -751,8 +527,7 @@ export default function EventManagePage(): React.ReactElement {
     );
   }
 
-  const isEndedEvent =
-    event.endDate ? new Date(event.endDate) <= new Date() : false;
+
 
   const totalTables = layoutData?.tables?.length ?? 0;
   const totalSeats = layoutData?.tables?.reduce((sum, t) => sum + (t.capacity ?? 0), 0) ?? 0;
@@ -815,7 +590,6 @@ export default function EventManagePage(): React.ReactElement {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
-          {/* Edit button */}
           <Link
             to={`/admin/events/${event.id}/edit`}
             style={{
@@ -837,83 +611,6 @@ export default function EventManagePage(): React.ReactElement {
             <Pencil size={14} />
             Edit Event
           </Link>
-
-          {/* Status action buttons */}
-          {event.status === 'Draft' && (
-            <button
-              type="button"
-              onClick={() => void handlePublish()}
-              disabled={publishing}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-                border: 'none',
-                background: 'var(--color-success)',
-                color: 'var(--bg-primary)',
-                cursor: publishing ? 'not-allowed' : 'pointer',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                fontWeight: 700,
-                opacity: publishing ? 0.7 : 1,
-              }}
-            >
-              <CheckCircle2 size={14} />
-              {publishing ? 'Publishing…' : 'Publish'}
-            </button>
-          )}
-
-          {event.status === 'Published' && isEndedEvent && (
-            <button
-              type="button"
-              onClick={() => void handleComplete()}
-              disabled={completing}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-                border: 'none',
-                background: 'var(--color-info)',
-                color: 'var(--bg-primary)',
-                cursor: completing ? 'not-allowed' : 'pointer',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                fontWeight: 700,
-                opacity: completing ? 0.7 : 1,
-              }}
-            >
-              <Check size={14} />
-              {completing ? 'Completing…' : 'Mark Complete'}
-            </button>
-          )}
-
-          {event.status === 'Published' && (
-            <button
-              type="button"
-              onClick={() => setShowCancelModal(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-                border: '1px solid color-mix(in srgb, var(--color-error) 40%, transparent)',
-                background: 'color-mix(in srgb, var(--color-error) 10%, transparent)',
-                color: 'var(--color-error)',
-                cursor: 'pointer',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                fontWeight: 700,
-              }}
-            >
-              <X size={14} />
-              Cancel Event
-            </button>
-          )}
         </div>
       </div>
 
@@ -1130,7 +827,7 @@ export default function EventManagePage(): React.ReactElement {
             }}>
               {/* Table header */}
               <div style={{
-                display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.7fr 0.6fr 0.5fr 0.6fr',
+                display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.7fr 0.6fr 0.5fr',
                 gap: '0.75rem', padding: '0.65rem 1rem',
                 borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)',
                 fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase',
@@ -1141,7 +838,6 @@ export default function EventManagePage(): React.ReactElement {
                 <span>Amount</span>
                 <span>Status</span>
                 <span>Date</span>
-                <span>Actions</span>
               </div>
 
               {/* Rows */}
@@ -1156,7 +852,7 @@ export default function EventManagePage(): React.ReactElement {
                   <div
                     key={b.id}
                     style={{
-                      display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.7fr 0.6fr 0.5fr 0.6fr',
+                      display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.7fr 0.6fr 0.5fr',
                       gap: '0.75rem', padding: '0.65rem 1rem', alignItems: 'center',
                       borderBottom: i < bookings.length - 1 ? '1px solid var(--border)' : 'none',
                       fontSize: '0.8125rem',
@@ -1218,58 +914,7 @@ export default function EventManagePage(): React.ReactElement {
                       {new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
 
-                    {/* Actions */}
-                    <div>
-                      {b.status === 'Paid' && confirmRefundId !== b.id && (
-                        <button
-                          type="button"
-                          onClick={() => setConfirmRefundId(b.id)}
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
-                            padding: '0.25rem 0.5rem', borderRadius: '0.375rem',
-                            border: '1px solid var(--border)', background: 'var(--bg-primary)',
-                            color: 'var(--color-error)', fontSize: '0.6875rem', fontWeight: 600,
-                            cursor: 'pointer', fontFamily: 'var(--font-body)',
-                          }}
-                        >
-                          <RotateCcw size={11} />
-                          Refund
-                        </button>
-                      )}
-                      {b.status === 'Paid' && confirmRefundId === b.id && (
-                        <div style={{ display: 'flex', gap: '0.25rem' }}>
-                          <button
-                            type="button"
-                            onClick={() => void handleRefund(b.id)}
-                            disabled={refundingId === b.id}
-                            style={{
-                              padding: '0.25rem 0.5rem', borderRadius: '0.375rem', border: 'none',
-                              background: 'var(--color-error)', color: 'var(--bg-primary)',
-                              fontSize: '0.6875rem', fontWeight: 700, cursor: refundingId === b.id ? 'not-allowed' : 'pointer',
-                              fontFamily: 'var(--font-body)', opacity: refundingId === b.id ? 0.6 : 1,
-                            }}
-                          >
-                            {refundingId === b.id ? 'Processing...' : 'Confirm'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setConfirmRefundId(null)}
-                            disabled={refundingId === b.id}
-                            style={{
-                              padding: '0.25rem 0.4rem', borderRadius: '0.375rem',
-                              border: '1px solid var(--border)', background: 'var(--bg-secondary)',
-                              color: 'var(--text-secondary)', fontSize: '0.6875rem', cursor: 'pointer',
-                              fontFamily: 'var(--font-body)',
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      )}
-                      {b.status !== 'Paid' && (
-                        <span style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>—</span>
-                      )}
-                    </div>
+
                   </div>
                 );
               })}
@@ -1434,10 +1079,7 @@ export default function EventManagePage(): React.ReactElement {
             />
           </Suspense>
         </div>
-      )}
-
-
-      {/* ── Fees Tab ──────────────────────────────────────────────────────── */}
+      )}      {/* ── Fees Tab ──────────────────────────────────────────────────────── */}
       {activeTab === 'fees' && (
         <div style={{ marginTop: '0.5rem' }}>
           <Suspense
@@ -1464,16 +1106,6 @@ export default function EventManagePage(): React.ReactElement {
             />
           </Suspense>
         </div>
-      )}
-
-      {/* ── Cancel modal ──────────────────────────────────────────────────── */}
-      {showCancelModal && (
-        <CancelModal
-          eventTitle={event.title}
-          onCancel={() => setShowCancelModal(false)}
-          onConfirm={() => void handleCancelConfirm()}
-          confirming={cancelling}
-        />
       )}
     </div>
   );
