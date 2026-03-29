@@ -197,7 +197,7 @@ export default function Navbar(): React.ReactElement {
               }}
             >
               <User size={14} />
-              <span>{user.name.split(' ')[0]}</span>
+              <span>{user.firstName}</span>
             </Link>
             <button
               onClick={() => { logout(); navigate('/'); }}

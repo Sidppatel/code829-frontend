@@ -431,7 +431,7 @@ export default function MyBookingsPage(): React.ReactElement {
               My Bookings
             </h1>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
-              Welcome back, {user?.name?.split(' ')[0] ?? 'there'}
+              Welcome back, {user?.firstName ?? 'there'}
             </p>
           </div>
 

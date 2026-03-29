@@ -207,7 +207,7 @@ export default function DeveloperLayout(): React.ReactElement {
                   whiteSpace: 'nowrap',
                 }}
               >
-                {user.name}
+                {user.firstName} {user.lastName}
               </p>
               <p
                 style={{

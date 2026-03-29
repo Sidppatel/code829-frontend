@@ -92,7 +92,8 @@ export default function LoginPage(): React.ReactElement {
       login(`dev-token-${preset.email}-${Date.now()}`, {
         id: preset.email,
         email: preset.email,
-        name: `Dev ${preset.label}`,
+        firstName: 'Dev',
+        lastName: preset.label,
         role: "developer" as UserRole,
         hasCompletedOnboarding: true,
       });

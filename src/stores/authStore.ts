@@ -6,7 +6,8 @@ export type UserRole = 'admin' | 'organizer' | 'attendee' | 'staff' | 'developer
 export interface User {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   role: UserRole;
   hasCompletedOnboarding: boolean;
   city?: string;
@@ -15,17 +16,18 @@ export interface User {
 interface DevLoginResponse {
   token: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   role: UserRole;
   expiresAt: string;
   hasCompletedOnboarding: boolean;
-  city?: string;
 }
 
 interface MeResponse {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   role: UserRole;
   createdAt: string;
   hasCompletedOnboarding: boolean;
@@ -68,8 +70,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   devLogin: async (email: string) => {
     const res = await apiClient.post<DevLoginResponse>('/auth/dev-login', { email });
-    const { token, email: resEmail, name, role, hasCompletedOnboarding } = res.data;
-    const user: User = { id: resEmail, email: resEmail, name, role, hasCompletedOnboarding };
+    const { token, email: resEmail, firstName, lastName, role, hasCompletedOnboarding } = res.data;
+    const user: User = { id: resEmail, email: resEmail, firstName, lastName, role, hasCompletedOnboarding };
     localStorage.setItem('auth_token', token);
     localStorage.setItem('auth_user', JSON.stringify(user));
     set({ token, user, isAuthenticated: true });
@@ -77,8 +79,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   fetchMe: async () => {
     const res = await apiClient.get<MeResponse>('/auth/me');
-    const { id, email, name, role, hasCompletedOnboarding, city } = res.data;
-    const user: User = { id, email, name, role, hasCompletedOnboarding, city };
+    const { id, email, firstName, lastName, role, hasCompletedOnboarding, city } = res.data;
+    const user: User = { id, email, firstName, lastName, role, hasCompletedOnboarding, city };
     localStorage.setItem('auth_user', JSON.stringify(user));
     set({ user });
   },

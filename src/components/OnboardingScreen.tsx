@@ -218,7 +218,7 @@ export default function OnboardingScreen(): React.ReactElement {
   } = useForm<OnboardingValues>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: {
-      name: user?.name || '',
+      name: user ? `${user.firstName} ${user.lastName}` : '',
       optInLocationEmail: true,
       address: '',
       city: '',

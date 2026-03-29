@@ -209,7 +209,7 @@ export default function AdminLayout(): React.ReactElement {
                   whiteSpace: 'nowrap',
                 }}
               >
-                {user.name}
+                {user.firstName} {user.lastName}
               </p>
               <p
                 style={{
