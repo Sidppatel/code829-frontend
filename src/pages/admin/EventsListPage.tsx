@@ -1030,25 +1030,46 @@ export default function EventsListPage(): React.ReactElement {
                       <td style={{ padding: '0.875rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'inline-flex', gap: '0.375rem', alignItems: 'center' }}>
                           <StatusChanger event={event} onStatusChanged={() => void fetchEvents()} />
-                          <Link
-                            to={`/admin/events/${event.id}/edit`}
-                            aria-label={`Edit ${event.title}`}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: '30px',
-                              height: '30px',
-                              borderRadius: '0.375rem',
-                              border: '1px solid var(--border)',
-                              background: 'var(--bg-tertiary)',
-                              color: 'var(--accent-primary)',
-                              textDecoration: 'none',
-                              transition: 'background 0.15s',
-                            }}
-                          >
-                            <Pencil size={13} />
-                          </Link>
+                          {event.status === 'Completed' || event.status === 'Cancelled' ? (
+                            <span
+                              title="Cannot edit completed or cancelled events"
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '30px',
+                                height: '30px',
+                                borderRadius: '0.375rem',
+                                border: '1px solid var(--border)',
+                                background: 'var(--bg-tertiary)',
+                                color: 'var(--text-tertiary)',
+                                opacity: 0.4,
+                                cursor: 'not-allowed',
+                              }}
+                            >
+                              <Pencil size={13} />
+                            </span>
+                          ) : (
+                            <Link
+                              to={`/admin/events/${event.id}/edit`}
+                              aria-label={`Edit ${event.title}`}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '30px',
+                                height: '30px',
+                                borderRadius: '0.375rem',
+                                border: '1px solid var(--border)',
+                                background: 'var(--bg-tertiary)',
+                                color: 'var(--accent-primary)',
+                                textDecoration: 'none',
+                                transition: 'background 0.15s',
+                              }}
+                            >
+                              <Pencil size={13} />
+                            </Link>
+                          )}
                           <button
                             type="button"
                             onClick={() => setDuplicateTarget(event)}
@@ -1209,28 +1230,53 @@ export default function EventsListPage(): React.ReactElement {
                     <CategoryPill category={event.category} />
 
                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', paddingTop: '0.5rem' }}>
-                      <Link
-                        to={`/admin/events/${event.id}/edit`}
-                        style={{
-                          flex: 1,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.35rem',
-                          padding: '0.4rem',
-                          borderRadius: '0.375rem',
-                          border: '1px solid var(--border)',
-                          background: 'var(--bg-tertiary)',
-                          color: 'var(--accent-primary)',
-                          textDecoration: 'none',
-                          fontSize: '0.8rem',
-                          fontWeight: 500,
-                          transition: 'background 0.15s',
-                        }}
-                      >
-                        <Pencil size={13} />
-                        Edit
-                      </Link>
+                      {event.status === 'Completed' || event.status === 'Cancelled' ? (
+                        <span
+                          title="Cannot edit completed or cancelled events"
+                          style={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.35rem',
+                            padding: '0.4rem',
+                            borderRadius: '0.375rem',
+                            border: '1px solid var(--border)',
+                            background: 'var(--bg-tertiary)',
+                            color: 'var(--text-tertiary)',
+                            fontSize: '0.8rem',
+                            fontWeight: 500,
+                            opacity: 0.4,
+                            cursor: 'not-allowed',
+                          }}
+                        >
+                          <Pencil size={13} />
+                          Edit
+                        </span>
+                      ) : (
+                        <Link
+                          to={`/admin/events/${event.id}/edit`}
+                          style={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.35rem',
+                            padding: '0.4rem',
+                            borderRadius: '0.375rem',
+                            border: '1px solid var(--border)',
+                            background: 'var(--bg-tertiary)',
+                            color: 'var(--accent-primary)',
+                            textDecoration: 'none',
+                            fontSize: '0.8rem',
+                            fontWeight: 500,
+                            transition: 'background 0.15s',
+                          }}
+                        >
+                          <Pencil size={13} />
+                          Edit
+                        </Link>
+                      )}
                       <button
                         type="button"
                         onClick={() => setDuplicateTarget(event)}
