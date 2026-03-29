@@ -12,7 +12,6 @@ interface Venue {
   city: string;
   state: string;
   zipCode: string;
-  capacity: number;
   description: string;
   imageUrl: string;
   phone: string;
@@ -489,7 +488,7 @@ export default function VenuesPage(): React.ReactElement {
                     borderBottom: '1px solid var(--border)',
                   }}
                 >
-                  {['Name', 'City / State', 'Capacity', 'Status', 'Actions'].map((h) => (
+                  {['Name', 'City / State', 'Status', 'Actions'].map((h) => (
                     <th
                       key={h}
                       style={{
@@ -564,15 +563,6 @@ export default function VenuesPage(): React.ReactElement {
                         }}
                       >
                         {venue.city}, {venue.state}
-                      </td>
-                      <td
-                        style={{
-                          padding: '0.875rem 1rem',
-                          color: 'var(--text-secondary)',
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        {venue.capacity?.toLocaleString() ?? '—'}
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <StatusBadge isActive={venue.isActive} />
@@ -712,21 +702,6 @@ export default function VenuesPage(): React.ReactElement {
                     {venue.address}, {venue.city}, {venue.state} {venue.zipCode}
                   </p>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                    {venue.capacity > 0 && (
-                      <span
-                        style={{
-                          fontSize: '0.75rem',
-                          fontWeight: 500,
-                          color: 'var(--text-secondary)',
-                          background: 'var(--bg-tertiary)',
-                          border: '1px solid var(--border)',
-                          borderRadius: '0.375rem',
-                          padding: '0.15rem 0.5rem',
-                        }}
-                      >
-                        Cap: {venue.capacity.toLocaleString()}
-                      </span>
-                    )}
                     <StatusBadge isActive={venue.isActive} />
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
