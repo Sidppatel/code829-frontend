@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
+import RoleGuard from './components/RoleGuard';
 import { useAuthStore } from './stores/authStore';
 
 const OnboardingScreen = React.lazy(() => import('./components/OnboardingScreen'));
@@ -76,8 +77,12 @@ function AppRoutes(): React.ReactElement {
           <Route path="/me/bookings" element={<MyBookingsPage />} />
           <Route path="/auth/login" element={<LoginPage />} />
 
-          {/* Admin routes */}
-          <Route path="/admin" element={<AdminLayout />}>
+          {/* Admin routes — Admin & Staff only, Developers redirected to /developer */}
+          <Route path="/admin" element={
+            <RoleGuard allowed={['Admin', 'Staff']} redirectTo="/developer">
+              <AdminLayout />
+            </RoleGuard>
+          }>
             <Route index element={<AdminDashboardPage />} />
             <Route path="venues" element={<VenuesPage />} />
             <Route path="venues/new" element={<VenueFormPage />} />
@@ -90,8 +95,12 @@ function AppRoutes(): React.ReactElement {
             <Route path="table-types" element={<TableTypesPage />} />
           </Route>
 
-          {/* Developer routes */}
-          <Route path="/developer" element={<DeveloperLayout />}>
+          {/* Developer routes — Developer only, Admins redirected to /admin */}
+          <Route path="/developer" element={
+            <RoleGuard allowed={['Developer']} redirectTo="/admin">
+              <DeveloperLayout />
+            </RoleGuard>
+          }>
             <Route index element={<DeveloperDashboardPage />} />
             <Route path="events" element={<DeveloperEventsPage />} />
             <Route path="analytics" element={<DeveloperAnalyticsPage />} />

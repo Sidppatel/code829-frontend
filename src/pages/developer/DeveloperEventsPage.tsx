@@ -49,7 +49,7 @@ export default function DeveloperEventsPage(): React.ReactElement {
     let cancelled = false;
     async function fetch(): Promise<void> {
       try {
-        const res = await apiClient.get<PaginatedResponse>('/admin/events', { params: { pageSize: 100 } });
+        const res = await apiClient.get<PaginatedResponse>('/developer/events', { params: { pageSize: 100 } });
         if (!cancelled) setEvents(res.data.items);
       } catch {
         if (!cancelled) toast.error('Failed to load events');

@@ -241,7 +241,7 @@ function NoUpcomingEvents(): React.ReactElement {
         real-time booking data, revenue tracking, and attendee insights.
       </p>
       <button
-        onClick={() => navigate('/admin/events')}
+        onClick={() => navigate('/developer/events')}
         style={{
           marginTop: '1.5rem', padding: '0.75rem 1.5rem',
           background: 'var(--accent-primary)', color: '#fff',
@@ -339,7 +339,7 @@ export default function DeveloperDashboardPage(): React.ReactElement {
             </div>
 
             <h1
-              onClick={() => navigate(`/admin/events/${d.eventId}`)}
+              onClick={() => navigate(`/developer/events`)}
               style={{
                 fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800,
                 color: 'var(--text-primary)', margin: 0, lineHeight: 1.15,
@@ -364,7 +364,7 @@ export default function DeveloperDashboardPage(): React.ReactElement {
             {/* Action buttons */}
             <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.25rem' }}>
               <button
-                onClick={() => navigate(`/admin/events/${d.eventId}`)}
+                onClick={() => navigate(`/developer/events`)}
                 style={{
                   padding: '0.5rem 1rem', background: 'var(--accent-primary)',
                   color: '#fff', border: 'none', borderRadius: '0.5rem',
@@ -373,7 +373,7 @@ export default function DeveloperDashboardPage(): React.ReactElement {
                 }}
               >Manage Event <ArrowRight size={14} /></button>
               <button
-                onClick={() => navigate(`/admin/events/${d.eventId}?tab=bookings`)}
+                onClick={() => navigate(`/developer/events`)}
                 style={{
                   padding: '0.5rem 1rem', background: 'var(--bg-tertiary)',
                   color: 'var(--text-primary)', border: '1px solid var(--border)',
@@ -630,7 +630,7 @@ export default function DeveloperDashboardPage(): React.ReactElement {
           </div>
           {d.totalBookings > 0 && (
             <button
-              onClick={() => navigate(`/admin/events/${d.eventId}?tab=bookings`)}
+              onClick={() => navigate(`/developer/events`)}
               style={{
                 background: 'none', border: 'none', color: 'var(--accent-primary)',
                 fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer',
