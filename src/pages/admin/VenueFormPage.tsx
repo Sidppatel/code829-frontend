@@ -236,23 +236,33 @@ interface AddressAutocompleteProps {
 }
 
 function AddressAutocomplete({ value, error, onAddressChange, onRawChange }: AddressAutocompleteProps): React.ReactElement {
-  const [query, setQuery] = useState(value);
+  const [query, setQuery] = useState(value || '');
   const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [focused, setFocused] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Sync external value
-  useEffect(() => { setQuery(value); }, [value]);
+  // Sync from parent on edit-mode load (value changes from '' to loaded address)
+  const prevValueRef = useRef(value);
+  useEffect(() => {
+    if (value !== prevValueRef.current) {
+      prevValueRef.current = value;
+      queueMicrotask(() => setQuery(value || ''));
+    }
+  }, [value]);
 
-  const fetchSuggestions = useCallback((q: string) => {
+  function handleInputChange(newValue: string): void {
+    setQuery(newValue);
+    onRawChange(newValue);
+
+    // Debounced fetch
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (q.length < 3) { setSuggestions([]); return; }
+    if (newValue.length < 3) { setSuggestions([]); setShowDropdown(false); return; }
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=us&limit=5&q=${encodeURIComponent(q)}`,
+          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=us&limit=5&q=${encodeURIComponent(newValue)}`,
           { headers: { 'Accept-Language': 'en' } }
         );
         const data: NominatimResult[] = await res.json();
@@ -261,8 +271,8 @@ function AddressAutocomplete({ value, error, onAddressChange, onRawChange }: Add
       } catch {
         setSuggestions([]);
       }
-    }, 350);
-  }, []);
+    }, 400);
+  }
 
   // Close on outside click
   useEffect(() => {
@@ -287,7 +297,7 @@ function AddressAutocomplete({ value, error, onAddressChange, onRawChange }: Add
     onAddressChange({ street, city, state, zipCode });
   }
 
-  const hasValue = Boolean(query);
+  const hasValue = Boolean(query) || focused;
 
   return (
     <div ref={containerRef} style={{ position: 'relative' }}>
@@ -297,12 +307,7 @@ function AddressAutocomplete({ value, error, onAddressChange, onRawChange }: Add
           type="text"
           placeholder=" "
           value={query}
-          onChange={(e) => {
-            const v = e.target.value;
-            setQuery(v);
-            onRawChange(v);
-            fetchSuggestions(v);
-          }}
+          onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => { setFocused(true); if (suggestions.length > 0) setShowDropdown(true); }}
           onBlur={() => setFocused(false)}
           autoComplete="off"
