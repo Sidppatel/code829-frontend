@@ -13,6 +13,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import MagneticButton from "../components/MagneticButton";
+import TableSelectionView from "../components/TableSelectionView";
 import { SkeletonLine, SkeletonText } from "../components/Skeleton";
 import apiClient from "../lib/axios";
 import { useAuthStore } from "../stores/authStore";
@@ -53,6 +54,7 @@ interface ApiEventDetail {
   endDate: string | null;
   imageUrl: string | null;
   isFeatured: boolean;
+  layoutMode: string;
   venueId: string;
   venue: ApiVenue;
   organizerId: string;
@@ -77,6 +79,7 @@ interface EventDetail {
   title: string;
   category: string;
   description: string;
+  layoutMode: string;
   venueName: string;
   venueCity: string;
   venueAddress: string;
@@ -113,6 +116,7 @@ function apiToEventDetail(api: ApiEventDetail): EventDetail {
     title: api.title,
     category: api.category,
     description: api.description,
+    layoutMode: api.layoutMode ?? 'None',
     venueName: api.venue?.name ?? "",
     venueCity: api.venue?.city ?? "",
     venueAddress: api.venue
@@ -135,6 +139,7 @@ const PLACEHOLDER_EVENT: EventDetail = {
   id: "2",
   title: "React Summit 2026",
   category: "Tech",
+  layoutMode: "None",
   description: `Join the world's largest React conference for two days of keynotes, workshops, and networking with the best minds in the React ecosystem. Explore the latest in React 19, Server Components, concurrent features, and much more.
 
 This year's summit features over 40 speakers from companies like Meta, Vercel, and the open-source community. Whether you're a beginner or a senior engineer, you'll leave with new skills, inspiration, and connections that will shape your career.`,
@@ -548,6 +553,8 @@ export default function EventDetailPage(): React.ReactElement {
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [saved, setSaved] = useState(false);
+  const [selectedTable, setSelectedTable] = useState<{ id: string; label: string; priceCents: number; capacity: number; priceType: string; holdExpiresAt: string | null } | null>(null);
+  const isGridLayout = event?.layoutMode === 'Grid';
 
   useEffect(() => {
     let cancelled = false;
@@ -895,7 +902,40 @@ export default function EventDetailPage(): React.ReactElement {
 
                 {event.maxAttendees > 0 && <SocialProof event={event} />}
 
-                {/* Ticket tiers */}
+                {/* Table selection for Grid layout events */}
+                {isGridLayout && id && selectedTier && (
+                  <div style={{ marginBottom: '1.25rem' }}>
+                    <TableSelectionView
+                      eventId={id}
+                      ticketTypeId={selectedTier}
+                      onTableSelected={(t) => setSelectedTable(t ? { id: t.id, label: t.label, priceCents: t.priceCents, capacity: t.capacity, priceType: t.priceType, holdExpiresAt: t.holdExpiresAt } : null)}
+                    />
+                    {selectedTable && (
+                      <div style={{
+                        marginTop: '0.75rem', padding: '0.75rem 1rem',
+                        background: 'color-mix(in srgb, var(--color-success) 10%, var(--bg-tertiary))',
+                        borderRadius: '0.75rem', border: '1px solid var(--color-success)',
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div>
+                            <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9375rem' }}>
+                              Table {selectedTable.label}
+                            </div>
+                            <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                              {selectedTable.capacity} seats &middot; {selectedTable.priceType === 'PerSeat' ? `$${(selectedTable.priceCents / 100).toFixed(0)}/seat` : `$${(selectedTable.priceCents / 100).toFixed(0)}/table`}
+                            </div>
+                          </div>
+                          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-cta)' }}>
+                            ${(selectedTable.priceType === 'PerSeat' ? selectedTable.priceCents * selectedTable.capacity : selectedTable.priceCents) / 100}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Ticket tiers (only for non-Grid events) */}
+                {!isGridLayout && (
                 <div
                   style={{
                     display: "flex",
@@ -913,9 +953,10 @@ export default function EventDetailPage(): React.ReactElement {
                     />
                   ))}
                 </div>
+                )}
 
-                {/* Quantity */}
-                {selectedTierData && (
+                {/* Quantity (hidden for Grid layout — you book a whole table) */}
+                {!isGridLayout && selectedTierData && (
                   <div
                     style={{
                       display: "flex",
@@ -992,8 +1033,8 @@ export default function EventDetailPage(): React.ReactElement {
                   </div>
                 )}
 
-                {/* Total */}
-                {selectedTierData && (
+                {/* Total (hidden for Grid — shown in table selection summary) */}
+                {!isGridLayout && selectedTierData && (
                   <div
                     style={{
                       display: "flex",
@@ -1029,9 +1070,9 @@ export default function EventDetailPage(): React.ReactElement {
                 {isAuthenticated ? (
                   <MagneticButton
                     style={{ width: "100%", justifyContent: "center" }}
-                    disabled={!selectedTier}
+                    disabled={isGridLayout ? !selectedTable : !selectedTier}
                   >
-                    Book Now
+                    {isGridLayout ? 'Confirm Table' : 'Book Now'}
                   </MagneticButton>
                 ) : (
                   <Link
