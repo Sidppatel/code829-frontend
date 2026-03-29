@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Plus,
   LayoutList,
@@ -631,6 +631,7 @@ function DeleteDialog({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function EventsListPage(): React.ReactElement {
+  const navigate = useNavigate();
   const [data, setData] = useState<PaginatedResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -970,9 +971,11 @@ export default function EventsListPage(): React.ReactElement {
                   : data?.items.map((event) => (
                     <tr
                       key={event.id}
+                      onClick={() => navigate(`/admin/events/${event.id}`)}
                       style={{
                         borderBottom: '1px solid var(--border)',
                         transition: 'background 0.15s',
+                        cursor: 'pointer',
                       }}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLTableRowElement).style.background = 'var(--bg-tertiary)';
@@ -1027,7 +1030,7 @@ export default function EventsListPage(): React.ReactElement {
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <StatusBadge status={event.status} />
                       </td>
-                      <td style={{ padding: '0.875rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '0.875rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }} onClick={(e) => e.stopPropagation()}>
                         <div style={{ display: 'inline-flex', gap: '0.375rem', alignItems: 'center' }}>
                           <StatusChanger event={event} onStatusChanged={() => void fetchEvents()} />
                           {event.status === 'Completed' || event.status === 'Cancelled' ? (
@@ -1161,6 +1164,7 @@ export default function EventsListPage(): React.ReactElement {
               {data?.items.map((event) => (
                 <div
                   key={event.id}
+                  onClick={() => navigate(`/admin/events/${event.id}`)}
                   style={{
                     background: 'var(--bg-secondary)',
                     border: '1px solid var(--border)',
@@ -1170,6 +1174,7 @@ export default function EventsListPage(): React.ReactElement {
                     display: 'flex',
                     flexDirection: 'column',
                     transition: 'box-shadow 0.2s',
+                    cursor: 'pointer',
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-card-hover)';
@@ -1229,7 +1234,7 @@ export default function EventsListPage(): React.ReactElement {
 
                     <CategoryPill category={event.category} />
 
-                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', paddingTop: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', paddingTop: '0.5rem' }} onClick={(e) => e.stopPropagation()}>
                       {event.status === 'Completed' || event.status === 'Cancelled' ? (
                         <span
                           title="Cannot edit completed or cancelled events"

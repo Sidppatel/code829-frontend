@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   DollarSign,
   Copy,
+  RotateCcw,
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
 import AnimatedCounter from '../../components/AnimatedCounter';
@@ -519,6 +520,8 @@ export default function EventManagePage(): React.ReactElement {
   const [bookingsPage, setBookingsPage] = useState(1);
   const [bookingsLoading, setBookingsLoading] = useState(false);
   const [bookingsStatusFilter, setBookingsStatusFilter] = useState<string>('');
+  const [refundingId, setRefundingId] = useState<string | null>(null);
+  const [confirmRefundId, setConfirmRefundId] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [completing, setCompleting] = useState(false);
@@ -565,49 +568,31 @@ export default function EventManagePage(): React.ReactElement {
     return () => { cancelled = true; };
   }, [id, event]);
 
-  // Load stats from dashboard or event endpoint
+  // Compute stats from bookings
   useEffect(() => {
     if (!id || !event) return;
     let cancelled = false;
 
     async function loadStats(): Promise<void> {
       try {
-        const res = await apiClient.get<{
-          totalCapacity?: number;
-          ticketsSold?: number;
-          revenueCents?: number;
-          checkIns?: number;
-          soldCount?: number;
-          checkedInCount?: number;
-          totalRevenueCents?: number;
-          capacity?: number;
-        }>(`/admin/events/${id}/stats`).catch(() => ({ data: null }));
-
+        const res = await apiClient.get<PagedBookings>(`/admin/bookings?eventId=${id}&pageSize=100`);
         if (cancelled) return;
+        const all = res.data.items ?? [];
+        const paid = all.filter(b => b.status === 'Paid' || b.status === 'CheckedIn');
+        const checkedIn = all.filter(b => b.status === 'CheckedIn');
+        const revenue = paid.reduce((sum, b) => sum + b.totalCents, 0);
+        const ticketsSold = paid.reduce((sum, b) => sum + (b.items?.length ?? 0), 0);
 
-        if (res.data) {
-          setStats({
-            totalCapacity:
-              res.data.totalCapacity ??
-              res.data.capacity ??
-              event.maxCapacity ??
-              0,
-            ticketsSold: res.data.ticketsSold ?? res.data.soldCount ?? 0,
-            revenueCents: res.data.revenueCents ?? res.data.totalRevenueCents ?? 0,
-            checkIns: res.data.checkIns ?? res.data.checkedInCount ?? 0,
-          });
-        } else {
-          setStats({
-            totalCapacity: event.maxCapacity ?? 0,
-            ticketsSold: 0,
-            revenueCents: 0,
-            checkIns: 0,
-          });
-        }
+        setStats({
+          totalCapacity: event?.maxCapacity ?? 0,
+          ticketsSold,
+          revenueCents: revenue,
+          checkIns: checkedIn.length,
+        });
       } catch {
         if (!cancelled) {
           setStats({
-            totalCapacity: event.maxCapacity ?? 0,
+            totalCapacity: event?.maxCapacity ?? 0,
             ticketsSold: 0,
             revenueCents: 0,
             checkIns: 0,
@@ -649,6 +634,23 @@ export default function EventManagePage(): React.ReactElement {
     void loadBookings();
     return () => { cancelled = true; };
   }, [id, activeTab, bookingsPage, bookingsStatusFilter]);
+
+  async function handleRefund(bookingId: string): Promise<void> {
+    setRefundingId(bookingId);
+    try {
+      await apiClient.post(`/admin/bookings/${bookingId}/refund`);
+      toast.success('Booking refunded successfully');
+      setBookings(prev => prev.map(b =>
+        b.id === bookingId ? { ...b, status: 'Refunded', payment: b.payment ? { ...b.payment, status: 'Refunded', refundedAt: new Date().toISOString() } : null } : b
+      ));
+      setConfirmRefundId(null);
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to refund booking';
+      toast.error(msg);
+    } finally {
+      setRefundingId(null);
+    }
+  }
 
   // ─── Actions ───────────────────────────────────────────────────────────────
 
@@ -732,7 +734,8 @@ export default function EventManagePage(): React.ReactElement {
     { key: 'overview', label: 'Overview', icon: <LayoutDashboard size={15} /> },
     { key: 'bookings', label: 'Bookings', icon: <Ticket size={15} /> },
     { key: 'layout', label: 'Layout', icon: <Grid3X3 size={15} /> },
-    { key: 'pricing', label: 'Pricing', icon: <DollarSign size={15} /> },
+    // Pricing tab hidden for assigned seating — pricing is set per-table in the grid editor
+    ...(event?.layoutMode !== 'Grid' ? [{ key: 'pricing' as TabKey, label: 'Pricing', icon: <DollarSign size={15} /> }] : []),
     { key: 'settings', label: 'Settings', icon: <Settings size={15} /> },
   ];
 
@@ -1149,7 +1152,7 @@ export default function EventManagePage(): React.ReactElement {
             }}>
               {/* Table header */}
               <div style={{
-                display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.8fr 0.7fr 0.6fr',
+                display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.7fr 0.6fr 0.5fr 0.6fr',
                 gap: '0.75rem', padding: '0.65rem 1rem',
                 borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)',
                 fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase',
@@ -1160,6 +1163,7 @@ export default function EventManagePage(): React.ReactElement {
                 <span>Amount</span>
                 <span>Status</span>
                 <span>Date</span>
+                <span>Actions</span>
               </div>
 
               {/* Rows */}
@@ -1174,7 +1178,7 @@ export default function EventManagePage(): React.ReactElement {
                   <div
                     key={b.id}
                     style={{
-                      display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.8fr 0.7fr 0.6fr',
+                      display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.7fr 0.6fr 0.5fr 0.6fr',
                       gap: '0.75rem', padding: '0.65rem 1rem', alignItems: 'center',
                       borderBottom: i < bookings.length - 1 ? '1px solid var(--border)' : 'none',
                       fontSize: '0.8125rem',
@@ -1235,6 +1239,59 @@ export default function EventManagePage(): React.ReactElement {
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
                       {new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
+
+                    {/* Actions */}
+                    <div>
+                      {b.status === 'Paid' && confirmRefundId !== b.id && (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmRefundId(b.id)}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                            padding: '0.25rem 0.5rem', borderRadius: '0.375rem',
+                            border: '1px solid var(--border)', background: 'var(--bg-primary)',
+                            color: 'var(--color-error)', fontSize: '0.6875rem', fontWeight: 600,
+                            cursor: 'pointer', fontFamily: 'var(--font-body)',
+                          }}
+                        >
+                          <RotateCcw size={11} />
+                          Refund
+                        </button>
+                      )}
+                      {b.status === 'Paid' && confirmRefundId === b.id && (
+                        <div style={{ display: 'flex', gap: '0.25rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => void handleRefund(b.id)}
+                            disabled={refundingId === b.id}
+                            style={{
+                              padding: '0.25rem 0.5rem', borderRadius: '0.375rem', border: 'none',
+                              background: 'var(--color-error)', color: 'var(--bg-primary)',
+                              fontSize: '0.6875rem', fontWeight: 700, cursor: refundingId === b.id ? 'not-allowed' : 'pointer',
+                              fontFamily: 'var(--font-body)', opacity: refundingId === b.id ? 0.6 : 1,
+                            }}
+                          >
+                            {refundingId === b.id ? 'Processing...' : 'Confirm'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmRefundId(null)}
+                            disabled={refundingId === b.id}
+                            style={{
+                              padding: '0.25rem 0.4rem', borderRadius: '0.375rem',
+                              border: '1px solid var(--border)', background: 'var(--bg-secondary)',
+                              color: 'var(--text-secondary)', fontSize: '0.6875rem', cursor: 'pointer',
+                              fontFamily: 'var(--font-body)',
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      )}
+                      {b.status !== 'Paid' && (
+                        <span style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>—</span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
