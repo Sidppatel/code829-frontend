@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { Helmet } from "react-helmet-async";
 import {
   MapPin,
@@ -554,7 +555,39 @@ export default function EventDetailPage(): React.ReactElement {
   const [quantity, setQuantity] = useState(1);
   const [saved, setSaved] = useState(false);
   const [selectedTable, setSelectedTable] = useState<{ id: string; label: string; priceCents: number; capacity: number; priceType: string; holdExpiresAt: string | null } | null>(null);
+  const [booking, setBooking] = useState(false);
+  const navigate = useNavigate();
   const isGridLayout = event?.layoutMode === 'Grid';
+
+  async function handleTableBooking(): Promise<void> {
+    if (!selectedTable || !selectedTier || !id) return;
+    setBooking(true);
+    try {
+      // Get seat IDs for the held table
+      const holdsRes = await apiClient.get<Array<{ seatId: string }>>(`/seats/holds/${id}`);
+      const seatIds = holdsRes.data.map(h => h.seatId);
+      if (seatIds.length === 0) {
+        toast.error('No active hold found. Please select a table first.');
+        setBooking(false);
+        return;
+      }
+
+      // Create booking with one item per seat
+      const items = seatIds.map(seatId => ({ ticketTypeId: selectedTier, seatId }));
+      const bookingRes = await apiClient.post<{ id: string }>('/bookings', { eventId: id, items });
+      const bookingId = bookingRes.data.id;
+
+      // Auto-confirm payment (mock/dev mode)
+      await apiClient.post(`/bookings/${bookingId}/confirm`);
+      toast.success('Table booked successfully!');
+      navigate('/me/bookings');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Booking failed';
+      toast.error(msg);
+    } finally {
+      setBooking(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -875,6 +908,28 @@ export default function EventDetailPage(): React.ReactElement {
                   </div>
                 </div>
               </div>
+
+              {/* Table layout for Grid events — below venue */}
+              {isGridLayout && id && selectedTier && (
+                <div style={{
+                  padding: '1.25rem',
+                  borderRadius: '1rem',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                }}>
+                  <h3 style={{
+                    fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700,
+                    marginBottom: '1rem', color: 'var(--text-primary)',
+                  }}>
+                    Select Your Table
+                  </h3>
+                  <TableSelectionView
+                    eventId={id}
+                    ticketTypeId={selectedTier}
+                    onTableSelected={(t) => setSelectedTable(t ? { id: t.id, label: t.label, priceCents: t.priceCents, capacity: t.capacity, priceType: t.priceType, holdExpiresAt: t.holdExpiresAt } : null)}
+                  />
+                </div>
+              )}
             </div>
 
             {/* RIGHT: sticky sidebar */}
@@ -902,35 +957,35 @@ export default function EventDetailPage(): React.ReactElement {
 
                 {event.maxAttendees > 0 && <SocialProof event={event} />}
 
-                {/* Table selection for Grid layout events */}
-                {isGridLayout && id && selectedTier && (
-                  <div style={{ marginBottom: '1.25rem' }}>
-                    <TableSelectionView
-                      eventId={id}
-                      ticketTypeId={selectedTier}
-                      onTableSelected={(t) => setSelectedTable(t ? { id: t.id, label: t.label, priceCents: t.priceCents, capacity: t.capacity, priceType: t.priceType, holdExpiresAt: t.holdExpiresAt } : null)}
-                    />
-                    {selectedTable && (
-                      <div style={{
-                        marginTop: '0.75rem', padding: '0.75rem 1rem',
-                        background: 'color-mix(in srgb, var(--color-success) 10%, var(--bg-tertiary))',
-                        borderRadius: '0.75rem', border: '1px solid var(--color-success)',
-                      }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div>
-                            <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9375rem' }}>
-                              Table {selectedTable.label}
-                            </div>
-                            <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                              {selectedTable.capacity} seats &middot; ${(selectedTable.priceCents / 100).toFixed(2)}/{selectedTable.priceType === 'PerSeat' ? 'seat' : 'table'}
-                            </div>
-                          </div>
-                          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-cta)' }}>
-                            ${(selectedTable.priceCents / 100).toFixed(2)}
-                          </div>
+                {/* Selected table summary for Grid layout */}
+                {isGridLayout && selectedTable && (
+                  <div style={{
+                    marginBottom: '1.25rem', padding: '0.75rem 1rem',
+                    background: 'color-mix(in srgb, var(--color-success) 10%, var(--bg-tertiary))',
+                    borderRadius: '0.75rem', border: '1px solid var(--color-success)',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9375rem' }}>
+                          Table {selectedTable.label}
+                        </div>
+                        <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                          {selectedTable.capacity} seats &middot; ${(selectedTable.priceCents / 100).toFixed(2)}/{selectedTable.priceType === 'PerSeat' ? 'seat' : 'table'}
                         </div>
                       </div>
-                    )}
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-cta)' }}>
+                        ${(selectedTable.priceCents / 100).toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {isGridLayout && !selectedTable && (
+                  <div style={{
+                    marginBottom: '1.25rem', padding: '1rem', textAlign: 'center',
+                    color: 'var(--text-tertiary)', fontSize: '0.875rem',
+                    border: '1px dashed var(--border)', borderRadius: '0.75rem',
+                  }}>
+                    Select a table from the floor plan below
                   </div>
                 )}
 
@@ -1070,9 +1125,10 @@ export default function EventDetailPage(): React.ReactElement {
                 {isAuthenticated ? (
                   <MagneticButton
                     style={{ width: "100%", justifyContent: "center" }}
-                    disabled={isGridLayout ? !selectedTable : !selectedTier}
+                    disabled={isGridLayout ? (!selectedTable || booking) : !selectedTier}
+                    onClick={isGridLayout ? () => void handleTableBooking() : undefined}
                   >
-                    {isGridLayout ? 'Confirm Table' : 'Book Now'}
+                    {booking ? 'Processing...' : isGridLayout ? 'Confirm Table' : 'Book Now'}
                   </MagneticButton>
                 ) : (
                   <Link
