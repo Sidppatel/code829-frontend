@@ -225,21 +225,20 @@ export default function DeveloperEventsPage(): React.ReactElement {
                                 <td style={{ padding: '0.625rem 0.75rem', color: 'var(--text-secondary)', textAlign: 'right' }}>{tt.quantitySold} / {tt.quantityTotal}</td>
                                 <td style={{ padding: '0.625rem 0.75rem', textAlign: 'right' }}>
                                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                                    <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>$</span>
+                                    <span style={{ color: 'var(--text-tertiary)', fontSize: '0.8125rem' }}>$</span>
                                     <input
                                       type="number"
-                                      step="1"
+                                      step="0.01"
                                       min="0"
-                                      defaultValue={tt.platformFeeCents}
-                                      onChange={e => setFeeEdits(p => ({ ...p, [tt.id]: parseInt(e.target.value) || 0 }))}
+                                      defaultValue={(tt.platformFeeCents / 100).toFixed(2)}
+                                      onChange={e => setFeeEdits(p => ({ ...p, [tt.id]: Math.round((parseFloat(e.target.value) || 0) * 100) }))}
                                       style={{
-                                        width: '70px', padding: '0.3rem 0.5rem',
+                                        width: '80px', padding: '0.3rem 0.5rem',
                                         borderRadius: '0.375rem', border: '1px solid var(--border)',
                                         background: 'var(--bg-primary)', color: 'var(--text-primary)',
                                         fontSize: '0.8125rem', textAlign: 'right', outline: 'none',
                                       }}
                                     />
-                                    <span style={{ color: 'var(--text-tertiary)', fontSize: '0.6875rem' }}>cents</span>
                                   </div>
                                 </td>
                               </tr>
