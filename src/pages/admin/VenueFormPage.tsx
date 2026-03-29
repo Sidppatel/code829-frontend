@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -459,6 +459,7 @@ export default function VenueFormPage(): React.ReactElement {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<VenueFormValues>({
     resolver: zodResolver(venueSchema),
