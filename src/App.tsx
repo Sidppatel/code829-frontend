@@ -59,8 +59,6 @@ function PageLoader(): React.ReactElement {
 
 function AppRoutes(): React.ReactElement {
   const { user, isAuthenticated } = useAuthStore();
-  const isAdmin = location.pathname.startsWith('/admin') || location.pathname.startsWith('/developer');
-
   return (
     <>
       {isAuthenticated && user && !user.hasCompletedOnboarding && (
@@ -70,8 +68,7 @@ function AppRoutes(): React.ReactElement {
       )}      {/* Noise grain overlay */}
       <div className="noise-overlay" aria-hidden="true" />
 
-      {/* Public navbar hidden on admin/developer pages */}
-      {!isAdmin && <Navbar />}
+      <Navbar />
 
       <Suspense fallback={<PageLoader />}>
         <Routes>
