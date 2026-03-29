@@ -55,11 +55,11 @@ function toStateAbbr(state: string): string {
 
 const onboardingSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  address: z.string().min(5, 'Please enter a valid address'),
-  city: z.string().min(2, 'City is required'),
-  state: z.string().length(2, 'Use 2-letter state code (e.g., NY)'),
-  zipCode: z.string().regex(/^\d{5}(-\d{4})?$/, 'Invalid ZIP code'),
-  phone: z.string().min(10, 'Invalid phone number'),
+  address: z.string().optional().or(z.literal('')),
+  city: z.string().optional().or(z.literal('')),
+  state: z.string().max(2).optional().or(z.literal('')),
+  zipCode: z.string().optional().or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
   optInLocationEmail: z.boolean(),
 });
 
@@ -349,7 +349,7 @@ export default function OnboardingScreen(): React.ReactElement {
           {/* Phone */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Phone Number
+              Phone Number (Optional)
             </label>
             <div style={{ position: 'relative' }}>
               <Phone size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
@@ -365,10 +365,10 @@ export default function OnboardingScreen(): React.ReactElement {
           {/* Address Autocomplete */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Street Address
+              Street Address (Optional)
             </label>
             <AddressAutocomplete
-              value={watchedValues.address}
+              value={watchedValues.address || ''}
               error={errors.address?.message}
               onRawChange={(v) => setValue('address', v, { shouldValidate: true })}
               onAddressChange={(addr) => {
