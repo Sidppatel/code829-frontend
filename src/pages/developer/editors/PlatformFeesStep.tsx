@@ -10,10 +10,10 @@ interface TicketType {
   platformFeeCents: number;
 }
 
-interface LayoutTable {
+interface TableTypeInfo {
   id: string;
-  label: string;
-  priceCents: number;
+  name: string;
+  defaultPriceCents: number;
   platformFeeCents: number;
 }
 
@@ -21,7 +21,7 @@ interface PlatformFeesStepProps {
   eventId: string;
   layoutMode: 'Grid' | 'CapacityOnly' | 'None';
   ticketTypes: TicketType[];
-  tables: LayoutTable[];
+  tableTypes: TableTypeInfo[];
   onRefresh: () => Promise<void>;
 }
 
@@ -29,18 +29,17 @@ export default function PlatformFeesStep({
   eventId,
   layoutMode,
   ticketTypes,
-  tables,
+  tableTypes,
   onRefresh
 }: PlatformFeesStepProps) {
   const [saving, setSaving] = useState(false);
-  
-  // Local state for fee edits
+
   const [ticketFees, setTicketFees] = useState<Record<string, string>>(
     Object.fromEntries(ticketTypes.map(t => [t.id, (t.platformFeeCents / 100).toString()]))
   );
-  
-  const [tableFees, setTableFees] = useState<Record<string, string>>(
-    Object.fromEntries(tables.map(t => [t.id, (t.platformFeeCents / 100).toString()]))
+
+  const [tableTypeFees, setTableTypeFees] = useState<Record<string, string>>(
+    Object.fromEntries(tableTypes.map(t => [t.id, (t.platformFeeCents / 100).toString()]))
   );
 
   const [globalTicketFee, setGlobalTicketFee] = useState('');
@@ -66,8 +65,8 @@ export default function PlatformFeesStep({
           ticketTypeId: id,
           platformFeeCents: Math.round(parseFloat(val || '0') * 100)
         })),
-        tableFees: Object.entries(tableFees).map(([id, val]) => ({
-          tableId: id,
+        tableTypeFees: Object.entries(tableTypeFees).map(([id, val]) => ({
+          tableTypeId: id,
           platformFeeCents: Math.round(parseFloat(val || '0') * 100)
         }))
       };
@@ -75,8 +74,9 @@ export default function PlatformFeesStep({
       await apiClient.put(`/developer/events/${eventId}/platform-fees`, payload);
       toast.success('Platform fees updated successfully');
       await onRefresh();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to update fees');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to update fees';
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -91,7 +91,7 @@ export default function PlatformFeesStep({
 
   return (
     <div style={{ padding: '0.5rem' }}>
-      <div style={{ 
+      <div style={{
         background: 'color-mix(in srgb, var(--accent-primary) 5%, var(--bg-secondary))',
         border: '1px solid var(--border)',
         borderRadius: '0.75rem',
@@ -107,14 +107,14 @@ export default function PlatformFeesStep({
             Developer Fee Management
           </h4>
           <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-            Configure specific platform fees for each ticket tier or table. These fees are added to the base price set by the organizer.
+            Configure platform fees for each ticket tier and table type. These fees are added to the base price.
             Attendees see the final summed price ($Price + $Fee).
           </p>
         </div>
       </div>
 
       {layoutMode === 'None' && (
-         <div style={{ 
+         <div style={{
           background: 'var(--bg-tertiary)',
           border: '1px solid var(--border)',
           borderRadius: '0.75rem',
@@ -127,8 +127,8 @@ export default function PlatformFeesStep({
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <div style={{ flex: 1, position: 'relative' }}>
                <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>$</span>
-               <input 
-                type="number" 
+               <input
+                type="number"
                 placeholder="Apply single fee to all tickets"
                 value={globalTicketFee}
                 onChange={e => setGlobalTicketFee(e.target.value)}
@@ -143,7 +143,7 @@ export default function PlatformFeesStep({
                 }}
               />
             </div>
-            <button 
+            <button
               onClick={handleApplyGlobal}
               style={{
                 padding: '0 1.25rem',
@@ -187,7 +187,7 @@ export default function PlatformFeesStep({
                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Platform Fee</div>
                  <div style={{ position: 'relative' }}>
                     <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>$</span>
-                    <input 
+                    <input
                       type="number"
                       value={ticketFees[t.id] || '0'}
                       onChange={e => setTicketFees(prev => ({ ...prev, [t.id]: e.target.value }))}
@@ -215,15 +215,15 @@ export default function PlatformFeesStep({
         ))}
       </div>
 
-      {/* Tables (if applicable) */}
-      {layoutMode === 'Grid' && tables.length > 0 && (
+      {/* Table Types (if applicable) */}
+      {layoutMode === 'Grid' && tableTypes.length > 0 && (
         <>
           <h5 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '2rem 0 1rem', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
             <LayoutGrid size={18} />
-            Specific Table Fees
+            Table Type Fees
           </h5>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-            {tables.map(t => (
+            {tableTypes.map(t => (
               <div key={t.id} style={{
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--border)',
@@ -231,17 +231,17 @@ export default function PlatformFeesStep({
                 borderRadius: '0.75rem'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                   <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Table {t.label}</div>
-                   <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>{formatCurrency(t.priceCents)} base</div>
+                   <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t.name}</div>
+                   <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>{formatCurrency(t.defaultPriceCents)} base</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                    <div style={{ flex: 1, position: 'relative' }}>
                       <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>$</span>
-                      <input 
+                      <input
                         type="number"
                         placeholder="Fee"
-                        value={tableFees[t.id] || '0'}
-                        onChange={e => setTableFees(prev => ({ ...prev, [t.id]: e.target.value }))}
+                        value={tableTypeFees[t.id] || '0'}
+                        onChange={e => setTableTypeFees(prev => ({ ...prev, [t.id]: e.target.value }))}
                         style={{
                           width: '100%',
                           padding: '0.5rem 0.5rem 0.5rem 1.6rem',
@@ -256,7 +256,7 @@ export default function PlatformFeesStep({
                    <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Total</div>
                       <div style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>
-                        {formatCurrency(t.priceCents + Math.round(parseFloat(tableFees[t.id] || '0') * 100))}
+                        {formatCurrency(t.defaultPriceCents + Math.round(parseFloat(tableTypeFees[t.id] || '0') * 100))}
                       </div>
                    </div>
                 </div>
@@ -267,7 +267,7 @@ export default function PlatformFeesStep({
       )}
 
       {/* Save Button */}
-      <div style={{ 
+      <div style={{
         marginTop: '3rem',
         paddingTop: '1.5rem',
         borderTop: '1px solid var(--border)',

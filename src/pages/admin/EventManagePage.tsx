@@ -83,6 +83,26 @@ interface LayoutData {
   tables: LayoutTable[];
 }
 
+interface LayoutStatusTable {
+  id: string;
+  label: string;
+  capacity: number;
+  shape: string;
+  color: string | null;
+  gridRow: number | null;
+  gridCol: number | null;
+  status: 'Available' | 'Held' | 'Booked';
+  seatsSold: number;
+  bookingCount: number;
+  bookers: string[];
+}
+
+interface LayoutStatusData {
+  gridRows: number | null;
+  gridCols: number | null;
+  tables: LayoutStatusTable[];
+}
+
 interface EventStats {
   totalCapacity: number;
   ticketsSold: number;
@@ -95,6 +115,8 @@ interface BookingItemDto {
   ticketTypeName: string;
   priceCents: number;
   seatId: string | null;
+  seatLabel: string | null;
+  tableLabel: string | null;
 }
 
 interface PaymentDto {
@@ -275,8 +297,8 @@ function StatCard({
 
 // ─── Layout grid display ──────────────────────────────────────────────────────
 
-function ReadOnlyLayoutGrid({ tables, gridRows, gridCols }: {
-  tables: LayoutTable[]; gridRows: number; gridCols: number;
+function ReadOnlyLayoutGrid({ tables, statusTables, gridRows, gridCols }: {
+  tables: LayoutTable[]; statusTables?: LayoutStatusTable[]; gridRows: number; gridCols: number;
 }): React.ReactElement {
   if (tables.length === 0) {
     return (
@@ -297,55 +319,94 @@ function ReadOnlyLayoutGrid({ tables, gridRows, gridCols }: {
     }
   }
 
+  // Build status lookup by table ID
+  const statusMap = new Map<string, LayoutStatusTable>();
+  if (statusTables) {
+    for (const st of statusTables) {
+      statusMap.set(st.id, st);
+    }
+  }
+
   const CELL = 64;
   const GAP = 4;
 
-  return (
-    <div style={{
-      overflowX: 'auto', overflowY: 'auto', border: '1px solid var(--border)',
-      borderRadius: '0.75rem', background: 'var(--bg-tertiary)', maxHeight: '420px', padding: '0.5rem',
-    }}>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${gridCols}, ${CELL}px)`,
-        gridTemplateRows: `repeat(${gridRows}, ${CELL}px)`,
-        gap: `${GAP}px`,
-        width: 'fit-content',
-      }}>
-        {Array.from({ length: gridRows * gridCols }).map((_, idx) => {
-          const r = Math.floor(idx / gridCols);
-          const c = idx % gridCols;
-          const t = cellMap.get(`${r},${c}`);
-          const fill = t?.color ?? 'var(--accent-primary)';
+  const statusColors: Record<string, string> = {
+    Booked: 'var(--color-success)',
+    Held: 'var(--color-warning)',
+    Available: '',
+  };
 
-          return (
-            <div
-              key={`${r}-${c}`}
-              style={{
-                width: `${CELL}px`, height: `${CELL}px`,
-                borderRadius: t?.shape === 'Round' || t?.shape === 'Cocktail' ? '50%' : '0.375rem',
-                background: t
-                  ? `color-mix(in srgb, ${fill} 20%, var(--bg-secondary))`
-                  : 'var(--bg-secondary)',
-                border: t ? `2px solid ${fill}` : '1px solid var(--border)',
-                display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.6875rem', fontWeight: 700,
-                color: t ? fill : 'transparent',
-                opacity: t ? 1 : 0.4,
-              }}
-            >
-              {t && (
-                <>
-                  <span>{t.label}</span>
-                  <span style={{ fontSize: '0.6rem', fontWeight: 500, opacity: 0.8 }}>
-                    {t.capacity}s
-                  </span>
-                </>
-              )}
-            </div>
-          );
-        })}
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {/* Legend */}
+      {statusTables && (
+        <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+          {['Booked', 'Held', 'Available'].map(s => (
+            <span key={s} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              <span style={{
+                width: '10px', height: '10px', borderRadius: '50%',
+                background: s === 'Available' ? 'var(--bg-tertiary)' : statusColors[s],
+                border: s === 'Available' ? '1.5px solid var(--border)' : 'none',
+              }} />
+              {s}
+            </span>
+          ))}
+        </div>
+      )}
+      <div style={{
+        overflowX: 'auto', overflowY: 'auto', border: '1px solid var(--border)',
+        borderRadius: '0.75rem', background: 'var(--bg-tertiary)', maxHeight: '420px', padding: '0.5rem',
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${gridCols}, ${CELL}px)`,
+          gridTemplateRows: `repeat(${gridRows}, ${CELL}px)`,
+          gap: `${GAP}px`,
+          width: 'fit-content',
+        }}>
+          {Array.from({ length: gridRows * gridCols }).map((_, idx) => {
+            const r = Math.floor(idx / gridCols);
+            const c = idx % gridCols;
+            const t = cellMap.get(`${r},${c}`);
+            const st = t ? statusMap.get(t.id) : undefined;
+            const status = st?.status ?? 'Available';
+            const fill = status === 'Available'
+              ? (t?.color ?? 'var(--accent-primary)')
+              : statusColors[status];
+            const bookedFill = status !== 'Available' ? fill : (t?.color ?? 'var(--accent-primary)');
+
+            return (
+              <div
+                key={`${r}-${c}`}
+                title={t && st ? `${t.label} — ${status}${st.bookers.length > 0 ? `\n${st.bookers.join(', ')}` : ''}` : undefined}
+                style={{
+                  width: `${CELL}px`, height: `${CELL}px`,
+                  borderRadius: t?.shape === 'Round' || t?.shape === 'Cocktail' ? '50%' : '0.375rem',
+                  background: t
+                    ? `color-mix(in srgb, ${bookedFill} 20%, var(--bg-secondary))`
+                    : 'var(--bg-secondary)',
+                  border: t ? `2px solid ${bookedFill}` : '1px solid var(--border)',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.6875rem', fontWeight: 700,
+                  color: t ? bookedFill : 'transparent',
+                  opacity: t ? 1 : 0.4,
+                  cursor: t ? 'default' : undefined,
+                  position: 'relative',
+                }}
+              >
+                {t && (
+                  <>
+                    <span>{t.label}</span>
+                    <span style={{ fontSize: '0.55rem', fontWeight: 500, opacity: 0.8 }}>
+                      {st ? `${st.seatsSold}/${st.capacity}` : `${t.capacity}s`}
+                    </span>
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -361,6 +422,7 @@ export default function EventManagePage(): React.ReactElement {
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [layoutData, setLayoutData] = useState<LayoutData | null>(null);
+  const [layoutStatusData, setLayoutStatusData] = useState<LayoutStatusData | null>(null);
   const [layoutLoading, setLayoutLoading] = useState(false);
   const [stats, setStats] = useState<EventStats>({
     totalCapacity: 0,
@@ -376,7 +438,7 @@ export default function EventManagePage(): React.ReactElement {
   const [bookingsStatusFilter, setBookingsStatusFilter] = useState<string>('');
   const [bookingsSearchInput, setBookingsSearchInput] = useState('');
   const [bookingsSearch, setBookingsSearch] = useState('');
-
+  const [tableTypes, setTableTypes] = useState<Array<{ id: string; name: string; defaultPriceCents: number; platformFeeCents: number }>>([]);
 
   const fetchEvent = useCallback(async (): Promise<void> => {
     if (!id) return;
@@ -403,8 +465,14 @@ export default function EventManagePage(): React.ReactElement {
 
     async function loadLayout(): Promise<void> {
       try {
-        const res = await apiClient.get<LayoutData>(`/admin/events/${id}/layout`);
-        if (!cancelled) setLayoutData(res.data);
+        const [layoutRes, statusRes] = await Promise.all([
+          apiClient.get<LayoutData>(`/admin/events/${id}/layout`),
+          apiClient.get<LayoutStatusData>(`/admin/events/${id}/layout/status`),
+        ]);
+        if (!cancelled) {
+          setLayoutData(layoutRes.data);
+          setLayoutStatusData(statusRes.data);
+        }
       } catch {
         // non-fatal
       } finally {
@@ -484,7 +552,19 @@ export default function EventManagePage(): React.ReactElement {
     return () => { cancelled = true; };
   }, [id, activeTab, bookingsPage, bookingsStatusFilter, bookingsSearch]);
 
-
+  // Load table types for fees tab
+  useEffect(() => {
+    if (activeTab !== 'fees') return;
+    let cancelled = false;
+    async function loadTableTypes(): Promise<void> {
+      try {
+        const res = await apiClient.get<Array<{ id: string; name: string; defaultPriceCents: number; platformFeeCents: number }>>('/admin/table-types');
+        if (!cancelled) setTableTypes(res.data);
+      } catch { /* non-fatal */ }
+    }
+    void loadTableTypes();
+    return () => { cancelled = true; };
+  }, [activeTab]);
 
   // ─── Tabs ─────────────────────────────────────────────────────────────────
 
@@ -902,7 +982,7 @@ export default function EventManagePage(): React.ReactElement {
                               fontSize: '0.75rem', color: 'var(--text-secondary)',
                               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                             }}>
-                              {item.ticketTypeName} · {formatCents(item.priceCents)}
+                              {item.tableLabel ? `Table ${item.tableLabel} · ` : ''}{item.ticketTypeName} · {formatCents(item.priceCents)}
                             </span>
                           ))}
                           {(b.items ?? []).length > 2 && (
@@ -1051,6 +1131,7 @@ export default function EventManagePage(): React.ReactElement {
             ) : (
               <ReadOnlyLayoutGrid
                 tables={layoutData?.tables ?? []}
+                statusTables={layoutStatusData?.tables}
                 gridRows={layoutData?.gridRows ?? 5}
                 gridCols={layoutData?.gridCols ?? 5}
               />
@@ -1125,7 +1206,7 @@ export default function EventManagePage(): React.ReactElement {
             <ReadOnlyPlatformFees
               layoutMode={event.layoutMode}
               ticketTypes={event.ticketTypes || []}
-              tables={layoutData?.tables || []}
+              tableTypes={tableTypes}
             />
           </Suspense>
         </div>

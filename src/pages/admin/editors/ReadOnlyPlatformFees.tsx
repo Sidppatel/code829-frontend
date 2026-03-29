@@ -7,23 +7,23 @@ interface TicketType {
   platformFeeCents: number;
 }
 
-interface LayoutTable {
+interface TableTypeInfo {
   id: string;
-  label: string;
-  priceCents: number;
+  name: string;
+  defaultPriceCents: number;
   platformFeeCents: number;
 }
 
 interface ReadOnlyPlatformFeesProps {
   layoutMode: 'Grid' | 'CapacityOnly' | 'None';
   ticketTypes: TicketType[];
-  tables: LayoutTable[];
+  tableTypes: TableTypeInfo[];
 }
 
 export default function ReadOnlyPlatformFees({
   layoutMode,
   ticketTypes,
-  tables
+  tableTypes
 }: ReadOnlyPlatformFeesProps) {
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -34,7 +34,7 @@ export default function ReadOnlyPlatformFees({
 
   return (
     <div style={{ padding: '0.5rem' }}>
-      <div style={{ 
+      <div style={{
         background: 'var(--bg-tertiary)',
         border: '1px solid var(--border)',
         borderRadius: '0.75rem',
@@ -85,14 +85,14 @@ export default function ReadOnlyPlatformFees({
         ))}
       </div>
 
-      {layoutMode === 'Grid' && tables.length > 0 && (
+      {layoutMode === 'Grid' && tableTypes.length > 0 && (
         <>
           <h5 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '2rem 0 1rem', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
             <LayoutGrid size={18} />
-            Table Specific Pricing
+            Table Type Pricing
           </h5>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-            {tables.map(t => (
+            {tableTypes.map(t => (
               <div key={t.id} style={{
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--border)',
@@ -103,13 +103,13 @@ export default function ReadOnlyPlatformFees({
                 justifyContent: 'space-between'
               }}>
                 <div>
-                   <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Table {t.label}</div>
-                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{formatCurrency(t.priceCents)} base</div>
+                   <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{t.name}</div>
+                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{formatCurrency(t.defaultPriceCents)} base</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                   <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Total</div>
+                   <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Fee</div>
                    <div style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>
-                     {formatCurrency(t.priceCents + t.platformFeeCents)}
+                     +{formatCurrency(t.platformFeeCents)}
                    </div>
                 </div>
               </div>

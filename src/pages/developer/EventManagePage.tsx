@@ -62,25 +62,6 @@ interface TicketTypeDto {
   sortOrder: number;
 }
 
-interface LayoutTable {
-  id: string;
-  label: string;
-  capacity: number;
-  shape: string;
-  gridRow: number | null;
-  gridCol: number | null;
-  tableTypeId: string | null;
-  color: string | null;
-  priceCents: number;
-  platformFeeCents: number;
-}
-
-interface LayoutData {
-  gridRows: number | null;
-  gridCols: number | null;
-  tables: LayoutTable[];
-}
-
 interface EventStats {
   totalCapacity: number;
   ticketsSold: number;
@@ -280,7 +261,6 @@ export default function EventManagePage(): React.ReactElement {
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [layoutData, setLayoutData] = useState<LayoutData | null>(null);
   const [stats, setStats] = useState<EventStats>({
     totalCapacity: 0,
     ticketsSold: 0,
@@ -295,6 +275,7 @@ export default function EventManagePage(): React.ReactElement {
   const [bookingsStatusFilter, setBookingsStatusFilter] = useState<string>('');
   const [refundingId, setRefundingId] = useState<string | null>(null);
   const [confirmRefundId, setConfirmRefundId] = useState<string | null>(null);
+  const [tableTypes, setTableTypes] = useState<Array<{ id: string; name: string; defaultPriceCents: number; platformFeeCents: number }>>([]);
 
   const fetchEvent = useCallback(async (): Promise<void> => {
     if (!id) return;
@@ -313,28 +294,19 @@ export default function EventManagePage(): React.ReactElement {
     void fetchEvent();
   }, [fetchEvent]);
 
-  // Load layout when on layout tab or when Grid mode
+  // Load table types for fees tab
   useEffect(() => {
-    if (!id || !event || event.layoutMode !== 'Grid') return;
+    if (activeTab !== 'fees') return;
     let cancelled = false;
-
-
-    async function loadLayout(): Promise<void> {
+    async function loadTableTypes(): Promise<void> {
       try {
-        const res = await apiClient.get<LayoutData>(`/developer/events/${id}/layout`);
-        if (!cancelled) setLayoutData(res.data);
-      } catch {
-        // non-fatal
-      } finally {
-        if (!cancelled) {
-          // fetch finished
-        }
-      }
+        const res = await apiClient.get<Array<{ id: string; name: string; defaultPriceCents: number; platformFeeCents: number }>>('/admin/table-types');
+        if (!cancelled) setTableTypes(res.data);
+      } catch { /* non-fatal */ }
     }
-
-    void loadLayout();
+    void loadTableTypes();
     return () => { cancelled = true; };
-  }, [id, event]);
+  }, [activeTab]);
 
   // Compute stats from bookings
   useEffect(() => {
@@ -933,7 +905,7 @@ export default function EventManagePage(): React.ReactElement {
               eventId={event.id}
               layoutMode={event.layoutMode}
               ticketTypes={event.ticketTypes || []}
-              tables={layoutData?.tables || []}
+              tableTypes={tableTypes}
               onRefresh={fetchEvent}
             />
           </Suspense>
