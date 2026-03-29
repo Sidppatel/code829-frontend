@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Circle, Square, RectangleHorizontal, Diamond, Clock, Lock, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../lib/axios';
@@ -70,6 +70,8 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
   const [data, setData] = useState<TablesResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [holdingId, setHoldingId] = useState<string | null>(null);
+  const onTableSelectedRef = useRef(onTableSelected);
+  onTableSelectedRef.current = onTableSelected;
 
   const loadTables = useCallback(async () => {
     try {
@@ -94,8 +96,8 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
   useEffect(() => {
     if (!data) return;
     const held = data.tables.find(t => t.status === 'HeldByYou');
-    onTableSelected(held ?? null);
-  }, [data, onTableSelected]);
+    onTableSelectedRef.current(held ?? null);
+  }, [data]);
 
   async function handleTableClick(table: EventTable): Promise<void> {
     if (!isAuthenticated) {
