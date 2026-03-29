@@ -28,14 +28,6 @@ const venueSchema = z.object({
     .url('Must be a valid URL')
     .optional()
     .or(z.literal('')),
-  latitude: z
-    .union([z.number(), z.nan()])
-    .optional()
-    .transform((v) => (typeof v === 'number' && !isNaN(v) ? v : undefined)),
-  longitude: z
-    .union([z.number(), z.nan()])
-    .optional()
-    .transform((v) => (typeof v === 'number' && !isNaN(v) ? v : undefined)),
 });
 
 type VenueFormValues = z.input<typeof venueSchema>;
@@ -51,8 +43,6 @@ interface VenueData {
   description: string;
   phone: string;
   website: string;
-  latitude: number | null;
-  longitude: number | null;
   isActive: boolean;
 }
 
@@ -257,8 +247,6 @@ export default function VenueFormPage(): React.ReactElement {
       description: '',
       phone: '',
       website: '',
-      latitude: undefined,
-      longitude: undefined,
     },
   });
 
@@ -283,8 +271,6 @@ export default function VenueFormPage(): React.ReactElement {
           description: v.description ?? '',
           phone: v.phone ?? '',
           website: v.website ?? '',
-          latitude: v.latitude ?? undefined,
-          longitude: v.longitude ?? undefined,
         });
       } catch {
         if (!cancelled) toast.error('Failed to load venue data');
@@ -427,26 +413,6 @@ export default function VenueFormPage(): React.ReactElement {
                 value={strVal('zipCode')}
                 error={errors.zipCode?.message}
                 {...register('zipCode')}
-              />
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <FloatingInput
-                id="latitude"
-                label="Latitude"
-                type="number"
-                step="any"
-                value={strVal('latitude')}
-                error={errors.latitude?.message}
-                {...register('latitude', { valueAsNumber: true })}
-              />
-              <FloatingInput
-                id="longitude"
-                label="Longitude"
-                type="number"
-                step="any"
-                value={strVal('longitude')}
-                error={errors.longitude?.message}
-                {...register('longitude', { valueAsNumber: true })}
               />
             </div>
           </div>
