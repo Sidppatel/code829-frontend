@@ -437,6 +437,8 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   const [draggingElementId, setDraggingElementId] = useState<string | null>(null);
   // Selected empty cells for bulk placement (stored as "row-col" keys)
   const [selectedEmptyCells, setSelectedEmptyCells] = useState<Set<string>>(new Set());
+  const [bookedRevenueCents, setBookedRevenueCents] = useState(0);
+  const [bookedCount, setBookedCount] = useState(0);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -522,6 +524,21 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
+  // Fetch booking stats for this event
+  useEffect(() => {
+    if (!eventId) return;
+    apiClient.get(`/admin/bookings?eventId=${eventId}&pageSize=1`)
+      .then((res) => {
+        const data = res.data as { items: Array<{ totalCents: number; status: string }>; totalCount: number };
+        const paidBookings = (data.items ?? []).filter(
+          (b) => b.status === 'Paid' || b.status === 'CheckedIn'
+        );
+        setBookedCount(data.totalCount);
+        setBookedRevenueCents(paidBookings.reduce((sum, b) => sum + b.totalCents, 0));
+      })
+      .catch(() => { /* no bookings endpoint or no bookings */ });
+  }, [eventId]);
+
   // Close context menu on outside click
   useEffect(() => {
     function handleClick(): void {
@@ -550,6 +567,12 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   const totalTables = allElements.length;
   const totalSeats = allElements.reduce((acc, el) => acc + el.capacity, 0);
   const sections = new Set(allElements.map((el) => el.section).filter(Boolean)).size;
+
+  // Revenue: total potential (all tables sold) based on priceType
+  const totalRevenueCents = allElements.reduce((acc, el) => {
+    const price = el.priceOverrideCents ?? el.priceCents;
+    return acc + (el.priceType === 'PerTable' ? price : price * el.capacity);
+  }, 0);
 
   // Cell occupancy map: "row-col" -> elementId
   const occupancyMap = new Map<string, string>();
@@ -1243,12 +1266,34 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
           {/* Divider */}
           <div style={{ width: '1px', height: '24px', background: 'var(--border)' }} />
 
-          {/* Stats */}
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            <strong style={{ color: 'var(--text-primary)' }}>{totalTables}</strong> tables,{' '}
-            <strong style={{ color: 'var(--text-primary)' }}>{totalSeats}</strong> seats,{' '}
-            <strong style={{ color: 'var(--text-primary)' }}>{sections}</strong> sections
-          </span>
+          {/* Stats + Revenue */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+            <span>
+              <strong style={{ color: 'var(--text-primary)' }}>{totalTables}</strong> tables
+              {' · '}
+              <strong style={{ color: 'var(--text-primary)' }}>{totalSeats}</strong> seats
+            </span>
+            <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
+            <span title="Total revenue if all tables are sold">
+              Potential:{' '}
+              <strong style={{ color: 'var(--color-success)' }}>
+                ${(totalRevenueCents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </strong>
+            </span>
+            {bookedCount > 0 && (
+              <>
+                <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
+                <span title="Revenue from confirmed bookings">
+                  Booked:{' '}
+                  <strong style={{ color: 'var(--accent-primary)' }}>
+                    ${(bookedRevenueCents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </strong>
+                  {' '}
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>({bookedCount} bookings)</span>
+                </span>
+              </>
+            )}
+          </div>
 
           {/* Select All */}
           <label
