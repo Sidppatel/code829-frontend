@@ -26,6 +26,7 @@ const DeveloperEventsListPage = React.lazy(() => import('./pages/developer/Event
 const DeveloperEventWizardPage = React.lazy(() => import('./pages/developer/EventWizardPage'));
 const DeveloperEventManagePage = React.lazy(() => import('./pages/developer/EventManagePage'));
 const DeveloperAnalyticsPage = React.lazy(() => import('./pages/developer/AnalyticsPage'));
+const DeveloperSettingsPage = React.lazy(() => import('./pages/developer/DeveloperSettingsPage'));
 
 function PageLoader(): React.ReactElement {
   return (
@@ -95,6 +96,7 @@ function AppRoutes(): React.ReactElement {
             <Route path="events/:id" element={<DeveloperEventManagePage />} />
             <Route path="events/:id/edit" element={<DeveloperEventWizardPage />} />
             <Route path="analytics" element={<DeveloperAnalyticsPage />} />
+            <Route path="settings" element={<DeveloperSettingsPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -1193,6 +1193,18 @@ export default function EventWizardPage(): React.ReactElement {
               {...register('bannerImageUrl')}
             />
 
+            {/* Platform Fee Percent (Developer Only) */}
+            <FloatingInput
+              fieldId="platformFeePercent"
+              label="Platform Fee % (optional)"
+              type="number"
+              min={0}
+              max={100}
+              value={watchedValues.platformFeePercent ?? ''}
+              error={errors.platformFeePercent?.message}
+              {...register('platformFeePercent')}
+            />
+
             {/* Featured */}
             <label
               style={{

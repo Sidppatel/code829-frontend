@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  Settings,
 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 
@@ -20,6 +21,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', to: '/developer', Icon: LayoutDashboard },
   { label: 'Events', to: '/developer/events', Icon: CalendarDays },
   { label: 'Analytics', to: '/developer/analytics', Icon: BarChart3 },
+  { label: 'Settings', to: '/developer/settings', Icon: Settings },
 ];
 
 function buildBreadcrumbs(pathname: string): string[] {
