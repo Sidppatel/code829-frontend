@@ -532,6 +532,7 @@ export default function VenuesPage(): React.ReactElement {
                       style={{
                         borderBottom: '1px solid var(--border)',
                         transition: 'background 0.15s',
+                        opacity: venue.isActive ? 1 : 0.45,
                       }}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLTableRowElement).style.background = 'var(--bg-tertiary)';
@@ -543,13 +544,14 @@ export default function VenuesPage(): React.ReactElement {
                       <td
                         style={{
                           padding: '0.875rem 1rem',
-                          color: 'var(--text-primary)',
+                          color: venue.isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
                           fontWeight: 500,
                           fontSize: '0.875rem',
                           maxWidth: '220px',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
+                          textDecoration: venue.isActive ? 'none' : 'line-through',
                         }}
                       >
                         {venue.name}
@@ -569,28 +571,50 @@ export default function VenuesPage(): React.ReactElement {
                       </td>
                       <td style={{ padding: '0.875rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'inline-flex', gap: '0.375rem', alignItems: 'center' }}>
-                          <Link
-                            to={`/admin/venues/${venue.id}/edit`}
-                            aria-label={`Edit ${venue.name}`}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: '30px',
-                              height: '30px',
-                              borderRadius: '0.375rem',
-                              border: '1px solid var(--border)',
-                              background: 'var(--bg-tertiary)',
-                              color: 'var(--accent-primary)',
-                              textDecoration: 'none',
-                              transition: 'background 0.15s',
-                            }}
-                          >
-                            <Pencil size={13} />
-                          </Link>
+                          {venue.isActive ? (
+                            <Link
+                              to={`/admin/venues/${venue.id}/edit`}
+                              aria-label={`Edit ${venue.name}`}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '30px',
+                                height: '30px',
+                                borderRadius: '0.375rem',
+                                border: '1px solid var(--border)',
+                                background: 'var(--bg-tertiary)',
+                                color: 'var(--accent-primary)',
+                                textDecoration: 'none',
+                                transition: 'background 0.15s',
+                              }}
+                            >
+                              <Pencil size={13} />
+                            </Link>
+                          ) : (
+                            <span
+                              title="Venue is disabled"
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '30px',
+                                height: '30px',
+                                borderRadius: '0.375rem',
+                                border: '1px solid var(--border)',
+                                background: 'var(--bg-tertiary)',
+                                color: 'var(--text-tertiary)',
+                                cursor: 'not-allowed',
+                                opacity: 0.5,
+                              }}
+                            >
+                              <Pencil size={13} />
+                            </span>
+                          )}
                           <button
-                            onClick={() => setDeleteTarget(venue)}
-                            aria-label={`Delete ${venue.name}`}
+                            onClick={venue.isActive ? () => setDeleteTarget(venue) : undefined}
+                            disabled={!venue.isActive}
+                            aria-label={venue.isActive ? `Delete ${venue.name}` : 'Venue is disabled'}
                             style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -600,8 +624,9 @@ export default function VenuesPage(): React.ReactElement {
                               borderRadius: '0.375rem',
                               border: '1px solid var(--border)',
                               background: 'var(--bg-tertiary)',
-                              color: 'var(--color-error)',
-                              cursor: 'pointer',
+                              color: venue.isActive ? 'var(--color-error)' : 'var(--text-tertiary)',
+                              cursor: venue.isActive ? 'pointer' : 'not-allowed',
+                              opacity: venue.isActive ? 1 : 0.5,
                               transition: 'background 0.15s',
                             }}
                           >
@@ -659,7 +684,7 @@ export default function VenuesPage(): React.ReactElement {
                   key={venue.id}
                   style={{
                     background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border)',
+                    border: venue.isActive ? '1px solid var(--border)' : '1px solid var(--color-error)',
                     borderRadius: '0.75rem',
                     padding: '1.25rem',
                     boxShadow: 'var(--shadow-card)',
@@ -667,6 +692,7 @@ export default function VenuesPage(): React.ReactElement {
                     flexDirection: 'column',
                     gap: '0.625rem',
                     transition: 'box-shadow 0.2s',
+                    opacity: venue.isActive ? 1 : 0.45,
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-card-hover)';
