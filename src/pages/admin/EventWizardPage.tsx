@@ -12,6 +12,7 @@ import {
   X,
   ChevronRight,
   ChevronLeft,
+  Lock,
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
 import { useEventWizardStore } from '../../stores/eventWizardStore';
@@ -482,6 +483,7 @@ interface Step2LayoutPanelProps {
   onMaxCapacityChange: (v: string) => void;
   eventId: string | null;
   isEdit: boolean;
+  layoutModeLocked: boolean;
 }
 
 
@@ -494,6 +496,7 @@ function Step2LayoutPanel({
   onMaxCapacityChange,
   eventId,
   isEdit,
+  layoutModeLocked,
 }: Step2LayoutPanelProps): React.ReactElement {
   const isAssignedSeating = watchedLayoutMode === 'Grid';
 
@@ -505,6 +508,19 @@ function Step2LayoutPanel({
       <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
         Choose how your event seats and capacity will be managed.
       </p>
+
+      {layoutModeLocked && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '0.5rem',
+          padding: '0.75rem 1rem', borderRadius: '0.5rem',
+          background: 'color-mix(in srgb, var(--color-warning) 10%, var(--bg-secondary))',
+          border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
+          fontSize: '0.8125rem', color: 'var(--color-warning)', fontWeight: 600,
+        }}>
+          <Lock size={14} />
+          Layout mode is locked — active bookings or seat holds exist for this event.
+        </div>
+      )}
 
       {layoutModeError && (
         <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--color-error)' }}>{layoutModeError}</p>
@@ -537,11 +553,13 @@ function Step2LayoutPanel({
           ] as const
         ).map((card) => {
           const isSelected = watchedLayoutMode === card.value;
+          const isDisabled = layoutModeLocked && !isSelected;
           return (
             <button
               key={card.value}
               type="button"
-              onClick={() => onLayoutModeChange(card.value)}
+              disabled={isDisabled}
+              onClick={() => !layoutModeLocked && onLayoutModeChange(card.value)}
               style={{
                 padding: '1.25rem',
                 borderRadius: '0.75rem',
@@ -549,13 +567,14 @@ function Step2LayoutPanel({
                 background: isSelected
                   ? 'color-mix(in srgb, var(--accent-primary) 8%, var(--bg-secondary))'
                   : 'var(--bg-secondary)',
-                cursor: 'pointer',
+                cursor: layoutModeLocked ? 'not-allowed' : 'pointer',
                 textAlign: 'left',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.625rem',
                 transition: 'border-color 0.2s, background 0.2s',
                 fontFamily: 'var(--font-body)',
+                opacity: isDisabled ? 0.45 : 1,
               }}
             >
               <span style={{ color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>
@@ -657,6 +676,7 @@ export default function EventWizardPage(): React.ReactElement {
   const [venuesLoading, setVenuesLoading] = useState(true);
   const [showNewVenueModal, setShowNewVenueModal] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(isEdit);
+  const [layoutModeLocked, setLayoutModeLocked] = useState(false);
 
   const {
     register,
@@ -763,6 +783,20 @@ export default function EventWizardPage(): React.ReactElement {
     void loadEvent();
     return () => { cancelled = true; };
   }, [id, isEdit, resetForm, setFormData, setEditingEvent]);
+
+  // Check if layout mode is locked (has bookings or holds)
+  useEffect(() => {
+    if (!isEdit || !id) return;
+    let cancelled = false;
+    async function checkLocked(): Promise<void> {
+      try {
+        const res = await apiClient.get<{ locked: boolean }>(`/admin/events/${id}/layout-locked`);
+        if (!cancelled) setLayoutModeLocked(res.data.locked);
+      } catch { /* non-fatal */ }
+    }
+    void checkLocked();
+    return () => { cancelled = true; };
+  }, [id, isEdit]);
 
   // Reset wizard on mount for new events
   useEffect(() => {
@@ -1225,6 +1259,7 @@ export default function EventWizardPage(): React.ReactElement {
             onMaxCapacityChange={(v) => setValue('maxCapacity', v, { shouldValidate: true })}
             eventId={id ?? null}
             isEdit={isEdit}
+            layoutModeLocked={layoutModeLocked}
           />
         )}
 
