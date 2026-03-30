@@ -135,20 +135,26 @@
 
 @media (max-width: 768px) {
   .c829-metrics-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .c829-metrics-grid > * {
+    min-width: 0;
   }
 }
 
 @media (max-width: 480px) {
   .c829-metrics-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 
 /* 2-column side-by-side sections → stack on tablet */
 @media (max-width: 768px) {
   .c829-two-col {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .c829-two-col > * {
+    min-width: 0;
   }
 }
 
@@ -171,13 +177,17 @@
 /* Main grid: content + sidebar → stack on tablet */
 @media (max-width: 900px) {
   .c829-event-layout {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .c829-event-layout > * {
+    min-width: 0;
   }
   .c829-event-sidebar {
     width: 100% !important;
     max-width: 100% !important;
     position: static !important;
     top: unset !important;
+    min-width: 0;
   }
 }
 
@@ -217,7 +227,7 @@
 
 @media (max-width: 480px) {
   .c829-dev-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 
@@ -225,7 +235,16 @@
 
 @media (max-width: 600px) {
   .c829-profile-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Prevent horizontal scroll on mobile ───────────────────────────────── */
+
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
   }
 }
 
