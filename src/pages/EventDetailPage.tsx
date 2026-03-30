@@ -16,7 +16,8 @@ import {
 import MagneticButton from "../components/MagneticButton";
 import TableSelectionView from "../components/TableSelectionView";
 import { SkeletonLine, SkeletonText } from "../components/Skeleton";
-import apiClient from "../lib/axios";
+import { eventsApi, seatsApi } from '../services/eventsApi';
+import { bookingsApi } from '../services/bookingsApi';
 import { useAuthStore } from "../stores/authStore";
 
 // ---------------------------------------------------------------------------
@@ -564,7 +565,7 @@ export default function EventDetailPage(): React.ReactElement {
     setBooking(true);
     try {
       // Get seat IDs for the held table
-      const holdsRes = await apiClient.get<Array<{ seatId: string }>>(`/seats/holds/${id}`);
+      const holdsRes = await seatsApi.getHolds<Array<{ seatId: string }>>(id ?? '');
       const seatIds = holdsRes.data.map(h => h.seatId);
       if (seatIds.length === 0) {
         toast.error('No active hold found. Please select a table first.');
@@ -574,11 +575,11 @@ export default function EventDetailPage(): React.ReactElement {
 
       // Create booking with one item per seat
       const items = seatIds.map(seatId => ({ ticketTypeId: selectedTier, seatId }));
-      const bookingRes = await apiClient.post<{ id: string }>('/bookings', { eventId: id, items });
+      const bookingRes = await bookingsApi.create(id ?? '', items);
       const bookingId = bookingRes.data.id;
 
       // Auto-confirm payment (mock/dev mode)
-      await apiClient.post(`/bookings/${bookingId}/confirm`);
+      await bookingsApi.confirm(bookingId);
       toast.success('Table booked successfully!');
       navigate('/me/bookings');
     } catch (err: unknown) {
@@ -595,7 +596,7 @@ export default function EventDetailPage(): React.ReactElement {
 
     async function fetchEvent(): Promise<void> {
       try {
-        const res = await apiClient.get<ApiEventDetail>(`/events/${id ?? ""}`);
+        const res = await eventsApi.getById<ApiEventDetail>(id ?? '');
         if (!cancelled) {
           const detail = apiToEventDetail(res.data);
           setEvent(detail);

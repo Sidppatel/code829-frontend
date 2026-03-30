@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { Calendar, QrCode, ChevronRight, Ticket, Send, User, ChevronDown, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { SkeletonCard } from '../components/Skeleton';
-import apiClient from '../lib/axios';
+import { bookingsApi } from '../services/bookingsApi';
 
 // ---------------------------------------------------------------------------
 // Types matching actual API response
@@ -160,7 +160,7 @@ function SeatTicket({ item, bookingId, onUpdate }: { item: ApiBookingLineItem; b
     if (!guestEmail.trim()) { toast.error('Enter a guest email first'); return; }
     setSending(true);
     try {
-      await apiClient.put(`/bookings/${bookingId}/items/${item.id}/guest`, {
+      await bookingsApi.updateGuest(bookingId, item.id, {
         guestName: guestName || null, guestEmail: guestEmail || null, sendInvitation: true,
       });
       toast.success(`Invitation sent to ${guestEmail}`);
@@ -171,7 +171,7 @@ function SeatTicket({ item, bookingId, onUpdate }: { item: ApiBookingLineItem; b
 
   async function handleSaveGuest(): Promise<void> {
     try {
-      await apiClient.put(`/bookings/${bookingId}/items/${item.id}/guest`, {
+      await bookingsApi.updateGuest(bookingId, item.id, {
         guestName: guestName || null, guestEmail: guestEmail || null, sendInvitation: false,
       });
       toast.success('Guest info saved');
@@ -387,7 +387,7 @@ export default function MyBookingsPage(): React.ReactElement {
 
   async function refreshBookings(): Promise<void> {
     try {
-      const res = await apiClient.get<ApiBookingsResponse>('/bookings/mine');
+      const res = await bookingsApi.getMine<ApiBookingsResponse>();
       setBookings((res.data.items ?? []).map(apiToBooking));
     } catch { /* ignore */ }
   }
@@ -399,7 +399,7 @@ export default function MyBookingsPage(): React.ReactElement {
 
     async function fetchBookings(): Promise<void> {
       try {
-        const res = await apiClient.get<ApiBookingsResponse>('/bookings/mine');
+        const res = await bookingsApi.getMine<ApiBookingsResponse>();
         if (!cancelled) {
           setBookings((res.data.items ?? []).map(apiToBooking));
         }
