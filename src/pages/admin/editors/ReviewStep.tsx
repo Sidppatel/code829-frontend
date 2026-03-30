@@ -515,15 +515,20 @@ export default function ReviewStep({
   async function handlePublish(): Promise<void> {
     if (!eventId) return;
     setPublishing(true);
+    const isAlreadyPublished = eventStatus === 'Published';
     try {
       const payload = await buildPayload();
       await adminApi.events.update(eventId, payload);
-      await adminApi.events.updateStatus(eventId, 'Published');
-      toast.success('Event published successfully!');
+      if (!isAlreadyPublished) {
+        await adminApi.events.updateStatus(eventId, 'Published');
+        toast.success('Event published successfully!');
+      } else {
+        toast.success('Changes saved');
+      }
       onSaved?.();
       navigate('/admin/events');
     } catch {
-      toast.error('Failed to publish event');
+      toast.error(isAlreadyPublished ? 'Failed to save changes' : 'Failed to publish event');
     } finally {
       setPublishing(false);
     }
@@ -1003,35 +1008,38 @@ export default function ReviewStep({
           paddingTop: '0.5rem',
         }}
       >
-        <button
-          type="button"
-          onClick={() => void handleSaveDraft()}
-          disabled={saving || publishing}
-          style={{
-            flex: 1,
-            minWidth: '140px',
-            padding: '0.65rem 1.25rem',
-            borderRadius: '0.5rem',
-            border: '1px solid var(--border)',
-            background: 'var(--bg-tertiary)',
-            color: 'var(--text-secondary)',
-            cursor: saving || publishing ? 'not-allowed' : 'pointer',
-            fontFamily: 'var(--font-body)',
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            opacity: saving ? 0.7 : 1,
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={(e) => {
-            if (!saving && !publishing)
-              (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-secondary)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-tertiary)';
-          }}
-        >
-          {saving ? 'Saving…' : 'Save as Draft'}
-        </button>
+        {/* Save as Draft — hidden for already-published events */}
+        {eventStatus !== 'Published' && (
+          <button
+            type="button"
+            onClick={() => void handleSaveDraft()}
+            disabled={saving || publishing}
+            style={{
+              flex: 1,
+              minWidth: '140px',
+              padding: '0.65rem 1.25rem',
+              borderRadius: '0.5rem',
+              border: '1px solid var(--border)',
+              background: 'var(--bg-tertiary)',
+              color: 'var(--text-secondary)',
+              cursor: saving || publishing ? 'not-allowed' : 'pointer',
+              fontFamily: 'var(--font-body)',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              opacity: saving ? 0.7 : 1,
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              if (!saving && !publishing)
+                (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-secondary)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-tertiary)';
+            }}
+          >
+            {saving ? 'Saving…' : 'Save as Draft'}
+          </button>
+        )}
 
         <button
           type="button"
@@ -1054,7 +1062,9 @@ export default function ReviewStep({
             transition: 'background 0.2s, opacity 0.2s',
           }}
         >
-          {publishing ? 'Publishing…' : 'Publish Event'}
+          {publishing
+            ? (eventStatus === 'Published' ? 'Saving…' : 'Publishing…')
+            : (eventStatus === 'Published' ? 'Save Changes' : 'Publish Event')}
         </button>
       </div>
     </div>
