@@ -184,7 +184,7 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
 
   // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
-    return <GridSkeleton rows={4} cols={5} />;
+    return <GridSkeleton rows={3} cols={5} />;
   }
 
   if (!data || data.tables.length === 0) {
@@ -196,13 +196,13 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
   }
 
   // ── Data ──────────────────────────────────────────────────────────────────
-  const { gridRows, gridCols, tables } = data;
+  const { gridCols, tables } = data;
 
-  // Dynamic cell size: fill available width with min/max guards
+  // Dynamic cell size: fill available width, no upper cap so the grid always spans 100%
   const LABEL_W = 32;
   const GAP = 8;
   const cellSize = containerWidth > 0
-    ? Math.max(54, Math.min(96, Math.floor((containerWidth - LABEL_W - GAP * gridCols) / gridCols)))
+    ? Math.max(54, Math.floor((containerWidth - LABEL_W - GAP * gridCols) / gridCols))
     : 72;
 
   // Occupancy map: "row-col" → table
@@ -212,6 +212,11 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
       occupancy.set(`${t.gridRow}-${t.gridCol}`, t);
     }
   }
+
+  // Only render rows that have at least one table (trims trailing empty rows the API may return)
+  const effectiveRows = tables.reduce(
+    (max, t) => (t.gridRow !== null ? Math.max(max, t.gridRow + 1) : max), 0
+  );
 
   // Held table for info bar
   const myTable = tables.find(t => t.status === 'HeldByYou') ?? null;
@@ -345,7 +350,7 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
           </div>
 
           {/* Seat rows */}
-          {Array.from({ length: gridRows }, (_, r) => (
+          {Array.from({ length: effectiveRows }, (_, r) => (
             <div key={r} style={{
               display: 'grid',
               gridTemplateColumns: `${LABEL_W}px repeat(${gridCols}, ${cellSize}px)`,
