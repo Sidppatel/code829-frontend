@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Circle, Square, RectangleHorizontal, Diamond, Clock, Lock, Check } from 'lucide-react';
+import { Clock, Lock, Check, Users, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { eventsApi, seatsApi } from '../services/eventsApi';
 import { useAuthStore } from '../stores/authStore';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface EventTable {
   id: string;
@@ -34,22 +36,23 @@ interface Props {
   onTableSelected: (table: EventTable | null) => void;
 }
 
-function ShapeIcon({ shape, size = 18 }: { shape: string; size?: number }): React.ReactElement {
-  switch (shape) {
-    case 'Rectangle': return <RectangleHorizontal size={size} />;
-    case 'Square': return <Square size={size} />;
-    case 'Cocktail': return <Diamond size={size} />;
-    default: return <Circle size={size} />;
-  }
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function colLetter(idx: number): string {
+  return String.fromCharCode(65 + idx);
 }
 
 function formatCents(cents: number): string {
-  return `$${(cents / 100).toFixed(0)}`;
+  if (cents === 0) return 'Free';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0,
+  }).format(cents / 100);
 }
+
+// ─── Countdown ────────────────────────────────────────────────────────────────
 
 function Countdown({ expiresAt }: { expiresAt: string }): React.ReactElement {
   const [remaining, setRemaining] = useState('');
-
   useEffect(() => {
     function tick(): void {
       const diff = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
@@ -61,17 +64,57 @@ function Countdown({ expiresAt }: { expiresAt: string }): React.ReactElement {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [expiresAt]);
-
-  return <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '0.75rem' }}>{remaining}</span>;
+  return <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{remaining}</span>;
 }
+
+// ─── Skeleton loading state ───────────────────────────────────────────────────
+
+function GridSkeleton({ rows, cols }: { rows: number; cols: number }): React.ReactElement {
+  return (
+    <div>
+      <style>{`@keyframes shimmer { 0%{opacity:1}50%{opacity:0.4}100%{opacity:1} }`}</style>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {Array.from({ length: rows }, (_, r) => (
+          <div key={r} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ width: 24, height: 24, borderRadius: 4, background: 'var(--bg-tertiary)', animation: 'shimmer 1.4s ease-in-out infinite', flexShrink: 0 }} />
+            {Array.from({ length: cols }, (_, c) => (
+              <div key={c} style={{
+                flex: 1, height: 64, borderRadius: 8,
+                background: 'var(--bg-tertiary)',
+                animation: `shimmer 1.4s ease-in-out ${(r * cols + c) * 0.06}s infinite`,
+              }} />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function TableSelectionView({ eventId, ticketTypeId, onTableSelected }: Props): React.ReactElement {
   const { isAuthenticated } = useAuthStore();
   const [data, setData] = useState<TablesResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [holdingId, setHoldingId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
   const onTableSelectedRef = useRef(onTableSelected);
   onTableSelectedRef.current = onTableSelected;
+
+  // Dynamic cell sizing via ResizeObserver
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    setContainerWidth(el.clientWidth);
+    const ro = new ResizeObserver(entries => {
+      setContainerWidth(entries[0].contentRect.width);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const loadTables = useCallback(async () => {
     try {
@@ -86,13 +129,13 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
 
   useEffect(() => { void loadTables(); }, [loadTables]);
 
-  // Poll every 15s to refresh statuses
+  // Poll every 15s to refresh seat statuses
   useEffect(() => {
     const id = setInterval(() => { void loadTables(); }, 15000);
     return () => clearInterval(id);
   }, [loadTables]);
 
-  // Notify parent when a table is held by user
+  // Notify parent when a table is held
   useEffect(() => {
     if (!data) return;
     const held = data.tables.find(t => t.status === 'HeldByYou');
@@ -101,13 +144,12 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
 
   async function handleTableClick(table: EventTable): Promise<void> {
     if (!isAuthenticated) {
-      toast.error('Please log in to select a table');
+      toast.error('Please sign in to select a table');
       return;
     }
     if (table.status === 'Held' || table.status === 'Booked') return;
 
     if (table.status === 'HeldByYou') {
-      // Release
       setHoldingId(table.id);
       try {
         await seatsApi.release(eventId, table.id);
@@ -123,17 +165,14 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
     // Release any existing hold first
     const currentHold = data?.tables.find(t => t.status === 'HeldByYou');
     if (currentHold) {
-      try {
-        await seatsApi.release(eventId, currentHold.id);
-      } catch { /* ignore */ }
+      try { await seatsApi.release(eventId, currentHold.id); } catch { /* ignore */ }
     }
 
-    // Hold the new table
     setHoldingId(table.id);
     try {
       await seatsApi.hold(eventId, table.id, ticketTypeId);
       await loadTables();
-      toast.success(`Table ${table.label} reserved for you`);
+      toast.success(`Table ${table.label} reserved — complete your booking!`);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to hold table';
       toast.error(msg);
@@ -143,23 +182,30 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
     }
   }
 
+  // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
+    return <GridSkeleton rows={4} cols={5} />;
+  }
+
+  if (!data || data.tables.length === 0) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '3px solid var(--border)', borderTopColor: 'var(--accent-primary)', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
+      <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>
+        No seating layout available.
       </div>
     );
   }
 
-  if (!data || data.tables.length === 0) {
-    return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-tertiary)' }}>No seating layout available.</div>;
-  }
-
+  // ── Data ──────────────────────────────────────────────────────────────────
   const { gridRows, gridCols, tables } = data;
-  const cellSize = 80;
-  const gap = 6;
 
-  // Build occupancy map
+  // Dynamic cell size: fill available width with min/max guards
+  const LABEL_W = 32;
+  const GAP = 8;
+  const cellSize = containerWidth > 0
+    ? Math.max(54, Math.min(96, Math.floor((containerWidth - LABEL_W - GAP * gridCols) / gridCols)))
+    : 72;
+
+  // Occupancy map: "row-col" → table
   const occupancy = new Map<string, EventTable>();
   for (const t of tables) {
     if (t.gridRow !== null && t.gridCol !== null) {
@@ -167,132 +213,449 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
     }
   }
 
-  const statusStyles = (t: EventTable) => {
+  // Held table for info bar
+  const myTable = tables.find(t => t.status === 'HeldByYou') ?? null;
+
+  // Unique price tiers for legend
+  const tiers = Array.from(
+    new Map(tables.map(t => [t.priceCents, { price: t.priceCents, color: t.color ?? 'var(--accent-primary)', type: t.priceType }])).values()
+  ).sort((a, b) => b.price - a.price);
+
+  // ── Status styles ──────────────────────────────────────────────────────────
+  function cellStyle(t: EventTable): {
+    bg: string; border: string; cursor: 'pointer' | 'not-allowed' | 'wait'; opacity: number; glow: string;
+  } {
+    const c = t.color ?? 'var(--accent-primary)';
     const isHolding = holdingId === t.id;
     switch (t.status) {
       case 'Available':
         return {
-          bg: `color-mix(in srgb, ${t.color ?? 'var(--accent-primary)'} 15%, var(--bg-secondary))`,
-          border: `2px solid ${t.color ?? 'var(--accent-primary)'}`,
-          cursor: isHolding ? 'wait' : 'pointer' as const,
+          bg: `color-mix(in srgb, ${c} 12%, var(--bg-secondary))`,
+          border: `2px solid ${c}`,
+          cursor: isHolding ? 'wait' : 'pointer',
           opacity: isHolding ? 0.7 : 1,
+          glow: `0 6px 20px color-mix(in srgb, ${c} 35%, transparent)`,
         };
       case 'HeldByYou':
         return {
           bg: 'color-mix(in srgb, var(--color-success) 15%, var(--bg-secondary))',
           border: '2px solid var(--color-success)',
-          cursor: 'pointer' as const,
+          cursor: 'pointer',
           opacity: 1,
+          glow: '0 0 0 3px color-mix(in srgb, var(--color-success) 30%, transparent), 0 6px 20px color-mix(in srgb, var(--color-success) 30%, transparent)',
         };
       case 'Held':
         return {
-          bg: 'color-mix(in srgb, var(--color-warning) 12%, var(--bg-secondary))',
+          bg: 'color-mix(in srgb, var(--color-warning) 10%, var(--bg-secondary))',
           border: '2px dashed var(--color-warning)',
-          cursor: 'not-allowed' as const,
-          opacity: 0.7,
+          cursor: 'not-allowed',
+          opacity: 0.65,
+          glow: 'none',
         };
       case 'Booked':
         return {
           bg: 'var(--bg-tertiary)',
           border: '2px solid var(--border)',
-          cursor: 'not-allowed' as const,
-          opacity: 0.5,
+          cursor: 'not-allowed',
+          opacity: 0.45,
+          glow: 'none',
         };
     }
-  };
+  }
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      {/* Legend */}
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-        {[
-          { color: 'var(--accent-primary)', label: 'Available' },
-          { color: 'var(--color-success)', label: 'Your Selection' },
-          { color: 'var(--color-warning)', label: 'Reserved' },
-          { color: 'var(--text-tertiary)', label: 'Booked' },
-        ].map(l => (
-          <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: l.color, display: 'inline-block' }} />
-            {l.label}
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse-ring { 0%,100%{opacity:1} 50%{opacity:0.5} }
+      `}</style>
+
+      {/* ── STAGE banner ──────────────────────────────────────────────────── */}
+      <div style={{ textAlign: 'center', position: 'relative' }}>
+        {/* Glow halo behind the stage */}
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '60%', height: '200%',
+          background: 'radial-gradient(ellipse at top, color-mix(in srgb, var(--accent-primary) 10%, transparent), transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Stage trapezoid */}
+        <div style={{
+          position: 'relative',
+          display: 'inline-block',
+          padding: '0.5rem 2.5rem',
+          background: 'linear-gradient(to bottom, var(--bg-tertiary) 0%, color-mix(in srgb, var(--accent-primary) 8%, var(--bg-secondary)) 100%)',
+          borderTop: '2px solid var(--accent-primary)',
+          borderLeft: '1px solid var(--border)',
+          borderRight: '1px solid var(--border)',
+          borderBottom: '1px solid var(--border)',
+          borderRadius: '0 0 0.75rem 0.75rem',
+          minWidth: '55%',
+          maxWidth: '85%',
+          boxShadow: '0 4px 24px color-mix(in srgb, var(--accent-primary) 15%, transparent)',
+        }}>
+          <div style={{
+            fontSize: '0.6875rem',
+            fontWeight: 800,
+            letterSpacing: '0.3em',
+            color: 'var(--text-tertiary)',
+            textTransform: 'uppercase',
+          }}>
+            ★ &nbsp;Stage&nbsp; ★
           </div>
-        ))}
+        </div>
+
+        {/* Fan-out shadow below stage */}
+        <div style={{
+          height: '20px',
+          background: 'linear-gradient(to bottom, color-mix(in srgb, var(--accent-primary) 8%, transparent), transparent)',
+          marginTop: '0',
+        }} />
       </div>
 
-      {/* Grid */}
-      <div style={{ overflow: 'auto', padding: '0.5rem' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${gridCols}, ${cellSize}px)`,
-          gridTemplateRows: `repeat(${gridRows}, ${cellSize}px)`,
-          gap: `${gap}px`,
-          width: 'fit-content',
-        }}>
-          {Array.from({ length: gridRows * gridCols }, (_, idx) => {
-            const r = Math.floor(idx / gridCols);
-            const c = idx % gridCols;
-            const table = occupancy.get(`${r}-${c}`);
+      {/* ── Seat grid ─────────────────────────────────────────────────────── */}
+      <div ref={containerRef} style={{ overflowX: 'auto', overflowY: 'visible', paddingBottom: '1rem' }}>
+        <div style={{ minWidth: 'fit-content' }}>
 
-            if (!table) {
-              return <div key={`${r}-${c}`} style={{ width: cellSize, height: cellSize }} />;
-            }
+          {/* Column header row */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: `${LABEL_W}px repeat(${gridCols}, ${cellSize}px)`,
+            gap: `${GAP}px`,
+            marginBottom: `${GAP}px`,
+            paddingLeft: '0',
+          }}>
+            <div /> {/* corner spacer */}
+            {Array.from({ length: gridCols }, (_, c) => (
+              <div key={c} style={{
+                textAlign: 'center',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: 'var(--text-tertiary)',
+                letterSpacing: '0.06em',
+                paddingBottom: '2px',
+                borderBottom: '1px solid var(--border)',
+              }}>
+                {colLetter(c)}
+              </div>
+            ))}
+          </div>
 
-            const styles = statusStyles(table);
-            return (
-              <div
-                key={table.id}
-                onClick={() => void handleTableClick(table)}
-                title={`${table.label} · ${table.capacity} seats · ${formatCents(table.priceCents)} ${table.priceType === 'PerSeat' ? '/seat' : '/table'}`}
-                style={{
-                  width: cellSize,
-                  height: cellSize,
-                  borderRadius: table.shape === 'Round' || table.shape === 'Cocktail' ? '50%' : '0.5rem',
-                  background: styles.bg,
-                  border: styles.border,
-                  cursor: styles.cursor,
-                  opacity: styles.opacity,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.15rem',
-                  transition: 'all 0.2s ease',
-                  position: 'relative',
-                }}
-              >
-                {/* Status icon */}
-                {table.status === 'Booked' && (
-                  <Lock size={12} style={{ position: 'absolute', top: 4, right: 4, color: 'var(--text-tertiary)' }} />
-                )}
-                {table.status === 'HeldByYou' && (
-                  <Check size={12} style={{ position: 'absolute', top: 4, right: 4, color: 'var(--color-success)' }} />
-                )}
+          {/* Seat rows */}
+          {Array.from({ length: gridRows }, (_, r) => (
+            <div key={r} style={{
+              display: 'grid',
+              gridTemplateColumns: `${LABEL_W}px repeat(${gridCols}, ${cellSize}px)`,
+              gap: `${GAP}px`,
+              marginBottom: `${GAP}px`,
+            }}>
+              {/* Row number label */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: 'var(--text-tertiary)',
+                letterSpacing: '0.05em',
+              }}>
+                {r + 1}
+              </div>
 
-                <ShapeIcon shape={table.shape} size={16} />
-                <span style={{ fontSize: '0.6875rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
-                  {table.label}
-                </span>
-                <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', lineHeight: 1 }}>
-                  {table.capacity} seats
-                </span>
-                <span style={{ fontSize: '0.625rem', fontWeight: 600, color: 'var(--accent-primary)', lineHeight: 1 }}>
-                  {formatCents(table.priceCents)}
-                </span>
+              {/* Seats in this row */}
+              {Array.from({ length: gridCols }, (_, c) => {
+                const table = occupancy.get(`${r}-${c}`);
 
-                {/* Countdown for user's hold */}
-                {table.status === 'HeldByYou' && table.holdExpiresAt && (
-                  <div style={{
-                    position: 'absolute', bottom: -8, left: '50%', transform: 'translateX(-50%)',
-                    background: 'var(--color-success)', color: '#fff', borderRadius: '999px',
-                    padding: '0.1rem 0.4rem', fontSize: '0.6rem', whiteSpace: 'nowrap',
-                  }}>
-                    <Clock size={8} style={{ verticalAlign: 'middle', marginRight: 2 }} />
-                    <Countdown expiresAt={table.holdExpiresAt} />
+                if (!table) {
+                  return (
+                    <div
+                      key={`empty-${r}-${c}`}
+                      style={{ width: cellSize, height: cellSize }}
+                    />
+                  );
+                }
+
+                const s = cellStyle(table);
+                const isHovered = hoveredId === table.id;
+                const isHolding = holdingId === table.id;
+                const isInteractive = s.cursor === 'pointer' || s.cursor === 'wait';
+                const smallCell = cellSize < 68;
+
+                return (
+                  <div
+                    key={table.id}
+                    onClick={() => void handleTableClick(table)}
+                    onMouseEnter={() => setHoveredId(table.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                    title={`${table.label} · ${table.capacity} seats · ${formatCents(table.priceCents)}/${table.priceType === 'PerSeat' ? 'seat' : 'table'}`}
+                    style={{
+                      width: cellSize,
+                      height: cellSize,
+                      borderRadius: table.shape === 'Round' || table.shape === 'Cocktail'
+                        ? '50%'
+                        : table.shape === 'Rectangle'
+                          ? '0.375rem'
+                          : '0.625rem',
+                      background: s.bg,
+                      border: s.border,
+                      cursor: s.cursor,
+                      opacity: s.opacity,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '2px',
+                      transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                      transform: isHovered && isInteractive ? 'scale(1.1)' : 'scale(1)',
+                      boxShadow: isHovered && isInteractive ? s.glow
+                        : table.status === 'HeldByYou' ? s.glow
+                        : 'none',
+                      position: 'relative',
+                      userSelect: 'none',
+                    }}
+                  >
+                    {/* Status badge — top-right corner */}
+                    {table.status === 'Booked' && (
+                      <Lock size={9} style={{
+                        position: 'absolute', top: 4, right: 5,
+                        color: 'var(--text-tertiary)',
+                      }} />
+                    )}
+                    {table.status === 'HeldByYou' && (
+                      <Check size={9} style={{
+                        position: 'absolute', top: 4, right: 5,
+                        color: 'var(--color-success)',
+                      }} />
+                    )}
+                    {table.status === 'Held' && (
+                      <Clock size={9} style={{
+                        position: 'absolute', top: 4, right: 5,
+                        color: 'var(--color-warning)',
+                      }} />
+                    )}
+
+                    {/* Spinner while holding */}
+                    {isHolding && (
+                      <div style={{
+                        position: 'absolute', inset: 0, borderRadius: 'inherit',
+                        background: 'color-mix(in srgb, var(--bg-primary) 30%, transparent)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 1,
+                      }}>
+                        <div style={{
+                          width: 18, height: 18, borderRadius: '50%',
+                          border: '2px solid var(--border)',
+                          borderTopColor: 'var(--accent-primary)',
+                          animation: 'spin 0.7s linear infinite',
+                        }} />
+                      </div>
+                    )}
+
+                    {/* Table label */}
+                    <span style={{
+                      fontSize: smallCell ? '0.75rem' : '0.875rem',
+                      fontWeight: 800,
+                      color: table.status === 'HeldByYou' ? 'var(--color-success)' : 'var(--text-primary)',
+                      lineHeight: 1,
+                      fontFamily: 'var(--font-display)',
+                    }}>
+                      {table.label}
+                    </span>
+
+                    {/* Capacity */}
+                    {!smallCell && (
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 2,
+                        fontSize: '0.5625rem', color: 'var(--text-secondary)', lineHeight: 1,
+                      }}>
+                        <Users size={8} />
+                        <span>{table.capacity}</span>
+                      </div>
+                    )}
+
+                    {/* Price */}
+                    <span style={{
+                      fontSize: smallCell ? '0.5625rem' : '0.6875rem',
+                      fontWeight: 700,
+                      color: table.status === 'HeldByYou' ? 'var(--color-success)' : `color-mix(in srgb, ${table.color ?? 'var(--accent-primary)'} 80%, var(--text-primary))`,
+                      lineHeight: 1,
+                    }}>
+                      {formatCents(table.priceCents)}
+                    </span>
+
+                    {/* Countdown timer chip for user's hold */}
+                    {table.status === 'HeldByYou' && table.holdExpiresAt && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: -11,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        background: 'var(--color-success)',
+                        color: 'var(--bg-primary)',
+                        borderRadius: '999px',
+                        padding: '0.1rem 0.4rem',
+                        fontSize: '0.5rem',
+                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        boxShadow: '0 2px 8px color-mix(in srgb, var(--color-success) 40%, transparent)',
+                      }}>
+                        <Clock size={7} />
+                        <Countdown expiresAt={table.holdExpiresAt} />
+                      </div>
+                    )}
                   </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Selected table info bar ───────────────────────────────────────── */}
+      {myTable && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0.75rem 1rem',
+          background: 'color-mix(in srgb, var(--color-success) 10%, var(--bg-secondary))',
+          border: '1px solid var(--color-success)',
+          borderRadius: '0.75rem',
+          gap: '0.75rem',
+          animation: 'pulse-ring 2s ease infinite',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+            <div style={{
+              width: 32, height: 32,
+              borderRadius: myTable.shape === 'Round' || myTable.shape === 'Cocktail' ? '50%' : '0.375rem',
+              background: `color-mix(in srgb, ${myTable.color ?? 'var(--accent-primary)'} 20%, var(--bg-secondary))`,
+              border: `2px solid var(--color-success)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <Check size={14} style={{ color: 'var(--color-success)' }} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                Table {myTable.label} selected
+              </div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Users size={10} />
+                {myTable.capacity} seats
+                <span style={{ opacity: 0.5 }}>·</span>
+                {formatCents(myTable.priceCents)}/{myTable.priceType === 'PerSeat' ? 'seat' : 'table'}
+                {myTable.holdExpiresAt && (
+                  <>
+                    <span style={{ opacity: 0.5 }}>·</span>
+                    <Clock size={10} style={{ color: 'var(--color-warning)' }} />
+                    <Countdown expiresAt={myTable.holdExpiresAt} />
+                  </>
                 )}
               </div>
-            );
-          })}
+            </div>
+          </div>
+          <button
+            onClick={() => void handleTableClick(myTable)}
+            style={{
+              padding: '0.3rem 0.6rem',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              color: 'var(--color-error)',
+              background: 'color-mix(in srgb, var(--color-error) 10%, var(--bg-secondary))',
+              border: '1px solid color-mix(in srgb, var(--color-error) 30%, transparent)',
+              borderRadius: '0.375rem',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-body)',
+              flexShrink: 0,
+            }}
+          >
+            Release
+          </button>
         </div>
+      )}
+
+      {/* ── Legend ────────────────────────────────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+        {/* Status legend */}
+        <div style={{
+          display: 'flex',
+          gap: '1rem',
+          flexWrap: 'wrap',
+          fontSize: '0.72rem',
+          color: 'var(--text-secondary)',
+        }}>
+          {[
+            { color: 'var(--accent-primary)', label: 'Available', shape: 'dot' },
+            { color: 'var(--color-success)', label: 'Your Pick', shape: 'dot' },
+            { color: 'var(--color-warning)', label: 'Held', shape: 'dash' },
+            { color: 'var(--text-tertiary)', label: 'Booked', shape: 'x' },
+          ].map(({ color, label, shape }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              {shape === 'dash' ? (
+                <span style={{ width: 16, height: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="16" height="8" viewBox="0 0 16 8">
+                    <rect x="0" y="3" width="16" height="2" rx="1"
+                      stroke={color} strokeWidth="1.5" fill="none"
+                      strokeDasharray="3 2" />
+                  </svg>
+                </span>
+              ) : shape === 'x' ? (
+                <span style={{ width: 10, height: 10, borderRadius: 3, background: 'var(--bg-tertiary)', border: `1.5px solid ${color}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="6" height="6" viewBox="0 0 6 6"><path d="M1 1l4 4M5 1l-4 4" stroke={color} strokeWidth="1.2" strokeLinecap="round"/></svg>
+                </span>
+              ) : (
+                <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0 }} />
+              )}
+              {label}
+            </div>
+          ))}
+        </div>
+
+        {/* Price tier legend */}
+        {tiers.length > 1 && (
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {tiers.map(t => (
+              <div key={t.price} style={{
+                display: 'flex', alignItems: 'center', gap: '0.35rem',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '999px',
+                background: `color-mix(in srgb, ${t.color} 10%, var(--bg-secondary))`,
+                border: `1px solid color-mix(in srgb, ${t.color} 35%, transparent)`,
+                fontSize: '0.6875rem',
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+              }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: t.color, display: 'inline-block', flexShrink: 0 }} />
+                {formatCents(t.price)}/{t.type === 'PerSeat' ? 'seat' : 'table'}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Row distance indicator */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        fontSize: '0.6rem',
+        color: 'var(--text-tertiary)',
+        letterSpacing: '0.05em',
+        opacity: 0.6,
+      }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <ChevronDown size={10} style={{ transform: 'rotate(180deg)' }} />
+          FRONT
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          BACK
+          <ChevronDown size={10} />
+        </span>
       </div>
     </div>
   );
