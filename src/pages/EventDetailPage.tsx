@@ -970,11 +970,11 @@ export default function EventDetailPage(): React.ReactElement {
                           Table {selectedTable.label}
                         </div>
                         <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                          {selectedTable.capacity} seats &middot; ${(selectedTable.priceCents / 100).toFixed(2)}/{selectedTable.priceType === 'PerSeat' ? 'seat' : 'table'}
+                          {selectedTable.capacity} seats &middot; {formatCents(selectedTable.priceCents)}/{selectedTable.priceType === 'PerSeat' ? 'seat' : 'table'}
                         </div>
                       </div>
                       <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-cta)' }}>
-                        ${(selectedTable.priceCents / 100).toFixed(2)}
+                        {formatCents(selectedTable.priceType === 'PerSeat' ? selectedTable.priceCents * selectedTable.capacity : selectedTable.priceCents)}
                       </div>
                     </div>
                   </div>

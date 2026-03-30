@@ -10,7 +10,7 @@ import apiClient from '../lib/axios';
 // ---------------------------------------------------------------------------
 // Types matching actual API response
 // ---------------------------------------------------------------------------
-type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'used';
+type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'used' | 'refunded';
 
 interface ApiBookingItem {
   id: string;
@@ -70,6 +70,17 @@ interface Booking {
   createdAt: string;
 }
 
+function mapApiStatus(apiStatus: string): BookingStatus {
+  switch (apiStatus) {
+    case 'Paid': return 'confirmed';
+    case 'Pending': return 'pending';
+    case 'CheckedIn': return 'used';
+    case 'Cancelled': return 'cancelled';
+    case 'Refunded': return 'refunded';
+    default: return apiStatus.toLowerCase() as BookingStatus;
+  }
+}
+
 function apiToBooking(api: ApiBookingItem): Booking {
   const names = [...new Set((api.items ?? []).map(i => i.ticketTypeName))];
   const tierSummary = names.map(n => {
@@ -82,7 +93,7 @@ function apiToBooking(api: ApiBookingItem): Booking {
     bookingNumber: api.bookingNumber,
     eventId: api.eventId,
     eventTitle: api.eventTitle,
-    status: api.status,
+    status: mapApiStatus(api.status as string),
     totalCents: api.totalCents,
     qrToken: api.qrToken,
     tierSummary,
@@ -116,6 +127,7 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; bg: string; color: s
   pending: { label: 'Pending', bg: 'color-mix(in srgb, var(--color-warning) 15%, transparent)', color: 'var(--color-warning)' },
   cancelled: { label: 'Cancelled', bg: 'color-mix(in srgb, var(--color-error) 15%, transparent)', color: 'var(--color-error)' },
   used: { label: 'Attended', bg: 'color-mix(in srgb, var(--text-tertiary) 20%, transparent)', color: 'var(--text-tertiary)' },
+  refunded: { label: 'Refunded', bg: 'color-mix(in srgb, var(--color-error) 10%, transparent)', color: 'var(--text-tertiary)' },
 };
 
 function StatusBadge({ status }: { status: BookingStatus }): React.ReactElement {
@@ -249,7 +261,7 @@ function SeatTicket({ item, bookingId, onUpdate }: { item: ApiBookingLineItem; b
 // Booking card
 // ---------------------------------------------------------------------------
 function BookingCard({ booking, onRefresh }: { booking: Booking; onRefresh: () => void }): React.ReactElement {
-  const isPast = booking.status === 'used' || booking.status === 'cancelled';
+  const isPast = booking.status === 'used' || booking.status === 'cancelled' || booking.status === 'refunded';
   const [showTickets, setShowTickets] = useState(false);
   const isConfirmed = booking.status === 'confirmed';
 
@@ -404,11 +416,11 @@ export default function MyBookingsPage(): React.ReactElement {
 
   // Split by status rather than date since API doesn't return event dates in booking list
   const upcoming = bookings.filter((b) => b.status === 'confirmed' || b.status === 'pending');
-  const past = bookings.filter((b) => b.status === 'used' || b.status === 'cancelled');
+  const past = bookings.filter((b) => b.status === 'used' || b.status === 'cancelled' || b.status === 'refunded');
   const displayed = activeTab === 'upcoming' ? upcoming : past;
 
   const totalSpent = bookings
-    .filter((b) => b.status !== 'cancelled')
+    .filter((b) => b.status !== 'cancelled' && b.status !== 'refunded')
     .reduce((sum, b) => sum + b.totalCents, 0);
 
   return (
