@@ -101,19 +101,36 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [availHeight, setAvailHeight] = useState(0);
   const onTableSelectedRef = useRef(onTableSelected);
   onTableSelectedRef.current = onTableSelected;
 
-  // Dynamic cell sizing via ResizeObserver
+  // Dynamic cell sizing — track both container width and available viewport height
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    setContainerWidth(el.clientWidth);
-    const ro = new ResizeObserver(entries => {
-      setContainerWidth(entries[0].contentRect.width);
-    });
+
+    const measure = (): void => {
+      const rect = el.getBoundingClientRect();
+      setContainerWidth(rect.width);
+      // Available height for the grid rows = viewport height minus the component's
+      // top position minus space for: stage banner (~88px) + legend (~100px) +
+      // front/back label (~28px) + internal gaps + card bottom padding (~60px)
+      const OVERHEAD = 276;
+      const topOffset = Math.max(rect.top, 56); // never less than navbar height
+      setAvailHeight(Math.max(180, window.innerHeight - topOffset - OVERHEAD));
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
     ro.observe(el);
-    return () => ro.disconnect();
+    window.addEventListener('resize', measure);
+    window.addEventListener('scroll', measure, { passive: true });
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure);
+    };
   }, []);
 
   const loadTables = useCallback(async () => {
@@ -183,13 +200,18 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
   }
 
   // ── Loading ────────────────────────────────────────────────────────────────
+  // containerRef must always be in the DOM so the ResizeObserver measures correctly.
   if (loading) {
-    return <GridSkeleton rows={3} cols={5} />;
+    return (
+      <div ref={containerRef}>
+        <GridSkeleton rows={3} cols={5} />
+      </div>
+    );
   }
 
   if (!data || data.tables.length === 0) {
     return (
-      <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>
+      <div ref={containerRef} style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>
         No seating layout available.
       </div>
     );
@@ -197,13 +219,6 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
 
   // ── Data ──────────────────────────────────────────────────────────────────
   const { gridCols, tables } = data;
-
-  // Dynamic cell size: fill available width, no upper cap so the grid always spans 100%
-  const LABEL_W = 32;
-  const GAP = 8;
-  const cellSize = containerWidth > 0
-    ? Math.max(54, Math.floor((containerWidth - LABEL_W - GAP * gridCols) / gridCols))
-    : 72;
 
   // Occupancy map: "row-col" → table
   const occupancy = new Map<string, EventTable>();
@@ -217,6 +232,22 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
   const effectiveRows = tables.reduce(
     (max, t) => (t.gridRow !== null ? Math.max(max, t.gridRow + 1) : max), 0
   );
+
+  // Dynamic cell size — fill width AND fit all rows in the visible viewport.
+  // cellSize is the smaller of the two constraints so nothing needs scrolling.
+  const LABEL_W = 32;
+  const LABEL_H = 30; // column-header row height
+  const GAP = 8;
+
+  const cellFromWidth = containerWidth > 0
+    ? Math.floor((containerWidth - LABEL_W - GAP * gridCols) / gridCols)
+    : 72;
+
+  const cellFromHeight = availHeight > 0
+    ? Math.floor((availHeight - LABEL_H - GAP * effectiveRows) / effectiveRows)
+    : 999;
+
+  const cellSize = Math.max(42, Math.min(cellFromWidth, cellFromHeight));
 
   // Held table for info bar
   const myTable = tables.find(t => t.status === 'HeldByYou') ?? null;
@@ -270,7 +301,7 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes pulse-ring { 0%,100%{opacity:1} 50%{opacity:0.5} }
@@ -322,7 +353,7 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
       </div>
 
       {/* ── Seat grid ─────────────────────────────────────────────────────── */}
-      <div ref={containerRef} style={{ overflowX: 'auto', overflowY: 'visible', paddingBottom: '1rem' }}>
+      <div style={{ overflowX: 'hidden', overflowY: 'visible', paddingBottom: '0.5rem' }}>
         <div style={{ minWidth: 'fit-content' }}>
 
           {/* Column header row */}
