@@ -111,25 +111,21 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
     if (!el) return;
 
     const measure = (): void => {
-      const rect = el.getBoundingClientRect();
-      setContainerWidth(rect.width);
-      // Available height for the grid rows = viewport height minus the component's
-      // top position minus space for: stage banner (~88px) + legend (~100px) +
-      // front/back label (~28px) + internal gaps + card bottom padding (~60px)
+      setContainerWidth(el.clientWidth);
+      // Target: the whole component fits within 82% of the viewport height.
+      // OVERHEAD accounts for space taken by the stage banner, column-header row,
+      // legend, front/back indicator, and internal gaps (~276 px total).
       const OVERHEAD = 276;
-      const topOffset = Math.max(rect.top, 56); // never less than navbar height
-      setAvailHeight(Math.max(180, window.innerHeight - topOffset - OVERHEAD));
+      setAvailHeight(Math.max(180, window.innerHeight * 0.82 - OVERHEAD));
     };
 
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     window.addEventListener('resize', measure);
-    window.addEventListener('scroll', measure, { passive: true });
     return () => {
       ro.disconnect();
       window.removeEventListener('resize', measure);
-      window.removeEventListener('scroll', measure);
     };
   }, []);
 
