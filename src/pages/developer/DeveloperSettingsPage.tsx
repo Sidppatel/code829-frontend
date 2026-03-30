@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { Save, Users, Settings, Key, Search } from 'lucide-react';
-import apiClient from '../../lib/axios';
+import { developerApi } from '../../services/developerApi';
 
 interface SettingItem {
   key: string;
@@ -31,10 +31,10 @@ export default function DeveloperSettingsPage(): React.ReactElement {
     async function fetchData(): Promise<void> {
       try {
         if (activeTab === 'general') {
-          const res = await apiClient.get<SettingItem[]>('/developer/settings');
+          const res = await developerApi.settings.list<SettingItem[]>();
           if (!cancelled) setSettings(res.data);
         } else {
-          const res = await apiClient.get<UserItem[]>('/developer/users');
+          const res = await developerApi.users.list<UserItem[]>();
           if (!cancelled) setUsers(res.data);
         }
       } catch {
@@ -52,10 +52,10 @@ export default function DeveloperSettingsPage(): React.ReactElement {
     if (!value.trim()) return;
     setSavingKeys(prev => ({ ...prev, [key]: true }));
     try {
-      await apiClient.put('/developer/settings', { key, value });
+      await developerApi.settings.update(key, value);
       toast.success('Setting updated successfully. Masked in UI for security.');
       // Refresh to get masked value
-      const res = await apiClient.get<SettingItem[]>('/developer/settings');
+      const res = await developerApi.settings.refetch<SettingItem[]>();
       setSettings(res.data);
     } catch {
       toast.error('Failed to update setting');
@@ -76,7 +76,7 @@ export default function DeveloperSettingsPage(): React.ReactElement {
 
   async function handleRoleChange(userId: string, newRole: string): Promise<void> {
     try {
-      await apiClient.put(`/developer/users/${userId}/role`, { role: newRole });
+      await developerApi.users.updateRole(userId, newRole);
       toast.success(`User role updated to ${newRole}`);
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
     } catch (err: any) {

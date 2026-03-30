@@ -13,7 +13,8 @@ import {
   DollarSign,
   RotateCcw,
 } from 'lucide-react';
-import apiClient from '../../lib/axios';
+import { developerApi } from '../../services/developerApi';
+import { adminApi } from '../../services/adminApi';
 import AnimatedCounter from '../../components/AnimatedCounter';
 
 const PlatformFeesStep = lazy(() => import('./editors/PlatformFeesStep'));
@@ -281,7 +282,7 @@ export default function EventManagePage(): React.ReactElement {
     if (!id) return;
     setLoading(true);
     try {
-      const res = await apiClient.get<EventDetail>(`/developer/events/${id}`);
+      const res = await developerApi.events.getById<EventDetail>(id ?? '');
       setEvent(res.data);
     } catch {
       toast.error('Failed to load event');
@@ -300,7 +301,7 @@ export default function EventManagePage(): React.ReactElement {
     let cancelled = false;
     async function loadTableTypes(): Promise<void> {
       try {
-        const res = await apiClient.get<Array<{ id: string; name: string; defaultPriceCents: number; platformFeeCents: number }>>('/admin/table-types');
+        const res = await adminApi.tableTypes.list<Array<{ id: string; name: string; defaultPriceCents: number; platformFeeCents: number }>>();
         if (!cancelled) setTableTypes(res.data);
       } catch { /* non-fatal */ }
     }
@@ -315,7 +316,7 @@ export default function EventManagePage(): React.ReactElement {
 
     async function loadStats(): Promise<void> {
       try {
-        const res = await apiClient.get<PagedBookings>(`/developer/bookings?eventId=${id}&pageSize=100`);
+        const res = await developerApi.bookings.list<PagedBookings>(`eventId=${id ?? ''}&pageSize=100`);
         if (cancelled) return;
         const all = res.data.items ?? [];
         const paid = all.filter(b => b.status === 'Paid' || b.status === 'CheckedIn');
@@ -359,7 +360,7 @@ export default function EventManagePage(): React.ReactElement {
           eventId: id!,
         });
         if (bookingsStatusFilter) params.set('status', bookingsStatusFilter);
-        const res = await apiClient.get<PagedBookings>(`/developer/bookings?${params}`);
+        const res = await developerApi.bookings.list<PagedBookings>(params.toString());
         if (!cancelled) {
           setBookings(res.data.items ?? []);
           setBookingsTotal(res.data.totalCount ?? 0);
@@ -378,7 +379,7 @@ export default function EventManagePage(): React.ReactElement {
   async function handleRefund(bookingId: string): Promise<void> {
     setRefundingId(bookingId);
     try {
-      await apiClient.post(`/developer/bookings/${bookingId}/refund`);
+      await developerApi.bookings.refund(bookingId);
       toast.success('Booking refunded successfully');
       setBookings(prev => prev.map(b =>
         b.id === bookingId ? { ...b, status: 'Refunded', payment: b.payment ? { ...b.payment, status: 'Refunded', refundedAt: new Date().toISOString() } : null } : b

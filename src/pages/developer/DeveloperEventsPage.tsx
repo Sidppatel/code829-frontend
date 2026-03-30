@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { Search, DollarSign, Save, Eye, ChevronDown, ChevronUp } from 'lucide-react';
-import apiClient from '../../lib/axios';
+import { developerApi } from '../../services/developerApi';
 import { Link } from 'react-router-dom';
 
 interface TicketType {
@@ -49,7 +49,7 @@ export default function DeveloperEventsPage(): React.ReactElement {
     let cancelled = false;
     async function fetch(): Promise<void> {
       try {
-        const res = await apiClient.get<PaginatedResponse>('/developer/events', { params: { pageSize: 100 } });
+        const res = await developerApi.events.list<PaginatedResponse>({ pageSize: 100 });
         if (!cancelled) setEvents(res.data.items);
       } catch {
         if (!cancelled) toast.error('Failed to load events');
@@ -87,7 +87,7 @@ export default function DeveloperEventsPage(): React.ReactElement {
         ticketTypeId: tt.id,
         platformFeeCents: feeEdits[tt.id] ?? tt.platformFeeCents,
       }));
-      await apiClient.put(`/developer/events/${eventId}/platform-fees`, { ticketFees });
+      await developerApi.events.updatePlatformFees(eventId, { ticketFees });
       toast.success('Platform fees updated');
       setEvents(prev => prev.map(e => {
         if (e.id !== eventId) return e;

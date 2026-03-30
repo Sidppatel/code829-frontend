@@ -14,7 +14,8 @@ import {
   DollarSign,
   ChevronRight,
 } from 'lucide-react';
-import apiClient from '../../../lib/axios';
+import { developerApi } from '../../../services/developerApi';
+import { adminApi } from '../../../services/adminApi';
 import type { WizardFormData } from '../../../stores/eventWizardStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -326,18 +327,18 @@ export default function ReviewStep({
 
     async function load(): Promise<void> {
       try {
-        const res = await apiClient.get<{
+        const res = await developerApi.events.getById<{
           status: string;
           venueId: string;
           venue?: Venue;
-        }>(`/developer/events/${eventId}`);
+        }>(eventId!);
         if (cancelled) return;
         setEventStatus(res.data.status ?? 'Draft');
         if (res.data.venue) {
           setVenue(res.data.venue);
         } else if (res.data.venueId) {
           try {
-            const vRes = await apiClient.get<Venue>(`/developer/venues/${res.data.venueId}`);
+            const vRes = await adminApi.venues.getById<Venue>(res.data.venueId);
             if (!cancelled) setVenue(vRes.data);
           } catch {
             // non-fatal
@@ -360,7 +361,7 @@ export default function ReviewStep({
 
     async function loadLayout(): Promise<void> {
       try {
-        const res = await apiClient.get<LayoutData>(`/developer/events/${eventId}/layout`);
+        const res = await developerApi.layout.get<LayoutData>(eventId!);
         if (!cancelled) setLayoutData(res.data);
       } catch {
         // non-fatal
@@ -382,8 +383,8 @@ export default function ReviewStep({
     async function loadPricing(): Promise<void> {
       try {
         const [rulesRes, resolvedRes] = await Promise.all([
-          apiClient.get<PricingRule[]>(`/developer/events/${eventId}/pricing`),
-          apiClient.get<ResolvedPrice>(`/developer/events/${eventId}/pricing/resolve`).catch(() => null),
+          developerApi.pricing.list<PricingRule[]>(eventId!),
+          developerApi.pricing.resolve<ResolvedPrice>(eventId!).catch(() => null),
         ]);
         if (!cancelled) {
           setPricingRules(rulesRes.data);
@@ -501,7 +502,7 @@ export default function ReviewStep({
     setSaving(true);
     try {
       const payload = await buildPayload();
-      await apiClient.put(`/developer/events/${eventId}`, payload);
+      await developerApi.events.update(eventId, payload);
       toast.success('Saved as draft');
       onSaved?.();
       navigate('/developer/events');
@@ -517,8 +518,8 @@ export default function ReviewStep({
     setPublishing(true);
     try {
       const payload = await buildPayload();
-      await apiClient.put(`/developer/events/${eventId}`, payload);
-      await apiClient.put(`/developer/events/${eventId}/status`, { status: 'Published' });
+      await developerApi.events.update(eventId, payload);
+      await developerApi.events.updateStatus(eventId, 'Published');
       toast.success('Event published successfully!');
       onSaved?.();
       navigate('/developer/events');
@@ -542,11 +543,8 @@ export default function ReviewStep({
     setPublishing(true);
     try {
       const payload = await buildPayload();
-      await apiClient.put(`/developer/events/${eventId}`, payload);
-      await apiClient.put(`/developer/events/${eventId}/status`, {
-        status: 'Published',
-        scheduledAt: scheduleAt.toISOString(),
-      });
+      await developerApi.events.update(eventId, payload);
+      await developerApi.events.updateStatus(eventId, 'Published');
       toast.success('Event scheduled for publish');
       onSaved?.();
       navigate('/developer/events');

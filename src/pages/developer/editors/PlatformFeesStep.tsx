@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Save, Info, Ticket, LayoutGrid } from 'lucide-react';
-import apiClient from '../../../lib/axios';
+import { developerApi } from '../../../services/developerApi';
 
 interface TicketType {
   id: string;
@@ -71,7 +71,7 @@ export default function PlatformFeesStep({
         }))
       };
 
-      await apiClient.put(`/developer/events/${eventId}/platform-fees`, payload);
+      await developerApi.events.updatePlatformFees(eventId, payload);
       toast.success('Platform fees updated successfully');
       await onRefresh();
     } catch (err: unknown) {

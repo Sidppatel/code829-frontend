@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { PieChart, BarChart2, MapPin, TrendingUp } from 'lucide-react';
-import apiClient from '../../lib/axios';
+import { developerApi } from '../../services/developerApi';
 import { SkeletonLine } from '../../components/Skeleton';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ export default function AnalyticsPage(): React.ReactElement {
     let cancelled = false;
     async function fetchStats(): Promise<void> {
       try {
-        const res = await apiClient.get<DashboardStats>('/developer/dashboard');
+        const res = await developerApi.dashboard.getStats<DashboardStats>();
         if (!cancelled) setStats(res.data);
       } catch {
         // silently fail

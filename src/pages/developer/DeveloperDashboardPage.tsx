@@ -5,7 +5,7 @@ import {
   TrendingUp, ArrowRight, CheckCircle2, XCircle, AlertCircle,
   BarChart3, Zap, Eye
 } from 'lucide-react';
-import apiClient from '../../lib/axios';
+import { developerApi } from '../../services/developerApi';
 import { SkeletonLine } from '../../components/Skeleton';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -268,7 +268,7 @@ export default function DeveloperDashboardPage(): React.ReactElement {
     let cancelled = false;
     async function fetch(): Promise<void> {
       try {
-        const res = await apiClient.get<ApiResponse>('/developer/dashboard/next-event');
+        const res = await developerApi.dashboard.getNextEvent<ApiResponse>();
         if (cancelled) return;
         if (res.data.hasUpcoming && res.data.data) {
           setData(res.data.data);

@@ -18,7 +18,7 @@ import {
   Copy,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import apiClient from '../../lib/axios';
+import { developerApi } from '../../services/developerApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -214,7 +214,7 @@ function StatusChanger({
     setOpen(false);
     setChanging(true);
     try {
-      await apiClient.put(`/developer/events/${event.id}/status`, { status: newStatus });
+      await developerApi.events.updateStatus(event.id, newStatus);
       toast.success(`Event marked as ${newStatus}`);
       onStatusChanged();
     } catch {
@@ -666,7 +666,7 @@ export default function EventsListPage(): React.ReactElement {
       if (statusFilter !== 'All') params.status = statusFilter;
       if (categoryFilter) params.category = categoryFilter;
 
-      const res = await apiClient.get<PaginatedResponse>('/developer/events', { params });
+      const res = await developerApi.events.list<PaginatedResponse>(params);
       setData(res.data);
     } catch {
       toast.error('Failed to load events');
@@ -683,7 +683,7 @@ export default function EventsListPage(): React.ReactElement {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await apiClient.delete(`/developer/events/${deleteTarget.id}`);
+      await developerApi.events.delete(deleteTarget.id);
       toast.success(`"${deleteTarget.title}" deleted`);
       setDeleteTarget(null);
       void fetchEvents();
@@ -698,7 +698,7 @@ export default function EventsListPage(): React.ReactElement {
     if (!duplicateTarget) return;
     setDuplicating(true);
     try {
-      await apiClient.post(`/developer/events/${duplicateTarget.id}/duplicate`, { startDate, endDate });
+      await developerApi.events.duplicate(duplicateTarget.id, startDate, endDate);
       toast.success(`"${duplicateTarget.title}" duplicated`);
       setDuplicateTarget(null);
       void fetchEvents();

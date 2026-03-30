@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
-import apiClient from '../../lib/axios';
+import { brandApi } from '../../services/brandApi';
 import { SkeletonLine } from '../../components/Skeleton';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ export default function SettingsPage(): React.ReactElement {
     let cancelled = false;
     async function fetchConfig(): Promise<void> {
       try {
-        const res = await apiClient.get<BrandConfig>('/brand/config');
+        const res = await brandApi.getConfig<BrandConfig>();
         if (!cancelled) setConfig(res.data);
       } catch {
         // silently fail — show empty values
