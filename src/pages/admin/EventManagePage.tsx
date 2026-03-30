@@ -14,7 +14,7 @@ import {
   DollarSign,
   Search,
 } from 'lucide-react';
-import apiClient from '../../lib/axios';
+import { adminApi } from '../../services/adminApi';
 import AnimatedCounter from '../../components/AnimatedCounter';
 
 const PricingStep = lazy(() => import('./editors/PricingStep'));
@@ -444,7 +444,7 @@ export default function EventManagePage(): React.ReactElement {
     if (!id) return;
     setLoading(true);
     try {
-      const res = await apiClient.get<EventDetail>(`/admin/events/${id}`);
+      const res = await adminApi.events.getById<EventDetail>(id ?? '');
       setEvent(res.data);
     } catch {
       toast.error('Failed to load event');
@@ -466,8 +466,8 @@ export default function EventManagePage(): React.ReactElement {
     async function loadLayout(): Promise<void> {
       try {
         const [layoutRes, statusRes] = await Promise.all([
-          apiClient.get<LayoutData>(`/admin/events/${id}/layout`),
-          apiClient.get<LayoutStatusData>(`/admin/events/${id}/layout/status`),
+          adminApi.layout.get<LayoutData>(id ?? ''),
+          adminApi.layout.getStatus<LayoutStatusData>(id ?? ''),
         ]);
         if (!cancelled) {
           setLayoutData(layoutRes.data);
@@ -500,9 +500,7 @@ export default function EventManagePage(): React.ReactElement {
 
     async function loadStats(): Promise<void> {
       try {
-        const res = await apiClient.get<{ total: number; paid: number; checkedIn: number; revenue: number; ticketsSold: number }>(
-          `/admin/bookings/stats?eventId=${id}`
-        );
+        const res = await adminApi.bookings.getStats<{ total: number; paid: number; checkedIn: number; revenue: number; ticketsSold: number }>(id ?? '');
         if (cancelled) return;
         setStats({
           totalCapacity: event?.maxCapacity ?? 0,
@@ -536,7 +534,7 @@ export default function EventManagePage(): React.ReactElement {
         });
         if (bookingsStatusFilter) params.set('status', bookingsStatusFilter);
         if (bookingsSearch.trim()) params.set('search', bookingsSearch.trim());
-        const res = await apiClient.get<PagedBookings>(`/admin/bookings?${params}`);
+        const res = await adminApi.bookings.list<PagedBookings>(params.toString());
         if (!cancelled) {
           setBookings(res.data.items ?? []);
           setBookingsTotal(res.data.totalCount ?? 0);
@@ -558,7 +556,7 @@ export default function EventManagePage(): React.ReactElement {
     let cancelled = false;
     async function loadTableTypes(): Promise<void> {
       try {
-        const res = await apiClient.get<Array<{ id: string; name: string; defaultPriceCents: number; platformFeeCents: number }>>('/admin/table-types');
+        const res = await adminApi.tableTypes.list<Array<{ id: string; name: string; defaultPriceCents: number; platformFeeCents: number }>>();
         if (!cancelled) setTableTypes(res.data);
       } catch { /* non-fatal */ }
     }
@@ -700,6 +698,7 @@ export default function EventManagePage(): React.ReactElement {
 
       {/* ── Tabs ──────────────────────────────────────────────────────────── */}
       <div
+        className="c829-manage-tabs"
         style={{
           display: 'flex',
           gap: '0.125rem',
@@ -924,7 +923,7 @@ export default function EventManagePage(): React.ReactElement {
               {bookingsSearch ? `No bookings matching "${bookingsSearch}"` : bookingsStatusFilter ? 'No bookings with this status.' : 'No bookings yet for this event.'}
             </div>
           ) : (
-            <div style={{
+            <div className="c829-table-scroll" style={{
               background: 'var(--bg-secondary)', border: '1px solid var(--border)',
               borderRadius: '0.75rem', overflow: 'hidden',
             }}>

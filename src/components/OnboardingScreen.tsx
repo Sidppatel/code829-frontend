@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { User, MapPin, Phone, CheckCircle2, ArrowRight } from 'lucide-react';
-import apiClient from '../lib/axios';
+import { authApi } from '../services/authApi';
 import { useAuthStore } from '../stores/authStore';
 
 // ─── Nominatim Types & Helpers ───────────────────────────────────────────────
@@ -233,7 +233,7 @@ export default function OnboardingScreen(): React.ReactElement {
   async function onSubmit(data: OnboardingValues) {
     setLoading(true);
     try {
-      await apiClient.put('/auth/profile', data);
+      await authApi.updateProfile(data);
       toast.success('Welcome aboard! Profile completed.');
       await fetchMe();
     } catch (err: any) {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Calendar, Ticket, QrCode, CheckCircle } from 'lucide-react';
-import apiClient from '../lib/axios';
+import { bookingsApi } from '../services/bookingsApi';
 
 interface InvitationData {
   eventTitle: string;
@@ -26,7 +26,7 @@ export default function InvitationPage(): React.ReactElement {
     let cancelled = false;
     async function load(): Promise<void> {
       try {
-        const res = await apiClient.get<InvitationData>(`/bookings/invitation/${token}`);
+        const res = await bookingsApi.getInvitation<InvitationData>(token!);
         if (!cancelled) setData(res.data);
       } catch (err: unknown) {
         if (!cancelled) {

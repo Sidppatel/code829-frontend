@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import apiClient from '../lib/axios';
+import { authApi } from '../services/authApi';
 
 export type UserRole = 'admin' | 'organizer' | 'attendee' | 'staff' | 'developer' | 'guest';
 
@@ -9,27 +9,6 @@ export interface User {
   firstName: string;
   lastName: string;
   role: UserRole;
-  hasCompletedOnboarding: boolean;
-  city?: string;
-}
-
-interface DevLoginResponse {
-  token: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  expiresAt: string;
-  hasCompletedOnboarding: boolean;
-}
-
-interface MeResponse {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  createdAt: string;
   hasCompletedOnboarding: boolean;
   city?: string;
 }
@@ -69,7 +48,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   devLogin: async (email: string) => {
-    const res = await apiClient.post<DevLoginResponse>('/auth/dev-login', { email });
+    const res = await authApi.devLogin(email);
     const { token, email: resEmail, firstName, lastName, role, hasCompletedOnboarding } = res.data;
     const user: User = { id: resEmail, email: resEmail, firstName, lastName, role, hasCompletedOnboarding };
     localStorage.setItem('auth_token', token);
@@ -78,7 +57,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   fetchMe: async () => {
-    const res = await apiClient.get<MeResponse>('/auth/me');
+    const res = await authApi.getMe();
     const { id, email, firstName, lastName, role, hasCompletedOnboarding, city } = res.data;
     const user: User = { id, email, firstName, lastName, role, hasCompletedOnboarding, city };
     localStorage.setItem('auth_user', JSON.stringify(user));

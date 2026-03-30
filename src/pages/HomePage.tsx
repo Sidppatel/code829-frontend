@@ -14,7 +14,7 @@ import AnimatedCounter from "../components/AnimatedCounter";
 import EventCard, { type EventData } from "../components/EventCard";
 import { SkeletonCard } from "../components/Skeleton";
 import { useScrollReveal } from "../hooks/useScrollReveal";
-import apiClient from "../lib/axios";
+import { eventsApi } from '../services/eventsApi';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -217,9 +217,9 @@ function HeroSection(): React.ReactElement {
       return;
     }
     debounceRef.current = setTimeout(() => {
-      apiClient
-        .get<ApiEventsResponse>(
-          `/events?search=${encodeURIComponent(searchQuery)}&pageSize=5`,
+      eventsApi
+        .list<ApiEventsResponse>(
+          `search=${encodeURIComponent(searchQuery)}&pageSize=5`,
         )
         .then((res) => {
           setSuggestions(
@@ -386,6 +386,7 @@ function HeroSection(): React.ReactElement {
       >
         {/* Staggered headline */}
         <h1
+          className="c829-home-hero-heading"
           style={{
             fontFamily: "var(--font-display)",
             fontSize: "clamp(2.5rem, 7vw, 5.5rem)",
@@ -621,6 +622,7 @@ function HeroSection(): React.ReactElement {
 
         {/* Social proof counters */}
         <div
+          className="c829-home-stats"
           style={{
             display: "flex",
             flexWrap: "wrap",
@@ -1169,8 +1171,8 @@ export default function HomePage(): React.ReactElement {
 
     async function fetchWeekend(): Promise<void> {
       try {
-        const res = await apiClient.get<ApiEventsResponse>(
-          "/events?dateFilter=this-week&pageSize=8",
+        const res = await eventsApi.list<ApiEventsResponse>(
+          "dateFilter=this-week&pageSize=8",
         );
         if (!cancelled) {
           const items = (res.data.items ?? []).map(apiItemToEventData);
@@ -1182,7 +1184,7 @@ export default function HomePage(): React.ReactElement {
           } else {
             // No events this week — fetch all upcoming instead
             const allRes =
-              await apiClient.get<ApiEventsResponse>("/events?pageSize=8");
+              await eventsApi.list<ApiEventsResponse>("pageSize=8");
             const allItems = (allRes.data.items ?? []).map(apiItemToEventData);
             setWeekendEvents(
               allItems.length > 0 ? allItems : PLACEHOLDER_EVENTS,
@@ -1207,7 +1209,7 @@ export default function HomePage(): React.ReactElement {
     async function fetchTrending(): Promise<void> {
       try {
         const res =
-          await apiClient.get<ApiEventsResponse>("/events?pageSize=8");
+          await eventsApi.list<ApiEventsResponse>("pageSize=8");
         if (!cancelled) {
           setTrendingEvents((res.data.items ?? []).map(apiItemToEventData));
         }
@@ -1220,15 +1222,15 @@ export default function HomePage(): React.ReactElement {
 
     async function fetchComingSoon(): Promise<void> {
       try {
-        const res = await apiClient.get<ApiEventsResponse>(
-          "/events?dateFilter=this-month&pageSize=10",
+        const res = await eventsApi.list<ApiEventsResponse>(
+          "dateFilter=this-month&pageSize=10",
         );
         if (!cancelled) {
           const items = (res.data.items ?? []).map(apiItemToEventData);
           if (items.length === 0) {
             // No events this month — show all upcoming
-            const allRes = await apiClient.get<ApiEventsResponse>(
-              "/events?pageSize=10",
+            const allRes = await eventsApi.list<ApiEventsResponse>(
+              "pageSize=10",
             );
             setComingSoonEvents(
               (allRes.data.items ?? []).map(apiItemToEventData),

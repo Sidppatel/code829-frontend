@@ -196,7 +196,7 @@ function DashboardSkeleton(): React.ReactElement {
         </div>
       </div>
       {/* Metrics skeleton */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+      <div className="c829-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
         {[1, 2, 3, 4].map(i => (
           <div key={i} style={{
             background: 'var(--bg-secondary)', borderRadius: '0.75rem',
@@ -312,7 +312,7 @@ export default function DeveloperDashboardPage(): React.ReactElement {
         border: '1px solid var(--border)', overflow: 'hidden',
         boxShadow: 'var(--shadow-card)',
       }}>
-        <div style={{ display: 'flex', minHeight: '220px' }}>
+        <div className="c829-hero-flex" style={{ display: 'flex', minHeight: '220px' }}>
           {/* Event Info */}
           <div style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
@@ -362,7 +362,7 @@ export default function DeveloperDashboardPage(): React.ReactElement {
             </div>
 
             {/* Action buttons */}
-            <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.25rem' }}>
+            <div className="c829-hero-actions" style={{ display: 'flex', gap: '0.625rem', marginTop: '1.25rem' }}>
               <button
                 onClick={() => navigate(`/developer/events`)}
                 style={{
@@ -396,7 +396,7 @@ export default function DeveloperDashboardPage(): React.ReactElement {
           </div>
 
           {/* Countdown */}
-          <div style={{
+          <div className="c829-hero-countdown" style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             justifyContent: 'center', padding: '2rem 2.5rem',
             borderLeft: '1px solid var(--border)',
@@ -429,7 +429,7 @@ export default function DeveloperDashboardPage(): React.ReactElement {
       </div>
 
       {/* ───── Key Metrics Row ───── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+      <div className="c829-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
         <MetricCard
           icon={Ticket} label="Tickets Sold" color="var(--accent-primary)"
           value={d.soldCount} sub={d.totalCapacity > 0 ? `of ${d.totalCapacity} (${capacityPct}%)` : undefined}
@@ -454,7 +454,7 @@ export default function DeveloperDashboardPage(): React.ReactElement {
       </div>
 
       {/* ───── Revenue & Capacity Progress ───── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div className="c829-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         {/* Revenue progress */}
         <div style={{
           background: 'var(--bg-secondary)', borderRadius: '0.75rem',
@@ -511,7 +511,7 @@ export default function DeveloperDashboardPage(): React.ReactElement {
       </div>
 
       {/* ───── Booking Breakdown & Ticket Types ───── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div className="c829-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         {/* Booking status breakdown */}
         <div style={{
           background: 'var(--bg-secondary)', borderRadius: '0.75rem',

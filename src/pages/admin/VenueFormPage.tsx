@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import apiClient from '../../lib/axios';
+import { adminApi } from '../../services/adminApi';
 import { SkeletonLine } from '../../components/Skeleton';
 
 // ─── Zod schema ──────────────────────────────────────────────────────────────
@@ -478,7 +478,7 @@ export default function VenueFormPage(): React.ReactElement {
     let cancelled = false;
     async function fetchVenue(): Promise<void> {
       try {
-        const res = await apiClient.get<VenueData>(`/admin/venues/${id}`);
+        const res = await adminApi.venues.getById<VenueData>(id!);
         if (cancelled) return;
         const v = res.data;
         reset({
@@ -505,10 +505,10 @@ export default function VenueFormPage(): React.ReactElement {
     setSubmitting(true);
     try {
       if (isEdit && id) {
-        await apiClient.put(`/admin/venues/${id}`, values);
+        await adminApi.venues.update(id, values);
         toast.success('Venue updated successfully');
       } else {
-        await apiClient.post('/admin/venues', values);
+        await adminApi.venues.create(values);
         toast.success('Venue created successfully');
       }
       navigate('/admin/venues');

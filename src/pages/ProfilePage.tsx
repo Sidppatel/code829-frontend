@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { User, Mail, MapPin, Phone, Save } from 'lucide-react';
-import apiClient from '../lib/axios';
+import { authApi } from '../services/authApi';
 import { useAuthStore } from '../stores/authStore';
 
 interface UserProfile {
@@ -31,7 +31,7 @@ export default function ProfilePage(): React.ReactElement {
     let cancelled = false;
     async function load(): Promise<void> {
       try {
-        const res = await apiClient.get<UserProfile>('/auth/me');
+        const res = await authApi.getMe<UserProfile>();
         if (cancelled) return;
         setProfile(res.data);
         setForm({
@@ -57,7 +57,7 @@ export default function ProfilePage(): React.ReactElement {
     e.preventDefault();
     setSaving(true);
     try {
-      await apiClient.put('/auth/profile', form);
+      await authApi.updateProfile(form);
       toast.success('Profile updated');
       await fetchMe();
     } catch {
@@ -140,7 +140,7 @@ export default function ProfilePage(): React.ReactElement {
           </div>
 
           {/* City / State / Zip */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '0.75rem' }}>
+          <div className="c829-profile-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '0.75rem' }}>
             <div>
               <label style={labelStyle}>City</label>
               <input style={inputStyle} value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />

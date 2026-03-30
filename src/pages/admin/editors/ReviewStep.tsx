@@ -14,7 +14,7 @@ import {
   DollarSign,
   ChevronRight,
 } from 'lucide-react';
-import apiClient from '../../../lib/axios';
+import { adminApi } from '../../../services/adminApi';
 import type { WizardFormData } from '../../../stores/eventWizardStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -326,18 +326,18 @@ export default function ReviewStep({
 
     async function load(): Promise<void> {
       try {
-        const res = await apiClient.get<{
+        const res = await adminApi.events.getById<{
           status: string;
           venueId: string;
           venue?: Venue;
-        }>(`/admin/events/${eventId}`);
+        }>(eventId!);
         if (cancelled) return;
         setEventStatus(res.data.status ?? 'Draft');
         if (res.data.venue) {
           setVenue(res.data.venue);
         } else if (res.data.venueId) {
           try {
-            const vRes = await apiClient.get<Venue>(`/admin/venues/${res.data.venueId}`);
+            const vRes = await adminApi.venues.getById<Venue>(res.data.venueId);
             if (!cancelled) setVenue(vRes.data);
           } catch {
             // non-fatal
@@ -360,7 +360,7 @@ export default function ReviewStep({
 
     async function loadLayout(): Promise<void> {
       try {
-        const res = await apiClient.get<LayoutData>(`/admin/events/${eventId}/layout`);
+        const res = await adminApi.layout.get<LayoutData>(eventId!);
         if (!cancelled) setLayoutData(res.data);
       } catch {
         // non-fatal
@@ -382,8 +382,8 @@ export default function ReviewStep({
     async function loadPricing(): Promise<void> {
       try {
         const [rulesRes, resolvedRes] = await Promise.all([
-          apiClient.get<PricingRule[]>(`/admin/events/${eventId}/pricing`),
-          apiClient.get<ResolvedPrice>(`/admin/events/${eventId}/pricing/resolve`).catch(() => null),
+          adminApi.pricing.list<PricingRule[]>(eventId!),
+          adminApi.pricing.resolve<ResolvedPrice>(eventId!).catch(() => null),
         ]);
         if (!cancelled) {
           setPricingRules(rulesRes.data);
@@ -501,7 +501,7 @@ export default function ReviewStep({
     setSaving(true);
     try {
       const payload = await buildPayload();
-      await apiClient.put(`/admin/events/${eventId}`, payload);
+      await adminApi.events.update(eventId, payload);
       toast.success('Saved as draft');
       onSaved?.();
       navigate('/admin/events');
@@ -517,8 +517,8 @@ export default function ReviewStep({
     setPublishing(true);
     try {
       const payload = await buildPayload();
-      await apiClient.put(`/admin/events/${eventId}`, payload);
-      await apiClient.put(`/admin/events/${eventId}/status`, { status: 'Published' });
+      await adminApi.events.update(eventId, payload);
+      await adminApi.events.updateStatus(eventId, 'Published');
       toast.success('Event published successfully!');
       onSaved?.();
       navigate('/admin/events');
@@ -542,11 +542,8 @@ export default function ReviewStep({
     setPublishing(true);
     try {
       const payload = await buildPayload();
-      await apiClient.put(`/admin/events/${eventId}`, payload);
-      await apiClient.put(`/admin/events/${eventId}/status`, {
-        status: 'Published',
-        scheduledAt: scheduleAt.toISOString(),
-      });
+      await adminApi.events.update(eventId, payload);
+      await adminApi.events.updateStatus(eventId, 'Published');
       toast.success('Event scheduled for publish');
       onSaved?.();
       navigate('/admin/events');

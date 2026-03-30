@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Circle, Square, RectangleHorizontal, Diamond, Clock, Lock, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
-import apiClient from '../lib/axios';
+import { eventsApi, seatsApi } from '../services/eventsApi';
 import { useAuthStore } from '../stores/authStore';
 
 interface EventTable {
@@ -75,7 +75,7 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
 
   const loadTables = useCallback(async () => {
     try {
-      const res = await apiClient.get<TablesResponse>(`/events/${eventId}/tables`);
+      const res = await eventsApi.getTables<TablesResponse>(eventId);
       setData(res.data);
     } catch {
       toast.error('Failed to load seating layout');
@@ -110,7 +110,7 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
       // Release
       setHoldingId(table.id);
       try {
-        await apiClient.post('/seats/release-table', { eventId, tableId: table.id });
+        await seatsApi.release(eventId, table.id);
         await loadTables();
       } catch {
         toast.error('Failed to release table');
@@ -124,14 +124,14 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
     const currentHold = data?.tables.find(t => t.status === 'HeldByYou');
     if (currentHold) {
       try {
-        await apiClient.post('/seats/release-table', { eventId, tableId: currentHold.id });
+        await seatsApi.release(eventId, currentHold.id);
       } catch { /* ignore */ }
     }
 
     // Hold the new table
     setHoldingId(table.id);
     try {
-      await apiClient.post('/seats/hold-table', { eventId, tableId: table.id, ticketTypeId });
+      await seatsApi.hold(eventId, table.id, ticketTypeId);
       await loadTables();
       toast.success(`Table ${table.label} reserved for you`);
     } catch (err: unknown) {

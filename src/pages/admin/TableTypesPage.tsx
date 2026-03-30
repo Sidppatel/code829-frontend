@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Plus, Pencil, Circle, RectangleHorizontal, Square, Diamond, X, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
-import apiClient from '../../lib/axios';
+import { adminApi } from '../../services/adminApi';
 import { SkeletonLine } from '../../components/Skeleton';
 import type { TableShape } from '../../stores/floorPlanStore';
 
@@ -322,7 +322,7 @@ export default function TableTypesPage(): React.ReactElement {
 
   const loadTableTypes = useCallback(async (): Promise<void> => {
     try {
-      const res = await apiClient.get<ApiTableType[]>('/admin/table-types');
+      const res = await adminApi.tableTypes.list<ApiTableType[]>();
       setTableTypes(res.data.map(mapApiToTableType));
     } catch {
       toast.error('Failed to load table types');
@@ -338,7 +338,7 @@ export default function TableTypesPage(): React.ReactElement {
   async function handleAdd(data: TableTypeFormData): Promise<void> {
     setSaving(true);
     try {
-      await apiClient.post('/admin/table-types', {
+      await adminApi.tableTypes.create({
         name: data.name,
         defaultShape: data.shape,
         defaultCapacity: data.defaultCapacity,
@@ -358,7 +358,7 @@ export default function TableTypesPage(): React.ReactElement {
   async function handleEdit(id: string, data: TableTypeFormData): Promise<void> {
     setSaving(true);
     try {
-      await apiClient.put(`/admin/table-types/${id}`, {
+      await adminApi.tableTypes.update(id, {
         name: data.name,
         defaultShape: data.shape,
         defaultCapacity: data.defaultCapacity,
@@ -379,7 +379,7 @@ export default function TableTypesPage(): React.ReactElement {
     try {
       const tt = tableTypes.find((t) => t.id === id);
       if (!tt) return;
-      await apiClient.put(`/admin/table-types/${id}`, {
+      await adminApi.tableTypes.update(id, {
         name: tt.name,
         defaultCapacity: tt.defaultCapacity,
         defaultShape: tt.shape,
@@ -388,7 +388,7 @@ export default function TableTypesPage(): React.ReactElement {
       });
       // Also toggle via delete endpoint if disabling
       if (!active) {
-        await apiClient.delete(`/admin/table-types/${id}`).catch(() => {});
+        await adminApi.tableTypes.delete(id).catch(() => {});
       }
       setTableTypes((prev) => prev.map((t) => (t.id === id ? { ...t, isActive: active } : t)));
       toast.success(active ? 'Table type enabled' : 'Table type disabled');
@@ -475,7 +475,7 @@ export default function TableTypesPage(): React.ReactElement {
           boxShadow: 'var(--shadow-card)',
         }}
       >
-        <div style={{ overflowX: 'auto' }}>
+        <div className="c829-table-scroll" style={{ overflowX: 'auto' }}>
           <table
             style={{
               width: '100%',

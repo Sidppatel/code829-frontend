@@ -915,7 +915,7 @@ export default function EventsListPage(): React.ReactElement {
             boxShadow: 'var(--shadow-card)',
           }}
         >
-          <div style={{ overflowX: 'auto' }}>
+          <div className="c829-table-scroll" style={{ overflowX: 'auto' }}>
             <table
               style={{
                 width: '100%',

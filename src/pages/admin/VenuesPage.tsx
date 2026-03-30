@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, LayoutList, LayoutGrid, Pencil, Trash2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
-import apiClient from '../../lib/axios';
+import { adminApi } from '../../services/adminApi';
 import { SkeletonLine } from '../../components/Skeleton';
 
 interface Venue {
@@ -247,7 +247,7 @@ export default function VenuesPage(): React.ReactElement {
       if (cityFilter) params.city = cityFilter;
       if (statusFilter !== 'all') params.isActive = statusFilter === 'active' ? 'true' : 'false';
 
-      const res = await apiClient.get<PaginatedResponse>('/admin/venues', { params });
+      const res = await adminApi.venues.list<PaginatedResponse>(params);
       setData(res.data);
     } catch {
       toast.error('Failed to load venues');
@@ -268,9 +268,9 @@ export default function VenuesPage(): React.ReactElement {
   async function handleToggleVenueActive(venueId: string, active: boolean): Promise<void> {
     try {
       if (active) {
-        await apiClient.put(`/admin/venues/${venueId}`, { isActive: true });
+        await adminApi.venues.update(venueId, { isActive: true });
       } else {
-        await apiClient.delete(`/admin/venues/${venueId}`);
+        await adminApi.venues.delete(venueId);
       }
       toast.success(active ? 'Venue enabled' : 'Venue disabled');
       void fetchVenues();
@@ -283,7 +283,7 @@ export default function VenuesPage(): React.ReactElement {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await apiClient.delete(`/admin/venues/${deleteTarget.id}`);
+      await adminApi.venues.delete(deleteTarget.id);
       toast.success(`"${deleteTarget.name}" deleted`);
       setDeleteTarget(null);
       void fetchVenues();
@@ -499,7 +499,7 @@ export default function VenuesPage(): React.ReactElement {
             boxShadow: 'var(--shadow-card)',
           }}
         >
-          <div style={{ overflowX: 'auto' }}>
+          <div className="c829-table-scroll" style={{ overflowX: 'auto' }}>
             <table
               style={{
                 width: '100%',

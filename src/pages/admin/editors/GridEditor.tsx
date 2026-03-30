@@ -1,11 +1,16 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Circle, RectangleHorizontal, Square, Diamond, Save, Trash2, Tags, Loader2, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
-import apiClient from '../../../lib/axios';
-import { useFloorPlanStore, type FloorPlanElement, type TableShape } from '../../../stores/floorPlanStore';
+import { adminApi } from '../../../services/adminApi';
+import { useFloorPlanStore, type FloorPlanElement, type TableShape, type ApiLayoutResponse } from '../../../stores/floorPlanStore';
 import { useEditorStore } from '../../../stores/editorStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+interface DraftResponse {
+  source: 'redis' | 'db';
+  data: Omit<ApiLayoutResponse, 'eventId'> & { tables: Record<string, unknown>[] };
+}
 
 interface TableType {
   id: string;
@@ -481,7 +486,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     let cancelled = false;
     async function load(): Promise<void> {
       try {
-        const res = await apiClient.get<TableType[]>('/admin/table-types');
+        const res = await adminApi.tableTypes.list<TableType[]>();
         if (!cancelled) setTableTypes(res.data.filter((t) => t.isActive));
       } catch {
         if (!cancelled) toast.error('Failed to load table types');
@@ -499,7 +504,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
       setLoadingLayout(true);
       try {
         // Check for Redis draft first
-        const draftRes = await apiClient.get(`/admin/events/${eventId}/layout/draft`);
+        const draftRes = await adminApi.layout.getDraft<DraftResponse>(eventId!);
         if (!cancelled && draftRes.data.source === 'redis' && draftRes.data.data) {
           const draft = draftRes.data.data;
           // Reconstruct the layout response shape for loadFromApi
@@ -510,14 +515,14 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
             gridCols: draft.gridCols,
             tables: draft.tables.map((t: Record<string, unknown>) => ({
               ...t, tableTypeName: (t.tableTypeName as string) ?? null,
-            })),
+            })) as ApiLayoutResponse['tables'],
           });
           setRowsInput(draft.gridRows ?? 10);
           setColsInput(draft.gridCols ?? 10);
           return;
         }
         // Fall back to DB
-        const res = await apiClient.get(`/admin/events/${eventId}/layout`);
+        const res = await adminApi.layout.get<ApiLayoutResponse>(eventId!);
         if (!cancelled) {
           loadFromApi(res.data);
           setRowsInput(res.data.gridRows ?? 10);
@@ -539,14 +544,14 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   // Fetch locked table IDs (active holds + booked seats)
   useEffect(() => {
     if (!eventId) return;
-    apiClient.get<{ lockedTableIds: string[] }>(`/admin/events/${eventId}/layout/locked`)
+    adminApi.layout.getLocked<{ lockedTableIds: string[] }>(eventId)
       .then((res) => {
         setBookedTableIds(new Set(res.data.lockedTableIds));
       })
       .catch(() => { /* ignore */ });
 
     // Also fetch booking stats for revenue display
-    apiClient.get(`/admin/bookings/stats?eventId=${eventId}`)
+    adminApi.bookings.getStats(eventId)
       .then((res) => {
         const data = res.data as { revenue: number };
         setBookedRevenueCents(data.revenue ?? 0);
@@ -854,12 +859,12 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   async function performAutoSave(): Promise<void> {
     setSaveStatus('saving');
     try {
-      await apiClient.post(`/admin/events/${eventId}/layout/draft`, buildLayoutPayload());
+      await adminApi.layout.saveDraft(eventId, buildLayoutPayload());
       setSaveStatus('saved');
     } catch {
       // Redis draft failed — try direct DB save as fallback
       try {
-        await apiClient.post(`/admin/events/${eventId}/layout`, buildLayoutPayload());
+        await adminApi.layout.save(eventId, buildLayoutPayload());
         markClean();
         setSaveStatus('saved');
       } catch {
@@ -959,11 +964,11 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     try {
       // Try Redis draft + flush first
       try {
-        await apiClient.post(`/admin/events/${eventId}/layout/draft`, buildLayoutPayload());
-        await apiClient.post(`/admin/events/${eventId}/layout/flush`);
+        await adminApi.layout.saveDraft(eventId, buildLayoutPayload());
+        await adminApi.layout.flush(eventId);
       } catch {
         // Fallback: save directly to DB
-        await apiClient.post(`/admin/events/${eventId}/layout`, buildLayoutPayload());
+        await adminApi.layout.save(eventId, buildLayoutPayload());
       }
       markClean();
       setSaveStatus('saved');
@@ -1153,7 +1158,7 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
                         if (editingTypeData) {
                           const isDuplicate = tableTypes.some((t) => t.id !== tt.id && t.name.toLowerCase() === editingTypeData.name.toLowerCase());
                           if (isDuplicate) { toast.error('A type with this name already exists'); return; }
-                          apiClient.put(`/admin/table-types/${tt.id}`, {
+                          adminApi.tableTypes.update(tt.id, {
                             name: editingTypeData.name,
                             defaultCapacity: editingTypeData.capacity,
                             defaultShape: editingTypeData.shape,

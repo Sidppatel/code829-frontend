@@ -14,7 +14,7 @@ import {
   ChevronLeft,
   Lock,
 } from 'lucide-react';
-import apiClient from '../../lib/axios';
+import { adminApi } from '../../services/adminApi';
 import { useEventWizardStore } from '../../stores/eventWizardStore';
 import type { LayoutMode } from '../../stores/eventWizardStore';
 
@@ -305,7 +305,7 @@ function NewVenueModal({
       if (values.capacity && !isNaN(Number(values.capacity))) {
         payload.capacity = Number(values.capacity);
       }
-      const res = await apiClient.post<Venue>('/admin/venues', payload);
+      const res = await adminApi.venues.create<Venue>(payload);
       toast.success('Venue created');
       onCreated(res.data);
     } catch {
@@ -711,7 +711,7 @@ export default function EventWizardPage(): React.ReactElement {
     let cancelled = false;
     async function loadVenues(): Promise<void> {
       try {
-        const res = await apiClient.get<VenueListResponse>('/admin/venues', { params: { pageSize: 100 } });
+        const res = await adminApi.venues.list<VenueListResponse>({ pageSize: 100 });
         if (!cancelled) setVenues(res.data.items);
       } catch {
         if (!cancelled) toast.error('Failed to load venues');
@@ -729,7 +729,7 @@ export default function EventWizardPage(): React.ReactElement {
     let cancelled = false;
     async function loadEvent(): Promise<void> {
       try {
-        const res = await apiClient.get<EventApiObject>(`/admin/events/${id}`);
+        const res = await adminApi.events.getById<EventApiObject>(id!);
         if (cancelled) return;
         const e = res.data;
 
@@ -790,7 +790,7 @@ export default function EventWizardPage(): React.ReactElement {
     let cancelled = false;
     async function checkLocked(): Promise<void> {
       try {
-        const res = await apiClient.get<{ locked: boolean }>(`/admin/events/${id}/layout-locked`);
+        const res = await adminApi.events.checkLayoutLocked(id!);
         if (!cancelled) setLayoutModeLocked(res.data.locked);
       } catch { /* non-fatal */ }
     }
@@ -872,9 +872,7 @@ export default function EventWizardPage(): React.ReactElement {
     } else if (step === 3 && id) {
       // Validate: at least one active pricing rule must exist
       try {
-        const res = await apiClient.get<Array<{ id: string; isActive: boolean; type: string }>>(
-          `/admin/events/${id}/pricing`
-        );
+        const res = await adminApi.pricing.list<Array<{ id: string; isActive: boolean; type: string }>>(id);
         const activeRules = res.data.filter((r) => r.isActive);
         if (activeRules.length === 0) {
           toast.error('Add at least one active pricing rule before continuing.');

@@ -4,7 +4,7 @@ import { Navigate, Link, useNavigate } from "react-router-dom";
 import { Mail, ArrowRight, CheckCircle, Bug } from "lucide-react";
 import { useAuthStore, type UserRole } from "../stores/authStore";
 import MagneticButton from "../components/MagneticButton";
-import apiClient from "../lib/axios";
+import { authApi } from "../services/authApi";
 
 // ---------------------------------------------------------------------------
 // Dev role presets — emails must match backend dev-login config
@@ -72,7 +72,7 @@ export default function LoginPage(): React.ReactElement {
     if (!email.trim()) return;
     setLoading(true);
     try {
-      await apiClient.post("/auth/magic-link", { email });
+      await authApi.sendMagicLink(email);
     } finally {
       setLoading(false);
       setSubmitted(true);
@@ -416,6 +416,7 @@ export default function LoginPage(): React.ReactElement {
                 </span>
               </div>
               <div
+                className="c829-dev-grid"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",

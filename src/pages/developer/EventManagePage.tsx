@@ -491,6 +491,7 @@ export default function EventManagePage(): React.ReactElement {
 
       {/* ── Tabs ──────────────────────────────────────────────────────────── */}
       <div
+        className="c829-manage-tabs"
         style={{
           display: 'flex',
           gap: '0.125rem',

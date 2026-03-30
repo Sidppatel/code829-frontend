@@ -17,7 +17,7 @@ import {
   Info,
   ExternalLink,
 } from 'lucide-react';
-import apiClient from '../../../lib/axios';
+import { adminApi } from '../../../services/adminApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -576,7 +576,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
       return;
     }
     try {
-      const res = await apiClient.get<PricingRule[]>(`/admin/events/${eventId}/pricing`);
+      const res = await adminApi.pricing.list<PricingRule[]>(eventId);
       setRules(res.data.sort((a, b) => a.sortOrder - b.sortOrder));
     } catch {
       toast.error('Failed to load pricing rules');
@@ -593,7 +593,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
     let cancelled = false;
     async function loadTableTypes(): Promise<void> {
       try {
-        const res = await apiClient.get<TableType[]>('/admin/table-types');
+        const res = await adminApi.tableTypes.list<TableType[]>();
         if (!cancelled) setTableTypes(res.data);
       } catch {
         // non-critical — table types optional
@@ -613,7 +613,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
     async function resolvePrice(): Promise<void> {
       setResolveLoading(true);
       try {
-        const res = await apiClient.get<ResolvedPrice>(`/admin/events/${eventId}/pricing/resolve`);
+        const res = await adminApi.pricing.resolve<ResolvedPrice>(eventId!);
         if (!cancelled) setResolvedPrice(res.data);
       } catch {
         if (!cancelled) setResolvedPrice(null);
@@ -645,7 +645,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
       if (values.type === 'FirstN') {
         payload.maxCount = values.maxCount ? Number(values.maxCount) : null;
       }
-      await apiClient.post(`/admin/events/${eventId}/pricing`, payload);
+      await adminApi.pricing.create(eventId, payload);
       toast.success('Pricing rule added');
       setShowAddForm(false);
       await loadRules();
@@ -678,7 +678,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
       } else {
         payload.maxCount = null;
       }
-      await apiClient.put(`/admin/events/${eventId}/pricing/${ruleId}`, payload);
+      await adminApi.pricing.update(eventId, ruleId, payload);
       toast.success('Rule updated');
       setEditingRuleId(null);
       await loadRules();
@@ -692,7 +692,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
   async function handleToggleActive(rule: PricingRule): Promise<void> {
     if (!eventId) return;
     try {
-      await apiClient.put(`/admin/events/${eventId}/pricing/${rule.id}`, {
+      await adminApi.pricing.update(eventId, rule.id, {
         isActive: !rule.isActive,
       });
       setRules((prev) =>
@@ -707,7 +707,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
     if (!eventId || !deleteTarget) return;
     setDeleting(true);
     try {
-      await apiClient.delete(`/admin/events/${eventId}/pricing/${deleteTarget.id}`);
+      await adminApi.pricing.delete(eventId, deleteTarget.id);
       toast.success('Rule deleted');
       setDeleteTarget(null);
       await loadRules();
@@ -751,7 +751,7 @@ export default function PricingStep({ eventId, layoutMode, maxCapacity }: Pricin
 
     if (!eventId) return;
     try {
-      await apiClient.put(`/admin/events/${eventId}/pricing/reorder`, {
+      await adminApi.pricing.reorder(eventId, {
         rules: withNewOrder.map((r) => ({ id: r.id, sortOrder: r.sortOrder })),
       });
     } catch {

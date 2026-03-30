@@ -286,7 +286,7 @@ function BookingCard({ booking, onRefresh }: { booking: Booking; onRefresh: () =
 
         {/* Content */}
         <div style={{ flex: 1, padding: '1.25rem', minWidth: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+          <div className="c829-booking-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <div style={{ minWidth: 0 }}>
               <h3 style={{
                 fontFamily: 'var(--font-display)', fontSize: '1.05rem', fontWeight: 700,

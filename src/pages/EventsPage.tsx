@@ -4,7 +4,7 @@ import { Search, ChevronDown, X } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import EventCard, { type EventData } from '../components/EventCard';
 import { SkeletonCard } from '../components/Skeleton';
-import apiClient from '../lib/axios';
+import { eventsApi } from '../services/eventsApi';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -260,7 +260,7 @@ export default function EventsPage(): React.ReactElement {
         if (dateFilter) params.set('dateFilter', dateFilter);
         if (city !== 'All Cities') params.set('city', city);
 
-        const res = await apiClient.get<ApiEventsResponse>(`/events?${params.toString()}`);
+        const res = await eventsApi.list<ApiEventsResponse>(params.toString());
         if (!cancelled) {
           setEvents((res.data.items ?? []).map(apiItemToEventData));
           setTotalCount(res.data.totalCount ?? 0);

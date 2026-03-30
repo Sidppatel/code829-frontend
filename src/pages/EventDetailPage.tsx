@@ -634,6 +634,7 @@ export default function EventDetailPage(): React.ReactElement {
           }}
         />
         <div
+          className="c829-event-layout"
           style={{
             maxWidth: "1280px",
             margin: "2rem auto",
@@ -695,6 +696,7 @@ export default function EventDetailPage(): React.ReactElement {
           }}
         >
           <div
+            className="c829-event-layout"
             style={{
               display: "grid",
               gridTemplateColumns: "minmax(0, 1fr) minmax(0, 400px)",
@@ -934,7 +936,7 @@ export default function EventDetailPage(): React.ReactElement {
             </div>
 
             {/* RIGHT: sticky sidebar */}
-            <div style={{ position: "sticky", top: "80px" }}>
+            <div className="c829-event-sidebar" style={{ position: "sticky", top: "80px" }}>
               <div
                 style={{
                   background: "var(--bg-secondary)",
