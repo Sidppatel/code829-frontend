@@ -244,7 +244,7 @@ function NoUpcomingEvents(): React.ReactElement {
         onClick={() => navigate('/admin/events')}
         style={{
           marginTop: '1.5rem', padding: '0.75rem 1.5rem',
-          background: 'var(--accent-primary)', color: '#fff',
+          background: 'var(--accent-primary)', color: 'var(--bg-primary)',
           border: 'none', borderRadius: '0.5rem', fontWeight: 600,
           fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'var(--font-body)',
           display: 'flex', alignItems: 'center', gap: '0.5rem',
@@ -367,7 +367,7 @@ export default function AdminDashboardPage(): React.ReactElement {
                 onClick={() => navigate(`/admin/events/${d.eventId}`)}
                 style={{
                   padding: '0.5rem 1rem', background: 'var(--accent-primary)',
-                  color: '#fff', border: 'none', borderRadius: '0.5rem',
+                  color: 'var(--bg-primary)', border: 'none', borderRadius: '0.5rem',
                   fontWeight: 600, fontSize: '0.8125rem', cursor: 'pointer',
                   fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', gap: '0.4rem',
                 }}

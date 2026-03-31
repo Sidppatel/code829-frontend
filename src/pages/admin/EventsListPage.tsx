@@ -1137,6 +1137,7 @@ export default function EventsListPage(): React.ReactElement {
         <div>
           {loading ? (
             <div
+              className="c829-card-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -1161,6 +1162,7 @@ export default function EventsListPage(): React.ReactElement {
             </div>
           ) : (
             <div
+              className="c829-card-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',

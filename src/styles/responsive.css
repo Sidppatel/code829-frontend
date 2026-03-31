@@ -415,3 +415,34 @@
     min-height: 36px !important;
   }
 }
+
+/* ── Bookings grid in EventManagePage — collapse to 3 cols on mobile ── */
+@media (max-width: 640px) {
+  .c829-bookings-grid {
+    grid-template-columns: 1fr 0.8fr 0.6fr !important;
+  }
+  .c829-bookings-col-hide {
+    display: none !important;
+  }
+}
+
+/* ── Admin breadcrumb header — prevent overflow on mobile ── */
+@media (max-width: 640px) {
+  .admin-main header {
+    padding: 0 0.875rem !important;
+    font-size: 0.8125rem !important;
+  }
+}
+
+/* ── Dashboard hero event title — clamp font on mobile ── */
+@media (max-width: 480px) {
+  .c829-hero-flex h1 {
+    font-size: clamp(1.25rem, 5vw, 2rem) !important;
+    white-space: normal !important;
+  }
+}
+
+/* ── Admin bottom nav items — ensure full tap targets ── */
+.admin-bottom-nav a {
+  min-height: 44px;
+}

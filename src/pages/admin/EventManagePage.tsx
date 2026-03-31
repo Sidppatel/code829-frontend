@@ -880,7 +880,7 @@ export default function EventManagePage(): React.ReactElement {
                     style={{
                       padding: '0.3rem 0.65rem', borderRadius: '999px', border: '1px solid var(--border)',
                       background: bookingsStatusFilter === s ? 'var(--accent-primary)' : 'var(--bg-secondary)',
-                      color: bookingsStatusFilter === s ? '#fff' : 'var(--text-secondary)',
+                      color: bookingsStatusFilter === s ? 'var(--bg-primary)' : 'var(--text-secondary)',
                       fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)',
                     }}
                   >{s || 'All'}</button>
@@ -929,7 +929,9 @@ export default function EventManagePage(): React.ReactElement {
               borderRadius: '0.75rem', overflow: 'hidden',
             }}>
               {/* Table header */}
-              <div style={{
+              <div
+                className="c829-bookings-grid"
+                style={{
                 display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.7fr 0.6fr 0.5fr',
                 gap: '0.75rem', padding: '0.65rem 1rem',
                 borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)',
@@ -937,10 +939,10 @@ export default function EventManagePage(): React.ReactElement {
                 letterSpacing: '0.06em', color: 'var(--text-tertiary)',
               }}>
                 <span>Customer</span>
-                <span>Items</span>
+                <span className="c829-bookings-col-hide">Items</span>
                 <span>Amount</span>
                 <span>Status</span>
-                <span>Date</span>
+                <span className="c829-bookings-col-hide">Date</span>
               </div>
 
               {/* Rows */}
@@ -954,6 +956,7 @@ export default function EventManagePage(): React.ReactElement {
                 return (
                   <div
                     key={b.id}
+                    className="c829-bookings-grid"
                     style={{
                       display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.7fr 0.6fr 0.5fr',
                       gap: '0.75rem', padding: '0.65rem 1rem', alignItems: 'center',
@@ -974,7 +977,7 @@ export default function EventManagePage(): React.ReactElement {
                     </div>
 
                     {/* Items */}
-                    <div style={{ minWidth: 0 }}>
+                    <div className="c829-bookings-col-hide" style={{ minWidth: 0 }}>
                       {(b.items ?? []).length > 0 ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
                           {(b.items ?? []).slice(0, 2).map((item, idx) => (
@@ -1013,7 +1016,7 @@ export default function EventManagePage(): React.ReactElement {
                     </span>
 
                     {/* Date */}
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                    <span className="c829-bookings-col-hide" style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
                       {new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
 
