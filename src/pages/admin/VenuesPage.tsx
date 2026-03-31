@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, LayoutList, LayoutGrid, Pencil, Trash2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, ChevronLeft, ChevronRight, ChevronDown, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { adminApi } from '../../services/adminApi';
-import { SkeletonLine } from '../../components/Skeleton';
 
 interface Venue {
   id: string;
@@ -32,44 +31,33 @@ interface PaginatedResponse {
   hasPreviousPage: boolean;
 }
 
-type ViewMode = 'table' | 'card';
 type StatusFilter = 'all' | 'active' | 'inactive';
 
 const PAGE_SIZE = 20;
 
-// ─── Skeleton rows / cards ──────────────────────────────────────────────────
+// ─── Skeleton card ───────────────────────────────────────────────────────────
 
-function SkeletonRow(): React.ReactElement {
-  return (
-    <tr>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <td key={i} style={{ padding: '0.875rem 1rem' }}>
-          <SkeletonLine className={i === 1 ? 'w-40' : i === 5 ? 'w-16' : 'w-24'} />
-        </td>
-      ))}
-    </tr>
-  );
-}
-
-function SkeletonVenueCard(): React.ReactElement {
+function SkeletonVenueAccordion(): React.ReactElement {
   return (
     <div
       style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border)',
+        borderLeft: '4px solid var(--border)',
         borderRadius: '0.75rem',
-        padding: '1.25rem',
+        padding: '1rem 1.25rem',
         display: 'flex',
-        flexDirection: 'column',
-        gap: '0.75rem',
+        alignItems: 'center',
+        gap: '0.875rem',
+        animation: 'pulse 1.5s ease-in-out infinite',
       }}
     >
-      <SkeletonLine className="w-48 h-6" />
-      <SkeletonLine className="w-full h-4" />
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
-        <SkeletonLine className="w-20 h-5" />
-        <SkeletonLine className="w-16 h-5" />
+      <div style={{ width: '38px', height: '38px', borderRadius: '0.5rem', background: 'var(--bg-tertiary)', flexShrink: 0 }} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <div style={{ height: '14px', width: '45%', borderRadius: '4px', background: 'var(--bg-tertiary)' }} />
+        <div style={{ height: '11px', width: '30%', borderRadius: '4px', background: 'var(--bg-tertiary)' }} />
       </div>
+      <div style={{ height: '20px', width: '64px', borderRadius: '999px', background: 'var(--bg-tertiary)', flexShrink: 0 }} />
     </div>
   );
 }
@@ -218,7 +206,7 @@ export default function VenuesPage(): React.ReactElement {
   const [data, setData] = useState<PaginatedResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [cityFilter, setCityFilter] = useState('');
@@ -422,31 +410,6 @@ export default function VenuesPage(): React.ReactElement {
           <option value="inactive">Inactive</option>
         </select>
 
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.25rem' }}>
-          {(['table', 'card'] as ViewMode[]).map((mode) => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
-              aria-label={mode === 'table' ? 'Table view' : 'Grid view'}
-              aria-pressed={viewMode === mode}
-              style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '0.375rem',
-                border: '1px solid var(--border)',
-                background: viewMode === mode ? 'var(--accent-primary)' : 'var(--bg-secondary)',
-                color: viewMode === mode ? 'var(--bg-primary)' : 'var(--text-secondary)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background 0.15s, color 0.15s',
-              }}
-            >
-              {mode === 'table' ? <LayoutList size={16} /> : <LayoutGrid size={16} />}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Active filter chips */}
@@ -489,332 +452,251 @@ export default function VenuesPage(): React.ReactElement {
         </div>
       )}
 
-      {/* Table view */}
-      {viewMode === 'table' && (
-        <div
-          style={{
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border)',
-            borderRadius: '0.75rem',
-            overflow: 'hidden',
-            boxShadow: 'var(--shadow-card)',
-          }}
-        >
-          <div className="c829-table-scroll" style={{ overflowX: 'auto' }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontFamily: 'var(--font-body)',
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    background: 'var(--bg-tertiary)',
-                    borderBottom: '1px solid var(--border)',
-                  }}
-                >
-                  {['Name', 'City / State', 'Status', 'Actions'].map((h) => (
-                    <th
-                      key={h}
-                      style={{
-                        padding: '0.75rem 1rem',
-                        textAlign: h === 'Actions' ? 'center' : 'left',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        color: 'var(--text-tertiary)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {loading
-                  ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
-                  : data?.items.length === 0
-                  ? (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        style={{
-                          padding: '3rem',
-                          textAlign: 'center',
-                          color: 'var(--text-tertiary)',
-                          fontSize: '0.9rem',
-                        }}
-                      >
-                        No venues match your filters.
-                      </td>
-                    </tr>
-                  )
-                  : data?.items.map((venue) => (
-                    <tr
-                      key={venue.id}
-                      style={{
-                        borderBottom: '1px solid var(--border)',
-                        transition: 'background 0.15s',
-                        opacity: venue.isActive ? 1 : 0.45,
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLTableRowElement).style.background = 'var(--bg-tertiary)';
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLTableRowElement).style.background = 'transparent';
-                      }}
-                    >
-                      <td
-                        style={{
-                          padding: '0.875rem 1rem',
-                          color: venue.isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
-                          fontWeight: 500,
-                          fontSize: '0.875rem',
-                          maxWidth: '220px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          textDecoration: venue.isActive ? 'none' : 'line-through',
-                        }}
-                      >
-                        {venue.name}
-                      </td>
-                      <td
-                        style={{
-                          padding: '0.875rem 1rem',
-                          color: 'var(--text-secondary)',
-                          fontSize: '0.875rem',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {venue.city}, {venue.state}
-                      </td>
-                      <td style={{ padding: '0.875rem 1rem' }}>
-                        <StatusToggle isActive={venue.isActive} onToggle={() => handleToggleVenueActive(venue.id, !venue.isActive)} />
-                      </td>
-                      <td style={{ padding: '0.875rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                        <div style={{ display: 'inline-flex', gap: '0.375rem', alignItems: 'center' }}>
-                          {venue.isActive ? (
-                            <Link
-                              to={`/admin/venues/${venue.id}/edit`}
-                              aria-label={`Edit ${venue.name}`}
-                              className="c829-table-action-btn"
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '30px',
-                                height: '30px',
-                                borderRadius: '0.375rem',
-                                border: '1px solid var(--border)',
-                                background: 'var(--bg-tertiary)',
-                                color: 'var(--accent-primary)',
-                                textDecoration: 'none',
-                                transition: 'background 0.15s',
-                              }}
-                            >
-                              <Pencil size={13} />
-                            </Link>
-                          ) : (
-                            <span
-                              title="Venue is disabled"
-                              className="c829-table-action-btn"
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '30px',
-                                height: '30px',
-                                borderRadius: '0.375rem',
-                                border: '1px solid var(--border)',
-                                background: 'var(--bg-tertiary)',
-                                color: 'var(--text-tertiary)',
-                                cursor: 'not-allowed',
-                                opacity: 0.5,
-                              }}
-                            >
-                              <Pencil size={13} />
-                            </span>
-                          )}
-                          <button
-                            onClick={venue.isActive ? () => setDeleteTarget(venue) : undefined}
-                            disabled={!venue.isActive}
-                            aria-label={venue.isActive ? `Delete ${venue.name}` : 'Venue is disabled'}
-                            className="c829-table-action-btn"
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: '30px',
-                              height: '30px',
-                              borderRadius: '0.375rem',
-                              border: '1px solid var(--border)',
-                              background: 'var(--bg-tertiary)',
-                              color: venue.isActive ? 'var(--color-error)' : 'var(--text-tertiary)',
-                              cursor: venue.isActive ? 'pointer' : 'not-allowed',
-                              opacity: venue.isActive ? 1 : 0.5,
-                              transition: 'background 0.15s',
-                            }}
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+      {/* Accordion list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+        {loading ? (
+          Array.from({ length: 6 }).map((_, i) => <SkeletonVenueAccordion key={i} />)
+        ) : data?.items.length === 0 ? (
+          <div
+            style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: '0.75rem',
+              padding: '3rem 1.5rem',
+              textAlign: 'center',
+              color: 'var(--text-tertiary)',
+              fontSize: '0.875rem',
+              boxShadow: 'var(--shadow-card)',
+            }}
+          >
+            No venues match your filters.
           </div>
-        </div>
-      )}
+        ) : (
+          data?.items.map((venue) => {
+            const isExpanded = expandedId === venue.id;
+            const initials = venue.name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 
-      {/* Card view */}
-      {viewMode === 'card' && (
-        <div>
-          {loading ? (
-            <div
-              className="c829-card-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '1rem',
-              }}
-            >
-              {Array.from({ length: 6 }).map((_, i) => (
-                <SkeletonVenueCard key={i} />
-              ))}
-            </div>
-          ) : data?.items.length === 0 ? (
-            <div
-              style={{
-                textAlign: 'center',
-                color: 'var(--text-tertiary)',
-                padding: '3rem',
-                background: 'var(--bg-secondary)',
-                borderRadius: '0.75rem',
-                border: '1px solid var(--border)',
-                fontSize: '0.9rem',
-              }}
-            >
-              No venues match your filters.
-            </div>
-          ) : (
-            <div
-              className="c829-card-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '1rem',
-              }}
-            >
-              {data?.items.map((venue) => (
-                <div
-                  key={venue.id}
+            return (
+              <div
+                key={venue.id}
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: `1px solid ${isExpanded ? 'var(--accent-primary)' : 'var(--border)'}`,
+                  borderLeft: `4px solid ${venue.isActive ? 'var(--accent-primary)' : 'var(--border)'}`,
+                  borderRadius: '0.75rem',
+                  boxShadow: isExpanded ? '0 0 0 1px color-mix(in srgb, var(--accent-primary) 20%, transparent)' : 'var(--shadow-card)',
+                  opacity: venue.isActive ? 1 : 0.55,
+                  transition: 'border-color 0.2s, box-shadow 0.2s, opacity 0.2s',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Card header */}
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(isExpanded ? null : venue.id)}
                   style={{
-                    background: 'var(--bg-secondary)',
-                    border: venue.isActive ? '1px solid var(--border)' : '1px solid var(--color-error)',
-                    borderRadius: '0.75rem',
-                    padding: '1.25rem',
-                    boxShadow: 'var(--shadow-card)',
+                    width: '100%',
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.625rem',
-                    transition: 'box-shadow 0.2s',
-                    opacity: venue.isActive ? 1 : 0.45,
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-card-hover)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-card)';
+                    alignItems: 'center',
+                    gap: '0.875rem',
+                    padding: '0.875rem 1.125rem',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontFamily: 'var(--font-body)',
                   }}
                 >
-                  <h3
+                  {/* Letter avatar */}
+                  <div
                     style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '0.5rem',
+                      background: 'color-mix(in srgb, var(--accent-primary) 18%, var(--bg-tertiary))',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      color: 'var(--accent-primary)',
+                      fontWeight: 800,
+                      fontSize: '0.875rem',
+                      letterSpacing: '-0.02em',
                       fontFamily: 'var(--font-display)',
-                      fontSize: '1.1rem',
-                      fontWeight: 700,
-                      color: 'var(--text-primary)',
-                      margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
                     }}
                   >
-                    {venue.name}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: '0.8125rem',
-                      color: 'var(--text-secondary)',
-                      margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {venue.address}, {venue.city}, {venue.state} {venue.zipCode}
-                  </p>
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <StatusToggle isActive={venue.isActive} onToggle={() => handleToggleVenueActive(venue.id, !venue.isActive)} />
+                    {initials}
                   </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
-                    <Link
-                      to={`/admin/venues/${venue.id}/edit`}
+
+                  {/* Name + city */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
                       style={{
-                        flex: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.35rem',
-                        padding: '0.45rem',
-                        borderRadius: '0.375rem',
-                        border: '1px solid var(--border)',
-                        background: 'var(--bg-tertiary)',
-                        color: 'var(--accent-primary)',
-                        textDecoration: 'none',
-                        fontSize: '0.8125rem',
-                        fontWeight: 500,
-                        transition: 'background 0.15s',
+                        fontSize: '0.9375rem',
+                        fontWeight: 700,
+                        color: 'var(--text-primary)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        textDecoration: venue.isActive ? 'none' : 'line-through',
                       }}
                     >
-                      <Pencil size={13} />
-                      Edit
-                    </Link>
+                      {venue.name}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '1px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <MapPin size={11} />
+                      {venue.city}, {venue.state}
+                    </div>
+                  </div>
+
+                  {/* Status pill */}
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      padding: '0.2rem 0.55rem',
+                      borderRadius: '999px',
+                      background: venue.isActive
+                        ? 'color-mix(in srgb, var(--color-success) 15%, transparent)'
+                        : 'var(--bg-tertiary)',
+                      color: venue.isActive ? 'var(--color-success)' : 'var(--text-tertiary)',
+                      border: `1px solid ${venue.isActive ? 'var(--color-success)' : 'var(--border)'}`,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {venue.isActive ? 'Active' : 'Disabled'}
+                  </span>
+
+                  {/* Chevron */}
+                  <div
+                    style={{
+                      color: 'var(--text-tertiary)',
+                      flexShrink: 0,
+                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.22s ease',
+                    }}
+                  >
+                    <ChevronDown size={18} />
+                  </div>
+                </button>
+
+                {/* Expanded detail */}
+                {isExpanded && (
+                  <div
+                    style={{
+                      borderTop: '1px solid var(--border)',
+                      padding: '0.875rem 1.125rem',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '0.75rem',
+                      alignItems: 'center',
+                      background: 'color-mix(in srgb, var(--bg-tertiary) 60%, var(--bg-secondary))',
+                    }}
+                  >
+                    {/* Address */}
+                    {venue.address && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          fontSize: '0.8125rem',
+                          color: 'var(--text-secondary)',
+                        }}
+                      >
+                        <MapPin size={13} style={{ flexShrink: 0, color: 'var(--text-tertiary)' }} />
+                        {venue.address}, {venue.city}, {venue.state} {venue.zipCode}
+                      </div>
+                    )}
+
+                    {/* Spacer */}
+                    <div style={{ flex: 1 }} />
+
+                    {/* Status toggle */}
+                    <StatusToggle
+                      isActive={venue.isActive}
+                      onToggle={() => void handleToggleVenueActive(venue.id, !venue.isActive)}
+                    />
+
+                    {/* Edit */}
+                    {venue.isActive ? (
+                      <Link
+                        to={`/admin/venues/${venue.id}/edit`}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.375rem',
+                          padding: '0.4rem 0.875rem',
+                          borderRadius: '0.5rem',
+                          border: '1px solid var(--border)',
+                          background: 'var(--bg-secondary)',
+                          color: 'var(--accent-primary)',
+                          textDecoration: 'none',
+                          fontSize: '0.8125rem',
+                          fontWeight: 600,
+                          fontFamily: 'var(--font-body)',
+                          transition: 'border-color 0.15s',
+                        }}
+                      >
+                        <Pencil size={13} />
+                        Edit
+                      </Link>
+                    ) : (
+                      <span
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.375rem',
+                          padding: '0.4rem 0.875rem',
+                          borderRadius: '0.5rem',
+                          border: '1px solid var(--border)',
+                          background: 'var(--bg-tertiary)',
+                          color: 'var(--text-tertiary)',
+                          fontSize: '0.8125rem',
+                          fontWeight: 600,
+                          opacity: 0.45,
+                          cursor: 'not-allowed',
+                        }}
+                      >
+                        <Pencil size={13} />
+                        Edit
+                      </span>
+                    )}
+
+                    {/* Delete */}
                     <button
-                      onClick={() => setDeleteTarget(venue)}
+                      type="button"
+                      disabled={!venue.isActive}
+                      onClick={venue.isActive ? () => setDeleteTarget(venue) : undefined}
                       style={{
-                        flex: 1,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.35rem',
-                        padding: '0.45rem',
-                        borderRadius: '0.375rem',
-                        border: '1px solid var(--border)',
-                        background: 'var(--bg-tertiary)',
-                        color: 'var(--color-error)',
-                        cursor: 'pointer',
+                        gap: '0.375rem',
+                        padding: '0.4rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: `1px solid ${venue.isActive ? 'var(--color-error)' : 'var(--border)'}`,
+                        background: venue.isActive
+                          ? 'color-mix(in srgb, var(--color-error) 10%, var(--bg-secondary))'
+                          : 'var(--bg-tertiary)',
+                        color: venue.isActive ? 'var(--color-error)' : 'var(--text-tertiary)',
+                        cursor: venue.isActive ? 'pointer' : 'not-allowed',
+                        opacity: venue.isActive ? 1 : 0.45,
                         fontSize: '0.8125rem',
-                        fontWeight: 500,
-                        transition: 'background 0.15s',
+                        fontWeight: 600,
                         fontFamily: 'var(--font-body)',
+                        transition: 'border-color 0.15s, background 0.15s',
                       }}
                     >
                       <Trash2 size={13} />
                       Delete
                     </button>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
 
       {/* Pagination */}
       {!loading && data && data.totalCount > 0 && (
