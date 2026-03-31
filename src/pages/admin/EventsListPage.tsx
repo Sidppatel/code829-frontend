@@ -922,7 +922,6 @@ export default function EventsListPage(): React.ReactElement {
             <table
               style={{
                 width: '100%',
-                minWidth: '480px',
                 borderCollapse: 'collapse',
                 fontFamily: 'var(--font-body)',
               }}
@@ -937,7 +936,7 @@ export default function EventsListPage(): React.ReactElement {
                   {['Title', 'Date', 'Venue', 'Category', 'Layout', 'Status', 'Actions'].map((h) => (
                     <th
                       key={h}
-                      className={['Venue', 'Category', 'Layout'].includes(h) ? 'c829-events-col-hide' : undefined}
+                      className={['Date', 'Venue', 'Category', 'Layout', 'Actions'].includes(h) ? 'c829-events-col-hide' : undefined}
                       style={{
                         padding: '0.75rem 1rem',
                         textAlign: h === 'Actions' ? 'center' : 'left',
@@ -1004,6 +1003,7 @@ export default function EventsListPage(): React.ReactElement {
                         {event.title}
                       </td>
                       <td
+                        className="c829-events-col-hide"
                         style={{
                           padding: '0.875rem 1rem',
                           color: 'var(--text-secondary)',
@@ -1036,7 +1036,7 @@ export default function EventsListPage(): React.ReactElement {
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <StatusBadge status={event.status} />
                       </td>
-                      <td style={{ padding: '0.875rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }} onClick={(e) => e.stopPropagation()}>
+                      <td className="c829-events-col-hide" style={{ padding: '0.875rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }} onClick={(e) => e.stopPropagation()}>
                         <div style={{ display: 'inline-flex', gap: '0.375rem', alignItems: 'center' }}>
                           <StatusChanger event={event} onStatusChanged={() => void fetchEvents()} />
                           {event.status === 'Completed' || event.status === 'Cancelled' ? (

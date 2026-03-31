@@ -519,4 +519,10 @@
     align-self: flex-start !important;
     width: auto !important;
   }
+  /* Title + Status only remain — title takes all space, status right-aligned */
+  .c829-table-scroll table td:first-child,
+  .c829-table-scroll table th:first-child {
+    width: auto !important;
+    max-width: none !important;
+  }
 }
