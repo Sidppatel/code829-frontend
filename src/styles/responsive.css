@@ -453,6 +453,46 @@
   min-height: 44px;
 }
 
+/* ── Pricing step type cards (3-col → 1-col on mobile) ── */
+@media (max-width: 640px) {
+  .c829-pricing-type-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Early Bird date range (2-col → 1-col on mobile) ── */
+@media (max-width: 480px) {
+  .c829-date-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Platform fees / table types grid ── */
+@media (max-width: 640px) {
+  .c829-fees-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Layout mode selector cards ── */
+@media (max-width: 480px) {
+  .c829-layout-mode-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Public events browse grid ── */
+@media (max-width: 480px) {
+  .c829-events-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 360px) {
+  .c829-events-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
 /* ── Events list page — status tabs horizontal scroll on mobile ── */
 .c829-status-tabs {
   -webkit-overflow-scrolling: touch;
