@@ -721,6 +721,7 @@ export default function EventsListPage(): React.ReactElement {
     <div>
       {/* Header */}
       <div
+        className="c829-page-header"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -765,6 +766,7 @@ export default function EventsListPage(): React.ReactElement {
 
       {/* Status tabs */}
       <div
+        className="c829-status-tabs"
         style={{
           display: 'flex',
           gap: '0.25rem',
@@ -802,6 +804,7 @@ export default function EventsListPage(): React.ReactElement {
 
       {/* Filter bar */}
       <div
+        className="c829-filter-row"
         style={{
           display: 'flex',
           gap: '0.75rem',
@@ -811,7 +814,7 @@ export default function EventsListPage(): React.ReactElement {
         }}
       >
         {/* Search */}
-        <div style={{ position: 'relative', flex: '1', minWidth: '200px' }}>
+        <div style={{ position: 'relative', flex: '1', minWidth: '0' }}>
           <input
             type="text"
             placeholder="Search events…"
@@ -876,7 +879,7 @@ export default function EventsListPage(): React.ReactElement {
         </select>
 
         {/* View toggle */}
-        <div style={{ display: 'flex', gap: '0.25rem', marginLeft: 'auto' }}>
+        <div className="c829-events-view-toggle" style={{ display: 'flex', gap: '0.25rem', marginLeft: 'auto' }}>
           {(['table', 'card'] as ViewMode[]).map((mode) => (
             <button
               key={mode}
@@ -921,6 +924,7 @@ export default function EventsListPage(): React.ReactElement {
                 width: '100%',
                 borderCollapse: 'collapse',
                 fontFamily: 'var(--font-body)',
+                minWidth: '480px',
               }}
             >
               <thead>
@@ -933,6 +937,7 @@ export default function EventsListPage(): React.ReactElement {
                   {['Title', 'Date', 'Venue', 'Category', 'Layout', 'Status', 'Actions'].map((h) => (
                     <th
                       key={h}
+                      className={['Venue', 'Category', 'Layout'].includes(h) ? 'c829-events-col-hide' : undefined}
                       style={{
                         padding: '0.75rem 1rem',
                         textAlign: h === 'Actions' ? 'center' : 'left',
@@ -1009,6 +1014,7 @@ export default function EventsListPage(): React.ReactElement {
                         {formatDate(event.startDate)}
                       </td>
                       <td
+                        className="c829-events-col-hide"
                         style={{
                           padding: '0.875rem 1rem',
                           color: 'var(--text-secondary)',
@@ -1021,10 +1027,10 @@ export default function EventsListPage(): React.ReactElement {
                       >
                         {event.venue ? `${event.venue.name}` : '—'}
                       </td>
-                      <td style={{ padding: '0.875rem 1rem' }}>
+                      <td className="c829-events-col-hide" style={{ padding: '0.875rem 1rem' }}>
                         <CategoryPill category={event.category} />
                       </td>
-                      <td style={{ padding: '0.875rem 1rem' }}>
+                      <td className="c829-events-col-hide" style={{ padding: '0.875rem 1rem' }}>
                         <LayoutIcon mode={event.layoutMode} />
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
@@ -1056,6 +1062,7 @@ export default function EventsListPage(): React.ReactElement {
                             <Link
                               to={`/developer/events/${event.id}/edit`}
                               aria-label={`Edit ${event.title}`}
+                              className="c829-table-action-btn"
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -1078,6 +1085,7 @@ export default function EventsListPage(): React.ReactElement {
                             onClick={() => setDuplicateTarget(event)}
                             aria-label={`Duplicate ${event.title}`}
                             title="Duplicate"
+                            className="c829-table-action-btn"
                             style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -1099,6 +1107,7 @@ export default function EventsListPage(): React.ReactElement {
                               type="button"
                               onClick={() => setDeleteTarget(event)}
                               aria-label={`Delete ${event.title}`}
+                              className="c829-table-action-btn"
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -1131,6 +1140,7 @@ export default function EventsListPage(): React.ReactElement {
         <div>
           {loading ? (
             <div
+              className="c829-card-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -1155,6 +1165,7 @@ export default function EventsListPage(): React.ReactElement {
             </div>
           ) : (
             <div
+              className="c829-card-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -1342,6 +1353,7 @@ export default function EventsListPage(): React.ReactElement {
       {/* Pagination */}
       {!loading && data && data.totalCount > 0 && (
         <div
+          className="c829-pagination"
           style={{
             display: 'flex',
             alignItems: 'center',
