@@ -79,8 +79,9 @@ export default function DeveloperSettingsPage(): React.ReactElement {
       await developerApi.users.updateRole(userId, newRole);
       toast.success(`User role updated to ${newRole}`);
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to update user role');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(message || 'Failed to update user role');
     }
   }
 
