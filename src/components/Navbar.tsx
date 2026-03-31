@@ -341,7 +341,7 @@ export default function Navbar(): React.ReactElement {
       <div
         className={`c829-mobile-menu${menuOpen ? ' open' : ''}`}
         onClick={(e) => { if (e.target === e.currentTarget) setMenuOpen(false); }}
-        aria-hidden={!menuOpen}
+        {...(!menuOpen ? { inert: true } : {})}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
