@@ -452,42 +452,34 @@ export default function EventManagePage(): React.ReactElement {
         className="c829-manage-header"
         style={{
           display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          gap: '1rem',
-          flexWrap: 'wrap',
+          flexDirection: 'column',
+          gap: '0.375rem',
           marginBottom: '1.75rem',
         }}
       >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.375rem' }}>
-            <StatusBadge status={event.status} />
-          </div>
-          <h1
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.875rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {event.title}
-          </h1>
-          {event.venue && (
-            <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-              <MapPin size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.25rem' }} />
-              {event.venue.name} · {event.venue.city}, {event.venue.state}
-            </p>
-          )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <StatusBadge status={event.status} />
         </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
-          {/* Developer only manages fees and bookings — high level status and general editing removed */}
-        </div>
+        <h1
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '1.875rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            margin: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {event.title}
+        </h1>
+        {event.venue && (
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+            <MapPin size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.25rem' }} />
+            {event.venue.name} · {event.venue.city}, {event.venue.state}
+          </p>
+        )}
       </div>
 
       {/* ── Tabs ──────────────────────────────────────────────────────────── */}

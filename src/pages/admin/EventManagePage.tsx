@@ -623,15 +623,14 @@ export default function EventManagePage(): React.ReactElement {
         className="c829-manage-header"
         style={{
           display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          gap: '1rem',
-          flexWrap: 'wrap',
+          flexDirection: 'column',
+          gap: '0.375rem',
           marginBottom: '1.75rem',
         }}
       >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.375rem' }}>
+        {/* Top row: status badges + edit button */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <StatusBadge status={event.status} />
             {event.isFeatured && (
               <span
@@ -650,51 +649,49 @@ export default function EventManagePage(): React.ReactElement {
               </span>
             )}
           </div>
-          <h1
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.875rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {event.title}
-          </h1>
-          {event.venue && (
-            <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-              <MapPin size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.25rem' }} />
-              {event.venue.name} · {event.venue.city}, {event.venue.state}
-            </p>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
           <Link
             to={`/admin/events/${event.id}/edit`}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.375rem',
-              padding: '0.5rem 1rem',
+              padding: '0.4rem 0.875rem',
               borderRadius: '0.5rem',
               border: '1px solid var(--border)',
               background: 'var(--bg-secondary)',
               color: 'var(--accent-primary)',
               textDecoration: 'none',
               fontFamily: 'var(--font-body)',
-              fontSize: '0.875rem',
+              fontSize: '0.8125rem',
               fontWeight: 600,
               transition: 'background 0.15s',
+              flexShrink: 0,
             }}
           >
-            <Pencil size={14} />
+            <Pencil size={13} />
             Edit Event
           </Link>
         </div>
+        <h1
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '1.875rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            margin: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {event.title}
+        </h1>
+        {event.venue && (
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+            <MapPin size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.25rem' }} />
+            {event.venue.name} · {event.venue.city}, {event.venue.state}
+          </p>
+        )}
       </div>
 
       {/* ── Tabs ──────────────────────────────────────────────────────────── */}
