@@ -481,6 +481,11 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
   const [editingTypeId, setEditingTypeId] = useState<string | null>(null);
   const [editingTypeData, setEditingTypeData] = useState<{ name: string; shape: TableShape; capacity: number; priceCents: number; color: string } | null>(null);
 
+  // ── Mobile state ─────────────────────────────────────────────────────────────
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [activeMobileTab, setActiveMobileTab] = useState<'types' | 'grid' | 'table'>('types');
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(true);
+
   const rows = gridDimensions?.rows ?? 10;
   const cols = gridDimensions?.cols ?? 10;
 
@@ -598,6 +603,27 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, []);
+
+  // Mobile: track viewport width
+  useEffect(() => {
+    function handleResize(): void {
+      setIsMobile(window.innerWidth < 768);
+    }
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Mobile: auto-switch tab when selection changes
+  useEffect(() => {
+    if (!isMobile) return;
+    if (selectedIds.length > 0) {
+      setActiveMobileTab('table');
+      setMobileSheetOpen(true);
+    } else if (selectedEmptyCells.size > 0) {
+      setActiveMobileTab('types');
+      setMobileSheetOpen(true);
+    }
+  }, [selectedIds, selectedEmptyCells, isMobile]);
 
   // Auto-save: 2s debounce after any change
   useEffect(() => {
@@ -1028,6 +1054,652 @@ export default function GridEditor({ eventId }: GridEditorProps): React.ReactEle
     );
   }
 
+  // ── Mobile Layout ─────────────────────────────────────────────────────────────
+  if (isMobile) {
+    const tabLabel = (tab: 'types' | 'grid' | 'table'): string =>
+      tab === 'types' ? 'Types' : tab === 'grid' ? 'Grid' : 'Table';
+
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: 'min(680px, 85svh)',
+          background: 'var(--bg-primary)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+        onClick={() => { clearSelection(); setSelectedEmptyCells(new Set()); }}
+      >
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+        {/* ── Mobile Top Bar ─────────────────────────────────────────────── */}
+        <div
+          style={{
+            height: '52px',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 0.875rem',
+            gap: '0.625rem',
+            borderBottom: '1px solid var(--border)',
+            background: 'var(--bg-secondary)',
+            flexShrink: 0,
+            zIndex: 10,
+          }}
+        >
+          <span
+            style={{
+              flex: 1,
+              fontSize: '0.8125rem',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              fontFamily: 'var(--font-display)',
+            }}
+          >
+            Layout Editor
+          </span>
+          {saveStatus === 'saving' && (
+            <Loader2 size={14} style={{ animation: 'spin 0.8s linear infinite', color: 'var(--text-tertiary)', flexShrink: 0 }} />
+          )}
+          {saveStatus === 'saved' && !isDirty && (
+            <Check size={12} style={{ color: 'var(--color-success)', flexShrink: 0 }} />
+          )}
+          {isDirty && saveStatus === 'idle' && (
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', flexShrink: 0 }}>Unsaved</span>
+          )}
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); void handleSave(); }}
+            disabled={saving}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              padding: '0.4rem 0.875rem',
+              borderRadius: '0.375rem',
+              border: 'none',
+              background: isDirty ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
+              color: isDirty ? 'var(--bg-primary)' : 'var(--text-tertiary)',
+              fontSize: '0.8125rem',
+              fontFamily: 'var(--font-body)',
+              fontWeight: 600,
+              cursor: saving ? 'not-allowed' : 'pointer',
+              opacity: saving ? 0.7 : 1,
+              flexShrink: 0,
+            }}
+          >
+            <Save size={13} />
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+
+        {/* ── Mobile Grid ─────────────────────────────────────────────────── */}
+        <div
+          ref={gridRef}
+          style={{
+            flex: 1,
+            overflow: 'auto',
+            padding: '0.625rem',
+            position: 'relative',
+            userSelect: 'none',
+          }}
+          onClick={() => { clearSelection(); setSelectedEmptyCells(new Set()); }}
+        >
+          <div
+            style={{
+              display: 'inline-grid',
+              gridTemplateColumns: `20px repeat(${cols}, 48px)`,
+              gridTemplateRows: `16px repeat(${rows}, 48px)`,
+              gap: '2px',
+            }}
+          >
+            {/* Corner */}
+            <div />
+            {/* Column headers */}
+            {Array.from({ length: cols }, (_, c) => (
+              <div
+                key={`mch-${c}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.6rem',
+                  fontWeight: 700,
+                  color: 'var(--text-tertiary)',
+                }}
+              >
+                {colLabel(c)}
+              </div>
+            ))}
+            {/* Rows */}
+            {Array.from({ length: rows }, (_, r) => (
+              <React.Fragment key={`mrow-${r}`}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.6rem',
+                    fontWeight: 700,
+                    color: 'var(--text-tertiary)',
+                  }}
+                >
+                  {r + 1}
+                </div>
+                {Array.from({ length: cols }, (_, c) => {
+                  const cellKey = `${r}-${c}`;
+                  const occupantId = occupancyMap.get(cellKey);
+                  const occupant = occupantId ? elements[occupantId] : undefined;
+                  const isCellSelected = occupantId ? selectedIds.includes(occupantId) : false;
+                  const isEmptySelected = !occupant && selectedEmptyCells.has(cellKey);
+                  const isBooked = occupant ? bookedTableIds.has(occupant.id) : false;
+                  const cellColor = isBooked ? 'var(--color-success)' : (occupant?.color ?? 'var(--accent-primary)');
+                  return (
+                    <div
+                      key={`mcell-${r}-${c}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (occupant && !isBooked) {
+                          setSelectedEmptyCells(new Set());
+                          if (e.shiftKey) multiSelect(occupant.id);
+                          else select(occupant.id);
+                        } else if (!occupant) {
+                          clearSelection();
+                          setSelectedEmptyCells((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(cellKey) && next.size === 1) next.clear();
+                            else { next.clear(); next.add(cellKey); }
+                            return next;
+                          });
+                        }
+                      }}
+                      style={{
+                        width: '48px',
+                        height: '48px',
+                        border: occupant
+                          ? `1px solid ${isCellSelected ? 'var(--accent-primary)' : (isBooked ? 'var(--color-success)' : 'var(--border)')}`
+                          : isEmptySelected
+                          ? '2px solid var(--accent-primary)'
+                          : '1px dashed var(--border)',
+                        borderRadius: '4px',
+                        background: occupant
+                          ? isBooked
+                            ? 'color-mix(in srgb, var(--color-success) 12%, transparent)'
+                            : isCellSelected
+                            ? 'color-mix(in srgb, var(--accent-primary) 10%, transparent)'
+                            : 'var(--bg-secondary)'
+                          : isEmptySelected
+                          ? 'color-mix(in srgb, var(--accent-primary) 8%, transparent)'
+                          : 'transparent',
+                        boxSizing: 'border-box',
+                        cursor: isBooked ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '1px',
+                        padding: '2px',
+                        position: 'relative',
+                        transition: 'border-color 0.1s, background 0.1s',
+                      }}
+                    >
+                      {occupant ? (
+                        <>
+                          <div style={{ color: cellColor }}>
+                            <ShapeIcon shape={occupant.shape} size={isBooked ? 12 : 16} fill={cellColor} />
+                          </div>
+                          {isBooked && (
+                            <span style={{ fontSize: '0.38rem', fontWeight: 800, color: 'var(--color-success)', letterSpacing: '0.04em', lineHeight: 1 }}>
+                              {role === 'admin' ? 'LKD' : 'SLD'}
+                            </span>
+                          )}
+                          <span style={{ fontSize: '0.5rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {occupant.label}
+                          </span>
+                          <span style={{ fontSize: '0.45rem', color: 'var(--text-tertiary)', lineHeight: 1 }}>
+                            {occupant.capacity}p
+                          </span>
+                        </>
+                      ) : isEmptySelected ? (
+                        <Check size={12} style={{ color: 'var(--accent-primary)', opacity: 0.5 }} />
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Mobile Bottom Sheet ─────────────────────────────────────────── */}
+        <div
+          style={{
+            flexShrink: 0,
+            borderTop: '1px solid var(--border)',
+            background: 'var(--bg-secondary)',
+            display: 'flex',
+            flexDirection: 'column',
+            zIndex: 20,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Tab Bar */}
+          <div style={{ display: 'flex', height: '44px', borderBottom: mobileSheetOpen ? '1px solid var(--border)' : 'none' }}>
+            {(['types', 'grid', 'table'] as const).map((tab) => {
+              const isActive = activeMobileTab === tab && mobileSheetOpen;
+              const badge =
+                tab === 'types' && tableTypes.length > 0 ? tableTypes.length
+                : tab === 'table' && selectedIds.length > 0 ? selectedIds.length
+                : null;
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => {
+                    if (activeMobileTab === tab) {
+                      setMobileSheetOpen((o) => !o);
+                    } else {
+                      setActiveMobileTab(tab);
+                      setMobileSheetOpen(true);
+                    }
+                  }}
+                  style={{
+                    flex: 1,
+                    border: 'none',
+                    background: 'transparent',
+                    borderBottom: isActive ? '2px solid var(--accent-primary)' : '2px solid transparent',
+                    color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                    fontSize: '0.8125rem',
+                    fontFamily: 'var(--font-body)',
+                    fontWeight: isActive ? 700 : 500,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem',
+                    transition: 'color 0.15s',
+                  }}
+                >
+                  {tabLabel(tab)}
+                  {badge !== null && (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '18px',
+                        height: '18px',
+                        borderRadius: '999px',
+                        background: isActive ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
+                        color: isActive ? 'var(--bg-primary)' : 'var(--text-tertiary)',
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        padding: '0 4px',
+                      }}
+                    >
+                      {badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tab Content */}
+          {mobileSheetOpen && (
+            <div style={{ maxHeight: '42vh', overflowY: 'auto' }}>
+
+              {/* ── Types Tab ── */}
+              {activeMobileTab === 'types' && (
+                <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                  {/* Selection hint */}
+                  {(selectedEmptyCells.size > 0 || selectedIds.length > 0) && (
+                    <div
+                      style={{
+                        padding: '0.5rem 0.75rem',
+                        borderRadius: '0.5rem',
+                        background: 'color-mix(in srgb, var(--accent-primary) 8%, transparent)',
+                        fontSize: '0.775rem',
+                        color: 'var(--accent-primary)',
+                        fontWeight: 500,
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {selectedEmptyCells.size > 0 && selectedIds.length > 0
+                        ? `${selectedEmptyCells.size} empty + ${selectedIds.length} table${selectedIds.length > 1 ? 's' : ''} — tap type to fill & change`
+                        : selectedEmptyCells.size > 0
+                        ? `${selectedEmptyCells.size} cell${selectedEmptyCells.size > 1 ? 's' : ''} selected — tap a type to place`
+                        : `${selectedIds.length} table${selectedIds.length > 1 ? 's' : ''} selected — tap a type to change`}
+                    </div>
+                  )}
+                  {tableTypes.length === 0 && (
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', margin: 0, textAlign: 'center', padding: '0.75rem 0' }}>
+                      No active table types
+                    </p>
+                  )}
+                  {/* 2-column type grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    {tableTypes.map((tt) => {
+                      const hasSelection = selectedEmptyCells.size > 0 || selectedIds.length > 0;
+                      return (
+                        <div
+                          key={tt.id}
+                          onClick={() => {
+                            if (hasSelection) {
+                              handleApplyTypeToSelected(tt);
+                            } else {
+                              toast('Select cells on the grid first, then tap a type to place');
+                            }
+                          }}
+                          style={{
+                            padding: '0.75rem',
+                            borderRadius: '0.625rem',
+                            border: `1.5px solid ${hasSelection ? 'var(--accent-primary)' : 'var(--border)'}`,
+                            background: hasSelection
+                              ? 'color-mix(in srgb, var(--accent-primary) 5%, var(--bg-tertiary))'
+                              : 'var(--bg-tertiary)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.375rem',
+                            minHeight: '72px',
+                            justifyContent: 'center',
+                            userSelect: 'none',
+                            transition: 'border-color 0.15s, background 0.15s',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ color: tt.defaultColor || 'var(--accent-primary)', flexShrink: 0 }}>
+                              <ShapeIcon shape={tt.defaultShape} size={20} fill={tt.defaultColor || undefined} />
+                            </div>
+                            <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                              {tt.name}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', paddingLeft: '1.75rem' }}>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                              {tt.defaultCapacity}p
+                            </span>
+                            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
+                              ${(tt.defaultPriceCents / 100).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* Bulk Insert */}
+                  {!showBulkInsert ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowBulkInsert(true)}
+                      style={{
+                        width: '100%',
+                        padding: '0.625rem',
+                        borderRadius: '0.5rem',
+                        border: '1px dashed var(--border)',
+                        background: 'transparent',
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.8125rem',
+                        fontFamily: 'var(--font-body)',
+                        cursor: 'pointer',
+                        fontWeight: 500,
+                      }}
+                    >
+                      + Bulk Insert Tables
+                    </button>
+                  ) : (
+                    <div
+                      style={{
+                        padding: '0.875rem',
+                        borderRadius: '0.625rem',
+                        border: '1px solid var(--border)',
+                        background: 'color-mix(in srgb, var(--accent-primary) 3%, var(--bg-tertiary))',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.625rem',
+                      }}
+                    >
+                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>Bulk Insert</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <label style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase' as const, letterSpacing: '0.04em' }}>Type</label>
+                          <select
+                            value={bulkInsertType}
+                            onChange={(e) => setBulkInsertType(e.target.value)}
+                            style={{ padding: '0.4rem 0.375rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontFamily: 'var(--font-body)', fontSize: '0.8rem', outline: 'none' }}
+                          >
+                            <option value="">— select —</option>
+                            {tableTypes.map((tt) => <option key={tt.id} value={tt.id}>{tt.name}</option>)}
+                          </select>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <label style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase' as const, letterSpacing: '0.04em' }}>Count (1–20)</label>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <button type="button" onClick={() => setBulkInsertCount((n) => Math.max(1, n - 1))} style={{ width: '32px', height: '32px', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-body)', flexShrink: 0 }}>−</button>
+                            <span style={{ flex: 1, textAlign: 'center', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-body)' }}>{bulkInsertCount}</span>
+                            <button type="button" onClick={() => setBulkInsertCount((n) => Math.min(20, n + 1))} style={{ width: '32px', height: '32px', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-body)', flexShrink: 0 }}>+</button>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button type="button" onClick={handleBulkInsert} style={{ flex: 1, padding: '0.5rem', borderRadius: '0.375rem', border: 'none', background: 'var(--accent-primary)', color: 'var(--bg-primary)', fontSize: '0.8125rem', fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer' }}>
+                          Insert
+                        </button>
+                        <button type="button" onClick={() => setShowBulkInsert(false)} style={{ padding: '0.5rem 0.875rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: '0.8125rem', fontFamily: 'var(--font-body)', fontWeight: 500, cursor: 'pointer' }}>
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── Grid Tab ── */}
+              {activeMobileTab === 'grid' && (
+                <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {/* Rows / Cols steppers */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                      <label style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase' as const, letterSpacing: '0.04em' }}>Rows</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                        <button type="button" onClick={() => setRowsInput((n) => Math.max(1, n - 1))} style={{ width: '36px', height: '36px', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-body)', flexShrink: 0 }}>−</button>
+                        <span style={{ flex: 1, textAlign: 'center', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>{rowsInput}</span>
+                        <button type="button" onClick={() => setRowsInput((n) => Math.min(30, n + 1))} style={{ width: '36px', height: '36px', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-body)', flexShrink: 0 }}>+</button>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                      <label style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase' as const, letterSpacing: '0.04em' }}>Cols</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                        <button type="button" onClick={() => setColsInput((n) => Math.max(1, n - 1))} style={{ width: '36px', height: '36px', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-body)', flexShrink: 0 }}>−</button>
+                        <span style={{ flex: 1, textAlign: 'center', fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>{colsInput}</span>
+                        <button type="button" onClick={() => setColsInput((n) => Math.min(30, n + 1))} style={{ width: '36px', height: '36px', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-body)', flexShrink: 0 }}>+</button>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleApplyDimensions}
+                    style={{ padding: '0.5rem', borderRadius: '0.375rem', border: 'none', background: 'var(--accent-primary)', color: 'var(--bg-primary)', fontSize: '0.8125rem', fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Apply Grid Size
+                  </button>
+                  {/* Stats */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                    {[
+                      { label: 'Tables', value: String(totalTables) },
+                      { label: 'Seats', value: String(totalSeats) },
+                      { label: 'Potential', value: `$${(totalRevenueCents / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` },
+                    ].map(({ label, value }) => (
+                      <div
+                        key={label}
+                        style={{
+                          padding: '0.625rem 0.5rem',
+                          borderRadius: '0.5rem',
+                          background: 'var(--bg-tertiary)',
+                          border: '1px solid var(--border)',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>{value}</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', marginTop: '0.1rem' }}>{label}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Select All */}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', cursor: 'pointer', userSelect: 'none' }}>
+                    <input
+                      type="checkbox"
+                      checked={totalTables > 0 && selectedIds.length === totalTables}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                      style={{ accentColor: 'var(--accent-primary)', cursor: 'pointer', width: '16px', height: '16px' }}
+                    />
+                    Select All Tables
+                  </label>
+                  {/* Actions */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={handleAutoLabel}
+                      style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', fontSize: '0.8125rem', fontFamily: 'var(--font-body)', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem' }}
+                    >
+                      <Tags size={14} /> Auto-label Tables
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleBulkRemove}
+                      disabled={selectedIds.length === 0}
+                      style={{
+                        padding: '0.5rem',
+                        borderRadius: '0.375rem',
+                        border: `1px solid ${selectedIds.length > 0 ? 'var(--color-error)' : 'var(--border)'}`,
+                        background: 'transparent',
+                        color: selectedIds.length > 0 ? 'var(--color-error)' : 'var(--text-tertiary)',
+                        fontSize: '0.8125rem',
+                        fontFamily: 'var(--font-body)',
+                        fontWeight: 500,
+                        cursor: selectedIds.length > 0 ? 'pointer' : 'not-allowed',
+                        opacity: selectedIds.length > 0 ? 1 : 0.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.375rem',
+                      }}
+                    >
+                      <Trash2 size={14} />
+                      {selectedIds.length > 0 ? `Delete ${selectedIds.length} Selected` : 'Delete Selected'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClearAll}
+                      style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid var(--color-error)', background: 'transparent', color: 'var(--color-error)', fontSize: '0.8125rem', fontFamily: 'var(--font-body)', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem' }}
+                    >
+                      <Trash2 size={14} /> Clear All Tables
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Table Tab ── */}
+              {activeMobileTab === 'table' && (
+                <div style={{ padding: '0.75rem' }}>
+                  {selectedElement && selectedIds.length === 1 ? (
+                    <PropertiesPanel
+                      element={selectedElement}
+                      onUpdate={updateElement}
+                      onDelete={handleDelete}
+                    />
+                  ) : selectedIds.length > 1 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {selectedIds.length} tables selected
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleBulkRemove}
+                        style={{
+                          padding: '0.625rem 1rem',
+                          borderRadius: '0.5rem',
+                          border: '1px solid var(--color-error)',
+                          background: 'transparent',
+                          color: 'var(--color-error)',
+                          fontSize: '0.8125rem',
+                          fontFamily: 'var(--font-body)',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.375rem',
+                        }}
+                      >
+                        <Trash2 size={14} />
+                        Delete {selectedIds.length} Tables
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 0', gap: '0.5rem' }}>
+                      <div style={{ color: 'var(--text-tertiary)', opacity: 0.4 }}>
+                        <Square size={32} />
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-tertiary)', textAlign: 'center' }}>
+                        Tap a table on the grid to edit its properties
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+            </div>
+          )}
+        </div>
+
+        {/* ── Context Menu (mobile) ─────────────────────────────────────── */}
+        {contextMenu && (
+          <div
+            ref={contextMenuRef}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'fixed',
+              top: contextMenu.y,
+              left: contextMenu.x,
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: '0.5rem',
+              boxShadow: 'var(--shadow-card-hover)',
+              zIndex: 999,
+              minWidth: '140px',
+              overflow: 'hidden',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => handleDelete(contextMenu.elementId)}
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                border: 'none',
+                background: 'none',
+                color: 'var(--color-error)',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontFamily: 'var(--font-body)',
+                textAlign: 'left',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Trash2 size={14} />
+              Delete Table
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Desktop Layout ────────────────────────────────────────────────────────────
   return (
     <div
       style={{
