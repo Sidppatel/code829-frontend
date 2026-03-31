@@ -224,6 +224,21 @@
   .c829-manage-header {
     flex-direction: column !important;
     align-items: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  /* Constrain every direct child so nothing blows out width */
+  .c829-manage-header > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  /* Title must truncate inside its constrained box */
+  .c829-manage-header h1 {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
   .c829-manage-header > div:last-child > a,
   .c829-manage-header > div:last-child > button {
@@ -284,6 +299,20 @@
   .admin-main main,
   .Developer-main main {
     padding: 1rem !important;
+  }
+}
+
+/* ── Pin admin/developer main area to viewport width on mobile ── */
+/* Root flex container has no fixed width so it expands to content;
+   clamping admin-main to 100vw prevents any inner element from blowing
+   out the layout. */
+@media (max-width: 767px) {
+  .admin-main,
+  .Developer-main {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
   }
 }
 
