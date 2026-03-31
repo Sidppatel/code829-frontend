@@ -19,6 +19,7 @@ import { SkeletonLine, SkeletonText } from "../components/Skeleton";
 import { eventsApi, seatsApi } from '../services/eventsApi';
 import { bookingsApi } from '../services/bookingsApi';
 import { useAuthStore } from "../stores/authStore";
+import { formatPriceCents as formatCents } from '../lib/format';
 
 // ---------------------------------------------------------------------------
 // Types matching actual API response
@@ -184,18 +185,6 @@ This year's summit features over 40 speakers from companies like Meta, Vercel, a
     },
   ],
 };
-
-// ---------------------------------------------------------------------------
-// Price formatting
-// ---------------------------------------------------------------------------
-function formatCents(cents: number): string {
-  if (cents === 0) return "Free";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
-}
 
 // ---------------------------------------------------------------------------
 // Ticket tier card

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MapPin, Calendar, Tag } from 'lucide-react';
+import { formatDate, formatPriceCents } from '../lib/format';
 
 export interface EventData {
   id: string;
@@ -40,27 +41,6 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   Theater: 'linear-gradient(135deg, var(--accent-secondary) 0%, var(--color-pink) 100%)',
   default: 'linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%)',
 };
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function formatPriceCents(cents: number | null | undefined): string {
-  if (cents === null || cents === undefined || cents === 0) return 'Free';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
-}
 
 function isFomoEvent(event: EventData): boolean {
   if (event.isFomo) return true;

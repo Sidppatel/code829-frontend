@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { Search, DollarSign, Save, Eye, ChevronDown, ChevronUp } from 'lucide-react';
 import { developerApi } from '../../services/developerApi';
 import { Link } from 'react-router-dom';
+import { formatDate, formatPriceCents as formatCents } from '../../lib/format';
 
 interface TicketType {
   id: string;
@@ -69,14 +70,6 @@ export default function DeveloperEventsPage(): React.ReactElement {
         (e.venue?.name ?? '').toLowerCase().includes(search.toLowerCase())
       )
     : events;
-
-  function formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  }
-
-  function formatCents(cents: number): string {
-    return `$${(cents / 100).toFixed(2)}`;
-  }
 
   async function savePlatformFees(eventId: string): Promise<void> {
     const ev = events.find(e => e.id === eventId);

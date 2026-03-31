@@ -6,6 +6,7 @@ import { Calendar, QrCode, ChevronRight, Ticket, Send, User, ChevronDown, CheckC
 import { useAuthStore } from '../stores/authStore';
 import { SkeletonCard } from '../components/Skeleton';
 import { bookingsApi } from '../services/bookingsApi';
+import { formatPriceCents as formatCents } from '../lib/format';
 
 // ---------------------------------------------------------------------------
 // Types matching actual API response
@@ -106,18 +107,6 @@ function apiToBooking(api: ApiBookingItem): Booking {
 // Placeholder
 // ---------------------------------------------------------------------------
 const PLACEHOLDER_BOOKINGS: Booking[] = [];
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-function formatCents(cents: number): string {
-  if (cents === 0) return 'Free';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
-}
 
 // ---------------------------------------------------------------------------
 // Status badge
