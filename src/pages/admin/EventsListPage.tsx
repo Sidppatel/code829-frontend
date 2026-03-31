@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   Plus,
-  LayoutList,
-  LayoutGrid,
   Pencil,
   Trash2,
   Grid3X3,
@@ -24,7 +22,6 @@ import { adminApi } from '../../services/adminApi';
 
 type EventStatus = 'Draft' | 'Published' | 'Cancelled' | 'Completed';
 type LayoutMode = 'Grid' | 'CapacityOnly' | 'None';
-type ViewMode = 'table' | 'card';
 
 interface EventItem {
   id: string;
@@ -299,49 +296,26 @@ function StatusChanger({
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
-function SkeletonRow(): React.ReactElement {
-  return (
-    <tr>
-      {[180, 110, 140, 80, 60, 70, 60].map((w, i) => (
-        <td key={i} style={{ padding: '0.875rem 1rem' }}>
-          <div
-            style={{
-              height: '14px',
-              width: `${w}px`,
-              maxWidth: '100%',
-              borderRadius: '0.25rem',
-              background: 'var(--bg-tertiary)',
-              animation: 'pulse 1.5s ease-in-out infinite',
-            }}
-          />
-        </td>
-      ))}
-    </tr>
-  );
-}
-
-function SkeletonCard(): React.ReactElement {
+function SkeletonEventAccordion(): React.ReactElement {
   return (
     <div
       style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border)',
+        borderLeft: '4px solid var(--border)',
         borderRadius: '0.75rem',
-        overflow: 'hidden',
+        padding: '1rem 1.25rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.875rem',
+        animation: 'pulse 1.5s ease-in-out infinite',
       }}
     >
-      <div
-        style={{
-          height: '120px',
-          background: 'var(--bg-tertiary)',
-          animation: 'pulse 1.5s ease-in-out infinite',
-        }}
-      />
-      <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-        <div style={{ height: '18px', width: '70%', borderRadius: '0.25rem', background: 'var(--bg-tertiary)', animation: 'pulse 1.5s ease-in-out infinite' }} />
-        <div style={{ height: '13px', width: '50%', borderRadius: '0.25rem', background: 'var(--bg-tertiary)', animation: 'pulse 1.5s ease-in-out infinite' }} />
-        <div style={{ height: '13px', width: '40%', borderRadius: '0.25rem', background: 'var(--bg-tertiary)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <div style={{ height: '14px', width: '50%', borderRadius: '4px', background: 'var(--bg-tertiary)' }} />
+        <div style={{ height: '11px', width: '30%', borderRadius: '4px', background: 'var(--bg-tertiary)' }} />
       </div>
+      <div style={{ height: '20px', width: '70px', borderRadius: '999px', background: 'var(--bg-tertiary)', flexShrink: 0 }} />
     </div>
   );
 }
@@ -631,11 +605,10 @@ function DeleteDialog({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function EventsListPage(): React.ReactElement {
-  const navigate = useNavigate();
   const [data, setData] = useState<PaginatedResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<EventStatus | 'All'>('All');
@@ -878,478 +851,277 @@ export default function EventsListPage(): React.ReactElement {
           ))}
         </select>
 
-        {/* View toggle */}
-        <div className="c829-events-view-toggle" style={{ display: 'flex', gap: '0.25rem', marginLeft: 'auto' }}>
-          {(['table', 'card'] as ViewMode[]).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => setViewMode(mode)}
-              aria-label={mode === 'table' ? 'Table view' : 'Grid view'}
-              aria-pressed={viewMode === mode}
-              style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '0.375rem',
-                border: '1px solid var(--border)',
-                background: viewMode === mode ? 'var(--accent-primary)' : 'var(--bg-secondary)',
-                color: viewMode === mode ? 'var(--bg-primary)' : 'var(--text-secondary)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background 0.15s, color 0.15s',
-              }}
-            >
-              {mode === 'table' ? <LayoutList size={16} /> : <LayoutGrid size={16} />}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* Table view */}
-      {viewMode === 'table' && (
-        <div
-          style={{
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border)',
-            borderRadius: '0.75rem',
-            overflow: 'hidden',
-            boxShadow: 'var(--shadow-card)',
-          }}
-        >
-          <div className="c829-table-scroll" style={{ overflowX: 'auto' }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontFamily: 'var(--font-body)',
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    background: 'var(--bg-tertiary)',
-                    borderBottom: '1px solid var(--border)',
-                  }}
-                >
-                  {['Title', 'Date', 'Venue', 'Category', 'Layout', 'Status', 'Actions'].map((h) => (
-                    <th
-                      key={h}
-                      className={['Date', 'Venue', 'Category', 'Layout', 'Actions'].includes(h) ? 'c829-events-col-hide' : undefined}
-                      style={{
-                        padding: '0.75rem 1rem',
-                        textAlign: h === 'Actions' ? 'center' : 'left',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        color: 'var(--text-tertiary)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {loading
-                  ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
-                  : data?.items.length === 0
-                  ? (
-                    <tr>
-                      <td
-                        colSpan={7}
-                        style={{
-                          padding: '3rem',
-                          textAlign: 'center',
-                          color: 'var(--text-tertiary)',
-                          fontSize: '0.9rem',
-                        }}
-                      >
-                        No events match your filters.
-                      </td>
-                    </tr>
-                  )
-                  : data?.items.map((event) => (
-                    <tr
-                      key={event.id}
-                      onClick={() => navigate(`/admin/events/${event.id}`)}
-                      style={{
-                        borderBottom: '1px solid var(--border)',
-                        transition: 'background 0.15s',
-                        cursor: 'pointer',
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLTableRowElement).style.background = 'var(--bg-tertiary)';
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLTableRowElement).style.background = 'transparent';
-                      }}
-                    >
-                      <td
-                        style={{
-                          padding: '0.875rem 1rem',
-                          color: 'var(--text-primary)',
-                          fontWeight: 500,
-                          fontSize: '0.875rem',
-                          maxWidth: '220px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {event.title}
-                      </td>
-                      <td
-                        className="c829-events-col-hide"
-                        style={{
-                          padding: '0.875rem 1rem',
-                          color: 'var(--text-secondary)',
-                          fontSize: '0.8125rem',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {formatDate(event.startDate)}
-                      </td>
-                      <td
-                        className="c829-events-col-hide"
-                        style={{
-                          padding: '0.875rem 1rem',
-                          color: 'var(--text-secondary)',
-                          fontSize: '0.8125rem',
-                          maxWidth: '160px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {event.venue ? `${event.venue.name}` : '—'}
-                      </td>
-                      <td className="c829-events-col-hide" style={{ padding: '0.875rem 1rem' }}>
-                        <CategoryPill category={event.category} />
-                      </td>
-                      <td className="c829-events-col-hide" style={{ padding: '0.875rem 1rem' }}>
-                        <LayoutIcon mode={event.layoutMode} />
-                      </td>
-                      <td style={{ padding: '0.875rem 1rem' }}>
-                        <StatusBadge status={event.status} />
-                      </td>
-                      <td className="c829-events-col-hide" style={{ padding: '0.875rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }} onClick={(e) => e.stopPropagation()}>
-                        <div style={{ display: 'inline-flex', gap: '0.375rem', alignItems: 'center' }}>
-                          <StatusChanger event={event} onStatusChanged={() => void fetchEvents()} />
-                          {event.status === 'Completed' || event.status === 'Cancelled' ? (
-                            <span
-                              title="Cannot edit completed or cancelled events"
-                              className="c829-table-action-btn"
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '30px',
-                                height: '30px',
-                                borderRadius: '0.375rem',
-                                border: '1px solid var(--border)',
-                                background: 'var(--bg-tertiary)',
-                                color: 'var(--text-tertiary)',
-                                opacity: 0.4,
-                                cursor: 'not-allowed',
-                              }}
-                            >
-                              <Pencil size={13} />
-                            </span>
-                          ) : (
-                            <Link
-                              to={`/admin/events/${event.id}/edit`}
-                              aria-label={`Edit ${event.title}`}
-                              className="c829-table-action-btn"
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '30px',
-                                height: '30px',
-                                borderRadius: '0.375rem',
-                                border: '1px solid var(--border)',
-                                background: 'var(--bg-tertiary)',
-                                color: 'var(--accent-primary)',
-                                textDecoration: 'none',
-                                transition: 'background 0.15s',
-                              }}
-                            >
-                              <Pencil size={13} />
-                            </Link>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => setDuplicateTarget(event)}
-                            aria-label={`Duplicate ${event.title}`}
-                            title="Duplicate"
-                            className="c829-table-action-btn"
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: '30px',
-                              height: '30px',
-                              borderRadius: '0.375rem',
-                              border: '1px solid var(--border)',
-                              background: 'var(--bg-tertiary)',
-                              color: 'var(--text-secondary)',
-                              cursor: 'pointer',
-                              transition: 'background 0.15s',
-                            }}
-                          >
-                            <Copy size={13} />
-                          </button>
-                          {event.status === 'Draft' && (
-                            <button
-                              type="button"
-                              onClick={() => setDeleteTarget(event)}
-                              aria-label={`Delete ${event.title}`}
-                              className="c829-table-action-btn"
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '30px',
-                                height: '30px',
-                                borderRadius: '0.375rem',
-                                border: '1px solid var(--border)',
-                                background: 'var(--bg-tertiary)',
-                                color: 'var(--color-error)',
-                                cursor: 'pointer',
-                                transition: 'background 0.15s',
-                              }}
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+      {/* Accordion list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+        {loading ? (
+          Array.from({ length: 6 }).map((_, i) => <SkeletonEventAccordion key={i} />)
+        ) : data?.items.length === 0 ? (
+          <div
+            style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: '0.75rem',
+              padding: '3rem 1.5rem',
+              textAlign: 'center',
+              color: 'var(--text-tertiary)',
+              fontSize: '0.875rem',
+              boxShadow: 'var(--shadow-card)',
+            }}
+          >
+            No events match your filters.
           </div>
-        </div>
-      )}
+        ) : (
+          data?.items.map((event) => {
+            const isExpanded = expandedId === event.id;
+            const statusColors: Record<EventStatus, string> = {
+              Draft: 'var(--text-tertiary)',
+              Published: 'var(--color-success)',
+              Cancelled: 'var(--color-error)',
+              Completed: 'var(--color-info)',
+            };
+            const borderColor = statusColors[event.status];
+            const canEdit = event.status !== 'Completed' && event.status !== 'Cancelled';
 
-      {/* Card view */}
-      {viewMode === 'card' && (
-        <div>
-          {loading ? (
-            <div
-              className="c829-card-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '1rem',
-              }}
-            >
-              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-            </div>
-          ) : data?.items.length === 0 ? (
-            <div
-              style={{
-                textAlign: 'center',
-                color: 'var(--text-tertiary)',
-                padding: '3rem',
-                background: 'var(--bg-secondary)',
-                borderRadius: '0.75rem',
-                border: '1px solid var(--border)',
-                fontSize: '0.9rem',
-              }}
-            >
-              No events match your filters.
-            </div>
-          ) : (
-            <div
-              className="c829-card-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '1rem',
-              }}
-            >
-              {data?.items.map((event) => (
-                <div
-                  key={event.id}
-                  onClick={() => navigate(`/admin/events/${event.id}`)}
+            return (
+              <div
+                key={event.id}
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: `1px solid ${isExpanded ? borderColor : 'var(--border)'}`,
+                  borderLeft: `4px solid ${borderColor}`,
+                  borderRadius: '0.75rem',
+                  boxShadow: isExpanded ? `0 0 0 1px ${borderColor}22` : 'var(--shadow-card)',
+                  transition: 'border-color 0.2s, box-shadow 0.2s',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Card header — click to expand */}
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(isExpanded ? null : event.id)}
                   style={{
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '0.75rem',
-                    overflow: 'hidden',
-                    boxShadow: 'var(--shadow-card)',
+                    width: '100%',
                     display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'box-shadow 0.2s',
+                    alignItems: 'center',
+                    gap: '0.875rem',
+                    padding: '0.875rem 1.125rem',
+                    background: 'transparent',
+                    border: 'none',
                     cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-card-hover)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-card)';
+                    textAlign: 'left',
+                    fontFamily: 'var(--font-body)',
                   }}
                 >
-                  {/* Banner / gradient header */}
-                  <div
-                    style={{
-                      height: '110px',
-                      background: event.imageUrl
-                        ? `linear-gradient(to bottom, color-mix(in srgb, var(--accent-primary) 30%, transparent), color-mix(in srgb, var(--bg-primary) 80%, transparent)), url(${event.imageUrl}) center/cover no-repeat`
-                        : 'linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 40%, transparent), color-mix(in srgb, var(--accent-secondary, var(--accent-primary)) 20%, var(--bg-tertiary)))',
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      padding: '0.625rem 0.875rem',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
-                      <StatusBadge status={event.status} />
-                      <span style={{ marginLeft: 'auto' }}>
-                        <LayoutIcon mode={event.layoutMode} />
-                      </span>
-                    </div>
-                  </div>
-
-                  <div style={{ padding: '0.875rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
-                    <h3
+                  {/* Title + date subtitle */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
                       style={{
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '1rem',
+                        fontSize: '0.9375rem',
                         fontWeight: 700,
                         color: 'var(--text-primary)',
-                        margin: 0,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
                       }}
                     >
                       {event.title}
-                    </h3>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                      <Calendar size={13} />
-                      {formatDate(event.startDate)}
                     </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <Calendar size={11} />
+                      {formatDate(event.startDate)}
+                      {event.venue && (
+                        <>
+                          <span style={{ opacity: 0.4 }}>·</span>
+                          <MapPin size={11} />
+                          {event.venue.name}
+                        </>
+                      )}
+                    </div>
+                  </div>
 
-                    {event.venue && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                        <MapPin size={13} />
-                        {event.venue.name}
-                      </div>
-                    )}
+                  {/* Status badge */}
+                  <StatusBadge status={event.status} />
 
+                  {/* Chevron */}
+                  <div
+                    style={{
+                      color: 'var(--text-tertiary)',
+                      flexShrink: 0,
+                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.22s ease',
+                    }}
+                  >
+                    <ChevronDown size={18} />
+                  </div>
+                </button>
+
+                {/* Expanded detail */}
+                {isExpanded && (
+                  <div
+                    style={{
+                      borderTop: '1px solid var(--border)',
+                      padding: '0.875rem 1.125rem',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '0.625rem',
+                      alignItems: 'center',
+                      background: 'color-mix(in srgb, var(--bg-tertiary) 60%, var(--bg-secondary))',
+                    }}
+                  >
+                    {/* Category */}
                     <CategoryPill category={event.category} />
 
-                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', paddingTop: '0.5rem' }} onClick={(e) => e.stopPropagation()}>
-                      {event.status === 'Completed' || event.status === 'Cancelled' ? (
-                        <span
-                          title="Cannot edit completed or cancelled events"
-                          style={{
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.35rem',
-                            padding: '0.4rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid var(--border)',
-                            background: 'var(--bg-tertiary)',
-                            color: 'var(--text-tertiary)',
-                            fontSize: '0.8rem',
-                            fontWeight: 500,
-                            opacity: 0.4,
-                            cursor: 'not-allowed',
-                          }}
-                        >
-                          <Pencil size={13} />
-                          Edit
-                        </span>
-                      ) : (
-                        <Link
-                          to={`/admin/events/${event.id}/edit`}
-                          style={{
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.35rem',
-                            padding: '0.4rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid var(--border)',
-                            background: 'var(--bg-tertiary)',
-                            color: 'var(--accent-primary)',
-                            textDecoration: 'none',
-                            fontSize: '0.8rem',
-                            fontWeight: 500,
-                            transition: 'background 0.15s',
-                          }}
-                        >
-                          <Pencil size={13} />
-                          Edit
-                        </Link>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => setDuplicateTarget(event)}
-                        title="Duplicate"
+                    {/* Layout */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                        padding: '0.25rem 0.6rem',
+                        borderRadius: '999px',
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
+                        fontSize: '0.75rem',
+                        color: 'var(--text-secondary)',
+                        fontWeight: 500,
+                      }}
+                    >
+                      <LayoutIcon mode={event.layoutMode} />
+                      {event.layoutMode === 'Grid' ? 'Assigned seating' : event.layoutMode === 'CapacityOnly' ? 'General admission' : 'Tickets only'}
+                    </div>
+
+                    {/* Spacer */}
+                    <div style={{ flex: 1 }} />
+
+                    {/* Status changer */}
+                    <StatusChanger event={event} onStatusChanged={() => void fetchEvents()} />
+
+                    {/* View/Manage */}
+                    <Link
+                      to={`/admin/events/${event.id}`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        padding: '0.4rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid var(--accent-primary)',
+                        background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--bg-secondary))',
+                        color: 'var(--accent-primary)',
+                        textDecoration: 'none',
+                        fontSize: '0.8125rem',
+                        fontWeight: 600,
+                        fontFamily: 'var(--font-body)',
+                        transition: 'background 0.15s',
+                      }}
+                    >
+                      Manage
+                    </Link>
+
+                    {/* Edit */}
+                    {canEdit ? (
+                      <Link
+                        to={`/admin/events/${event.id}/edit`}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
                           gap: '0.35rem',
-                          padding: '0.4rem 0.6rem',
-                          borderRadius: '0.375rem',
+                          padding: '0.4rem 0.875rem',
+                          borderRadius: '0.5rem',
                           border: '1px solid var(--border)',
-                          background: 'var(--bg-tertiary)',
+                          background: 'var(--bg-secondary)',
                           color: 'var(--text-secondary)',
-                          cursor: 'pointer',
-                          fontSize: '0.8rem',
+                          textDecoration: 'none',
+                          fontSize: '0.8125rem',
+                          fontWeight: 600,
                           fontFamily: 'var(--font-body)',
                           transition: 'background 0.15s',
                         }}
                       >
-                        <Copy size={13} />
+                        <Pencil size={13} />
+                        Edit
+                      </Link>
+                    ) : (
+                      <span
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          padding: '0.4rem 0.875rem',
+                          borderRadius: '0.5rem',
+                          border: '1px solid var(--border)',
+                          background: 'var(--bg-tertiary)',
+                          color: 'var(--text-tertiary)',
+                          fontSize: '0.8125rem',
+                          fontWeight: 600,
+                          opacity: 0.45,
+                          cursor: 'not-allowed',
+                        }}
+                      >
+                        <Pencil size={13} />
+                        Edit
+                      </span>
+                    )}
+
+                    {/* Duplicate */}
+                    <button
+                      type="button"
+                      onClick={() => setDuplicateTarget(event)}
+                      title="Duplicate event"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        padding: '0.4rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid var(--border)',
+                        background: 'var(--bg-secondary)',
+                        color: 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        fontSize: '0.8125rem',
+                        fontWeight: 600,
+                        fontFamily: 'var(--font-body)',
+                        transition: 'background 0.15s',
+                      }}
+                    >
+                      <Copy size={13} />
+                      Duplicate
+                    </button>
+
+                    {/* Delete (Draft only) */}
+                    {event.status === 'Draft' && (
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(event)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          padding: '0.4rem 0.875rem',
+                          borderRadius: '0.5rem',
+                          border: '1px solid var(--color-error)',
+                          background: 'color-mix(in srgb, var(--color-error) 10%, var(--bg-secondary))',
+                          color: 'var(--color-error)',
+                          cursor: 'pointer',
+                          fontSize: '0.8125rem',
+                          fontWeight: 600,
+                          fontFamily: 'var(--font-body)',
+                          transition: 'background 0.15s',
+                        }}
+                      >
+                        <Trash2 size={13} />
+                        Delete
                       </button>
-                      {event.status === 'Draft' && (
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(event)}
-                          style={{
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.35rem',
-                            padding: '0.4rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid var(--border)',
-                            background: 'var(--bg-tertiary)',
-                            color: 'var(--color-error)',
-                            cursor: 'pointer',
-                            fontSize: '0.8rem',
-                            fontWeight: 500,
-                            fontFamily: 'var(--font-body)',
-                            transition: 'background 0.15s',
-                          }}
-                        >
-                          <Trash2 size={13} />
-                          Delete
-                        </button>
-                      )}
-                    </div>
+                    )}
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
 
       {/* Pagination */}
       {!loading && data && data.totalCount > 0 && (
