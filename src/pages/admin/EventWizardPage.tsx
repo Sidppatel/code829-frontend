@@ -252,6 +252,7 @@ function StepIndicator({
             </div>
             {idx < STEP_LABELS.length - 1 && (
               <div
+                className="c829-step-connector"
                 style={{
                   width: '60px',
                   height: '2px',

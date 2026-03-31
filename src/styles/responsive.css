@@ -297,3 +297,121 @@
     font-size: clamp(2rem, 12vw, 3.5rem) !important;
   }
 }
+
+/* ── Admin page header (title + action button row) ── */
+@media (max-width: 640px) {
+  .c829-page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+  .c829-page-header > * { width: 100% !important; }
+}
+
+/* ── Filter/search bar rows ── */
+@media (max-width: 640px) {
+  .c829-filter-row {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  .c829-filter-row input,
+  .c829-filter-row select { min-width: 0 !important; width: 100% !important; }
+}
+
+/* ── Admin stat cards grid ── */
+@media (max-width: 640px) {
+  .c829-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 400px) {
+  .c829-stat-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Card grid (venues card view) ── */
+@media (max-width: 640px) {
+  .c829-card-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Form grid (table types inline form) ── */
+@media (max-width: 640px) {
+  .c829-form-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Pagination controls ── */
+@media (max-width: 480px) {
+  .c829-pagination {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+  }
+}
+
+/* ── EventManage layout grid ── */
+@media (max-width: 900px) {
+  .c829-manage-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Wizard step indicator ── */
+@media (max-width: 480px) {
+  .c829-step-connector {
+    width: 24px !important;
+    min-width: 24px !important;
+  }
+}
+
+/* ── Analytics cards grid ── */
+@media (max-width: 640px) {
+  .c829-analytics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 400px) {
+  .c829-analytics-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Booking row in dashboard ── */
+@media (max-width: 480px) {
+  .c829-booking-row {
+    flex-wrap: wrap !important;
+    gap: 0.35rem !important;
+  }
+}
+
+/* ── ReviewStep section card edit button & info rows ── */
+@media (max-width: 480px) {
+  .c829-review-inforow {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.2rem !important;
+  }
+  .c829-review-inforow-label {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* ── VenueForm city/state/zip grid ── */
+@media (max-width: 480px) {
+  .c829-venue-location-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Table action buttons — ensure 44px tap targets ── */
+@media (max-width: 768px) {
+  .c829-table-action-btn {
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+}

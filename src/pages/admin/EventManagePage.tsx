@@ -743,6 +743,7 @@ export default function EventManagePage(): React.ReactElement {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Stats grid */}
           <div
+            className="c829-stat-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',

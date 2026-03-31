@@ -605,6 +605,7 @@ export default function VenueFormPage(): React.ReactElement {
               }}
             />
             <div
+              className="c829-venue-location-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 80px 140px',

@@ -307,6 +307,7 @@ export default function VenuesPage(): React.ReactElement {
     <div>
       {/* Header */}
       <div
+        className="c829-page-header"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -351,6 +352,7 @@ export default function VenuesPage(): React.ReactElement {
 
       {/* Filters */}
       <div
+        className="c829-filter-row"
         style={{
           display: 'flex',
           gap: '0.75rem',
@@ -601,6 +603,7 @@ export default function VenuesPage(): React.ReactElement {
                             <Link
                               to={`/admin/venues/${venue.id}/edit`}
                               aria-label={`Edit ${venue.name}`}
+                              className="c829-table-action-btn"
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -620,6 +623,7 @@ export default function VenuesPage(): React.ReactElement {
                           ) : (
                             <span
                               title="Venue is disabled"
+                              className="c829-table-action-btn"
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -641,6 +645,7 @@ export default function VenuesPage(): React.ReactElement {
                             onClick={venue.isActive ? () => setDeleteTarget(venue) : undefined}
                             disabled={!venue.isActive}
                             aria-label={venue.isActive ? `Delete ${venue.name}` : 'Venue is disabled'}
+                            className="c829-table-action-btn"
                             style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -673,6 +678,7 @@ export default function VenuesPage(): React.ReactElement {
         <div>
           {loading ? (
             <div
+              className="c829-card-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -699,6 +705,7 @@ export default function VenuesPage(): React.ReactElement {
             </div>
           ) : (
             <div
+              className="c829-card-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -813,6 +820,7 @@ export default function VenuesPage(): React.ReactElement {
       {/* Pagination */}
       {!loading && data && data.totalCount > 0 && (
         <div
+          className="c829-pagination"
           style={{
             display: 'flex',
             alignItems: 'center',

@@ -132,6 +132,7 @@ function InlineForm({ initial = EMPTY_FORM, onSave, onCancel, saving }: InlineFo
       }}
     >
       <div
+        className="c829-form-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
@@ -408,6 +409,7 @@ export default function TableTypesPage(): React.ReactElement {
     <div>
       {/* Header */}
       <div
+        className="c829-page-header"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -668,6 +670,7 @@ export default function TableTypesPage(): React.ReactElement {
                               setEditingId(tt.id);
                               setShowAddForm(false);
                             } : undefined}
+                            className="c829-table-action-btn"
                             style={{
                               display: 'flex',
                               alignItems: 'center',

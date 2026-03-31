@@ -232,6 +232,7 @@ export default function AnalyticsPage(): React.ReactElement {
       </h1>
 
       <div
+        className="c829-analytics-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',

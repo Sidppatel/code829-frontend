@@ -429,7 +429,7 @@ export default function AdminDashboardPage(): React.ReactElement {
       </div>
 
       {/* ───── Key Metrics Row ───── */}
-      <div className="c829-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+      <div className="c829-metrics-grid c829-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
         <MetricCard
           icon={Ticket} label="Tickets Sold" color="var(--accent-primary)"
           value={d.soldCount} sub={d.totalCapacity > 0 ? `of ${d.totalCapacity} (${capacityPct}%)` : undefined}
@@ -653,6 +653,7 @@ export default function AdminDashboardPage(): React.ReactElement {
               return (
                 <div
                   key={b.id}
+                  className="c829-booking-row"
                   style={{
                     display: 'flex', alignItems: 'center', gap: '1rem',
                     padding: '0.75rem 1.25rem',

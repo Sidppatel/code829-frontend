@@ -721,6 +721,7 @@ export default function EventsListPage(): React.ReactElement {
     <div>
       {/* Header */}
       <div
+        className="c829-page-header"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -802,6 +803,7 @@ export default function EventsListPage(): React.ReactElement {
 
       {/* Filter bar */}
       <div
+        className="c829-filter-row"
         style={{
           display: 'flex',
           gap: '0.75rem',
@@ -1036,6 +1038,7 @@ export default function EventsListPage(): React.ReactElement {
                           {event.status === 'Completed' || event.status === 'Cancelled' ? (
                             <span
                               title="Cannot edit completed or cancelled events"
+                              className="c829-table-action-btn"
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -1056,6 +1059,7 @@ export default function EventsListPage(): React.ReactElement {
                             <Link
                               to={`/admin/events/${event.id}/edit`}
                               aria-label={`Edit ${event.title}`}
+                              className="c829-table-action-btn"
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -1078,6 +1082,7 @@ export default function EventsListPage(): React.ReactElement {
                             onClick={() => setDuplicateTarget(event)}
                             aria-label={`Duplicate ${event.title}`}
                             title="Duplicate"
+                            className="c829-table-action-btn"
                             style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -1099,6 +1104,7 @@ export default function EventsListPage(): React.ReactElement {
                               type="button"
                               onClick={() => setDeleteTarget(event)}
                               aria-label={`Delete ${event.title}`}
+                              className="c829-table-action-btn"
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -1342,6 +1348,7 @@ export default function EventsListPage(): React.ReactElement {
       {/* Pagination */}
       {!loading && data && data.totalCount > 0 && (
         <div
+          className="c829-pagination"
           style={{
             display: 'flex',
             alignItems: 'center',
