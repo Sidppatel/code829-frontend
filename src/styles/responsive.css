@@ -452,3 +452,31 @@
 .admin-bottom-nav a {
   min-height: 44px;
 }
+
+/* ── Events list page — status tabs horizontal scroll on mobile ── */
+.c829-status-tabs {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.c829-status-tabs::-webkit-scrollbar {
+  display: none;
+}
+@media (max-width: 640px) {
+  .c829-status-tabs {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+  }
+}
+
+/* ── Events list table — hide low-priority cols on mobile ── */
+@media (max-width: 640px) {
+  .c829-events-col-hide {
+    display: none !important;
+  }
+  /* View toggle shouldn't stretch to full width in stacked filter row */
+  .c829-events-view-toggle {
+    margin-left: 0 !important;
+    align-self: flex-start !important;
+    width: auto !important;
+  }
+}

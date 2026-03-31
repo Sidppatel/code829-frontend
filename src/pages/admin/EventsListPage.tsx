@@ -766,6 +766,7 @@ export default function EventsListPage(): React.ReactElement {
 
       {/* Status tabs */}
       <div
+        className="c829-status-tabs"
         style={{
           display: 'flex',
           gap: '0.25rem',
@@ -878,7 +879,7 @@ export default function EventsListPage(): React.ReactElement {
         </select>
 
         {/* View toggle */}
-        <div style={{ display: 'flex', gap: '0.25rem', marginLeft: 'auto' }}>
+        <div className="c829-events-view-toggle" style={{ display: 'flex', gap: '0.25rem', marginLeft: 'auto' }}>
           {(['table', 'card'] as ViewMode[]).map((mode) => (
             <button
               key={mode}
@@ -935,6 +936,7 @@ export default function EventsListPage(): React.ReactElement {
                   {['Title', 'Date', 'Venue', 'Category', 'Layout', 'Status', 'Actions'].map((h) => (
                     <th
                       key={h}
+                      className={['Venue', 'Category', 'Layout'].includes(h) ? 'c829-events-col-hide' : undefined}
                       style={{
                         padding: '0.75rem 1rem',
                         textAlign: h === 'Actions' ? 'center' : 'left',
@@ -1011,6 +1013,7 @@ export default function EventsListPage(): React.ReactElement {
                         {formatDate(event.startDate)}
                       </td>
                       <td
+                        className="c829-events-col-hide"
                         style={{
                           padding: '0.875rem 1rem',
                           color: 'var(--text-secondary)',
@@ -1023,10 +1026,10 @@ export default function EventsListPage(): React.ReactElement {
                       >
                         {event.venue ? `${event.venue.name}` : '—'}
                       </td>
-                      <td style={{ padding: '0.875rem 1rem' }}>
+                      <td className="c829-events-col-hide" style={{ padding: '0.875rem 1rem' }}>
                         <CategoryPill category={event.category} />
                       </td>
-                      <td style={{ padding: '0.875rem 1rem' }}>
+                      <td className="c829-events-col-hide" style={{ padding: '0.875rem 1rem' }}>
                         <LayoutIcon mode={event.layoutMode} />
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
