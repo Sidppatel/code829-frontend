@@ -922,6 +922,7 @@ export default function EventsListPage(): React.ReactElement {
             <table
               style={{
                 width: '100%',
+                minWidth: '480px',
                 borderCollapse: 'collapse',
                 fontFamily: 'var(--font-body)',
               }}
