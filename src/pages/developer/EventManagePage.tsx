@@ -449,6 +449,7 @@ export default function EventManagePage(): React.ReactElement {
 
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <div
+        className="c829-manage-header"
         style={{
           display: 'flex',
           alignItems: 'flex-start',
@@ -500,7 +501,7 @@ export default function EventManagePage(): React.ReactElement {
           borderRadius: '0.625rem',
           padding: '0.25rem',
           marginBottom: '1.5rem',
-          flexWrap: 'wrap',
+          flexWrap: 'nowrap',
         }}
       >
         {tabs.map((tab) => (

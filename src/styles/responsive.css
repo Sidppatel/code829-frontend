@@ -213,6 +213,23 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   flex-shrink: 0;
+  scrollbar-width: none;
+}
+.c829-manage-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Manage page header — stack on mobile ── */
+@media (max-width: 640px) {
+  .c829-manage-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .c829-manage-header > div:last-child > a,
+  .c829-manage-header > div:last-child > button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
 }
 
 /* ── Admin dashboard hero section actions ───────────────────────────────── */

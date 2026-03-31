@@ -26,12 +26,15 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Analytics', to: '/admin/analytics', Icon: BarChart3 },
 ];
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function buildBreadcrumbs(pathname: string): string[] {
   const segments = pathname.replace(/^\/admin\/?/, '').split('/').filter(Boolean);
   const crumbs: string[] = ['Admin'];
   for (const seg of segments) {
     if (seg === 'new') crumbs.push('New');
     else if (seg === 'edit') crumbs.push('Edit');
+    else if (UUID_RE.test(seg)) crumbs.push('Detail');
     else crumbs.push(seg.charAt(0).toUpperCase() + seg.slice(1));
   }
   return crumbs;
@@ -272,6 +275,7 @@ export default function AdminLayout(): React.ReactElement {
             alignItems: 'center',
             gap: '0.5rem',
             flexShrink: 0,
+            overflow: 'hidden',
           }}
         >
           {breadcrumbs.map((crumb, i) => (
