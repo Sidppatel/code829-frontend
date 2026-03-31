@@ -440,13 +440,18 @@ export default function ReviewStep({
           : 'Venue selected'
         : 'Select a venue in Step 1',
     },
-    {
-      label: 'At least 1 pricing rule',
-      status: hasPricing ? 'pass' : 'fail',
-      detail: hasPricing
-        ? `${activeRules.length} active rule${activeRules.length > 1 ? 's' : ''}`
-        : 'Add pricing rules in Step 3',
-    },
+    // Pricing rules only required for non-Grid events; Grid pricing lives on table types
+    ...(!isGridMode
+      ? [
+          {
+            label: 'At least 1 pricing rule',
+            status: hasPricing ? ('pass' as CheckStatus) : ('fail' as CheckStatus),
+            detail: hasPricing
+              ? `${activeRules.length} active rule${activeRules.length > 1 ? 's' : ''}`
+              : 'Add pricing rules in Step 3',
+          },
+        ]
+      : []),
     ...(isGridMode
       ? [
           {
@@ -723,8 +728,8 @@ export default function ReviewStep({
         )}
       </SectionCard>
 
-      {/* Pricing Card */}
-      <SectionCard title="Pricing" onEdit={() => onGoToStep(3)}>
+      {/* Pricing Card — hidden for Grid/table-seating events; pricing lives on table types */}
+      {!isGridMode && <SectionCard title="Pricing" onEdit={() => onGoToStep(3)}>
         {pricingLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {[1, 2].map((i) => (
@@ -809,7 +814,7 @@ export default function ReviewStep({
           </div>
         )}
         <style>{`@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }`}</style>
-      </SectionCard>
+      </SectionCard>}
 
       {/* Publish Checklist */}
       <div
