@@ -222,7 +222,7 @@ export default function PlatformFeesStep({
             <LayoutGrid size={18} />
             Table Type Fees
           </h5>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+          <div className="c829-fees-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
             {tableTypes.map(t => (
               <div key={t.id} style={{
                 background: 'var(--bg-secondary)',

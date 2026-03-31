@@ -367,7 +367,7 @@ function RuleForm({ tableTypes, defaultValues, onSave, onCancel, saving }: RuleF
           {/* Type radio cards */}
           <div>
             <label style={labelStyle}>Type *</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.625rem' }}>
+            <div className="c829-pricing-type-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.625rem' }}>
               {TYPE_CARDS.map((card) => {
                 const isSelected = watchedType === card.value;
                 return (
@@ -445,7 +445,7 @@ function RuleForm({ tableTypes, defaultValues, onSave, onCancel, saving }: RuleF
 
           {/* Early Bird date range */}
           {watchedType === 'EarlyBird' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div className="c829-date-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               <div>
                 <label style={labelStyle}>Valid From *</label>
                 <input

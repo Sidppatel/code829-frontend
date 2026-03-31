@@ -241,7 +241,8 @@ export default function DeveloperSettingsPage(): React.ReactElement {
               />
             </div>
           <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '0.75rem', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+            <div className="c829-table-scroll" style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem', minWidth: '480px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)' }}>
                   <th style={{ padding: '0.875rem 1.25rem', fontWeight: 600, color: 'var(--text-tertiary)' }}>Name</th>
@@ -304,6 +305,7 @@ export default function DeveloperSettingsPage(): React.ReactElement {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
           </div>
         )}
