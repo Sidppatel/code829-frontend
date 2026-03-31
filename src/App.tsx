@@ -32,6 +32,7 @@ const DeveloperDashboardPage = React.lazy(() => import('./pages/developer/Develo
 const DeveloperEventsPage = React.lazy(() => import('./pages/developer/DeveloperEventsPage'));
 const DeveloperAnalyticsPage = React.lazy(() => import('./pages/developer/AnalyticsPage'));
 const DeveloperSettingsPage = React.lazy(() => import('./pages/developer/DeveloperSettingsPage'));
+const DeveloperEventManagePage = React.lazy(() => import('./pages/developer/EventManagePage'));
 
 function PageLoader(): React.ReactElement {
   return (
@@ -115,6 +116,7 @@ function AppRoutes(): React.ReactElement {
           }>
             <Route index element={<DeveloperDashboardPage />} />
             <Route path="events" element={<DeveloperEventsPage />} />
+            <Route path="events/:id" element={<DeveloperEventManagePage />} />
             <Route path="analytics" element={<DeveloperAnalyticsPage />} />
             <Route path="settings" element={<DeveloperSettingsPage />} />
           </Route>
