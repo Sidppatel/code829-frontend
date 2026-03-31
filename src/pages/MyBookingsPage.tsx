@@ -448,7 +448,7 @@ export default function MyBookingsPage(): React.ReactElement {
           </div>
 
           {/* Stats */}
-          <div style={{
+          <div className="c829-stat-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
             gap: '1rem',

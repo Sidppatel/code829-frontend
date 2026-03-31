@@ -527,7 +527,7 @@ function Step2LayoutPanel({
         <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--color-error)' }}>{layoutModeError}</p>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.875rem' }}>
+      <div className="c829-layout-mode-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.875rem' }}>
         {(
           [
             {

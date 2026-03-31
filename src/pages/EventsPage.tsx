@@ -340,8 +340,8 @@ export default function EventsPage(): React.ReactElement {
             border: '1px solid var(--border)',
             borderRadius: '0.75rem',
             padding: '0.5rem 1rem',
-            flex: '1 1 220px',
-            minWidth: '180px',
+            flex: '1 1 160px',
+            minWidth: '0',
           }}>
             <Search size={15} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
             <input
@@ -582,7 +582,7 @@ export default function EventsPage(): React.ReactElement {
               borderRadius: '0.5rem',
               marginBottom: '1.5rem',
             }} />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem' }}>
+            <div className="c829-events-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem' }}>
               {Array.from({ length: 8 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
@@ -639,7 +639,7 @@ export default function EventsPage(): React.ReactElement {
                   {group.events.length} {group.events.length === 1 ? 'event' : 'events'}
                 </span>
               </div>
-              <div style={{
+              <div className="c829-events-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
                 gap: '1.5rem',
