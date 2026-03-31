@@ -137,6 +137,10 @@ function AddressAutocomplete({ value, error, onAddressChange, onRawChange }: Add
           onFocus={() => { setFocused(true); if (suggestions.length > 0) setShowDropdown(true); }}
           onBlur={() => setFocused(false)}
           autoComplete="off"
+          role="combobox"
+          aria-expanded={showDropdown}
+          aria-controls="address-suggestions"
+          aria-autocomplete="list"
           style={{
             ...inputStyle(!!error),
             paddingLeft: '2.75rem',
@@ -147,6 +151,8 @@ function AddressAutocomplete({ value, error, onAddressChange, onRawChange }: Add
       
       {showDropdown && (
         <div
+          id="address-suggestions"
+          role="listbox"
           style={{
             position: 'absolute',
             top: '100%',
@@ -172,6 +178,7 @@ function AddressAutocomplete({ value, error, onAddressChange, onRawChange }: Add
               <button
                 key={s.place_id}
                 type="button"
+                role="option"
                 onClick={() => handleSelect(s)}
                 style={{
                   display: 'flex',
@@ -230,14 +237,59 @@ export default function OnboardingScreen(): React.ReactElement {
 
   const watchedValues = watch();
 
+  // Focus trap + Escape key
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+
+    // Focus the first input on mount
+    const firstInput = el.querySelector<HTMLElement>('input, button, [tabindex]');
+    firstInput?.focus();
+
+    function handleKeyDown(e: KeyboardEvent): void {
+      if (e.key === 'Escape') {
+        // Don't allow escape on onboarding (mandatory), but consume the event
+        e.preventDefault();
+        return;
+      }
+      // Focus trap
+      if (e.key === 'Tab') {
+        const focusableEls = el!.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableEls.length === 0) return;
+        const first = focusableEls[0];
+        const last = focusableEls[focusableEls.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   async function onSubmit(data: OnboardingValues) {
     setLoading(true);
     try {
       await authApi.updateProfile(data);
       toast.success('Welcome aboard! Profile completed.');
       await fetchMe();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to update profile');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to update profile';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -245,6 +297,10 @@ export default function OnboardingScreen(): React.ReactElement {
 
   return (
     <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="onboarding-title"
       style={{
         position: 'fixed',
         inset: 0,
@@ -313,6 +369,7 @@ export default function OnboardingScreen(): React.ReactElement {
             <User size={32} />
           </div>
           <h1
+            id="onboarding-title"
             style={{
               fontFamily: 'var(--font-display)',
               fontSize: '1.75rem',
@@ -340,10 +397,13 @@ export default function OnboardingScreen(): React.ReactElement {
               <input
                 {...register('name')}
                 placeholder="John Doe"
+                aria-required="true"
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? 'name-error' : undefined}
                 style={inputStyle(!!errors.name)}
               />
             </div>
-            {errors.name && <p style={errorStyle}>{errors.name.message}</p>}
+            {errors.name && <p id="name-error" style={errorStyle}>{errors.name.message}</p>}
           </div>
 
           {/* Phone */}
@@ -356,10 +416,12 @@ export default function OnboardingScreen(): React.ReactElement {
               <input
                 {...register('phone')}
                 placeholder="+1 (555) 000-0000"
+                aria-invalid={!!errors.phone}
+                aria-describedby={errors.phone ? 'phone-error' : undefined}
                 style={inputStyle(!!errors.phone)}
               />
             </div>
-            {errors.phone && <p style={errorStyle}>{errors.phone.message}</p>}
+            {errors.phone && <p id="phone-error" style={errorStyle}>{errors.phone.message}</p>}
           </div>
 
           {/* Address Autocomplete */}
@@ -378,22 +440,22 @@ export default function OnboardingScreen(): React.ReactElement {
                 setValue('zipCode', addr.zipCode, { shouldValidate: true });
               }}
             />
-            {errors.address && <p style={errorStyle}>{errors.address.message}</p>}
+            {errors.address && <p id="address-error" style={errorStyle}>{errors.address.message}</p>}
           </div>
 
           {/* City State Zip */}
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr', gap: '0.75rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <input {...register('city')} placeholder="City" style={inputStyle(!!errors.city, true)} />
-              {errors.city && <p style={errorStyle}>{errors.city.message}</p>}
+              <input {...register('city')} placeholder="City" aria-invalid={!!errors.city} aria-describedby={errors.city ? 'city-error' : undefined} style={inputStyle(!!errors.city, true)} />
+              {errors.city && <p id="city-error" style={errorStyle}>{errors.city.message}</p>}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <input {...register('state')} placeholder="ST" maxLength={2} style={inputStyle(!!errors.state, true)} />
-              {errors.state && <p style={errorStyle}>{errors.state.message}</p>}
+              <input {...register('state')} placeholder="ST" maxLength={2} aria-invalid={!!errors.state} aria-describedby={errors.state ? 'state-error' : undefined} style={inputStyle(!!errors.state, true)} />
+              {errors.state && <p id="state-error" style={errorStyle}>{errors.state.message}</p>}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <input {...register('zipCode')} placeholder="ZIP" style={inputStyle(!!errors.zipCode, true)} />
-              {errors.zipCode && <p style={errorStyle}>{errors.zipCode.message}</p>}
+              <input {...register('zipCode')} placeholder="ZIP" aria-invalid={!!errors.zipCode} aria-describedby={errors.zipCode ? 'zip-error' : undefined} style={inputStyle(!!errors.zipCode, true)} />
+              {errors.zipCode && <p id="zip-error" style={errorStyle}>{errors.zipCode.message}</p>}
             </div>
           </div>
 

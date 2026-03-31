@@ -861,6 +861,7 @@ function FeaturedSection({
               <img
                 src={event.imageUrl}
                 alt={event.title}
+                loading="lazy"
                 style={{
                   position: "absolute",
                   inset: 0,
@@ -1088,6 +1089,7 @@ function ComingSoonSection({
                       <img
                         src={event.imageUrl}
                         alt={event.title}
+                        loading="lazy"
                         style={{
                           width: "100%",
                           height: "100%",

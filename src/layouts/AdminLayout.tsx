@@ -65,6 +65,7 @@ export default function AdminLayout(): React.ReactElement {
     >
       {/* Sidebar — hidden on mobile, shown on desktop */}
       <aside
+        aria-label="Admin navigation"
         style={{
           position: 'fixed',
           top: 0,

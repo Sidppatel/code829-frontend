@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Sun, Moon, Monitor, User, LogIn, LogOut, LayoutDashboard, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
@@ -47,8 +47,83 @@ export default function Navbar(): React.ReactElement {
   const adminLabel = (user?.role as string) === 'Developer' ? 'Developer' : 'Admin';
   const showAdminLink = isAuthenticated && user && ADMIN_ROLES.has(user.role);
 
+  const menuPanelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleKeyDown(e: KeyboardEvent): void {
+      if (e.key === 'Escape') {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const el = menuPanelRef.current;
+    if (!el) return;
+
+    // Focus the close button when menu opens
+    const closeBtn = el.querySelector<HTMLElement>('button');
+    closeBtn?.focus();
+
+    function trapFocus(e: KeyboardEvent): void {
+      if (e.key !== 'Tab') return;
+      const focusableEls = el!.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusableEls.length === 0) return;
+      const first = focusableEls[0];
+      const last = focusableEls[focusableEls.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener('keydown', trapFocus);
+    return () => document.removeEventListener('keydown', trapFocus);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
   return (
     <>
+      {/* Skip to main content — visible only on keyboard focus */}
+      <a
+        href="#main-content"
+        style={{
+          position: 'fixed',
+          top: '-100px',
+          left: '1rem',
+          zIndex: 9999,
+          padding: '0.75rem 1.5rem',
+          background: 'var(--accent-primary)',
+          color: 'var(--bg-primary)',
+          borderRadius: '0 0 0.75rem 0.75rem',
+          fontFamily: 'var(--font-body)',
+          fontWeight: 600,
+          fontSize: '0.875rem',
+          textDecoration: 'none',
+          transition: 'top 0.2s ease',
+        }}
+        onFocus={(e) => { e.currentTarget.style.top = '0'; }}
+        onBlur={(e) => { e.currentTarget.style.top = '-100px'; }}
+      >
+        Skip to main content
+      </a>
       <header
         style={{
           position: 'fixed',
@@ -134,7 +209,7 @@ export default function Navbar(): React.ReactElement {
                   transition: 'background 0.2s, color 0.2s',
                 }}
               >
-                <LayoutDashboard size={14} />
+                <LayoutDashboard size={14} aria-hidden="true" />
                 {adminLabel}
               </Link>
             )}
@@ -267,8 +342,11 @@ export default function Navbar(): React.ReactElement {
         className={`c829-mobile-menu${menuOpen ? ' open' : ''}`}
         onClick={(e) => { if (e.target === e.currentTarget) setMenuOpen(false); }}
         aria-hidden={!menuOpen}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
       >
-        <div className="c829-mobile-menu-panel">
+        <div ref={menuPanelRef} className="c829-mobile-menu-panel">
           {/* Close */}
           <button
             className="c829-mobile-menu-close"

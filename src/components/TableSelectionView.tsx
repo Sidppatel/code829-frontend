@@ -64,7 +64,11 @@ function Countdown({ expiresAt }: { expiresAt: string }): React.ReactElement {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [expiresAt]);
-  return <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{remaining}</span>;
+  return (
+    <span aria-live="off" aria-label={`Hold expires in ${remaining}`} style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+      {remaining}
+    </span>
+  );
 }
 
 // ─── Skeleton loading state ───────────────────────────────────────────────────
@@ -99,6 +103,8 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
   const [loading, setLoading] = useState(true);
   const [holdingId, setHoldingId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [focusedCell, setFocusedCell] = useState<{ row: number; col: number } | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [availHeight, setAvailHeight] = useState(0);
@@ -199,7 +205,7 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
   // containerRef must always be in the DOM so the ResizeObserver measures correctly.
   if (loading) {
     return (
-      <div ref={containerRef}>
+      <div ref={containerRef} role="status" aria-busy="true" aria-label="Loading seating layout">
         <GridSkeleton rows={3} cols={5} />
       </div>
     );
@@ -247,6 +253,45 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
 
   // Held table for info bar
   const myTable = tables.find(t => t.status === 'HeldByYou') ?? null;
+
+  // Initialize focus on first available table
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    if (!focusedCell && data && data.tables.length > 0) {
+      const first = data.tables.find(t => t.gridRow !== null && t.gridCol !== null);
+      if (first && first.gridRow !== null && first.gridCol !== null) {
+        setFocusedCell({ row: first.gridRow, col: first.gridCol });
+      }
+    }
+  }, [data, focusedCell]);
+
+  function handleGridKeyDown(e: React.KeyboardEvent): void {
+    if (!focusedCell || !data) return;
+    const { row, col } = focusedCell;
+    let nextRow = row;
+    let nextCol = col;
+
+    switch (e.key) {
+      case 'ArrowUp': nextRow = Math.max(0, row - 1); break;
+      case 'ArrowDown': nextRow = Math.min(effectiveRows - 1, row + 1); break;
+      case 'ArrowLeft': nextCol = Math.max(0, col - 1); break;
+      case 'ArrowRight': nextCol = Math.min(gridCols - 1, col + 1); break;
+      case 'Enter':
+      case ' ': {
+        e.preventDefault();
+        const table = occupancy.get(`${row}-${col}`);
+        if (table) void handleTableClick(table);
+        return;
+      }
+      default: return;
+    }
+    e.preventDefault();
+    setFocusedCell({ row: nextRow, col: nextCol });
+
+    // Move DOM focus to the cell
+    const cellEl = gridRef.current?.querySelector<HTMLElement>(`[data-row="${nextRow}"][data-col="${nextCol}"]`);
+    cellEl?.focus();
+  }
 
   // Unique price tiers for legend
   const tiers = Array.from(
@@ -349,7 +394,12 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
       </div>
 
       {/* ── Seat grid ─────────────────────────────────────────────────────── */}
-      <div style={{ overflowX: 'hidden', overflowY: 'visible', paddingBottom: '0.5rem' }}>
+      <div
+        ref={gridRef}
+        role="grid"
+        aria-label="Seating layout — use arrow keys to navigate, Enter or Space to select"
+        onKeyDown={handleGridKeyDown}
+        style={{ overflowX: 'hidden', overflowY: 'visible', paddingBottom: '0.5rem' }}>
         <div style={{ minWidth: 'fit-content' }}>
 
           {/* Column header row */}
@@ -378,7 +428,7 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
 
           {/* Seat rows */}
           {Array.from({ length: effectiveRows }, (_, r) => (
-            <div key={r} style={{
+            <div key={r} role="row" style={{
               display: 'grid',
               gridTemplateColumns: `${LABEL_W}px repeat(${gridCols}, ${cellSize}px)`,
               gap: `${GAP}px`,
@@ -405,6 +455,9 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
                   return (
                     <div
                       key={`empty-${r}-${c}`}
+                      role="gridcell"
+                      data-row={r}
+                      data-col={c}
                       style={{ width: cellSize, height: cellSize }}
                     />
                   );
@@ -419,9 +472,24 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
                 return (
                   <div
                     key={table.id}
+                    role="gridcell"
+                    data-row={r}
+                    data-col={c}
+                    tabIndex={focusedCell?.row === r && focusedCell?.col === c ? 0 : -1}
+                    aria-label={`Table ${table.label}, ${table.capacity} seats, ${formatCents(table.priceCents)}, ${table.status === 'Available' ? 'available' : table.status === 'HeldByYou' ? 'selected by you' : table.status === 'Held' ? 'held by another user' : 'booked'}`}
+                    aria-selected={table.status === 'HeldByYou'}
+                    aria-disabled={table.status === 'Held' || table.status === 'Booked'}
                     onClick={() => void handleTableClick(table)}
+                    onFocus={() => { setFocusedCell({ row: r, col: c }); setHoveredId(table.id); }}
+                    onBlur={() => setHoveredId(null)}
                     onMouseEnter={() => setHoveredId(table.id)}
                     onMouseLeave={() => setHoveredId(null)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        void handleTableClick(table);
+                      }
+                    }}
                     title={`${table.label} · ${table.capacity} seats · ${formatCents(table.priceCents)}/${table.priceType === 'PerSeat' ? 'seat' : 'table'}`}
                     style={{
                       width: cellSize,
@@ -451,19 +519,19 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
                   >
                     {/* Status badge — top-right corner */}
                     {table.status === 'Booked' && (
-                      <Lock size={9} style={{
+                      <Lock size={9} aria-hidden="true" style={{
                         position: 'absolute', top: 4, right: 5,
                         color: 'var(--text-tertiary)',
                       }} />
                     )}
                     {table.status === 'HeldByYou' && (
-                      <Check size={9} style={{
+                      <Check size={9} aria-hidden="true" style={{
                         position: 'absolute', top: 4, right: 5,
                         color: 'var(--color-success)',
                       }} />
                     )}
                     {table.status === 'Held' && (
-                      <Clock size={9} style={{
+                      <Clock size={9} aria-hidden="true" style={{
                         position: 'absolute', top: 4, right: 5,
                         color: 'var(--color-warning)',
                       }} />
@@ -503,7 +571,7 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
                         display: 'flex', alignItems: 'center', gap: 2,
                         fontSize: '0.5625rem', color: 'var(--text-secondary)', lineHeight: 1,
                       }}>
-                        <Users size={8} />
+                        <Users size={8} aria-hidden="true" />
                         <span>{table.capacity}</span>
                       </div>
                     )}
@@ -681,12 +749,12 @@ export default function TableSelectionView({ eventId, ticketTypeId, onTableSelec
         opacity: 0.6,
       }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <ChevronDown size={10} style={{ transform: 'rotate(180deg)' }} />
+          <ChevronDown size={10} aria-hidden="true" style={{ transform: 'rotate(180deg)' }} />
           FRONT
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           BACK
-          <ChevronDown size={10} />
+          <ChevronDown size={10} aria-hidden="true" />
         </span>
       </div>
     </div>

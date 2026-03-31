@@ -80,13 +80,13 @@ export default function InvitationPage(): React.ReactElement {
           {/* Header */}
           <div style={{
             padding: '1.5rem', background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-cta))',
-            color: '#fff', textAlign: 'center',
+            color: 'var(--bg-primary)', textAlign: 'center',
           }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.25rem' }}>
               {data.eventTitle}
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.875rem', opacity: 0.9 }}>
-              <Calendar size={14} />
+              <Calendar size={14} aria-hidden="true" />
               {new Date(data.eventDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
           </div>
@@ -104,7 +104,7 @@ export default function InvitationPage(): React.ReactElement {
                 padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'var(--bg-tertiary)',
                 fontSize: '0.8125rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.35rem',
               }}>
-                <Ticket size={14} /> {data.ticketType}
+                <Ticket size={14} aria-hidden="true" /> {data.ticketType}
               </div>
               {data.seatLabel && (
                 <div style={{
@@ -119,17 +119,17 @@ export default function InvitationPage(): React.ReactElement {
             {/* QR Code */}
             {data.isCheckedIn ? (
               <div style={{ textAlign: 'center', padding: '1.5rem' }}>
-                <CheckCircle size={48} style={{ color: 'var(--color-success)' }} />
+                <CheckCircle size={48} aria-hidden="true" style={{ color: 'var(--color-success)' }} />
                 <div style={{ marginTop: '0.5rem', fontWeight: 700, color: 'var(--color-success)' }}>Already Checked In</div>
               </div>
             ) : (
               <div style={{
-                padding: '1rem', background: '#fff', borderRadius: '0.75rem',
+                padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '0.75rem',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
               }}>
-                <QrCode size={120} style={{ color: '#000' }} />
+                <QrCode size={120} style={{ color: 'var(--text-primary)' }} />
                 <div style={{
-                  fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: '#666',
+                  fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--text-secondary)',
                   wordBreak: 'break-all', textAlign: 'center', maxWidth: '200px',
                 }}>
                   {data.qrToken}

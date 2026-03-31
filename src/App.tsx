@@ -35,6 +35,8 @@ const DeveloperSettingsPage = React.lazy(() => import('./pages/developer/Develop
 function PageLoader(): React.ReactElement {
   return (
     <div
+      role="status"
+      aria-label="Loading page"
       style={{
         minHeight: '100vh',
         display: 'flex',
@@ -53,6 +55,9 @@ function PageLoader(): React.ReactElement {
           animation: 'spin 0.8s linear infinite',
         }}
       />
+      <span style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}>
+        Loading…
+      </span>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
@@ -71,6 +76,7 @@ function AppRoutes(): React.ReactElement {
 
       <Navbar />
 
+      <main id="main-content">
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -114,6 +120,7 @@ function AppRoutes(): React.ReactElement {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
+      </main>
 
       <Toaster
         position="top-right"
@@ -124,6 +131,10 @@ function AppRoutes(): React.ReactElement {
             border: '1px solid var(--border)',
             borderRadius: '0.75rem',
             fontFamily: 'var(--font-body)',
+          },
+          ariaProps: {
+            role: 'status',
+            'aria-live': 'polite',
           },
         }}
       />

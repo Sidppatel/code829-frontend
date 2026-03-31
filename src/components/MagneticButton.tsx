@@ -30,9 +30,13 @@ export default function MagneticButton({
   const [isHovered, setIsHovered] = useState(false);
   const [ripples, setRipples] = useState<Ripple[]>([]);
   const rippleCounter = useRef(0);
+  const prefersReducedMotion = useRef(
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>): void => {
+      if (prefersReducedMotion.current) return;
       const btn = btnRef.current;
       if (!btn) return;
       const rect = btn.getBoundingClientRect();
@@ -56,16 +60,19 @@ export default function MagneticButton({
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>): void => {
-      const btn = btnRef.current;
-      if (!btn) return;
-      const rect = btn.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const id = ++rippleCounter.current;
-      setRipples((prev) => [...prev, { id, x, y }]);
-      setTimeout(() => {
-        setRipples((prev) => prev.filter((r) => r.id !== id));
-      }, 600);
+      if (!prefersReducedMotion.current) {
+        const btn = btnRef.current;
+        if (btn) {
+          const rect = btn.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const id = ++rippleCounter.current;
+          setRipples((prev) => [...prev, { id, x, y }]);
+          setTimeout(() => {
+            setRipples((prev) => prev.filter((r) => r.id !== id));
+          }, 600);
+        }
+      }
       onClick?.();
     },
     [onClick],
@@ -102,7 +109,6 @@ export default function MagneticButton({
         display: "inline-flex",
         alignItems: "center",
         gap: "0.5rem",
-        outline: "none",
         boxShadow: isHovered
           ? "0 0 0 4px color-mix(in srgb, var(--accent-cta) 30%, transparent), 0 8px 24px color-mix(in srgb, var(--accent-cta) 40%, transparent)"
           : "0 4px 14px color-mix(in srgb, var(--accent-cta) 30%, transparent)",
@@ -151,6 +157,10 @@ export default function MagneticButton({
       <style>{`
         @keyframes ripple-expand {
           to { transform: scale(20); opacity: 0; }
+        }
+        button:focus-visible {
+          outline: 2px solid var(--accent-primary);
+          outline-offset: 3px;
         }
       `}</style>
 

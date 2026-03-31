@@ -562,6 +562,10 @@ export default function EventDetailPage(): React.ReactElement {
 
   async function handleTableBooking(): Promise<void> {
     if (!selectedTable || !selectedTier || !id) return;
+    const confirmed = window.confirm(
+      `Book table ${selectedTable.label} (${selectedTable.capacity} seats) for ${formatCents(selectedTable.priceCents)}? This will be charged immediately.`
+    );
+    if (!confirmed) return;
     setBooking(true);
     try {
       // Get seat IDs for the held table

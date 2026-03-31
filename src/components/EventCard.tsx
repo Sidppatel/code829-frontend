@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MapPin, Calendar, Tag } from 'lucide-react';
 
 export interface EventData {
@@ -77,6 +77,17 @@ export default function EventCard({ event, style }: EventCardProps): React.React
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [glow, setGlow] = useState({ x: 50, y: 50, opacity: 0 });
   const [isHovered, setIsHovered] = useState(false);
+  const [canHover, setCanHover] = useState(true);
+  const rafId = useRef(0);
+  const prefersReducedMotion = useRef(
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+
+  useEffect(() => {
+    setCanHover(window.matchMedia('(hover: hover)').matches);
+  }, []);
+
+  useEffect(() => () => cancelAnimationFrame(rafId.current), []);
 
   // Support both API shape (startDate/venueName/venueCity/minPriceCents) and legacy shape
   const displayDate = event.startDate ?? event.date ?? '';
@@ -92,19 +103,25 @@ export default function EventCard({ event, style }: EventCardProps): React.React
   const showFomo = isFomoEvent(event);
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>): void {
-    const card = cardRef.current;
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const cx = rect.width / 2;
-    const cy = rect.height / 2;
-    const rotateY = ((x - cx) / cx) * 8;
-    const rotateX = -((y - cy) / cy) * 8;
-    const glowX = (x / rect.width) * 100;
-    const glowY = (y / rect.height) * 100;
-    setTilt({ x: rotateX, y: rotateY });
-    setGlow({ x: glowX, y: glowY, opacity: 0.18 });
+    if (prefersReducedMotion.current) return;
+    cancelAnimationFrame(rafId.current);
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+    rafId.current = requestAnimationFrame(() => {
+      const card = cardRef.current;
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+      const rotateY = ((x - cx) / cx) * 8;
+      const rotateX = -((y - cy) / cy) * 8;
+      const glowX = (x / rect.width) * 100;
+      const glowY = (y / rect.height) * 100;
+      setTilt({ x: rotateX, y: rotateY });
+      setGlow({ x: glowX, y: glowY, opacity: 0.18 });
+    });
   }
 
   function handleMouseLeave(): void {
@@ -120,7 +137,9 @@ export default function EventCard({ event, style }: EventCardProps): React.React
   return (
     <div
       ref={cardRef}
-      onMouseMove={handleMouseMove}
+      role="article"
+      aria-label={event.title}
+      onMouseMove={canHover ? handleMouseMove : undefined}
       onMouseLeave={handleMouseLeave}
       onMouseEnter={handleMouseEnter}
       style={{ perspective: '1000px', ...style }}
@@ -166,6 +185,7 @@ export default function EventCard({ event, style }: EventCardProps): React.React
             <img
               src={event.imageUrl}
               alt={event.title}
+              loading="lazy"
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
           ) : (
@@ -244,7 +264,7 @@ export default function EventCard({ event, style }: EventCardProps): React.React
               marginBottom: '0.5rem',
             }}
           >
-            <Tag size={10} />
+            <Tag size={10} aria-hidden="true" />
             {event.category}
           </span>
 
@@ -278,7 +298,7 @@ export default function EventCard({ event, style }: EventCardProps): React.React
                 marginBottom: '0.3rem',
               }}
             >
-              <MapPin size={12} style={{ flexShrink: 0 }} />
+              <MapPin size={12} aria-hidden="true" style={{ flexShrink: 0 }} />
               <span
                 style={{
                   overflow: 'hidden',
@@ -303,7 +323,7 @@ export default function EventCard({ event, style }: EventCardProps): React.React
                 marginBottom: '0.75rem',
               }}
             >
-              <Calendar size={12} style={{ flexShrink: 0 }} />
+              <Calendar size={12} aria-hidden="true" style={{ flexShrink: 0 }} />
               <span>{formatDate(displayDate)}</span>
             </div>
           )}

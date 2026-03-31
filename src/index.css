@@ -1,8 +1,7 @@
 @import "tailwindcss";
 @import "./styles/responsive.css";
 
-/* Typography: Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Typography: Google Fonts — loaded via preload in index.html */
 
 /* Tailwind v4 Theme */
 @theme {
@@ -18,7 +17,7 @@
   --bg-tertiary: #f5f5f4;
   --text-primary: #1c1917;
   --text-secondary: #57534e;
-  --text-tertiary: #a8a29e;
+  --text-tertiary: #78716c;
   --accent-primary: #4f46e5;
   --accent-secondary: #7c3aed;
   --accent-cta: #f97316;
@@ -45,7 +44,7 @@
   --bg-tertiary: #1a1535;
   --text-primary: #f0f0f8;
   --text-secondary: rgba(255,255,255,0.6);
-  --text-tertiary: rgba(255,255,255,0.3);
+  --text-tertiary: rgba(255,255,255,0.5);
   --accent-primary: #818cf8;
   --accent-secondary: #a78bfa;
   --accent-cta: #f97316;
@@ -162,6 +161,23 @@ code, pre {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 3px; }
+
+/* Focus-visible ring for all interactive elements */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Remove default outlines only when :focus-visible is supported */
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible) {
+  outline: none;
+}
 
 /* Horizontal Snap Scroll */
 .snap-scroll {

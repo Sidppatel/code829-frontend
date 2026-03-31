@@ -186,7 +186,7 @@ function SeatTicket({ item, bookingId, onUpdate }: { item: ApiBookingLineItem; b
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <Ticket size={13} style={{ color: 'var(--accent-primary)' }} />
+          <Ticket size={13} aria-hidden="true" style={{ color: 'var(--accent-primary)' }} />
           <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)' }}>
             {item.ticketTypeName}
           </span>
@@ -198,16 +198,16 @@ function SeatTicket({ item, bookingId, onUpdate }: { item: ApiBookingLineItem; b
         </div>
         {item.isCheckedIn && (
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.6875rem', fontWeight: 700, color: 'var(--color-success)' }}>
-            <CheckCircle size={12} /> Checked In
+            <CheckCircle size={12} aria-hidden="true" /> Checked In
           </span>
         )}
       </div>
 
       {/* QR Token */}
       {item.qrToken && !item.isCheckedIn && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.6rem', background: '#fff', borderRadius: '0.5rem' }}>
-          <QrCode size={32} style={{ color: '#000', flexShrink: 0 }} />
-          <code style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: '#333', wordBreak: 'break-all' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '0.5rem' }}>
+          <QrCode size={32} style={{ color: 'var(--text-primary)', flexShrink: 0 }} />
+          <code style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--text-secondary)', wordBreak: 'break-all' }}>
             {item.qrToken}
           </code>
         </div>
@@ -245,7 +245,7 @@ function SeatTicket({ item, bookingId, onUpdate }: { item: ApiBookingLineItem; b
           style={{
             padding: '0.35rem 0.6rem', borderRadius: '0.375rem', border: 'none',
             background: guestEmail.trim() ? 'var(--accent-primary)' : 'var(--bg-secondary)',
-            color: guestEmail.trim() ? '#fff' : 'var(--text-tertiary)',
+            color: guestEmail.trim() ? 'var(--bg-primary)' : 'var(--text-tertiary)',
             fontSize: '0.75rem', fontWeight: 600, cursor: sending || !guestEmail.trim() ? 'not-allowed' : 'pointer',
             display: 'flex', alignItems: 'center', gap: '0.25rem',
           }}
@@ -304,12 +304,12 @@ function BookingCard({ booking, onRefresh }: { booking: Booking; onRefresh: () =
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              <Calendar size={12} style={{ color: 'var(--accent-primary)' }} />
+              <Calendar size={12} aria-hidden="true" style={{ color: 'var(--accent-primary)' }} />
               {new Date(booking.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
             {booking.tierSummary && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                <Ticket size={12} style={{ color: 'var(--accent-primary)' }} />
+                <Ticket size={12} aria-hidden="true" style={{ color: 'var(--accent-primary)' }} />
                 {booking.tierSummary}
               </span>
             )}
@@ -360,7 +360,7 @@ function BookingCard({ booking, onRefresh }: { booking: Booking; onRefresh: () =
           display: 'flex', flexDirection: 'column', gap: '0.5rem',
         }}>
           <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.25rem' }}>
-            <User size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+            <User size={12} aria-hidden="true" style={{ verticalAlign: 'middle', marginRight: 4 }} />
             Individual Tickets — assign guests & share QR codes
           </div>
           {booking.items.map(item => (
@@ -518,7 +518,7 @@ export default function MyBookingsPage(): React.ReactElement {
             </div>
           ) : displayed.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-secondary)' }}>
-              <Ticket size={40} style={{ color: 'var(--text-tertiary)', margin: '0 auto 1rem' }} />
+              <Ticket size={40} aria-hidden="true" style={{ color: 'var(--text-tertiary)', margin: '0 auto 1rem' }} />
               <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
                 No {activeTab} bookings
               </h3>

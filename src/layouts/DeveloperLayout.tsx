@@ -63,6 +63,7 @@ export default function DeveloperLayout(): React.ReactElement {
     >
       {/* Sidebar — hidden on mobile, shown on desktop */}
       <aside
+        aria-label="Developer navigation"
         style={{
           position: 'fixed',
           top: 0,

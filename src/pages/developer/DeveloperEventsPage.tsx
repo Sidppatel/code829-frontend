@@ -209,6 +209,9 @@ export default function DeveloperEventsPage(): React.ReactElement {
                         <p style={{ color: 'var(--text-tertiary)', fontSize: '0.8125rem' }}>No ticket types for this event.</p>
                       ) : (
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8125rem' }}>
+                          <caption style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}>
+                            Platform fees by ticket type for {ev.title}
+                          </caption>
                           <thead>
                             <tr style={{ borderBottom: '1px solid var(--border)' }}>
                               <th style={{ textAlign: 'left', padding: '0.5rem 0.75rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>Ticket Type</th>
@@ -254,7 +257,7 @@ export default function DeveloperEventsPage(): React.ReactElement {
                             style={{
                               padding: '0.5rem 1.25rem', borderRadius: '0.5rem',
                               border: 'none', background: 'var(--accent-primary)',
-                              color: '#fff', fontWeight: 600, fontSize: '0.8125rem',
+                              color: 'var(--bg-primary)', fontWeight: 600, fontSize: '0.8125rem',
                               cursor: saving[ev.id] ? 'not-allowed' : 'pointer',
                               display: 'flex', alignItems: 'center', gap: '0.375rem',
                               opacity: saving[ev.id] ? 0.7 : 1,

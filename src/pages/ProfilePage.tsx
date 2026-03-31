@@ -104,7 +104,7 @@ export default function ProfilePage(): React.ReactElement {
           border: '1px solid var(--border)', marginBottom: '1.25rem',
           display: 'flex', alignItems: 'center', gap: '0.75rem',
         }}>
-          <Mail size={18} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+          <Mail size={18} aria-hidden="true" style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
           <div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>EMAIL</div>
             <div style={{ color: 'var(--text-primary)', fontSize: '0.9375rem' }}>{profile?.email}</div>
@@ -123,19 +123,19 @@ export default function ProfilePage(): React.ReactElement {
         }}>
           {/* Name */}
           <div>
-            <label style={labelStyle}><User size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />Name</label>
+            <label style={labelStyle}><User size={12} aria-hidden="true" style={{ verticalAlign: 'middle', marginRight: 4 }} />Name</label>
             <input style={inputStyle} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
           </div>
 
           {/* Phone */}
           <div>
-            <label style={labelStyle}><Phone size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />Phone</label>
+            <label style={labelStyle}><Phone size={12} aria-hidden="true" style={{ verticalAlign: 'middle', marginRight: 4 }} />Phone</label>
             <input style={inputStyle} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="(555) 123-4567" />
           </div>
 
           {/* Address */}
           <div>
-            <label style={labelStyle}><MapPin size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />Address</label>
+            <label style={labelStyle}><MapPin size={12} aria-hidden="true" style={{ verticalAlign: 'middle', marginRight: 4 }} />Address</label>
             <input style={inputStyle} value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="123 Main St" />
           </div>
 
@@ -166,13 +166,13 @@ export default function ProfilePage(): React.ReactElement {
             disabled={saving}
             style={{
               padding: '0.75rem', borderRadius: '0.5rem', border: 'none',
-              background: 'var(--accent-primary)', color: '#fff', fontWeight: 600,
+              background: 'var(--accent-primary)', color: 'var(--bg-primary)', fontWeight: 600,
               fontSize: '0.875rem', cursor: saving ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
               opacity: saving ? 0.7 : 1,
             }}
           >
-            <Save size={16} />
+            <Save size={16} aria-hidden="true" />
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </form>
