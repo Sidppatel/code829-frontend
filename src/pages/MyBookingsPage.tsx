@@ -477,7 +477,7 @@ export default function MyBookingsPage(): React.ReactElement {
           </div>
 
           {/* Tabs */}
-          <div style={{
+          <div role="tablist" style={{
             display: 'flex',
             gap: '0.25rem',
             background: 'var(--bg-secondary)',
@@ -490,6 +490,8 @@ export default function MyBookingsPage(): React.ReactElement {
             {(['upcoming', 'past'] as const).map((tab) => (
               <button
                 key={tab}
+                role="tab"
+                aria-selected={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
                 style={{
                   padding: '0.45rem 1.25rem',
@@ -510,6 +512,7 @@ export default function MyBookingsPage(): React.ReactElement {
           </div>
 
           {/* Booking list */}
+          <div role="tabpanel">
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {Array.from({ length: 3 }).map((_, i) => (
@@ -553,6 +556,7 @@ export default function MyBookingsPage(): React.ReactElement {
               ))}
             </div>
           )}
+          </div>
         </div>
       </main>
     </div>

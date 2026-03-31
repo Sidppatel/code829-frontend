@@ -552,3 +552,12 @@
     max-width: none !important;
   }
 }
+
+/* Ensure minimum touch target sizes on mobile */
+@media (max-width: 768px) {
+  .c829-icon-btn,
+  button[aria-label] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

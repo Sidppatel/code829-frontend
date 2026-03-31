@@ -374,10 +374,12 @@ export default function EventsPage(): React.ReactElement {
           </div>
 
           {/* Category pills */}
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'nowrap', overflowX: 'auto' }}>
+          <div role="tablist" aria-label="Filter by category" style={{ display: 'flex', gap: '0.4rem', flexWrap: 'nowrap', overflowX: 'auto' }}>
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
+                role="tab"
+                aria-selected={category === cat}
                 onClick={() => {
                   setCategory(cat);
                   updateParams({ category: cat === 'All' ? '' : cat });
@@ -407,6 +409,8 @@ export default function EventsPage(): React.ReactElement {
           {/* Date dropdown */}
           <div style={{ position: 'relative' }}>
             <button
+              aria-expanded={showDateDropdown}
+              aria-haspopup="listbox"
               onClick={() => { setShowDateDropdown((v) => !v); setShowCityDropdown(false); }}
               style={{
                 display: 'flex',
@@ -475,6 +479,8 @@ export default function EventsPage(): React.ReactElement {
           {/* City dropdown */}
           <div style={{ position: 'relative' }}>
             <button
+              aria-expanded={showCityDropdown}
+              aria-haspopup="listbox"
               onClick={() => { setShowCityDropdown((v) => !v); setShowDateDropdown(false); }}
               style={{
                 display: 'flex',

@@ -4,6 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import RoleGuard from './components/RoleGuard';
+import ErrorBoundary from './components/ErrorBoundary';
 import { useAuthStore } from './stores/authStore';
 
 const OnboardingScreen = React.lazy(() => import('./components/OnboardingScreen'));
@@ -78,6 +79,7 @@ function AppRoutes(): React.ReactElement {
 
       <main id="main-content">
       <Suspense fallback={<PageLoader />}>
+        <ErrorBoundary>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/events" element={<EventsPage />} />
@@ -119,6 +121,7 @@ function AppRoutes(): React.ReactElement {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </ErrorBoundary>
       </Suspense>
       </main>
 
