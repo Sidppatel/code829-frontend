@@ -232,9 +232,10 @@ export default function AnalyticsPage(): React.ReactElement {
       </h1>
 
       <div
+        className="c829-analytics-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(340px, 100%), 1fr))',
           gap: '1rem',
         }}
       >
