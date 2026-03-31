@@ -221,28 +221,65 @@ function StatusChanger({
     }
   }
 
+  // Single transition: render as a plain button, no dropdown needed
+  if (transitions.length === 1) {
+    const next = transitions[0];
+    const isPublish = next === 'Published';
+    return (
+      <button
+        type="button"
+        onClick={() => void changeStatus(next)}
+        disabled={changing}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.35rem',
+          padding: '0.4rem 0.875rem',
+          borderRadius: '0.5rem',
+          border: `1px solid ${isPublish ? 'var(--color-success)' : 'var(--border)'}`,
+          background: isPublish
+            ? 'color-mix(in srgb, var(--color-success) 12%, var(--bg-secondary))'
+            : 'var(--bg-secondary)',
+          color: isPublish ? 'var(--color-success)' : 'var(--text-secondary)',
+          cursor: changing ? 'not-allowed' : 'pointer',
+          opacity: changing ? 0.6 : 1,
+          fontSize: '0.8125rem',
+          fontWeight: 600,
+          fontFamily: 'var(--font-body)',
+          transition: 'background 0.15s',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {changing ? 'Updating…' : `${next === 'Published' ? 'Publish' : next === 'Cancelled' ? 'Cancel' : next} event`}
+      </button>
+    );
+  }
+
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         disabled={changing}
-        title="Change status"
         style={{
-          display: 'flex',
+          display: 'inline-flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          width: '30px',
-          height: '30px',
-          borderRadius: '0.375rem',
+          gap: '0.35rem',
+          padding: '0.4rem 0.875rem',
+          borderRadius: '0.5rem',
           border: '1px solid var(--border)',
-          background: 'var(--bg-tertiary)',
+          background: 'var(--bg-secondary)',
           color: 'var(--text-secondary)',
           cursor: changing ? 'not-allowed' : 'pointer',
           opacity: changing ? 0.6 : 1,
+          fontSize: '0.8125rem',
+          fontWeight: 600,
+          fontFamily: 'var(--font-body)',
           transition: 'background 0.15s',
+          whiteSpace: 'nowrap',
         }}
       >
+        {changing ? 'Updating…' : 'Change status'}
         <ChevronDown size={13} />
       </button>
       {open && (
@@ -250,14 +287,14 @@ function StatusChanger({
           style={{
             position: 'absolute',
             top: '100%',
-            right: 0,
+            left: 0,
             marginTop: '0.25rem',
             background: 'var(--bg-secondary)',
             border: '1px solid var(--border)',
             borderRadius: '0.5rem',
             boxShadow: 'var(--shadow-card-hover)',
             zIndex: 100,
-            minWidth: '130px',
+            minWidth: '160px',
             overflow: 'hidden',
           }}
         >
@@ -268,7 +305,7 @@ function StatusChanger({
               onClick={() => void changeStatus(s)}
               style={{
                 width: '100%',
-                padding: '0.5rem 0.875rem',
+                padding: '0.55rem 0.875rem',
                 textAlign: 'left',
                 background: 'none',
                 border: 'none',
@@ -278,12 +315,8 @@ function StatusChanger({
                 fontFamily: 'var(--font-body)',
                 transition: 'background 0.15s',
               }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-tertiary)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'none';
-              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-tertiary)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'none'; }}
             >
               Mark as {s}
             </button>
@@ -957,164 +990,196 @@ export default function EventsListPage(): React.ReactElement {
                   </div>
                 </button>
 
-                {/* Expanded detail */}
+                {/* Expanded detail — two-section panel */}
                 {isExpanded && (
-                  <div
-                    style={{
-                      borderTop: '1px solid var(--border)',
-                      padding: '0.875rem 1.125rem',
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '0.625rem',
-                      alignItems: 'center',
-                      background: 'color-mix(in srgb, var(--bg-tertiary) 60%, var(--bg-secondary))',
-                    }}
-                  >
-                    {/* Category */}
-                    <CategoryPill category={event.category} />
+                  <div style={{ borderTop: '1px solid var(--border)' }}>
 
-                    {/* Layout */}
+                    {/* Section 1: metadata chips */}
                     <div
                       style={{
+                        padding: '0.75rem 1.125rem',
                         display: 'flex',
+                        gap: '0.5rem',
+                        flexWrap: 'wrap',
                         alignItems: 'center',
-                        gap: '0.3rem',
-                        padding: '0.25rem 0.6rem',
-                        borderRadius: '999px',
-                        background: 'var(--bg-secondary)',
-                        border: '1px solid var(--border)',
-                        fontSize: '0.75rem',
-                        color: 'var(--text-secondary)',
-                        fontWeight: 500,
+                        background: 'color-mix(in srgb, var(--bg-tertiary) 50%, var(--bg-secondary))',
                       }}
                     >
-                      <LayoutIcon mode={event.layoutMode} />
-                      {event.layoutMode === 'Grid' ? 'Assigned seating' : event.layoutMode === 'CapacityOnly' ? 'General admission' : 'Tickets only'}
+                      <CategoryPill category={event.category} />
+                      <div
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          padding: '0.2rem 0.6rem',
+                          borderRadius: '999px',
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          fontSize: '0.73rem',
+                          color: 'var(--text-secondary)',
+                          fontWeight: 500,
+                        }}
+                      >
+                        <LayoutIcon mode={event.layoutMode} />
+                        {event.layoutMode === 'Grid' ? 'Assigned seating' : event.layoutMode === 'CapacityOnly' ? 'General admission' : 'Tickets only'}
+                      </div>
+                      {event.maxCapacity && (
+                        <div
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: '999px',
+                            background: 'var(--bg-secondary)',
+                            border: '1px solid var(--border)',
+                            fontSize: '0.73rem',
+                            color: 'var(--text-secondary)',
+                            fontWeight: 500,
+                          }}
+                        >
+                          <Users size={11} />
+                          {event.maxCapacity.toLocaleString()} cap
+                        </div>
+                      )}
                     </div>
 
-                    {/* Spacer */}
-                    <div style={{ flex: 1 }} />
-
-                    {/* Status changer */}
-                    <StatusChanger event={event} onStatusChanged={() => void fetchEvents()} />
-
-                    {/* View/Manage */}
-                    <Link
-                      to={`/admin/events/${event.id}`}
+                    {/* Section 2: action buttons */}
+                    <div
                       style={{
+                        padding: '0.75rem 1.125rem',
+                        borderTop: '1px solid var(--border)',
                         display: 'flex',
+                        gap: '0.5rem',
+                        flexWrap: 'wrap',
                         alignItems: 'center',
-                        gap: '0.35rem',
-                        padding: '0.4rem 0.875rem',
-                        borderRadius: '0.5rem',
-                        border: '1px solid var(--accent-primary)',
-                        background: 'color-mix(in srgb, var(--accent-primary) 10%, var(--bg-secondary))',
-                        color: 'var(--accent-primary)',
-                        textDecoration: 'none',
-                        fontSize: '0.8125rem',
-                        fontWeight: 600,
-                        fontFamily: 'var(--font-body)',
-                        transition: 'background 0.15s',
+                        background: 'var(--bg-secondary)',
                       }}
                     >
-                      Manage
-                    </Link>
+                      {/* Status action — left side */}
+                      <StatusChanger event={event} onStatusChanged={() => void fetchEvents()} />
 
-                    {/* Edit */}
-                    {canEdit ? (
+                      <div style={{ flex: 1, minWidth: '0.5rem' }} />
+
+                      {/* Primary: Manage */}
                       <Link
-                        to={`/admin/events/${event.id}/edit`}
+                        to={`/admin/events/${event.id}`}
                         style={{
-                          display: 'flex',
+                          display: 'inline-flex',
                           alignItems: 'center',
                           gap: '0.35rem',
-                          padding: '0.4rem 0.875rem',
+                          padding: '0.4rem 1rem',
                           borderRadius: '0.5rem',
-                          border: '1px solid var(--border)',
-                          background: 'var(--bg-secondary)',
-                          color: 'var(--text-secondary)',
+                          border: 'none',
+                          background: 'var(--accent-primary)',
+                          color: 'var(--bg-primary)',
                           textDecoration: 'none',
                           fontSize: '0.8125rem',
                           fontWeight: 600,
                           fontFamily: 'var(--font-body)',
-                          transition: 'background 0.15s',
+                          whiteSpace: 'nowrap',
                         }}
                       >
-                        <Pencil size={13} />
-                        Edit
+                        Manage
                       </Link>
-                    ) : (
-                      <span
+
+                      {/* Edit */}
+                      {canEdit ? (
+                        <Link
+                          to={`/admin/events/${event.id}/edit`}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.35rem',
+                            padding: '0.4rem 0.875rem',
+                            borderRadius: '0.5rem',
+                            border: '1px solid var(--border)',
+                            background: 'var(--bg-tertiary)',
+                            color: 'var(--text-primary)',
+                            textDecoration: 'none',
+                            fontSize: '0.8125rem',
+                            fontWeight: 600,
+                            fontFamily: 'var(--font-body)',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          <Pencil size={13} />
+                          Edit
+                        </Link>
+                      ) : (
+                        <span
+                          title="Cannot edit completed or cancelled events"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.35rem',
+                            padding: '0.4rem 0.875rem',
+                            borderRadius: '0.5rem',
+                            border: '1px solid var(--border)',
+                            background: 'var(--bg-tertiary)',
+                            color: 'var(--text-tertiary)',
+                            fontSize: '0.8125rem',
+                            fontWeight: 600,
+                            opacity: 0.4,
+                            cursor: 'not-allowed',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          <Pencil size={13} />
+                          Edit
+                        </span>
+                      )}
+
+                      {/* Duplicate */}
+                      <button
+                        type="button"
+                        onClick={() => setDuplicateTarget(event)}
                         style={{
-                          display: 'flex',
+                          display: 'inline-flex',
                           alignItems: 'center',
                           gap: '0.35rem',
                           padding: '0.4rem 0.875rem',
                           borderRadius: '0.5rem',
                           border: '1px solid var(--border)',
                           background: 'var(--bg-tertiary)',
-                          color: 'var(--text-tertiary)',
-                          fontSize: '0.8125rem',
-                          fontWeight: 600,
-                          opacity: 0.45,
-                          cursor: 'not-allowed',
-                        }}
-                      >
-                        <Pencil size={13} />
-                        Edit
-                      </span>
-                    )}
-
-                    {/* Duplicate */}
-                    <button
-                      type="button"
-                      onClick={() => setDuplicateTarget(event)}
-                      title="Duplicate event"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                        padding: '0.4rem 0.875rem',
-                        borderRadius: '0.5rem',
-                        border: '1px solid var(--border)',
-                        background: 'var(--bg-secondary)',
-                        color: 'var(--text-secondary)',
-                        cursor: 'pointer',
-                        fontSize: '0.8125rem',
-                        fontWeight: 600,
-                        fontFamily: 'var(--font-body)',
-                        transition: 'background 0.15s',
-                      }}
-                    >
-                      <Copy size={13} />
-                      Duplicate
-                    </button>
-
-                    {/* Delete (Draft only) */}
-                    {event.status === 'Draft' && (
-                      <button
-                        type="button"
-                        onClick={() => setDeleteTarget(event)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.35rem',
-                          padding: '0.4rem 0.875rem',
-                          borderRadius: '0.5rem',
-                          border: '1px solid var(--color-error)',
-                          background: 'color-mix(in srgb, var(--color-error) 10%, var(--bg-secondary))',
-                          color: 'var(--color-error)',
+                          color: 'var(--text-secondary)',
                           cursor: 'pointer',
                           fontSize: '0.8125rem',
                           fontWeight: 600,
                           fontFamily: 'var(--font-body)',
-                          transition: 'background 0.15s',
+                          whiteSpace: 'nowrap',
                         }}
                       >
-                        <Trash2 size={13} />
-                        Delete
+                        <Copy size={13} />
+                        Duplicate
                       </button>
-                    )}
+
+                      {/* Delete — Draft only */}
+                      {event.status === 'Draft' && (
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(event)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.35rem',
+                            padding: '0.4rem 0.875rem',
+                            borderRadius: '0.5rem',
+                            border: '1px solid color-mix(in srgb, var(--color-error) 40%, transparent)',
+                            background: 'color-mix(in srgb, var(--color-error) 8%, var(--bg-secondary))',
+                            color: 'var(--color-error)',
+                            cursor: 'pointer',
+                            fontSize: '0.8125rem',
+                            fontWeight: 600,
+                            fontFamily: 'var(--font-body)',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          <Trash2 size={13} />
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
