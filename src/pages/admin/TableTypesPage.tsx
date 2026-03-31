@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Plus, Pencil, Circle, RectangleHorizontal, Square, Diamond, X, Check } from 'lucide-react';
+import { Plus, Pencil, Circle, RectangleHorizontal, Square, Diamond, X, Check, ChevronDown, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { adminApi } from '../../services/adminApi';
-import { SkeletonLine } from '../../components/Skeleton';
 import type { TableShape } from '../../stores/floorPlanStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -298,17 +297,29 @@ function InlineForm({ initial = EMPTY_FORM, onSave, onCancel, saving }: InlineFo
   );
 }
 
-// ─── Skeleton Row ─────────────────────────────────────────────────────────────
+// ─── Skeleton Card ────────────────────────────────────────────────────────────
 
-function SkeletonTableRow(): React.ReactElement {
+function SkeletonCard(): React.ReactElement {
   return (
-    <tr>
-      {[1, 2, 3, 4, 5, 6].map((i) => (
-        <td key={i} style={{ padding: '0.875rem 1rem' }}>
-          <SkeletonLine className={i === 1 ? 'w-32' : i === 6 ? 'w-20' : 'w-20'} />
-        </td>
-      ))}
-    </tr>
+    <div
+      style={{
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border)',
+        borderRadius: '0.75rem',
+        padding: '1rem 1.25rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.875rem',
+        animation: 'pulse 1.5s ease-in-out infinite',
+      }}
+    >
+      <div style={{ width: '36px', height: '36px', borderRadius: '0.5rem', background: 'var(--bg-tertiary)', flexShrink: 0 }} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <div style={{ height: '14px', width: '40%', borderRadius: '4px', background: 'var(--bg-tertiary)' }} />
+        <div style={{ height: '11px', width: '25%', borderRadius: '4px', background: 'var(--bg-tertiary)' }} />
+      </div>
+      <div style={{ height: '20px', width: '56px', borderRadius: '999px', background: 'var(--bg-tertiary)', flexShrink: 0 }} />
+    </div>
   );
 }
 
@@ -319,6 +330,7 @@ export default function TableTypesPage(): React.ReactElement {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const loadTableTypes = useCallback(async (): Promise<void> => {
@@ -467,236 +479,275 @@ export default function TableTypesPage(): React.ReactElement {
         />
       )}
 
-      {/* Table */}
-      <div
-        style={{
-          background: 'var(--bg-secondary)',
-          border: '1px solid var(--border)',
-          borderRadius: '0.75rem',
-          overflow: 'hidden',
-          boxShadow: 'var(--shadow-card)',
-        }}
-      >
-        <div className="c829-table-scroll" style={{ overflowX: 'auto' }}>
-          <table
+      {/* Card list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+        {loading ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : tableTypes.length === 0 ? (
+          <div
             style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontFamily: 'var(--font-body)',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: '0.75rem',
+              padding: '3rem 1.5rem',
+              textAlign: 'center',
+              color: 'var(--text-tertiary)',
               fontSize: '0.875rem',
+              boxShadow: 'var(--shadow-card)',
             }}
           >
-            <thead>
-              <tr
+            No table types yet. Click "Add Type" to create one.
+          </div>
+        ) : (
+          tableTypes.map((tt) => {
+            const isExpanded = expandedId === tt.id;
+            const accentColor = tt.defaultColor || 'var(--accent-primary)';
+
+            if (editingId === tt.id) {
+              return (
+                <InlineForm
+                  key={tt.id}
+                  initial={{
+                    name: tt.name,
+                    shape: tt.shape,
+                    defaultCapacity: tt.defaultCapacity,
+                    defaultPriceCents: tt.defaultPriceCents,
+                    defaultColor: tt.defaultColor,
+                  }}
+                  onSave={(data) => handleEdit(tt.id, data)}
+                  onCancel={() => setEditingId(null)}
+                  saving={saving}
+                />
+              );
+            }
+
+            return (
+              <div
+                key={tt.id}
                 style={{
-                  background: 'var(--bg-tertiary)',
-                  borderBottom: '1px solid var(--border)',
+                  background: 'var(--bg-secondary)',
+                  border: `1px solid ${isExpanded ? accentColor : 'var(--border)'}`,
+                  borderLeft: `4px solid ${accentColor}`,
+                  borderRadius: '0.75rem',
+                  boxShadow: isExpanded ? `0 0 0 1px ${accentColor}22` : 'var(--shadow-card)',
+                  opacity: tt.isActive ? 1 : 0.55,
+                  transition: 'border-color 0.2s, box-shadow 0.2s, opacity 0.2s',
+                  overflow: 'hidden',
                 }}
               >
-                {['Name', 'Shape', 'Capacity', 'Default Price', 'Status', 'Actions'].map((h) => (
-                  <th
-                    key={h}
+                {/* Card header — always visible, click to expand */}
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(isExpanded ? null : tt.id)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.875rem',
+                    padding: '0.875rem 1.125rem',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontFamily: 'var(--font-body)',
+                  }}
+                >
+                  {/* Shape icon badge */}
+                  <div
                     style={{
-                      padding: '0.75rem 1rem',
-                      textAlign: 'left',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      color: 'var(--text-tertiary)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      whiteSpace: 'nowrap',
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '0.5rem',
+                      background: `${accentColor}22`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      color: accentColor,
                     }}
                   >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <>
-                  <SkeletonTableRow />
-                  <SkeletonTableRow />
-                  <SkeletonTableRow />
-                  <SkeletonTableRow />
-                </>
-              ) : tableTypes.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    style={{
-                      padding: '3rem 1rem',
-                      textAlign: 'center',
-                      color: 'var(--text-tertiary)',
-                      fontSize: '0.875rem',
-                    }}
-                  >
-                    No table types yet. Click "Add Type" to create one.
-                  </td>
-                </tr>
-              ) : (
-                tableTypes.map((tt) => {
-                  if (editingId === tt.id) {
-                    return (
-                      <tr key={tt.id}>
-                        <td colSpan={6} style={{ padding: '0.75rem 1rem' }}>
-                          <InlineForm
-                            initial={{
-                              name: tt.name,
-                              shape: tt.shape,
-                              defaultCapacity: tt.defaultCapacity,
-                              defaultPriceCents: tt.defaultPriceCents,
-                              defaultColor: tt.defaultColor,
-                            }}
-                            onSave={(data) => handleEdit(tt.id, data)}
-                            onCancel={() => setEditingId(null)}
-                            saving={saving}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  }
+                    <ShapeIcon shape={tt.shape} size={20} fill={tt.defaultColor || undefined} />
+                  </div>
 
-                  return (
-                    <tr
-                      key={tt.id}
+                  {/* Name + shape hint */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
                       style={{
-                        borderBottom: '1px solid var(--border)',
-                        transition: 'background 0.1s',
-                        opacity: tt.isActive ? 1 : 0.45,
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'var(--bg-tertiary)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
+                        fontSize: '0.9375rem',
+                        fontWeight: 700,
+                        color: 'var(--text-primary)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
                       }}
                     >
-                      {/* Name */}
-                      <td style={{ padding: '0.875rem 1rem' }}>
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                          }}
-                        >
-                          <div style={{ color: tt.defaultColor || 'var(--accent-primary)', flexShrink: 0 }}>
-                            <ShapeIcon shape={tt.shape} size={16} fill={tt.defaultColor || undefined} />
-                          </div>
-                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                            {tt.name}
-                          </span>
-                        </div>
-                      </td>
+                      {tt.name}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '1px' }}>
+                      {tt.shape} · {tt.defaultCapacity} seats
+                    </div>
+                  </div>
 
-                      {/* Shape */}
-                      <td style={{ padding: '0.875rem 1rem' }}>
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.375rem',
-                            color: tt.defaultColor || 'var(--accent-primary)',
-                          }}
-                        >
-                          <ShapeIcon shape={tt.shape} size={18} fill={tt.defaultColor || undefined} />
-                          <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                            {tt.shape}
-                          </span>
-                        </div>
-                      </td>
+                  {/* Price */}
+                  <span
+                    style={{
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      color: 'var(--text-primary)',
+                      flexShrink: 0,
+                      fontFamily: 'var(--font-mono, var(--font-body))',
+                    }}
+                  >
+                    {formatPrice(tt.defaultPriceCents)}
+                  </span>
 
-                      {/* Capacity */}
-                      <td style={{ padding: '0.875rem 1rem', color: 'var(--text-primary)' }}>
-                        {tt.defaultCapacity}
-                      </td>
+                  {/* Chevron */}
+                  <div
+                    style={{
+                      color: 'var(--text-tertiary)',
+                      flexShrink: 0,
+                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.22s ease',
+                    }}
+                  >
+                    <ChevronDown size={18} />
+                  </div>
+                </button>
 
-                      {/* Default Price */}
-                      <td style={{ padding: '0.875rem 1rem', color: 'var(--text-primary)', fontWeight: 600 }}>
-                        {formatPrice(tt.defaultPriceCents)}
-                      </td>
+                {/* Expanded detail row */}
+                {isExpanded && (
+                  <div
+                    style={{
+                      borderTop: '1px solid var(--border)',
+                      padding: '0.875rem 1.125rem',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '0.75rem',
+                      alignItems: 'center',
+                      background: 'color-mix(in srgb, var(--bg-tertiary) 60%, var(--bg-secondary))',
+                    }}
+                  >
+                    {/* Shape pill */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.375rem',
+                        padding: '0.3rem 0.75rem',
+                        borderRadius: '999px',
+                        background: `${accentColor}18`,
+                        border: `1px solid ${accentColor}44`,
+                        color: accentColor,
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                      }}
+                    >
+                      <ShapeIcon shape={tt.shape} size={13} fill={tt.defaultColor || undefined} />
+                      {tt.shape}
+                    </div>
 
-                      {/* Status toggle */}
-                      <td style={{ padding: '0.875rem 1rem' }}>
-                        <button
-                          type="button"
-                          title={tt.isActive ? 'Click to disable' : 'Click to enable'}
-                          onClick={() => handleToggleActive(tt.id, !tt.isActive)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.375rem',
-                            padding: '0.25rem 0.625rem',
-                            borderRadius: '999px',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            background: tt.isActive
-                              ? 'color-mix(in srgb, var(--color-success) 15%, transparent)'
-                              : 'var(--bg-tertiary)',
-                            color: tt.isActive ? 'var(--color-success)' : 'var(--text-tertiary)',
-                            border: `1px solid ${tt.isActive ? 'var(--color-success)' : 'var(--border)'}`,
-                            cursor: 'pointer',
-                            fontFamily: 'var(--font-body)',
-                            transition: 'background 0.15s',
-                          }}
-                        >
-                          <div style={{
-                            width: '28px', height: '16px', borderRadius: '8px',
-                            background: tt.isActive ? 'var(--color-success)' : 'var(--border)',
-                            position: 'relative', transition: 'background 0.2s',
-                          }}>
-                            <div style={{
-                              width: '12px', height: '12px', borderRadius: '50%',
-                              background: 'var(--bg-primary)',
-                              position: 'absolute', top: '2px',
-                              left: tt.isActive ? '14px' : '2px',
-                              transition: 'left 0.2s',
-                            }} />
-                          </div>
-                          {tt.isActive ? 'Active' : 'Disabled'}
-                        </button>
-                      </td>
+                    {/* Capacity badge */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                        padding: '0.3rem 0.75rem',
+                        borderRadius: '999px',
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                      }}
+                    >
+                      <Users size={13} />
+                      {tt.defaultCapacity} seats
+                    </div>
 
-                      {/* Actions */}
-                      <td style={{ padding: '0.875rem 1rem' }}>
-                        <div style={{ display: 'flex', gap: '0.375rem' }}>
-                          {/* Confirm delete dialog */}
-                          <button
-                            type="button"
-                            title={tt.isActive ? 'Edit' : 'Enable first to edit'}
-                            disabled={!tt.isActive}
-                            onClick={tt.isActive ? () => {
-                              setEditingId(tt.id);
-                              setShowAddForm(false);
-                            } : undefined}
-                            className="c829-table-action-btn"
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: '30px',
-                              height: '30px',
-                              borderRadius: '0.375rem',
-                              border: '1px solid var(--border)',
-                              background: 'var(--bg-tertiary)',
-                              color: tt.isActive ? 'var(--text-secondary)' : 'var(--text-tertiary)',
-                              cursor: tt.isActive ? 'pointer' : 'not-allowed',
-                              opacity: tt.isActive ? 1 : 0.4,
-                              transition: 'border-color 0.15s, color 0.15s',
-                            }}
-                          >
-                            <Pencil size={13} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                    {/* Status toggle */}
+                    <button
+                      type="button"
+                      title={tt.isActive ? 'Click to disable' : 'Click to enable'}
+                      onClick={() => void handleToggleActive(tt.id, !tt.isActive)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.375rem',
+                        padding: '0.3rem 0.75rem',
+                        borderRadius: '999px',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        background: tt.isActive
+                          ? 'color-mix(in srgb, var(--color-success) 15%, transparent)'
+                          : 'var(--bg-secondary)',
+                        color: tt.isActive ? 'var(--color-success)' : 'var(--text-tertiary)',
+                        border: `1px solid ${tt.isActive ? 'var(--color-success)' : 'var(--border)'}`,
+                        cursor: 'pointer',
+                        fontFamily: 'var(--font-body)',
+                        transition: 'background 0.15s, color 0.15s, border-color 0.15s',
+                      }}
+                    >
+                      <div style={{
+                        width: '26px', height: '15px', borderRadius: '8px',
+                        background: tt.isActive ? 'var(--color-success)' : 'var(--border)',
+                        position: 'relative', transition: 'background 0.2s', flexShrink: 0,
+                      }}>
+                        <div style={{
+                          width: '11px', height: '11px', borderRadius: '50%',
+                          background: 'var(--bg-primary)',
+                          position: 'absolute', top: '2px',
+                          left: tt.isActive ? '13px' : '2px',
+                          transition: 'left 0.2s',
+                        }} />
+                      </div>
+                      {tt.isActive ? 'Active' : 'Disabled'}
+                    </button>
+
+                    {/* Spacer */}
+                    <div style={{ flex: 1 }} />
+
+                    {/* Edit button */}
+                    <button
+                      type="button"
+                      disabled={!tt.isActive}
+                      title={tt.isActive ? 'Edit' : 'Enable first to edit'}
+                      onClick={tt.isActive ? () => {
+                        setEditingId(tt.id);
+                        setExpandedId(null);
+                        setShowAddForm(false);
+                      } : undefined}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.375rem',
+                        padding: '0.4rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid var(--border)',
+                        background: tt.isActive ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
+                        color: tt.isActive ? 'var(--text-secondary)' : 'var(--text-tertiary)',
+                        cursor: tt.isActive ? 'pointer' : 'not-allowed',
+                        opacity: tt.isActive ? 1 : 0.45,
+                        fontSize: '0.8125rem',
+                        fontWeight: 600,
+                        fontFamily: 'var(--font-body)',
+                        transition: 'border-color 0.15s, color 0.15s',
+                      }}
+                    >
+                      <Pencil size={13} />
+                      Edit
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
