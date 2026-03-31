@@ -813,7 +813,7 @@ export default function EventsListPage(): React.ReactElement {
         }}
       >
         {/* Search */}
-        <div style={{ position: 'relative', flex: '1', minWidth: '200px' }}>
+        <div style={{ position: 'relative', flex: '1', minWidth: '0' }}>
           <input
             type="text"
             placeholder="Search events…"

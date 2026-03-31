@@ -302,7 +302,7 @@
 @media (max-width: 640px) {
   .c829-page-header {
     flex-direction: column !important;
-    align-items: flex-start !important;
+    align-items: stretch !important;
     gap: 0.75rem !important;
   }
   .c829-page-header > * { width: 100% !important; }
@@ -316,6 +316,8 @@
   }
   .c829-filter-row input,
   .c829-filter-row select { min-width: 0 !important; width: 100% !important; }
+  /* Also zero out wrapper divs that carry inline minWidth */
+  .c829-filter-row > div { min-width: 0 !important; width: 100% !important; }
 }
 
 /* ── Admin stat cards grid ── */
@@ -385,6 +387,10 @@
   .c829-booking-row {
     flex-wrap: wrap !important;
     gap: 0.35rem !important;
+  }
+  /* Remove fixed minWidth on inline-styled amount/time spans */
+  .c829-booking-row > span {
+    min-width: 0 !important;
   }
 }
 

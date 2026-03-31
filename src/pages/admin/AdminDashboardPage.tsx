@@ -196,7 +196,7 @@ function DashboardSkeleton(): React.ReactElement {
         </div>
       </div>
       {/* Metrics skeleton */}
-      <div className="c829-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+      <div className="c829-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
         {[1, 2, 3, 4].map(i => (
           <div key={i} style={{
             background: 'var(--bg-secondary)', borderRadius: '0.75rem',
@@ -690,13 +690,13 @@ export default function AdminDashboardPage(): React.ReactElement {
                   {/* Amount */}
                   <span style={{
                     fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)',
-                    minWidth: '60px', textAlign: 'right',
+                    textAlign: 'right', flexShrink: 0,
                   }}>{formatCurrency(b.totalCents)}</span>
 
                   {/* Time */}
                   <span style={{
                     fontSize: '0.75rem', color: 'var(--text-tertiary)',
-                    minWidth: '50px', textAlign: 'right',
+                    textAlign: 'right', flexShrink: 0,
                   }}>{timeAgo(b.createdAt)}</span>
                 </div>
               );

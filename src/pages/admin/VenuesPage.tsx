@@ -376,7 +376,6 @@ export default function VenuesPage(): React.ReactElement {
             fontFamily: 'var(--font-body)',
             fontSize: '0.875rem',
             outline: 'none',
-            minWidth: '200px',
           }}
         />
 
