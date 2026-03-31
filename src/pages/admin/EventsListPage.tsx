@@ -180,153 +180,6 @@ function LayoutIcon({ mode }: { mode: LayoutMode }): React.ReactElement {
   );
 }
 
-// ─── Status change dropdown ───────────────────────────────────────────────────
-
-function StatusChanger({
-  event,
-  onStatusChanged,
-}: {
-  event: EventItem;
-  onStatusChanged: () => void;
-}): React.ReactElement {
-  const [open, setOpen] = useState(false);
-  const [changing, setChanging] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const transitions = STATUS_TRANSITIONS[event.status];
-
-  useEffect(() => {
-    if (!open) return;
-    function handleClick(e: MouseEvent): void {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [open]);
-
-  if (transitions.length === 0) return <></>;
-
-  async function changeStatus(newStatus: EventStatus): Promise<void> {
-    setOpen(false);
-    setChanging(true);
-    try {
-      await adminApi.events.updateStatus(event.id, newStatus);
-      toast.success(`Event marked as ${newStatus}`);
-      onStatusChanged();
-    } catch {
-      toast.error('Failed to update status');
-    } finally {
-      setChanging(false);
-    }
-  }
-
-  // Single transition: render as a plain button, no dropdown needed
-  if (transitions.length === 1) {
-    const next = transitions[0];
-    const isPublish = next === 'Published';
-    return (
-      <button
-        type="button"
-        onClick={() => void changeStatus(next)}
-        disabled={changing}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.35rem',
-          padding: '0.4rem 0.875rem',
-          borderRadius: '0.5rem',
-          border: `1px solid ${isPublish ? 'var(--color-success)' : 'var(--border)'}`,
-          background: isPublish
-            ? 'color-mix(in srgb, var(--color-success) 12%, var(--bg-secondary))'
-            : 'var(--bg-secondary)',
-          color: isPublish ? 'var(--color-success)' : 'var(--text-secondary)',
-          cursor: changing ? 'not-allowed' : 'pointer',
-          opacity: changing ? 0.6 : 1,
-          fontSize: '0.8125rem',
-          fontWeight: 600,
-          fontFamily: 'var(--font-body)',
-          transition: 'background 0.15s',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {changing ? 'Updating…' : `${next === 'Published' ? 'Publish' : next === 'Cancelled' ? 'Cancel' : next} event`}
-      </button>
-    );
-  }
-
-  return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        disabled={changing}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.35rem',
-          padding: '0.4rem 0.875rem',
-          borderRadius: '0.5rem',
-          border: '1px solid var(--border)',
-          background: 'var(--bg-secondary)',
-          color: 'var(--text-secondary)',
-          cursor: changing ? 'not-allowed' : 'pointer',
-          opacity: changing ? 0.6 : 1,
-          fontSize: '0.8125rem',
-          fontWeight: 600,
-          fontFamily: 'var(--font-body)',
-          transition: 'background 0.15s',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {changing ? 'Updating…' : 'Change status'}
-        <ChevronDown size={13} />
-      </button>
-      {open && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            marginTop: '0.25rem',
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border)',
-            borderRadius: '0.5rem',
-            boxShadow: 'var(--shadow-card-hover)',
-            zIndex: 100,
-            minWidth: '160px',
-            overflow: 'hidden',
-          }}
-        >
-          {transitions.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => void changeStatus(s)}
-              style={{
-                width: '100%',
-                padding: '0.55rem 0.875rem',
-                textAlign: 'left',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '0.8125rem',
-                color: 'var(--text-primary)',
-                fontFamily: 'var(--font-body)',
-                transition: 'background 0.15s',
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-tertiary)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'none'; }}
-            >
-              Mark as {s}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function SkeletonEventAccordion(): React.ReactElement {
@@ -700,6 +553,16 @@ export default function EventsListPage(): React.ReactElement {
     }
   }
 
+  async function handleStatusChange(eventId: string, newStatus: EventStatus): Promise<void> {
+    try {
+      await adminApi.events.updateStatus(eventId, newStatus);
+      toast.success(`Event marked as ${newStatus}`);
+      void fetchEvents();
+    } catch {
+      toast.error('Failed to update status');
+    }
+  }
+
   async function handleDuplicate(startDate: string, endDate: string): Promise<void> {
     if (!duplicateTarget) return;
     setDuplicating(true);
@@ -922,12 +785,13 @@ export default function EventsListPage(): React.ReactElement {
                 key={event.id}
                 style={{
                   background: 'var(--bg-secondary)',
-                  border: `1px solid ${isExpanded ? borderColor : 'var(--border)'}`,
+                  borderTop: `1px solid ${isExpanded ? borderColor : 'var(--border)'}`,
+                  borderRight: `1px solid ${isExpanded ? borderColor : 'var(--border)'}`,
+                  borderBottom: `1px solid ${isExpanded ? borderColor : 'var(--border)'}`,
                   borderLeft: `4px solid ${borderColor}`,
                   borderRadius: '0.75rem',
                   boxShadow: isExpanded ? `0 0 0 1px ${borderColor}22` : 'var(--shadow-card)',
                   transition: 'border-color 0.2s, box-shadow 0.2s',
-                  overflow: 'hidden',
                 }}
               >
                 {/* Card header — click to expand */}
@@ -1054,10 +918,43 @@ export default function EventsListPage(): React.ReactElement {
                         flexWrap: 'wrap',
                         alignItems: 'center',
                         background: 'var(--bg-secondary)',
+                        borderRadius: '0 0 0.65rem 0.65rem',
                       }}
                     >
-                      {/* Status action — left side */}
-                      <StatusChanger event={event} onStatusChanged={() => void fetchEvents()} />
+                      {/* Status transitions — inline buttons, no dropdown */}
+                      {STATUS_TRANSITIONS[event.status].map((nextStatus) => {
+                        const isPublish = nextStatus === 'Published';
+                        const isCancel = nextStatus === 'Cancelled';
+                        const label = isPublish ? 'Publish' : isCancel ? 'Cancel event' : 'Mark complete';
+                        return (
+                          <button
+                            key={nextStatus}
+                            type="button"
+                            onClick={() => void handleStatusChange(event.id, nextStatus)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem',
+                              padding: '0.4rem 0.875rem',
+                              borderRadius: '0.5rem',
+                              border: `1px solid ${isPublish ? 'var(--color-success)' : isCancel ? 'color-mix(in srgb, var(--color-error) 40%, transparent)' : 'var(--border)'}`,
+                              background: isPublish
+                                ? 'color-mix(in srgb, var(--color-success) 12%, var(--bg-secondary))'
+                                : isCancel
+                                ? 'color-mix(in srgb, var(--color-error) 8%, var(--bg-secondary))'
+                                : 'var(--bg-secondary)',
+                              color: isPublish ? 'var(--color-success)' : isCancel ? 'var(--color-error)' : 'var(--text-secondary)',
+                              cursor: 'pointer',
+                              fontSize: '0.8125rem',
+                              fontWeight: 600,
+                              fontFamily: 'var(--font-body)',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
 
                       <div style={{ flex: 1, minWidth: '0.5rem' }} />
 

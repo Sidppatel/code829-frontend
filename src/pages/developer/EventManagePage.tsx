@@ -502,6 +502,7 @@ export default function EventManagePage(): React.ReactElement {
           padding: '0.25rem',
           marginBottom: '1.5rem',
           flexWrap: 'nowrap',
+          overflowX: 'auto',
         }}
       >
         {tabs.map((tab) => (
@@ -574,80 +575,77 @@ export default function EventManagePage(): React.ReactElement {
           {/* Event details summary */}
           <div
             style={{
-              background: 'var(--glass-bg)',
+              background: 'var(--bg-secondary)',
               border: '1px solid var(--border)',
               borderRadius: '0.875rem',
-              padding: '1.25rem',
-              backdropFilter: 'blur(8px)',
+              overflow: 'hidden',
+              boxShadow: 'var(--shadow-card)',
             }}
           >
-            <h3
+            <div
               style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1rem',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                margin: '0 0 1rem',
+                padding: '0.875rem 1.25rem',
+                borderBottom: '1px solid var(--border)',
+                background: 'var(--bg-tertiary)',
               }}
             >
-              Event Details
-            </h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-              <DetailRow label="Category">
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.25rem',
-                    padding: '0.15rem 0.55rem',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    background: 'color-mix(in srgb, var(--accent-primary) 12%, transparent)',
-                    color: 'var(--accent-primary)',
-                    border: '1px solid color-mix(in srgb, var(--accent-primary) 25%, transparent)',
-                  }}
-                >
-                  <Tag size={11} />
-                  {event.category}
-                </span>
-              </DetailRow>
-
-              <DetailRow label="Date & Time">
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                  <Calendar size={13} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
-                  {formatDateRange(event.startDate, event.endDate)}
-                </span>
-              </DetailRow>
-
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Event Details
+              </span>
+            </div>
+            <div style={{ padding: '0.25rem 0' }}>
+              <div style={{ display: 'flex', gap: '1rem', padding: '0.75rem 1.25rem', borderBottom: '1px solid var(--border)', alignItems: 'flex-start' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '0.5rem', flexShrink: 0, background: 'color-mix(in srgb, var(--accent-primary) 12%, var(--bg-tertiary))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)' }}>
+                  <Calendar size={15} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>Date & Time</div>
+                  <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>{formatDateRange(event.startDate, event.endDate)}</div>
+                </div>
+              </div>
               {event.venue && (
-                <DetailRow label="Venue">
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                    <MapPin size={13} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
-                    {event.venue.name} · {event.venue.city}, {event.venue.state}
-                  </span>
-                </DetailRow>
+                <div style={{ display: 'flex', gap: '1rem', padding: '0.75rem 1.25rem', borderBottom: '1px solid var(--border)', alignItems: 'flex-start' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '0.5rem', flexShrink: 0, background: 'color-mix(in srgb, var(--color-info) 12%, var(--bg-tertiary))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-info)' }}>
+                    <MapPin size={15} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>Venue</div>
+                    <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 600 }}>{event.venue.name}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{event.venue.city}, {event.venue.state}</div>
+                  </div>
+                </div>
               )}
-
-              <DetailRow label="Layout">
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                  {event.layoutMode === 'Grid' && <Grid3X3 size={13} style={{ color: 'var(--text-tertiary)' }} />}
-                  {event.layoutMode === 'CapacityOnly' && <Users size={13} style={{ color: 'var(--text-tertiary)' }} />}
-                  {event.layoutMode === 'None' && <Ticket size={13} style={{ color: 'var(--text-tertiary)' }} />}
-                  {event.layoutMode === 'Grid'
-                    ? 'Assigned Seating'
-                    : event.layoutMode === 'CapacityOnly'
-                    ? `General Admission${event.maxCapacity ? ` · ${event.maxCapacity} guests` : ''}`
-                    : 'Tickets Only'}
-                </span>
-              </DetailRow>
-
-              <DetailRow label="Description" last>
-                <span style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-                  {event.description}
-                </span>
-              </DetailRow>
+              <div style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ flex: 1, display: 'flex', gap: '1rem', padding: '0.75rem 1.25rem', alignItems: 'flex-start', borderRight: '1px solid var(--border)' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '0.5rem', flexShrink: 0, background: 'color-mix(in srgb, var(--accent-primary) 12%, var(--bg-tertiary))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)' }}>
+                    <Tag size={15} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.35rem' }}>Category</div>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.6rem', borderRadius: '0.375rem', fontSize: '0.75rem', fontWeight: 600, background: 'color-mix(in srgb, var(--accent-primary) 12%, transparent)', color: 'var(--accent-primary)', border: '1px solid color-mix(in srgb, var(--accent-primary) 25%, transparent)' }}>
+                      {event.category}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ flex: 1, display: 'flex', gap: '1rem', padding: '0.75rem 1.25rem', alignItems: 'flex-start' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '0.5rem', flexShrink: 0, background: 'color-mix(in srgb, var(--color-success) 12%, var(--bg-tertiary))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-success)' }}>
+                    {event.layoutMode === 'Grid' ? <Grid3X3 size={15} /> : event.layoutMode === 'CapacityOnly' ? <Users size={15} /> : <Ticket size={15} />}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>Layout</div>
+                    <div style={{ fontSize: '0.8125rem', color: 'var(--text-primary)', fontWeight: 500 }}>
+                      {event.layoutMode === 'Grid' ? 'Assigned Seating' : event.layoutMode === 'CapacityOnly' ? 'General Admission' : 'Tickets Only'}
+                    </div>
+                    {event.maxCapacity && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{event.maxCapacity.toLocaleString()} capacity</div>}
+                  </div>
+                </div>
+              </div>
+              {event.description && (
+                <div style={{ padding: '0.875rem 1.25rem' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.5rem' }}>Description</div>
+                  <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.65 }}>{event.description}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -920,44 +918,4 @@ export default function EventManagePage(): React.ReactElement {
   );
 }
 
-// ─── Detail row helper ────────────────────────────────────────────────────────
-
-function DetailRow({
-  label,
-  children,
-  last = false,
-}: {
-  label: string;
-  children: React.ReactNode;
-  last?: boolean;
-}): React.ReactElement {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        gap: '0.875rem',
-        alignItems: 'flex-start',
-        paddingBottom: last ? 0 : '0.625rem',
-        borderBottom: last ? 'none' : '1px solid var(--border)',
-        marginBottom: last ? 0 : '0.625rem',
-      }}
-    >
-      <span
-        style={{
-          minWidth: '90px',
-          fontSize: '0.775rem',
-          fontWeight: 600,
-          color: 'var(--text-tertiary)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.04em',
-          paddingTop: '0.15rem',
-          flexShrink: 0,
-        }}
-      >
-        {label}
-      </span>
-      <span style={{ fontSize: '0.875rem', color: 'var(--text-primary)', flex: 1 }}>{children}</span>
-    </div>
-  );
-}
 
