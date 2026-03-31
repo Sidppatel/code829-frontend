@@ -87,6 +87,9 @@ export const developerApi = {
     list: <T = unknown>(params?: Record<string, string | number | boolean>) =>
       apiClient.get<T>('/developer/venues', { params }),
 
+    getById: <T = unknown>(id: string) =>
+      apiClient.get<T>(`/admin/venues/${id}`),
+
     create: <T = unknown>(data: unknown) =>
       apiClient.post<T>('/developer/venues', data),
   },
