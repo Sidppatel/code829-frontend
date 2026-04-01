@@ -110,7 +110,9 @@ export default function DeveloperSettingsPage(): React.ReactElement {
             style={{
               padding: '0.75rem 0',
               background: 'none',
-              border: 'none',
+              borderTop: 'none',
+              borderRight: 'none',
+              borderLeft: 'none',
               borderBottom: `2px solid ${activeTab === 'general' ? 'var(--accent-primary)' : 'transparent'}`,
               color: activeTab === 'general' ? 'var(--text-primary)' : 'var(--text-secondary)',
               fontWeight: activeTab === 'general' ? 600 : 400,
@@ -130,7 +132,9 @@ export default function DeveloperSettingsPage(): React.ReactElement {
             style={{
               padding: '0.75rem 0',
               background: 'none',
-              border: 'none',
+              borderTop: 'none',
+              borderRight: 'none',
+              borderLeft: 'none',
               borderBottom: `2px solid ${activeTab === 'users' ? 'var(--accent-primary)' : 'transparent'}`,
               color: activeTab === 'users' ? 'var(--text-primary)' : 'var(--text-secondary)',
               fontWeight: activeTab === 'users' ? 600 : 400,

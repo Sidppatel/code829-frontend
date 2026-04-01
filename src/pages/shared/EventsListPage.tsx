@@ -187,7 +187,9 @@ function SkeletonEventAccordion(): React.ReactElement {
     <div
       style={{
         background: 'var(--bg-secondary)',
-        border: '1px solid var(--border)',
+        borderTop: '1px solid var(--border)',
+        borderRight: '1px solid var(--border)',
+        borderBottom: '1px solid var(--border)',
         borderLeft: '4px solid var(--border)',
         borderRadius: '0.75rem',
         padding: '1rem 1.25rem',

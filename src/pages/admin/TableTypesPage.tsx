@@ -531,7 +531,9 @@ export default function TableTypesPage(): React.ReactElement {
                 key={tt.id}
                 style={{
                   background: 'var(--bg-secondary)',
-                  border: `1px solid ${isExpanded ? accentColor : 'var(--border)'}`,
+                  borderTop: `1px solid ${isExpanded ? accentColor : 'var(--border)'}`,
+                  borderRight: `1px solid ${isExpanded ? accentColor : 'var(--border)'}`,
+                  borderBottom: `1px solid ${isExpanded ? accentColor : 'var(--border)'}`,
                   borderLeft: `4px solid ${accentColor}`,
                   borderRadius: '0.75rem',
                   boxShadow: isExpanded ? `0 0 0 1px ${accentColor}22` : 'var(--shadow-card)',

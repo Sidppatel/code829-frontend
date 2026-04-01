@@ -42,7 +42,9 @@ function SkeletonVenueAccordion(): React.ReactElement {
     <div
       style={{
         background: 'var(--bg-secondary)',
-        border: '1px solid var(--border)',
+        borderTop: '1px solid var(--border)',
+        borderRight: '1px solid var(--border)',
+        borderBottom: '1px solid var(--border)',
         borderLeft: '4px solid var(--border)',
         borderRadius: '0.75rem',
         padding: '1rem 1.25rem',
@@ -481,7 +483,9 @@ export default function VenuesPage(): React.ReactElement {
                 key={venue.id}
                 style={{
                   background: 'var(--bg-secondary)',
-                  border: `1px solid ${isExpanded ? 'var(--accent-primary)' : 'var(--border)'}`,
+                  borderTop: `1px solid ${isExpanded ? 'var(--accent-primary)' : 'var(--border)'}`,
+                  borderRight: `1px solid ${isExpanded ? 'var(--accent-primary)' : 'var(--border)'}`,
+                  borderBottom: `1px solid ${isExpanded ? 'var(--accent-primary)' : 'var(--border)'}`,
                   borderLeft: `4px solid ${venue.isActive ? 'var(--accent-primary)' : 'var(--border)'}`,
                   borderRadius: '0.75rem',
                   boxShadow: isExpanded ? '0 0 0 1px color-mix(in srgb, var(--accent-primary) 20%, transparent)' : 'var(--shadow-card)',
