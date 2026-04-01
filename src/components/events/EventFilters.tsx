@@ -2,11 +2,11 @@ import { Input, Select, Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import type { EventFacets } from '../../types/event';
 
-interface FilterValues {
+export interface FilterValues {
   search?: string;
   category?: string;
   city?: string;
-  dateFilter?: string;
+  dateFilter?: 'today' | 'this-week' | 'this-month';
 }
 
 interface Props {
