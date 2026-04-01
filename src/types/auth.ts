@@ -10,17 +10,13 @@ export interface UserProfile {
   lastName: string;
   role: UserRole;
   phone?: string;
-  address?: AddressSummary;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
   optInLocationEmail: boolean;
   hasCompletedOnboarding: boolean;
   createdAt: string;
-}
-
-export interface AddressSummary {
-  line1: string;
-  city: string;
-  state: string;
-  zipCode: string;
 }
 
 export type UserRole = 'User' | 'Staff' | 'Admin' | 'Developer';

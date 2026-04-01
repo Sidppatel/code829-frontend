@@ -21,10 +21,10 @@ export default function ProfilePage() {
           firstName: data.firstName,
           lastName: data.lastName,
           phone: data.phone ?? '',
-          address: data.address?.line1 ?? '',
-          city: data.address?.city ?? '',
-          state: data.address?.state ?? '',
-          zipCode: data.address?.zipCode ?? '',
+          address: data.address ?? '',
+          city: data.city ?? '',
+          state: data.state ?? '',
+          zipCode: data.zipCode ?? '',
           optInLocationEmail: data.optInLocationEmail,
         });
       } catch {
