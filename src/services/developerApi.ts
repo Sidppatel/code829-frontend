@@ -11,7 +11,7 @@ export interface DevLogEntry {
   statusCode?: number;
 }
 
-export interface DevLogParams {
+export interface DevLogParams extends Record<string, unknown> {
   page?: number;
   pageSize?: number;
   severity?: string;
