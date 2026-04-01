@@ -36,10 +36,32 @@ export default function PublicLayout() {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ display: 'flex', alignItems: 'center', padding: '0 24px' }}>
-        <Link to="/" style={{ marginRight: 24 }}>
-          <Typography.Title level={4} style={{ margin: 0, color: '#fff' }}>
+    <Layout style={{ minHeight: '100vh', background: '#0A0A0F' }}>
+      <Header
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 32px',
+          background: 'rgba(10, 10, 15, 0.8)',
+          backdropFilter: 'blur(16px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+        }}
+      >
+        <Link to="/" style={{ marginRight: 32, textDecoration: 'none' }}>
+          <Typography.Title
+            level={4}
+            style={{
+              margin: 0,
+              fontFamily: "'Playfair Display', serif",
+              background: 'linear-gradient(135deg, #7C3AED, #F59E0B)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontSize: 22,
+            }}
+          >
             Code829
           </Typography.Title>
         </Link>
@@ -47,26 +69,48 @@ export default function PublicLayout() {
           theme="dark"
           mode="horizontal"
           items={menuItems}
-          style={{ flex: 1 }}
+          style={{ flex: 1, background: 'transparent', borderBottom: 'none' }}
         />
         <Space>
           {isAuthenticated ? (
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <Button type="text" style={{ color: '#fff' }}>
+              <Button
+                type="text"
+                style={{
+                  color: '#F1F0FF',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                }}
+              >
                 <UserOutlined /> {user?.firstName}
               </Button>
             </Dropdown>
           ) : (
-            <Button type="primary" onClick={() => navigate('/login')}>
+            <Button
+              type="primary"
+              onClick={() => navigate('/login')}
+              style={{
+                borderRadius: 8,
+                fontWeight: 600,
+              }}
+            >
               Sign In
             </Button>
           )}
         </Space>
       </Header>
-      <Content style={{ padding: '24px 48px' }}>
+      <Content style={{ padding: '32px 48px', background: '#0A0A0F' }}>
         <Outlet />
       </Content>
-      <Footer style={{ textAlign: 'center' }}>
+      <Footer
+        style={{
+          textAlign: 'center',
+          background: '#0A0A0F',
+          borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+          color: '#6B7280',
+        }}
+      >
         Code829 Event Platform
       </Footer>
     </Layout>
