@@ -1,158 +1,98 @@
-import React, { Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
-import { Toaster } from 'react-hot-toast';
-import Navbar from './components/Navbar';
-import RoleGuard from './components/RoleGuard';
-import ErrorBoundary from './components/ErrorBoundary';
-import { useAuthStore } from './stores/authStore';
+import ErrorBoundary from './components/shared/ErrorBoundary';
+import LoadingSpinner from './components/shared/LoadingSpinner';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import PublicLayout from './components/layout/PublicLayout';
+import AdminLayout from './components/layout/AdminLayout';
+import DeveloperLayout from './components/layout/DeveloperLayout';
 
-const OnboardingScreen = React.lazy(() => import('./components/OnboardingScreen'));
+const HomePage = lazy(() => import('./pages/home/HomePage'));
+const EventsPage = lazy(() => import('./pages/events/EventsPage'));
+const EventDetailPage = lazy(() => import('./pages/event-detail/EventDetailPage'));
+const InvitationPage = lazy(() => import('./pages/invitation/InvitationPage'));
+const LoginPage = lazy(() => import('./pages/login/LoginPage'));
+const MyBookingsPage = lazy(() => import('./pages/bookings/MyBookingsPage'));
+const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
 
-const HomePage = React.lazy(() => import('./pages/HomePage'));
-const EventsPage = React.lazy(() => import('./pages/EventsPage'));
-const EventDetailPage = React.lazy(() => import('./pages/EventDetailPage'));
-const MyBookingsPage = React.lazy(() => import('./pages/MyBookingsPage'));
-const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
-const InvitationPage = React.lazy(() => import('./pages/InvitationPage'));
-const LoginPage = React.lazy(() => import('./pages/LoginPage'));
+const AdminDashboardPage = lazy(() => import('./pages/admin/dashboard/AdminDashboardPage'));
+const AdminEventsListPage = lazy(() => import('./pages/admin/events/EventsListPage'));
+const EventWizardPage = lazy(() => import('./pages/admin/events/EventWizardPage'));
+const EventManagePage = lazy(() => import('./pages/admin/events/EventManagePage'));
+const VenuesPage = lazy(() => import('./pages/admin/venues/VenuesPage'));
+const VenueFormPage = lazy(() => import('./pages/admin/venues/VenueFormPage'));
+const AdminBookingsPage = lazy(() => import('./pages/admin/bookings/AdminBookingsPage'));
+const TableTypesPage = lazy(() => import('./pages/admin/table-types/TableTypesPage'));
+const LayoutEditorPage = lazy(() => import('./pages/admin/layout-editor/LayoutEditorPage'));
+const PricingPage = lazy(() => import('./pages/admin/pricing/PricingPage'));
+const CheckInPage = lazy(() => import('./pages/admin/checkin/CheckInPage'));
+const SettingsPage = lazy(() => import('./pages/admin/settings/SettingsPage'));
+const AnalyticsPage = lazy(() => import('./pages/admin/analytics/AnalyticsPage'));
 
-const AdminLayout = React.lazy(() => import('./layouts/AdminLayout'));
-const AdminDashboardPage = React.lazy(() => import('./pages/admin/AdminDashboardPage'));
-const VenuesPage = React.lazy(() => import('./pages/admin/VenuesPage'));
-const VenueFormPage = React.lazy(() => import('./pages/admin/VenueFormPage'));
-const EventsListPage = React.lazy(() => import('./pages/admin/EventsListPage'));
-const EventWizardPage = React.lazy(() => import('./pages/admin/EventWizardPage'));
-const EventManagePage = React.lazy(() => import('./pages/admin/EventManagePage'));
-const AnalyticsPage = React.lazy(() => import('./pages/admin/AnalyticsPage'));
-const TableTypesPage = React.lazy(() => import('./pages/admin/TableTypesPage'));
+const DevLogsPage = lazy(() => import('./pages/developer/logs/DevLogsPage'));
+const EmailLogsPage = lazy(() => import('./pages/developer/email-logs/EmailLogsPage'));
+const SystemLogsPage = lazy(() => import('./pages/developer/system-logs/SystemLogsPage'));
+const DevSettingsPage = lazy(() => import('./pages/developer/settings/DevSettingsPage'));
+const DevUsersPage = lazy(() => import('./pages/developer/users/DevUsersPage'));
 
-const DeveloperLayout = React.lazy(() => import('./layouts/DeveloperLayout'));
-const DeveloperDashboardPage = React.lazy(() => import('./pages/developer/DeveloperDashboardPage'));
-const DeveloperEventsPage = React.lazy(() => import('./pages/developer/DeveloperEventsPage'));
-const DeveloperAnalyticsPage = React.lazy(() => import('./pages/developer/AnalyticsPage'));
-const DeveloperSettingsPage = React.lazy(() => import('./pages/developer/DeveloperSettingsPage'));
-const DeveloperEventManagePage = React.lazy(() => import('./pages/developer/EventManagePage'));
-
-function PageLoader(): React.ReactElement {
+export default function App() {
   return (
-    <div
-      role="status"
-      aria-label="Loading page"
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'var(--bg-primary)',
-      }}
-    >
-      <div
-        style={{
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          border: '3px solid var(--border)',
-          borderTopColor: 'var(--accent-primary)',
-          animation: 'spin 0.8s linear infinite',
-        }}
-      />
-      <span style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}>
-        Loading…
-      </span>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
-  );
-}
+    <BrowserRouter>
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            {/* Public */}
+            <Route element={<PublicLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path="events" element={<EventsPage />} />
+              <Route path="events/:slug" element={<EventDetailPage />} />
+              <Route path="invitation/:token" element={<InvitationPage />} />
+              <Route path="login" element={<LoginPage />} />
+            </Route>
 
-function AppRoutes(): React.ReactElement {
-  const { user, isAuthenticated } = useAuthStore();
-  return (
-    <>
-      {isAuthenticated && user && !user.hasCompletedOnboarding && (
-        <Suspense fallback={<PageLoader />}>
-          <OnboardingScreen />
+            {/* Authenticated Users */}
+            <Route element={<ProtectedRoute><PublicLayout /></ProtectedRoute>}>
+              <Route path="bookings" element={<MyBookingsPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+            </Route>
+
+            {/* Admin */}
+            <Route
+              path="/admin"
+              element={<ProtectedRoute minRole="Admin"><AdminLayout /></ProtectedRoute>}
+            >
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="events" element={<AdminEventsListPage />} />
+              <Route path="events/new" element={<EventWizardPage />} />
+              <Route path="events/:id" element={<EventManagePage />} />
+              <Route path="venues" element={<VenuesPage />} />
+              <Route path="venues/new" element={<VenueFormPage />} />
+              <Route path="venues/:id" element={<VenueFormPage />} />
+              <Route path="bookings" element={<AdminBookingsPage />} />
+              <Route path="table-types" element={<TableTypesPage />} />
+              <Route path="layout/:eventId" element={<LayoutEditorPage />} />
+              <Route path="pricing/:eventId" element={<PricingPage />} />
+              <Route path="checkin/:eventId" element={<CheckInPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
+            </Route>
+
+            {/* Developer */}
+            <Route
+              path="/developer"
+              element={<ProtectedRoute minRole="Developer"><DeveloperLayout /></ProtectedRoute>}
+            >
+              <Route index element={<DevLogsPage />} />
+              <Route path="email-logs" element={<EmailLogsPage />} />
+              <Route path="system-logs" element={<SystemLogsPage />} />
+              <Route path="settings" element={<DevSettingsPage />} />
+              <Route path="users" element={<DevUsersPage />} />
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </Suspense>
-      )}      {/* Noise grain overlay */}
-      <div className="noise-overlay" aria-hidden="true" />
-
-      <Navbar />
-
-      <main id="main-content">
-      <Suspense fallback={<PageLoader />}>
-        <ErrorBoundary>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/events/:id" element={<EventDetailPage />} />
-          <Route path="/me/bookings" element={<MyBookingsPage />} />
-          <Route path="/me/profile" element={<ProfilePage />} />
-          <Route path="/invitation/:token" element={<InvitationPage />} />
-          <Route path="/auth/login" element={<LoginPage />} />
-
-          {/* Admin routes — Admin & Staff only, Developers redirected to /developer */}
-          <Route path="/admin" element={
-            <RoleGuard allowed={['Admin', 'Staff']} redirectTo="/developer">
-              <AdminLayout />
-            </RoleGuard>
-          }>
-            <Route index element={<AdminDashboardPage />} />
-            <Route path="venues" element={<VenuesPage />} />
-            <Route path="venues/new" element={<VenueFormPage />} />
-            <Route path="venues/:id/edit" element={<VenueFormPage />} />
-            <Route path="events" element={<EventsListPage />} />
-            <Route path="events/new" element={<EventWizardPage />} />
-            <Route path="events/:id" element={<EventManagePage />} />
-            <Route path="events/:id/edit" element={<EventWizardPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="table-types" element={<TableTypesPage />} />
-          </Route>
-
-          {/* Developer routes — Developer only, Admins redirected to /admin */}
-          <Route path="/developer" element={
-            <RoleGuard allowed={['Developer']} redirectTo="/admin">
-              <DeveloperLayout />
-            </RoleGuard>
-          }>
-            <Route index element={<DeveloperDashboardPage />} />
-            <Route path="events" element={<DeveloperEventsPage />} />
-            <Route path="events/:id" element={<DeveloperEventManagePage />} />
-            <Route path="analytics" element={<DeveloperAnalyticsPage />} />
-            <Route path="settings" element={<DeveloperSettingsPage />} />
-          </Route>
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        </ErrorBoundary>
-      </Suspense>
-      </main>
-
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            background: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-            border: '1px solid var(--border)',
-            borderRadius: '0.75rem',
-            fontFamily: 'var(--font-body)',
-          },
-          ariaProps: {
-            role: 'status',
-            'aria-live': 'polite',
-          },
-        }}
-      />
-    </>
-  );
-}
-
-export default function App(): React.ReactElement {
-  return (
-    <HelmetProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </HelmetProvider>
+      </ErrorBoundary>
+    </BrowserRouter>
   );
 }

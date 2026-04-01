@@ -1,23 +1,41 @@
 import apiClient from '../lib/axios';
+import type { EventSummary, EventDetail, EventFacets, EventTablesResponse } from '../types/event';
+import type { PagedResponse } from '../types/shared';
+
+export interface EventListParams {
+  search?: string;
+  category?: string;
+  city?: string;
+  dateFilter?: 'today' | 'this-week' | 'this-month';
+  minPrice?: number;
+  maxPrice?: number;
+  venueId?: string;
+  page?: number;
+  pageSize?: number;
+}
 
 export const eventsApi = {
-  list: <T = unknown>(queryString?: string) =>
-    apiClient.get<T>(`/events${queryString ? `?${queryString}` : ''}`),
+  list: (params?: EventListParams) =>
+    apiClient.get<PagedResponse<EventSummary>>('/events', { params }),
 
-  getById: <T = unknown>(id: string) =>
-    apiClient.get<T>(`/events/${id}`),
+  getById: (id: string) =>
+    apiClient.get<EventDetail>(`/events/${id}`),
 
-  getTables: <T = unknown>(eventId: string) =>
-    apiClient.get<T>(`/events/${eventId}/tables`),
-};
+  getBySlug: (slug: string) =>
+    apiClient.get<EventDetail>(`/events/by-slug/${slug}`),
 
-export const seatsApi = {
-  getHolds: <T = unknown>(eventId: string) =>
-    apiClient.get<T>(`/seats/holds/${eventId}`),
+  getFacets: () =>
+    apiClient.get<EventFacets>('/events/facets'),
 
-  hold: (eventId: string, tableId: string, ticketTypeId: string) =>
-    apiClient.post('/seats/hold-table', { eventId, tableId, ticketTypeId }),
+  getTables: (id: string) =>
+    apiClient.get<EventTablesResponse>(`/events/${id}/tables`),
 
-  release: (eventId: string, tableId: string) =>
-    apiClient.post('/seats/release-table', { eventId, tableId }),
+  getSchemaOrg: (id: string) =>
+    apiClient.get(`/events/${id}/schema`),
+
+  getSeoMeta: (id: string) =>
+    apiClient.get(`/events/${id}/seo`),
+
+  getItemListSchema: () =>
+    apiClient.get('/events/schema-list'),
 };

@@ -1,30 +1,38 @@
 import apiClient from '../lib/axios';
+import type { Booking, BookingDetail } from '../types/booking';
+import type { PagedResponse } from '../types/shared';
 
-interface BookingItem {
+export interface CreateBookingItem {
   ticketTypeId: string;
   seatId?: string;
   quantity?: number;
 }
 
-interface GuestUpdateRequest {
-  guestName: string | null;
-  guestEmail: string | null;
-  sendInvitation: boolean;
-}
-
 export const bookingsApi = {
-  getMine: <T = unknown>() =>
-    apiClient.get<T>('/bookings/mine'),
-
-  create: (eventId: string, items: BookingItem[]) =>
+  create: (eventId: string, items: CreateBookingItem[]) =>
     apiClient.post<{ id: string }>('/bookings', { eventId, items }),
 
-  confirm: (bookingId: string) =>
-    apiClient.post(`/bookings/${bookingId}/confirm`),
+  confirmPayment: (id: string) =>
+    apiClient.post<BookingDetail>(`/bookings/${id}/confirm`),
 
-  getInvitation: <T = unknown>(token: string) =>
-    apiClient.get<T>(`/bookings/invitation/${token}`),
+  cancel: (id: string) =>
+    apiClient.post<BookingDetail>(`/bookings/${id}/cancel`),
 
-  updateGuest: (bookingId: string, itemId: string, data: GuestUpdateRequest) =>
-    apiClient.put(`/bookings/${bookingId}/items/${itemId}/guest`, data),
+  getById: (id: string) =>
+    apiClient.get<BookingDetail>(`/bookings/${id}`),
+
+  getMine: (page = 1, pageSize = 20) =>
+    apiClient.get<PagedResponse<Booking>>('/bookings/mine', { params: { page, pageSize } }),
+
+  getQrCode: (id: string) =>
+    apiClient.get(`/bookings/${id}/qr`, { responseType: 'blob' }),
+
+  getInvitation: (token: string) =>
+    apiClient.get(`/bookings/invitation/${token}`),
+
+  updateGuest: (bookingId: string, itemId: string, data: {
+    guestName: string | null;
+    guestEmail: string | null;
+    sendInvitation: boolean;
+  }) => apiClient.put(`/bookings/${bookingId}/items/${itemId}/guest`, data),
 };
