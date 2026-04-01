@@ -2,89 +2,109 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ConfigProvider, App as AntApp, theme as antTheme } from 'antd';
 import { HelmetProvider } from 'react-helmet-async';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/playfair-display/400.css';
+import '@fontsource/playfair-display/700.css';
 import './index.css';
 import App from './App';
 
-const theme = {
-  algorithm: antTheme.darkAlgorithm,
-  token: {
-    colorPrimary: '#7C3AED',
-    colorSuccess: '#10B981',
-    colorError: '#EF4444',
-    colorWarning: '#F59E0B',
-    colorInfo: '#7C3AED',
-    fontFamily: "'Inter', sans-serif",
-    fontFamilyCode: "'JetBrains Mono', monospace",
-    fontSize: 15,
-    borderRadius: 8,
-    colorBgContainer: '#13131A',
-    colorBgElevated: '#1C1C27',
-    colorBgLayout: '#0A0A0F',
-    colorBgBase: '#0A0A0F',
-    colorText: '#F1F0FF',
-    colorTextSecondary: '#9CA3AF',
-    colorTextTertiary: '#6B7280',
-    colorTextQuaternary: '#4B5563',
-    colorBorder: 'rgba(255, 255, 255, 0.08)',
-    colorBorderSecondary: 'rgba(255, 255, 255, 0.06)',
-    colorBgSpotlight: '#1C1C27',
-    controlHeight: 40,
-    boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3)',
-    boxShadowSecondary: '0 8px 32px rgba(0, 0, 0, 0.4)',
-  },
-  components: {
-    Button: {
-      primaryShadow: 'none',
-      borderRadius: 8,
-      controlHeight: 40,
-      controlHeightLG: 48,
-    },
-    Card: {
-      colorBgContainer: '#13131A',
-      borderRadiusLG: 12,
-      boxShadowTertiary: '0 2px 12px rgba(0, 0, 0, 0.2)',
-    },
-    Input: {
-      colorBgContainer: '#1C1C27',
-      borderRadius: 8,
-    },
-    Select: {
-      colorBgContainer: '#1C1C27',
-      borderRadius: 8,
-    },
+const darkTokens = {
+  colorPrimary: '#7C3AED',
+  colorSuccess: '#10B981',
+  colorError: '#EF4444',
+  colorWarning: '#F59E0B',
+  colorInfo: '#7C3AED',
+  fontFamily: "'Inter', sans-serif",
+  fontSize: 15,
+  borderRadius: 10,
+  colorBgContainer: '#13131A',
+  colorBgElevated: '#1C1C27',
+  colorBgLayout: '#0A0A0F',
+  colorBgBase: '#0A0A0F',
+  colorText: '#F1F0FF',
+  colorTextSecondary: '#9CA3AF',
+  colorTextTertiary: '#6B7280',
+  colorBorder: 'rgba(255,255,255,0.08)',
+  colorBorderSecondary: 'rgba(255,255,255,0.05)',
+  controlHeight: 44,
+  boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
+};
+
+const lightTokens = {
+  colorPrimary: '#7C3AED',
+  colorSuccess: '#059669',
+  colorError: '#DC2626',
+  colorWarning: '#D97706',
+  colorInfo: '#7C3AED',
+  fontFamily: "'Inter', sans-serif",
+  fontSize: 15,
+  borderRadius: 10,
+  colorBgContainer: '#FFFFFF',
+  colorBgElevated: '#F9F9FF',
+  colorBgLayout: '#F4F4F8',
+  colorBgBase: '#F4F4F8',
+  colorText: '#1A1A2E',
+  colorTextSecondary: '#4B5563',
+  colorTextTertiary: '#9CA3AF',
+  colorBorder: 'rgba(0,0,0,0.08)',
+  colorBorderSecondary: 'rgba(0,0,0,0.05)',
+  controlHeight: 44,
+  boxShadow: '0 4px 16px rgba(124,58,237,0.08)',
+};
+
+function buildComponents(isDark: boolean) {
+  return {
+    Button: { primaryShadow: 'none', borderRadius: 10, controlHeight: 44, controlHeightLG: 52 },
+    Card: { borderRadiusLG: 14, boxShadowTertiary: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(124,58,237,0.07)' },
+    Input: { colorBgContainer: isDark ? '#1C1C27' : '#FFFFFF', borderRadius: 10 },
+    Select: { colorBgContainer: isDark ? '#1C1C27' : '#FFFFFF', borderRadius: 10 },
     Menu: {
       darkItemBg: 'transparent',
       darkSubMenuItemBg: 'transparent',
-      darkItemSelectedBg: 'rgba(124, 58, 237, 0.15)',
-      darkItemHoverBg: 'rgba(124, 58, 237, 0.08)',
+      darkItemSelectedBg: 'rgba(124,58,237,0.18)',
+      darkItemHoverBg: 'rgba(124,58,237,0.08)',
+      itemSelectedBg: 'rgba(124,58,237,0.10)',
+      itemHoverBg: 'rgba(124,58,237,0.05)',
+      itemSelectedColor: '#7C3AED',
     },
     Layout: {
-      headerBg: '#0A0A0F',
-      bodyBg: '#0A0A0F',
-      siderBg: '#13131A',
-      footerBg: '#0A0A0F',
+      headerBg: isDark ? '#0D0D14' : '#FFFFFF',
+      bodyBg: isDark ? '#0A0A0F' : '#F4F4F8',
+      siderBg: isDark ? '#0D0D14' : '#FFFFFF',
+      footerBg: isDark ? '#0D0D14' : '#F4F4F8',
     },
     Table: {
-      colorBgContainer: '#13131A',
-      headerBg: '#1C1C27',
-      rowHoverBg: 'rgba(124, 58, 237, 0.06)',
+      colorBgContainer: isDark ? '#13131A' : '#FFFFFF',
+      headerBg: isDark ? '#1C1C27' : '#F9F9FF',
+      rowHoverBg: 'rgba(124,58,237,0.06)',
     },
-    Modal: {
-      contentBg: '#13131A',
-      headerBg: '#13131A',
-    },
-    Pagination: {
-      colorBgContainer: '#1C1C27',
-      itemActiveBg: 'rgba(124, 58, 237, 0.2)',
-    },
-    Tag: {
-      borderRadiusSM: 6,
-    },
-    Dropdown: {
-      colorBgElevated: '#1C1C27',
-    },
-  },
-};
+    Modal: { contentBg: isDark ? '#13131A' : '#FFFFFF', headerBg: isDark ? '#13131A' : '#FFFFFF' },
+    Dropdown: { colorBgElevated: isDark ? '#1C1C27' : '#FFFFFF' },
+    Tag: { borderRadiusSM: 6 },
+    Pagination: { itemActiveBg: 'rgba(124,58,237,0.15)' },
+  };
+}
+
+function ThemedApp() {
+  const { isDark } = useTheme();
+  return (
+    <ConfigProvider
+      theme={{
+        algorithm: isDark ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
+        token: isDark ? darkTokens : lightTokens,
+        components: buildComponents(isDark),
+      }}
+    >
+      <AntApp>
+        <App />
+      </AntApp>
+    </ConfigProvider>
+  );
+}
 
 const rootEl = document.getElementById('root');
 if (!rootEl) throw new Error('Root element not found');
@@ -92,11 +112,9 @@ if (!rootEl) throw new Error('Root element not found');
 createRoot(rootEl).render(
   <StrictMode>
     <HelmetProvider>
-      <ConfigProvider theme={theme}>
-        <AntApp>
-          <App />
-        </AntApp>
-      </ConfigProvider>
+      <ThemeProvider>
+        <ThemedApp />
+      </ThemeProvider>
     </HelmetProvider>
   </StrictMode>,
 );

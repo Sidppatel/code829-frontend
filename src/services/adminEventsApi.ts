@@ -2,7 +2,7 @@ import apiClient from '../lib/axios';
 import type { EventDetail } from '../types/event';
 import type { PagedResponse } from '../types/shared';
 
-export interface AdminEventListParams {
+export interface AdminEventListParams extends Record<string, unknown> {
   page?: number;
   pageSize?: number;
   status?: string;
