@@ -60,9 +60,12 @@ export default function SystemLogsPage() {
           options={['Event', 'Booking', 'User', 'Venue', 'Payment'].map((s) => ({ label: s, value: s }))}
         />
       </Space>
-      <Table dataSource={logs} columns={columns} rowKey="id" loading={loading} size="small"
-        pagination={{ pageSize: 50, showSizeChanger: true }}
-      />
+      <div className="responsive-table">
+        <Table dataSource={logs} columns={columns} rowKey="id" loading={loading} size="small"
+          scroll={{ x: 700 }}
+          pagination={{ pageSize: 50, showSizeChanger: true }}
+        />
+      </div>
     </div>
   );
 }

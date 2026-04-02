@@ -170,11 +170,13 @@ export default function EventsListPage() {
           ].map((s) => ({ label: s, value: s }))}
         />
       </Space>
+      <div className="responsive-table">
       <Table
         dataSource={data}
         columns={columns}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 800 }}
         pagination={{
           current: page,
           pageSize,
@@ -186,6 +188,7 @@ export default function EventsListPage() {
           showSizeChanger: true,
         }}
       />
+      </div>
     </div>
   );
 }

@@ -48,6 +48,7 @@ export default function SettingsPage() {
       <PageHeader title="Settings" subtitle="Manage application settings" />
       <Card>
         <List
+          className="responsive-list"
           dataSource={settings}
           renderItem={(item) => (
             <List.Item
@@ -72,7 +73,7 @@ export default function SettingsPage() {
               <Input
                 value={editValues[item.key] ?? ''}
                 onChange={(e) => setEditValues((prev) => ({ ...prev, [item.key]: e.target.value }))}
-                style={{ width: 300 }}
+                style={{ width: '100%', maxWidth: 300 }}
               />
             </List.Item>
           )}

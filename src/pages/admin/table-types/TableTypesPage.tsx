@@ -114,7 +114,9 @@ export default function TableTypesPage() {
       <PageHeader title="Table Types" subtitle="Define reusable table configurations"
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Add Type</Button>}
       />
-      <Table dataSource={types} columns={columns} rowKey="id" pagination={false} />
+      <div className="responsive-table">
+        <Table dataSource={types} columns={columns} rowKey="id" pagination={false} scroll={{ x: 600 }} />
+      </div>
       <Modal title={editingId ? 'Edit Table Type' : 'Add Table Type'} open={modalOpen}
         onCancel={() => setModalOpen(false)} onOk={handleSave} confirmLoading={saving}
       >

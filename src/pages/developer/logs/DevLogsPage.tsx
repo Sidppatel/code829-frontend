@@ -57,18 +57,21 @@ export default function DevLogsPage() {
           options={['Info', 'Warning', 'Error', 'Debug'].map((s) => ({ label: s, value: s }))}
         />
       </Space>
-      <Table
-        dataSource={data}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        size="small"
-        pagination={{
-          current: page, pageSize, total,
-          onChange: (p, ps) => { setPage(p); setPageSize(ps); },
-          showSizeChanger: true,
-        }}
-      />
+      <div className="responsive-table">
+        <Table
+          dataSource={data}
+          columns={columns}
+          rowKey="id"
+          loading={loading}
+          size="small"
+          scroll={{ x: 800 }}
+          pagination={{
+            current: page, pageSize, total,
+            onChange: (p, ps) => { setPage(p); setPageSize(ps); },
+            showSizeChanger: true,
+          }}
+        />
+      </div>
     </div>
   );
 }

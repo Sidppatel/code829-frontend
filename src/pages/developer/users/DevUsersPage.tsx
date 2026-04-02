@@ -65,7 +65,11 @@ export default function DevUsersPage() {
   return (
     <div>
       <PageHeader title="Users" subtitle={`${users.length} registered users`} />
-      <Table dataSource={users} columns={columns} rowKey="id" pagination={{ pageSize: 25, showSizeChanger: true }} />
+      <div className="responsive-table">
+        <Table dataSource={users} columns={columns} rowKey="id" scroll={{ x: 600 }}
+          pagination={{ pageSize: 25, showSizeChanger: true }}
+        />
+      </div>
     </div>
   );
 }

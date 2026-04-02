@@ -27,6 +27,7 @@
   --nav-border:     rgba(255,255,255,0.06);
   --card-shadow:    0 4px 24px rgba(0,0,0,0.35);
   --accent-violet-light: #A78BFA;
+  --accent-violet-dark: #5B21B6;
   --accent-green:   #10B981;
   --accent-cyan:    #06B6D4;
   --hero-gradient:  radial-gradient(ellipse at 25% 50%, rgba(124,58,237,0.18) 0%, transparent 55%),
@@ -52,6 +53,7 @@ html.light {
   --nav-border:     rgba(0,0,0,0.06);
   --card-shadow:    0 4px 16px rgba(124,58,237,0.08);
   --accent-violet-light: #A78BFA;
+  --accent-violet-dark: #5B21B6;
   --accent-green:   #059669;
   --accent-cyan:    #0891B2;
   --hero-gradient:  radial-gradient(ellipse at 25% 50%, rgba(124,58,237,0.08) 0%, transparent 55%),
@@ -202,6 +204,31 @@ html.light .glass-card {
 }
 .stat-card:hover {
   box-shadow: 0 8px 32px rgba(124,58,237,0.12);
+}
+
+/* Responsive table wrapper — horizontal scroll on mobile */
+.responsive-table .ant-table {
+  overflow-x: auto;
+}
+.responsive-table .ant-table-content {
+  overflow-x: auto;
+}
+
+/* Responsive list items — stack on mobile */
+.responsive-list .ant-list-item {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.responsive-list .ant-list-item-meta {
+  flex: 1 1 100%;
+}
+@media (min-width: 768px) {
+  .responsive-list .ant-list-item-meta {
+    flex: 1 1 auto;
+  }
+}
+.responsive-list .ant-list-item-action {
+  margin-inline-start: 0;
 }
 
 /* Hero CTA buttons: stack on mobile, row on tablet+ */

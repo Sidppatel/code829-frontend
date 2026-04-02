@@ -60,18 +60,21 @@ export default function EmailLogsPage() {
         onChange={(e) => { setRecipient(e.target.value || undefined); setPage(1); }}
         style={{ width: 300, marginBottom: 16 }}
       />
-      <Table
-        dataSource={logs}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        size="small"
-        pagination={{
-          current: page, pageSize, total,
-          onChange: (p, ps) => { setPage(p); setPageSize(ps); },
-          showSizeChanger: true,
-        }}
-      />
+      <div className="responsive-table">
+        <Table
+          dataSource={logs}
+          columns={columns}
+          rowKey="id"
+          loading={loading}
+          size="small"
+          scroll={{ x: 600 }}
+          pagination={{
+            current: page, pageSize, total,
+            onChange: (p, ps) => { setPage(p); setPageSize(ps); },
+            showSizeChanger: true,
+          }}
+        />
+      </div>
     </div>
   );
 }

@@ -67,9 +67,12 @@ export default function VenuesPage() {
       <PageHeader title="Venues" subtitle="Manage event venues"
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/admin/venues/new')}>Add Venue</Button>}
       />
-      <Table dataSource={venues} columns={columns} rowKey="id" loading={loading}
-        pagination={{ current: page, pageSize, total, onChange: (p, ps) => { setPage(p); setPageSize(ps); }, showSizeChanger: true }}
-      />
+      <div className="responsive-table">
+        <Table dataSource={venues} columns={columns} rowKey="id" loading={loading}
+          scroll={{ x: 600 }}
+          pagination={{ current: page, pageSize, total, onChange: (p, ps) => { setPage(p); setPageSize(ps); }, showSizeChanger: true }}
+        />
+      </div>
     </div>
   );
 }

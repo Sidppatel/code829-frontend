@@ -125,7 +125,7 @@ export default function LoginPage() {
                     fontWeight: 600,
                     height: 44,
                     borderRadius: 99,
-                    background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
+                    background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-violet-dark))',
                     border: 'none',
                   }}
                 >

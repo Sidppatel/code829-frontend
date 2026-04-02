@@ -51,6 +51,7 @@ export default function DevSettingsPage() {
       <PageHeader title="Developer Settings" subtitle="Application configuration" />
       <Card>
         <List
+          className="responsive-list"
           dataSource={settings}
           renderItem={(item) => (
             <List.Item
@@ -62,7 +63,7 @@ export default function DevSettingsPage() {
               ]}
             >
               <List.Item.Meta title={item.key} description={item.description ?? 'No description'} />
-              <Input value={editValues[item.key] ?? ''} style={{ width: 300 }}
+              <Input value={editValues[item.key] ?? ''} style={{ width: '100%', maxWidth: 300 }}
                 onChange={(e) => setEditValues((prev) => ({ ...prev, [item.key]: e.target.value }))}
               />
             </List.Item>
