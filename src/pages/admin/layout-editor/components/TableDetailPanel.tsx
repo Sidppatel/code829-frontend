@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Card, Form, Input, InputNumber, Select, Switch, Button, Popconfirm, Alert } from 'antd';
+import { Card, Form, Input, InputNumber, Select, Button, Popconfirm, Alert } from 'antd';
 import { DeleteOutlined, LockOutlined } from '@ant-design/icons';
 import type { FloorPlanElement } from '../../../../stores/floorPlanStore';
 import { centsToUSD } from '../../../../utils/currency';
@@ -13,7 +13,10 @@ interface TableDetailPanelProps {
 }
 
 const SHAPES = ['Round', 'Rectangle', 'Square', 'Cocktail'].map((s) => ({ label: s, value: s }));
-const PRICE_TYPES = ['PerTable', 'PerSeat'].map((s) => ({ label: s, value: s }));
+const PRICE_TYPES = [
+  { label: 'Per Table', value: 'PerTable' },
+  { label: 'Per Seat', value: 'PerSeat' },
+];
 
 export default function TableDetailPanel({
   selectedTable,
@@ -26,7 +29,10 @@ export default function TableDetailPanel({
 
   useEffect(() => {
     if (selectedTable) {
-      form.setFieldsValue(selectedTable);
+      form.setFieldsValue({
+        ...selectedTable,
+        priceDollars: (selectedTable.priceCents ?? 0) / 100,
+      });
     }
   }, [selectedTable, form]);
 
@@ -43,9 +49,18 @@ export default function TableDetailPanel({
   }
 
   const handleFieldChange = (_changed: Record<string, unknown>, all: Record<string, unknown>) => {
-    if (!isLocked) {
-      onUpdate(all as Partial<FloorPlanElement>);
-    }
+    if (isLocked) return;
+    // Convert dollars back to cents for the store
+    const priceDollars = all.priceDollars as number | undefined;
+    const patch: Partial<FloorPlanElement> = {
+      label: all.label as string,
+      capacity: all.capacity as number,
+      shape: all.shape as FloorPlanElement['shape'],
+      section: all.section as string | undefined,
+      priceType: all.priceType as FloorPlanElement['priceType'],
+      priceCents: Math.round((priceDollars ?? 0) * 100),
+    };
+    onUpdate(patch);
   };
 
   return (
@@ -73,7 +88,7 @@ export default function TableDetailPanel({
           disabled={isLocked}
         >
           <Form.Item name="label" label="Label" rules={[{ required: true }]}>
-            <Input />
+            <Input maxLength={20} />
           </Form.Item>
           <Form.Item name="capacity" label="Capacity" rules={[{ required: true }]}>
             <InputNumber min={1} style={{ width: '100%' }} />
@@ -87,17 +102,14 @@ export default function TableDetailPanel({
           <Form.Item name="priceType" label="Price Type" rules={[{ required: true }]}>
             <Select options={PRICE_TYPES} />
           </Form.Item>
-          <Form.Item name="priceCents" label="Price (cents)" rules={[{ required: true }]}>
-            <InputNumber min={0} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="isActive" label="Active" valuePropName="checked">
-            <Switch />
+          <Form.Item name="priceDollars" label="Price ($)" rules={[{ required: true }]}>
+            <InputNumber min={0} step={0.01} prefix="$" style={{ width: '100%' }} />
           </Form.Item>
         </Form>
 
         {selectedTable.priceCents > 0 && (
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
-            Display price: {centsToUSD(selectedTable.priceCents)}
+            Stored as: {centsToUSD(selectedTable.priceCents)}
           </div>
         )}
 

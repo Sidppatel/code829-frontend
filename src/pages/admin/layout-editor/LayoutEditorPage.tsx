@@ -191,14 +191,24 @@ export default function LayoutEditorPage() {
       const tt = tableTypes.find((t) => t.id === selectedTypeId);
       if (!tt) return;
 
+      // Auto-number label to avoid unique constraint on (EventId, Label)
+      const existingLabels = new Set(Object.values(elements).map((el) => el.label));
+      const baseName = tt.name.length > 16 ? tt.name.slice(0, 16) : tt.name;
+      let label = baseName;
+      let counter = 1;
+      while (existingLabels.has(label)) {
+        counter++;
+        label = `${baseName} ${counter}`;
+      }
+
       const newId = crypto.randomUUID();
       const newElement: FloorPlanElement = {
         id: newId,
-        label: tt.name,
+        label,
         capacity: tt.defaultCapacity,
         shape: (tt.defaultShape as FloorPlanElement['shape']) ?? 'Round',
         color: tt.defaultColor,
-        priceType: 'PerSeat',
+        priceType: 'PerTable',
         priceCents: tt.defaultPriceCents ?? 0,
         isActive: true,
         gridRow: row,

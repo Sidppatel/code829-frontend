@@ -14,6 +14,15 @@ interface GridCellProps {
   onClick: () => void;
 }
 
+function hexToRgba(hex: string, alpha: number): string {
+  const cleaned = hex.replace('#', '');
+  const r = parseInt(cleaned.slice(0, 2), 16);
+  const g = parseInt(cleaned.slice(2, 4), 16);
+  const b = parseInt(cleaned.slice(4, 6), 16);
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return hex;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
 export default function GridCell({
   element,
   statusInfo,
@@ -67,9 +76,25 @@ export default function GridCell({
         ? 'Click to place table'
         : '';
 
-  const cellStyle: React.CSSProperties = element?.color
-    ? { borderColor: isLocked ? undefined : element.color, ['--cell-color' as string]: element.color }
-    : {};
+  // Fill cell with the table's color for clear visual distinction
+  const cellStyle: React.CSSProperties = {};
+  if (element?.color) {
+    const color = element.color;
+    if (isLocked) {
+      cellStyle.background = hexToRgba(color, 0.12);
+      cellStyle.borderColor = hexToRgba(color, 0.4);
+    } else if (status === 'Booked') {
+      cellStyle.background = hexToRgba(color, 0.25);
+      cellStyle.borderColor = color;
+    } else if (status === 'Held') {
+      cellStyle.background = hexToRgba(color, 0.2);
+      cellStyle.borderColor = color;
+    } else {
+      cellStyle.background = hexToRgba(color, 0.3);
+      cellStyle.borderColor = color;
+      cellStyle.color = 'var(--text-primary)';
+    }
+  }
 
   return (
     <Tooltip title={tooltipText} mouseEnterDelay={0.4}>
