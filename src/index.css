@@ -526,6 +526,104 @@ html.light .next-event-stat {
   opacity: 0.75;
 }
 
+/* ── Grid cell status states ── */
+.seat-cell.available {
+  border-style: solid;
+  border-color: var(--accent-violet);
+  background: rgba(124,58,237,0.08);
+  color: var(--text-primary);
+}
+.seat-cell.held {
+  border-style: solid;
+  border-color: var(--accent-gold);
+  background: rgba(245,158,11,0.15);
+  color: var(--text-primary);
+}
+.seat-cell.booked {
+  border-style: solid;
+  border-color: var(--accent-green);
+  background: rgba(16,185,129,0.15);
+  color: var(--text-primary);
+}
+.seat-cell.locked {
+  border-style: solid;
+  border-color: #EF4444;
+  background: rgba(239,68,68,0.10);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+.seat-cell.selected {
+  box-shadow: 0 0 0 2px var(--accent-violet);
+}
+.seat-cell.type-brush {
+  border-color: var(--accent-violet-light);
+  border-style: dashed;
+}
+.seat-cell.type-brush:hover {
+  background: rgba(124,58,237,0.12);
+  border-color: var(--accent-violet);
+}
+
+/* ── Grid editor layout ── */
+.grid-editor-wrapper {
+  display: flex;
+  gap: 16px;
+  min-height: 500px;
+}
+.grid-editor-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+}
+.grid-editor-center {
+  flex: 1;
+  min-width: 0;
+}
+.grid-editor-detail {
+  width: 280px;
+  flex-shrink: 0;
+}
+.table-type-palette-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: var(--bg-surface);
+  margin-bottom: 6px;
+}
+.table-type-palette-item:hover {
+  border-color: var(--accent-violet-light);
+}
+.table-type-palette-item.active {
+  border-color: var(--accent-violet);
+  background: rgba(124,58,237,0.08);
+}
+.table-type-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.table-type-info {
+  flex: 1;
+  min-width: 0;
+}
+.table-type-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.table-type-meta {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
 /* ── Color picker display ── */
 .color-swatch-trigger {
   width: 36px; height: 36px;

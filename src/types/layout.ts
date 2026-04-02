@@ -36,3 +36,24 @@ export interface TableType {
   platformFeeCents: number;
   isActive: boolean;
 }
+
+export interface LayoutStatsResponse {
+  totalTables: number;
+  totalCapacity: number;
+  totalPotentialRevenueCents: number;
+  totalBookedRevenueCents: number;
+}
+
+export interface TableStatusInfo {
+  id: string;
+  label: string;
+  capacity: number;
+  shape: string;
+  color?: string;
+  gridRow?: number;
+  gridCol?: number;
+  status: 'Available' | 'Held' | 'Booked';
+  seatsSold: number;
+  bookingCount: number;
+  bookers: string[];
+}

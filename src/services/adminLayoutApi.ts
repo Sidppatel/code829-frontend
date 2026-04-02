@@ -75,4 +75,10 @@ export const adminLayoutApi = {
 
   getLockedTables: (eventId: string) =>
     apiClient.get<{ lockedTableIds: string[] }>(`/admin/events/${eventId}/layout/locked`),
+
+  getLayoutStats: (eventId: string) =>
+    apiClient.get(`/admin/events/${eventId}/layout/stats`),
+
+  bulkInsertTables: (eventId: string, tableTypeIds: string[]) =>
+    apiClient.post(`/admin/events/${eventId}/layout/bulk-insert`, { tableTypeIds }),
 };
