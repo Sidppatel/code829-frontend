@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Row, Col, Pagination, App, Skeleton } from 'antd';
 import { eventsApi } from '../../services/api';
 import type { EventSummary, EventFacets } from '../../types/event';
@@ -9,9 +10,10 @@ import PageHeader from '../../components/shared/PageHeader';
 import EmptyState from '../../components/shared/EmptyState';
 
 export default function EventsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(() => parseInt(searchParams.get('page') ?? '1', 10));
   const [pageSize] = useState(12);
   const [loading, setLoading] = useState(true);
   const [facets, setFacets] = useState<EventFacets | null>(null);
@@ -36,12 +38,26 @@ export default function EventsPage() {
   }, [fetchEvents]);
 
   useEffect(() => {
+    const pageParam = parseInt(searchParams.get('page') ?? '1', 10);
+    if (pageParam !== page) {
+      setPage(pageParam);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     eventsApi.getFacets().then((res) => setFacets(res.data)).catch(() => {});
   }, []);
 
   const handleFilterChange = (newFilters: EventListParams) => {
     setFilters(newFilters);
     setPage(1);
+    setSearchParams({ page: '1' });
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    setSearchParams({ page: newPage.toString() });
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -96,7 +112,7 @@ export default function EventsPage() {
               current={page}
               pageSize={pageSize}
               total={total}
-              onChange={setPage}
+              onChange={handlePageChange}
               showSizeChanger={false}
             />
           </div>
