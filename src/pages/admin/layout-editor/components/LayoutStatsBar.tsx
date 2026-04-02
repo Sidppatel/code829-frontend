@@ -17,7 +17,7 @@ export default function LayoutStatsBar({ stats, loading }: LayoutStatsBarProps) 
             title="Total Tables"
             value={stats?.totalTables ?? 0}
             prefix={<TableOutlined />}
-            valueStyle={{ color: 'var(--accent-violet)' }}
+            styles={{ content: { color: 'var(--accent-violet)' } }}
           />
         </Card>
       </Col>
@@ -27,7 +27,7 @@ export default function LayoutStatsBar({ stats, loading }: LayoutStatsBarProps) 
             title="Total Capacity"
             value={stats?.totalCapacity ?? 0}
             prefix={<TeamOutlined />}
-            valueStyle={{ color: 'var(--accent-violet)' }}
+            styles={{ content: { color: 'var(--accent-violet)' } }}
             suffix="seats"
           />
         </Card>
@@ -38,7 +38,7 @@ export default function LayoutStatsBar({ stats, loading }: LayoutStatsBarProps) 
             title="Potential Revenue"
             value={centsToUSD(stats?.totalPotentialRevenueCents ?? 0)}
             prefix={<DollarOutlined />}
-            valueStyle={{ color: 'var(--accent-green)' }}
+            styles={{ content: { color: 'var(--accent-green)' } }}
           />
         </Card>
       </Col>
@@ -48,7 +48,7 @@ export default function LayoutStatsBar({ stats, loading }: LayoutStatsBarProps) 
             title="Booked Revenue"
             value={centsToUSD(stats?.totalBookedRevenueCents ?? 0)}
             prefix={<CheckCircleOutlined />}
-            valueStyle={{ color: 'var(--accent-green)' }}
+            styles={{ content: { color: 'var(--accent-green)' } }}
           />
         </Card>
       </Col>

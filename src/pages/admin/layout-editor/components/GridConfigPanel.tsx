@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, InputNumber, Button, Space, App, Divider, Badge } from 'antd';
 import { AppstoreOutlined, ThunderboltOutlined, AimOutlined } from '@ant-design/icons';
 import { useFloorPlanStore } from '../../../../stores/floorPlanStore';
@@ -26,8 +26,14 @@ export default function GridConfigPanel({
   const setGridDimensions = useFloorPlanStore((s) => s.setGridDimensions);
   const elements = useFloorPlanStore((s) => s.elements);
 
-  const [rows, setRows] = useState(gridDimensions?.rows ?? 5);
-  const [cols, setCols] = useState(gridDimensions?.cols ?? 5);
+  const [rows, setRows] = useState(gridDimensions?.rows || 5);
+  const [cols, setCols] = useState(gridDimensions?.cols || 5);
+
+  // Sync local inputs when store dimensions change (e.g. after API load)
+  useEffect(() => {
+    if (gridDimensions && gridDimensions.rows > 0) setRows(gridDimensions.rows);
+    if (gridDimensions && gridDimensions.cols > 0) setCols(gridDimensions.cols);
+  }, [gridDimensions]);
   const { message } = App.useApp();
 
   const handleApplyGrid = () => {
@@ -57,25 +63,30 @@ export default function GridConfigPanel({
     <div className="grid-editor-sidebar">
       <Card size="small" title={<><AppstoreOutlined /> Grid Dimensions</>} style={{ marginBottom: 12 }}>
         <Space direction="vertical" style={{ width: '100%' }}>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <InputNumber
-              min={1}
-              max={30}
-              value={rows}
-              onChange={(v) => setRows(v ?? 1)}
-              addonBefore="Rows"
-              style={{ flex: 1 }}
-            />
-            <InputNumber
-              min={1}
-              max={30}
-              value={cols}
-              onChange={(v) => setCols(v ?? 1)}
-              addonBefore="Cols"
-              style={{ flex: 1 }}
-            />
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>Rows</div>
+              <InputNumber
+                min={1}
+                max={30}
+                value={rows}
+                onChange={(v) => setRows(v ?? 1)}
+                style={{ width: '100%' }}
+              />
+            </div>
+            <span style={{ color: 'var(--text-muted)', marginTop: 18 }}>&times;</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>Cols</div>
+              <InputNumber
+                min={1}
+                max={30}
+                value={cols}
+                onChange={(v) => setCols(v ?? 1)}
+                style={{ width: '100%' }}
+              />
+            </div>
           </div>
-          <Button block onClick={handleApplyGrid}>
+          <Button block type="primary" onClick={handleApplyGrid}>
             Apply Grid
           </Button>
         </Space>

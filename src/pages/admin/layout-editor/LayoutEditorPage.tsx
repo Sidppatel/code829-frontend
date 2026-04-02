@@ -48,53 +48,30 @@ export default function LayoutEditorPage() {
     setLoading(true);
     setStatsLoading(true);
     try {
-      const [statusRes, lockedRes, typesRes, statsRes] = await Promise.all([
+      const [layoutRes, statusRes, lockedRes, typesRes, statsRes] = await Promise.all([
+        adminLayoutApi.getLayout(eventId),
         adminLayoutApi.getLayoutStatus(eventId),
         adminLayoutApi.getLockedTables(eventId),
         adminLayoutApi.listTableTypes(),
         adminLayoutApi.getLayoutStats(eventId),
       ]);
 
-      const statusData = statusRes.data;
-      // Feed layout data into store
-      loadFromApi({
-        eventId,
-        editorMode: 'grid',
-        gridRows: statusData.gridRows ?? 0,
-        gridCols: statusData.gridCols ?? 0,
-        tables: (statusData.tables ?? []).map((t: TableStatusInfo) => ({
-          id: t.id,
-          label: t.label,
-          capacity: t.capacity,
-          shape: t.shape as FloorPlanElement['shape'],
-          color: t.color,
-          gridRow: t.gridRow,
-          gridCol: t.gridCol,
-          priceType: 'PerSeat' as const,
-          priceCents: 0,
-          isActive: true,
-          sortOrder: 0,
-        })),
-      });
-
-      // Also load full layout for complete table data (price, section, etc.)
-      const layoutRes = await adminLayoutApi.getLayout(eventId);
-      const fullTables = layoutRes.data.tables ?? [];
+      // Feed full layout data into store (has all fields: price, section, etc.)
       loadFromApi({
         eventId,
         editorMode: 'grid',
         gridRows: layoutRes.data.gridRows ?? 0,
         gridCols: layoutRes.data.gridCols ?? 0,
-        tables: fullTables,
+        tables: layoutRes.data.tables ?? [],
       });
 
       setLockedIds(new Set(lockedRes.data.lockedTableIds ?? []));
       setTableTypes(typesRes.data ?? []);
       setStats(statsRes.data);
 
-      // Build status lookup
+      // Build status lookup from status endpoint (has booking/hold info)
       const statusMap: Record<string, TableStatusInfo> = {};
-      for (const t of statusData.tables ?? []) {
+      for (const t of statusRes.data.tables ?? []) {
         statusMap[t.id] = t;
       }
       setTableStatuses(statusMap);
@@ -115,29 +92,7 @@ export default function LayoutEditorPage() {
     if (!isDirty || !eventId) return;
     if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
     draftTimerRef.current = setTimeout(() => {
-      const store = useFloorPlanStore.getState();
-      const tables = Object.values(store.elements).map((el) => ({
-        id: el.id,
-        label: el.label,
-        capacity: el.capacity,
-        shape: el.shape,
-        color: el.color,
-        section: el.section,
-        priceType: el.priceType,
-        priceCents: el.priceCents,
-        priceOverrideCents: el.priceOverrideCents,
-        isActive: el.isActive,
-        gridRow: el.gridRow,
-        gridCol: el.gridCol,
-        sortOrder: el.sortOrder,
-        tableTypeId: el.tableTypeId,
-      }));
-      void adminLayoutApi.saveDraft(eventId, {
-        editorMode: 'grid',
-        gridRows: store.gridDimensions?.rows,
-        gridCols: store.gridDimensions?.cols,
-        tables,
-      });
+      void adminLayoutApi.saveDraft(eventId, serializeTables());
     }, 800);
     return () => {
       if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
@@ -164,36 +119,40 @@ export default function LayoutEditorPage() {
     return () => window.removeEventListener('beforeunload', handler);
   }, []);
 
+  const serializeTables = () => {
+    const store = useFloorPlanStore.getState();
+    return {
+      editorMode: 'grid',
+      gridRows: store.gridDimensions?.rows ?? 0,
+      gridCols: store.gridDimensions?.cols ?? 0,
+      tables: Object.values(store.elements).map((el) => ({
+        id: el.id,
+        label: el.label,
+        capacity: el.capacity,
+        shape: el.shape ?? 'Round',
+        color: el.color,
+        section: el.section,
+        priceType: el.priceType ?? 'PerSeat',
+        priceCents: el.priceCents ?? 0,
+        priceOverrideCents: el.priceOverrideCents,
+        isActive: el.isActive ?? true,
+        gridRow: el.gridRow,
+        gridCol: el.gridCol,
+        sortOrder: el.sortOrder ?? 0,
+        tableTypeId: el.tableTypeId,
+      })),
+    };
+  };
+
   const handleSaveLayout = async () => {
     if (!eventId) return;
     setSaving(true);
     try {
-      const store = useFloorPlanStore.getState();
-      const tables = Object.values(store.elements).map((el) => ({
-        id: el.id,
-        label: el.label,
-        capacity: el.capacity,
-        shape: el.shape,
-        color: el.color,
-        section: el.section,
-        priceType: el.priceType,
-        priceCents: el.priceCents,
-        priceOverrideCents: el.priceOverrideCents,
-        isActive: el.isActive,
-        gridRow: el.gridRow,
-        gridCol: el.gridCol,
-        sortOrder: el.sortOrder,
-        tableTypeId: el.tableTypeId,
-      }));
-      await adminLayoutApi.saveLayout(eventId, {
-        editorMode: 'grid',
-        gridRows: store.gridDimensions?.rows,
-        gridCols: store.gridDimensions?.cols,
-        tables,
-      });
+      const payload = serializeTables();
+      await adminLayoutApi.saveLayout(eventId, payload);
       markClean();
       message.success('Layout saved');
-      // Refresh stats and status
+      // Refresh stats and status after save
       const [statsRes, statusRes] = await Promise.all([
         adminLayoutApi.getLayoutStats(eventId),
         adminLayoutApi.getLayoutStatus(eventId),
@@ -204,8 +163,10 @@ export default function LayoutEditorPage() {
         statusMap[t.id] = t;
       }
       setTableStatuses(statusMap);
-    } catch {
-      message.error('Failed to save layout');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      const errMsg = axiosErr?.response?.data?.message ?? (err instanceof Error ? err.message : 'Unknown error');
+      message.error(`Failed to save layout: ${errMsg}`);
     } finally {
       setSaving(false);
     }
