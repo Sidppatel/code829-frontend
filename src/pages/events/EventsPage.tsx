@@ -1,12 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Row, Col, Pagination, App } from 'antd';
+import { Row, Col, Pagination, App, Skeleton } from 'antd';
 import { eventsApi } from '../../services/api';
 import type { EventSummary, EventFacets } from '../../types/event';
 import type { EventListParams } from '../../services/eventsApi';
 import EventCard from '../../components/events/EventCard';
 import EventFilters from '../../components/events/EventFilters';
 import PageHeader from '../../components/shared/PageHeader';
-import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import EmptyState from '../../components/shared/EmptyState';
 
 export default function EventsPage() {
@@ -46,24 +45,49 @@ export default function EventsPage() {
   };
 
   return (
-    <>
+    <div className="page-container">
       <PageHeader title="Events" subtitle="Discover upcoming events near you" />
+
       <EventFilters
         facets={facets}
         values={filters}
         onChange={handleFilterChange}
       />
 
+      {!loading && events.length > 0 && (
+        <div style={{ marginBottom: 16, color: 'var(--text-muted)', fontSize: 13 }}>
+          Showing {events.length} of {total} events
+        </div>
+      )}
+
       {loading ? (
-        <LoadingSpinner />
+        <Row gutter={[20, 20]}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Col xs={24} sm={12} md={8} key={i}>
+              <div style={{
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 14,
+                overflow: 'hidden',
+              }}>
+                <Skeleton.Image active style={{ width: '100%', height: 180, display: 'block' }} />
+                <div style={{ padding: 16 }}>
+                  <Skeleton active paragraph={{ rows: 3 }} />
+                </div>
+              </div>
+            </Col>
+          ))}
+        </Row>
       ) : events.length === 0 ? (
         <EmptyState description="No events found matching your filters" />
       ) : (
         <>
-          <Row gutter={[24, 24]}>
+          <Row gutter={[20, 20]}>
             {events.map((event) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={event.id}>
-                <EventCard event={event} />
+              <Col xs={24} sm={12} md={8} key={event.id}>
+                <div className="hover-lift">
+                  <EventCard event={event} />
+                </div>
               </Col>
             ))}
           </Row>
@@ -78,6 +102,6 @@ export default function EventsPage() {
           </div>
         </>
       )}
-    </>
+    </div>
   );
 }

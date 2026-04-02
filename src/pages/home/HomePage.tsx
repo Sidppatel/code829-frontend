@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Typography, Button, Row, Col, Space } from 'antd';
-import { CalendarOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { Typography, Button, Row, Col } from 'antd';
+import { ArrowRightOutlined, DownOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { eventsApi } from '../../services/api';
 import type { EventSummary } from '../../types/event';
@@ -34,118 +34,152 @@ export default function HomePage() {
   }, []);
 
   return (
-    <Space direction="vertical" size="large" style={{ width: '100%' }}>
-      {/* Hero */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div
-          className="glass-card"
-          style={{
-            textAlign: 'center',
-            padding: '80px 24px',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
+    <>
+      {/* Hero Section */}
+      <div className="hero-section">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          style={{ position: 'relative', zIndex: 1, maxWidth: 700 }}
         >
-          <div
+          <h1
+            className="text-display"
             style={{
-              position: 'absolute',
-              top: '-50%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 600,
-              height: 600,
-              background: 'radial-gradient(circle, rgba(124, 58, 237, 0.15), transparent 70%)',
-              pointerEvents: 'none',
-            }}
-          />
-          <CalendarOutlined
-            style={{ fontSize: 48, color: '#7C3AED', marginBottom: 16 }}
-          />
-          <Typography.Title
-            level={1}
-            style={{
-              marginBottom: 8,
-              fontFamily: "'Playfair Display', serif",
-              color: '#F1F0FF',
-              fontSize: 42,
+              fontSize: 'clamp(2rem, 6vw, 4rem)',
+              color: 'var(--text-primary)',
+              lineHeight: 1.15,
+              marginBottom: 16,
+              fontWeight: 700,
             }}
           >
-            Discover Events in Mobile, AL
-          </Typography.Title>
+            Discover Events<br />in Mobile, AL
+          </h1>
           <Typography.Paragraph
             style={{
-              fontSize: 18,
-              maxWidth: 600,
-              margin: '0 auto 32px',
-              color: '#9CA3AF',
+              fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
+              color: 'var(--text-secondary)',
+              maxWidth: 520,
+              margin: '0 auto 36px',
             }}
           >
             Browse upcoming events, book your seats, and enjoy unforgettable experiences.
           </Typography.Paragraph>
-          <Button
-            type="primary"
-            size="large"
-            icon={<ArrowRightOutlined />}
-            onClick={() => navigate('/events')}
-            style={{ fontWeight: 600, padding: '0 32px', height: 48 }}
-          >
-            Browse Events
-          </Button>
-        </div>
-      </motion.div>
 
-      {/* Featured Events */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+            <div className="hero-cta-row">
+              <Button
+                type="primary"
+                size="large"
+                icon={<ArrowRightOutlined />}
+                onClick={() => navigate('/events')}
+                style={{
+                  fontWeight: 600,
+                  padding: '0 32px',
+                  height: 52,
+                  borderRadius: 99,
+                  fontSize: 16,
+                }}
+              >
+                Browse Events
+              </Button>
+              <Button
+                size="large"
+                ghost
+                onClick={() => {
+                  const section = document.getElementById('upcoming-section');
+                  section?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                style={{
+                  fontWeight: 600,
+                  padding: '0 32px',
+                  height: 52,
+                  borderRadius: 99,
+                  fontSize: 16,
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                Learn More
+              </Button>
+            </div>
+          </div>
+
+          {/* Scroll indicator */}
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            style={{ marginTop: 48 }}
+          >
+            <DownOutlined style={{ fontSize: 20, color: 'var(--text-muted)' }} />
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Featured & Upcoming Sections */}
       {loading ? (
-        <LoadingSpinner />
+        <div className="page-container">
+          <LoadingSpinner />
+        </div>
       ) : (
         <>
           {featured.length > 0 && (
             <motion.section
+              className="page-container"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Typography.Title level={3} style={{ margin: 0, color: '#F1F0FF' }}>
-                  <span className="gradient-text">Featured</span> Events
-                </Typography.Title>
-                <Button type="link" onClick={() => navigate('/events')} style={{ color: '#7C3AED' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="section-heading">
+                  <h2 style={{ margin: 0, fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', color: 'var(--text-primary)' }}>
+                    <span className="gradient-text">Featured</span> Events
+                  </h2>
+                </div>
+                <Button type="link" onClick={() => navigate('/events')} style={{ color: 'var(--accent-violet)' }}>
                   View all
                 </Button>
               </div>
-              <Row gutter={[24, 24]}>
+              <Row gutter={[20, 20]}>
                 {featured.map((event) => (
                   <Col xs={24} sm={12} lg={6} key={event.id}>
-                    <EventCard event={event} />
+                    <div className="hover-lift">
+                      <EventCard event={event} />
+                    </div>
                   </Col>
                 ))}
               </Row>
             </motion.section>
           )}
 
-          {/* Upcoming Events */}
           <motion.section
+            id="upcoming-section"
+            className="page-container"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <Typography.Title level={3} style={{ margin: 0, color: '#F1F0FF' }}>
-                Upcoming Events
-              </Typography.Title>
-              <Button type="link" onClick={() => navigate('/events')} style={{ color: '#7C3AED' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="section-heading">
+                <h2 style={{ margin: 0, fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', color: 'var(--text-primary)' }}>
+                  Upcoming Events
+                </h2>
+              </div>
+              <Button type="link" onClick={() => navigate('/events')} style={{ color: 'var(--accent-violet)' }}>
                 View all
               </Button>
             </div>
             {upcoming.length > 0 ? (
-              <Row gutter={[24, 24]}>
+              <Row gutter={[20, 20]}>
                 {upcoming.map((event) => (
                   <Col xs={24} sm={12} lg={8} key={event.id}>
-                    <EventCard event={event} />
+                    <div className="hover-lift">
+                      <EventCard event={event} />
+                    </div>
                   </Col>
                 ))}
               </Row>
@@ -155,6 +189,6 @@ export default function HomePage() {
           </motion.section>
         </>
       )}
-    </Space>
+    </>
   );
 }

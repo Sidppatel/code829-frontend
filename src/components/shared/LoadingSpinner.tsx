@@ -1,15 +1,19 @@
 import { Spin } from 'antd';
 
 interface Props {
+  fullPage?: boolean;
   description?: string;
 }
 
-export default function LoadingSpinner({ description = 'Loading...' }: Props) {
+export default function LoadingSpinner({ fullPage = true }: Props) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 48 }}>
-      <Spin size="large" description={description}>
-        <div style={{ padding: 50 }} />
-      </Spin>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: fullPage ? '60vh' : '120px',
+    }}>
+      <Spin size="large" />
     </div>
   );
 }
