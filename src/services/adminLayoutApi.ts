@@ -30,6 +30,7 @@ export interface CreateTableTypePayload {
   defaultShape: string;
   defaultColor?: string;
   defaultPriceCents?: number;
+  isActive?: boolean;
 }
 
 export const adminLayoutApi = {

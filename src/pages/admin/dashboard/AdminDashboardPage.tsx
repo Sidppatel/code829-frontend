@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Row, Col, Button, App } from 'antd';
+import { Button, App } from 'antd';
 import {
   CalendarOutlined,
-  ShoppingCartOutlined,
-  DollarOutlined,
-  UserOutlined,
-  RightOutlined,
+  EnvironmentOutlined,
+  ArrowRightOutlined,
   PlusOutlined,
-  CheckCircleOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { adminDashboardApi } from '../../../services/api';
@@ -17,39 +14,19 @@ import type { DashboardStats, NextEventDashboard } from '../../../types/develope
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 
-interface StatCardProps {
-  icon: React.ReactNode;
-  iconBg: string;
-  label: string;
-  value: string | number;
-}
-
-function StatCard({ icon, iconBg, label, value }: StatCardProps) {
-  return (
-    <div className="stat-card">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div style={{
-          width: 44,
-          height: 44,
-          borderRadius: 12,
-          background: iconBg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 20,
-          flexShrink: 0,
-        }}>
-          {icon}
-        </div>
-        <div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>
-            {value}
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</div>
-        </div>
-      </div>
-    </div>
-  );
+function getCountdownLabel(startDate: string): string {
+  const now = new Date();
+  const start = new Date(startDate);
+  const diffMs = start.getTime() - now.getTime();
+  if (diffMs <= 0) return 'Happening Now';
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 24) return `In ${diffHours}h`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return 'Tomorrow';
+  if (diffDays < 7) return `In ${diffDays} days`;
+  const diffWeeks = Math.floor(diffDays / 7);
+  if (diffWeeks === 1) return 'In 1 week';
+  return `In ${diffWeeks} weeks`;
 }
 
 export default function AdminDashboardPage() {
@@ -101,63 +78,98 @@ export default function AdminDashboardPage() {
       />
 
       {stats && (
-        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          <Col xs={12} lg={6}>
-            <StatCard
-              icon={<CalendarOutlined style={{ color: 'var(--accent-violet)' }} />}
-              iconBg="rgba(124, 58, 237, 0.12)"
-              label="Total Events"
-              value={stats.totalEvents}
-            />
-          </Col>
-          <Col xs={12} lg={6}>
-            <StatCard
-              icon={<ShoppingCartOutlined style={{ color: 'var(--accent-gold)' }} />}
-              iconBg="rgba(245, 158, 11, 0.12)"
-              label="Total Bookings"
-              value={stats.totalBookings}
-            />
-          </Col>
-          <Col xs={12} lg={6}>
-            <StatCard
-              icon={<DollarOutlined style={{ color: 'var(--accent-green)' }} />}
-              iconBg="rgba(16, 185, 129, 0.12)"
-              label="Revenue"
-              value={centsToUSD(stats.totalRevenueCents)}
-            />
-          </Col>
-          <Col xs={12} lg={6}>
-            <StatCard
-              icon={<UserOutlined style={{ color: 'var(--accent-cyan)' }} />}
-              iconBg="rgba(6, 182, 212, 0.12)"
-              label="Users"
-              value={stats.totalUsers}
-            />
-          </Col>
-        </Row>
+        <div className="mini-kpi-strip">
+          <div className="mini-kpi-card">
+            <div className="mini-kpi-value">{stats.totalEvents}</div>
+            <div className="mini-kpi-label">Events</div>
+          </div>
+          <div className="mini-kpi-card">
+            <div className="mini-kpi-value">{stats.totalBookings}</div>
+            <div className="mini-kpi-label">Bookings</div>
+          </div>
+          <div className="mini-kpi-card">
+            <div className="mini-kpi-value">{centsToUSD(stats.totalRevenueCents)}</div>
+            <div className="mini-kpi-label">Revenue</div>
+          </div>
+        </div>
       )}
 
-      {nextEvent && (
+      {nextEvent ? (
         <div
-          className="stat-card"
-          style={{ cursor: 'pointer' }}
+          className="next-event-hero"
           onClick={() => navigate(`/admin/events/${nextEvent.eventId}`)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && navigate(`/admin/events/${nextEvent.eventId}`)}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ fontWeight: 600, fontSize: 16, color: 'var(--text-primary)', marginBottom: 4 }}>
-                <CheckCircleOutlined style={{ color: 'var(--accent-violet)', marginRight: 8 }} />
-                {nextEvent.eventTitle}
-              </div>
-              <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-                {formatEventDate(nextEvent.startDate)} &middot; {nextEvent.venueName}
-              </div>
-              <div style={{ marginTop: 8, color: 'var(--text-secondary)', fontSize: 13 }}>
-                {nextEvent.ticketsSold} / {nextEvent.ticketsTotal} tickets sold &middot; {centsToUSD(nextEvent.revenueCents)} revenue
-              </div>
-            </div>
-            <RightOutlined style={{ color: 'var(--text-muted)', fontSize: 16 }} />
+          <div className="next-event-countdown">
+            ⚡ {getCountdownLabel(nextEvent.startDate)}
           </div>
+
+          <div className="next-event-title">{nextEvent.eventTitle}</div>
+
+          <div className="next-event-meta">
+            <span className="next-event-meta-item">
+              <CalendarOutlined style={{ color: 'var(--accent-gold)' }} />
+              {formatEventDate(nextEvent.startDate)}
+            </span>
+            <span className="next-event-meta-item">
+              <EnvironmentOutlined style={{ color: 'var(--accent-violet)' }} />
+              {nextEvent.venueName}
+            </span>
+          </div>
+
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', marginTop: 14, marginBottom: 6 }}>
+              <span>Tickets Sold</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>
+                {nextEvent.ticketsSold} / {nextEvent.ticketsTotal}
+              </span>
+            </div>
+            <div className="next-event-progress-bar">
+              <div
+                className="next-event-progress-fill"
+                style={{
+                  width: `${nextEvent.ticketsTotal > 0
+                    ? Math.min((nextEvent.ticketsSold / nextEvent.ticketsTotal) * 100, 100)
+                    : 0}%`
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="next-event-stats">
+            <div className="next-event-stat">
+              <div className="next-event-stat-value">
+                {nextEvent.ticketsTotal > 0
+                  ? `${Math.round((nextEvent.ticketsSold / nextEvent.ticketsTotal) * 100)}%`
+                  : '0%'}
+              </div>
+              <div className="next-event-stat-label">Sold</div>
+            </div>
+            <div className="next-event-stat">
+              <div className="next-event-stat-value">{centsToUSD(nextEvent.revenueCents)}</div>
+              <div className="next-event-stat-label">Revenue</div>
+            </div>
+            <div className="next-event-stat">
+              <div className="next-event-stat-value">{nextEvent.ticketsTotal - nextEvent.ticketsSold}</div>
+              <div className="next-event-stat-label">Available</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14, position: 'relative', zIndex: 1 }}>
+            <span style={{ fontSize: 13, color: '#A78BFA', fontWeight: 600 }}>
+              View Event <ArrowRightOutlined />
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="admin-section" style={{ textAlign: 'center', padding: '40px 24px' }}>
+          <CalendarOutlined style={{ fontSize: 40, color: 'var(--accent-violet)', opacity: 0.4, display: 'block', marginBottom: 12 }} />
+          <div style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>No upcoming events scheduled</div>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/admin/events/new')} style={{ borderRadius: 99 }}>
+            Create Your First Event
+          </Button>
         </div>
       )}
     </div>

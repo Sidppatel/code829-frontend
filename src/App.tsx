@@ -64,6 +64,7 @@ export default function App() {
               <Route index element={<AdminDashboardPage />} />
               <Route path="events" element={<AdminEventsListPage />} />
               <Route path="events/new" element={<EventWizardPage />} />
+              <Route path="events/:id/edit" element={<EventWizardPage />} />
               <Route path="events/:id" element={<EventManagePage />} />
               <Route path="venues" element={<VenuesPage />} />
               <Route path="venues/new" element={<VenueFormPage />} />

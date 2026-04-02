@@ -8,7 +8,6 @@ import {
   BookOutlined,
   TableOutlined,
   BarChartOutlined,
-  SettingOutlined,
   MenuOutlined,
   CloseOutlined,
   BellOutlined,
@@ -28,7 +27,6 @@ const menuItems = [
   { key: '/admin/bookings', label: <Link to="/admin/bookings">Bookings</Link>, icon: <BookOutlined /> },
   { key: '/admin/table-types', label: <Link to="/admin/table-types">Table Types</Link>, icon: <TableOutlined /> },
   { key: '/admin/analytics', label: <Link to="/admin/analytics">Analytics</Link>, icon: <BarChartOutlined /> },
-  { key: '/admin/settings', label: <Link to="/admin/settings">Settings</Link>, icon: <SettingOutlined /> },
 ];
 
 type Breakpoint = 'mobile' | 'tablet' | 'desktop';
