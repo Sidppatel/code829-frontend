@@ -241,6 +241,9 @@ export default function EventDetailPage() {
   // Default: event info view
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/events')}>
+        All Events
+      </Button>
       {/* Banner */}
       {event.imageUrl ? (
         <img

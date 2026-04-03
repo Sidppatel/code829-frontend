@@ -53,10 +53,10 @@ export default function PublicLayout() {
   ];
 
   const bottomNavItems = [
-    { key: '/', icon: <HomeOutlined />, label: 'Home' },
-    { key: '/events', icon: <CalendarOutlined />, label: 'Events' },
-    { key: '/bookings', icon: <BookOutlined />, label: 'Bookings' },
-    { key: isAuthenticated ? '/profile' : '/login', icon: <UserOutlined />, label: isAuthenticated ? 'Account' : 'Sign In' },
+    { key: '/', icon: <HomeOutlined />, label: 'Home', action: 'navigate' as const },
+    { key: '/events', icon: <CalendarOutlined />, label: 'Events', action: 'navigate' as const },
+    { key: '/bookings', icon: <BookOutlined />, label: 'Bookings', action: 'navigate' as const },
+    { key: 'menu', icon: <MenuOutlined />, label: 'Menu', action: 'drawer' as const },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -130,14 +130,6 @@ export default function PublicLayout() {
               </Button>
             )}
           </div>
-          {/* Mobile hamburger */}
-          <Button
-            type="text"
-            icon={<MenuOutlined style={{ fontSize: 20, color: 'var(--text-primary)' }} />}
-            onClick={() => setDrawerOpen(true)}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40 }}
-            className="mobile-only-btn"
-          />
         </Space>
       </Header>
 
@@ -247,11 +239,18 @@ export default function PublicLayout() {
       {/* Mobile Bottom Nav */}
       <nav className="mobile-bottom-nav">
         {bottomNavItems.map((item) => {
-          const active = isActive(item.key);
+          const active = item.action === 'navigate' && isActive(item.key);
+          const isMenuOpen = item.action === 'drawer' && drawerOpen;
           return (
             <button
               key={item.key}
-              onClick={() => navigate(item.key)}
+              onClick={() => {
+                if (item.action === 'drawer') {
+                  setDrawerOpen(true);
+                } else {
+                  navigate(item.key);
+                }
+              }}
               style={{
                 background: 'none',
                 border: 'none',
@@ -261,7 +260,7 @@ export default function PublicLayout() {
                 alignItems: 'center',
                 gap: 2,
                 padding: '4px 12px',
-                color: active ? 'var(--accent-violet)' : 'var(--text-muted)',
+                color: active || isMenuOpen ? 'var(--accent-violet)' : 'var(--text-muted)',
                 fontSize: 10,
                 fontFamily: "'Inter', sans-serif",
                 position: 'relative',
