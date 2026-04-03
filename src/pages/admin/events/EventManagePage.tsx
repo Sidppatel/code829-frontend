@@ -222,34 +222,36 @@ export default function EventManagePage() {
       {/* Section 4 -- Sales Stats */}
       <div className="admin-section">
         <div className="admin-section-title"><DollarOutlined /> Sales</div>
-        <div className="next-event-stats">
-          <div className="next-event-stat">
-            <div className="next-event-stat-value">{event.quantitySold}</div>
-            <div className="next-event-stat-label">Sold</div>
-          </div>
-          <div className="next-event-stat">
-            <div className="next-event-stat-value">{event.quantityTotal - event.quantitySold}</div>
-            <div className="next-event-stat-label">Available</div>
-          </div>
-          <div className="next-event-stat">
-            <div className="next-event-stat-value">
-              {event.quantityTotal > 0
-                ? `${Math.round((event.quantitySold / event.quantityTotal) * 100)}%`
-                : '0%'}
-            </div>
-            <div className="next-event-stat-label">Fill Rate</div>
-          </div>
-        </div>
-        <div className="next-event-progress-bar" style={{ marginTop: 14 }}>
-          <div
-            className="next-event-progress-fill"
-            style={{
-              width: `${event.quantityTotal > 0
-                ? Math.min((event.quantitySold / event.quantityTotal) * 100, 100)
-                : 0}%`
-            }}
-          />
-        </div>
+        {(() => {
+          const sold = event.quantitySold ?? 0;
+          const total = event.quantityTotal ?? 0;
+          const available = total - sold;
+          const fillRate = total > 0 ? Math.round((sold / total) * 100) : 0;
+          return (
+            <>
+              <div className="next-event-stats">
+                <div className="next-event-stat">
+                  <div className="next-event-stat-value">{sold}</div>
+                  <div className="next-event-stat-label">Sold</div>
+                </div>
+                <div className="next-event-stat">
+                  <div className="next-event-stat-value">{available}</div>
+                  <div className="next-event-stat-label">Available</div>
+                </div>
+                <div className="next-event-stat">
+                  <div className="next-event-stat-value">{fillRate}%</div>
+                  <div className="next-event-stat-label">Fill Rate</div>
+                </div>
+              </div>
+              <div className="next-event-progress-bar" style={{ marginTop: 14 }}>
+                <div
+                  className="next-event-progress-fill"
+                  style={{ width: `${Math.min(fillRate, 100)}%` }}
+                />
+              </div>
+            </>
+          );
+        })()}
       </div>
 
       {/* Section 5 -- Quick Links */}
