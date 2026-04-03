@@ -91,7 +91,7 @@ export default function CheckInSelectPage() {
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                       <Tag color="blue" style={{ margin: 0 }}>{s.totalTicketsSold} sold</Tag>
                       <Tag color="green" style={{ margin: 0 }}>{s.checkedIn} checked in</Tag>
-                      <Tag color="orange" style={{ margin: 0 }}>{s.pending} remaining</Tag>
+                      <Tag color="orange" style={{ margin: 0 }}>{s.remaining} remaining</Tag>
                     </div>
                   )}
                 </div>

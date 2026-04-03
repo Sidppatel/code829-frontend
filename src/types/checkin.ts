@@ -12,11 +12,10 @@ export interface ScanResponse {
 export interface CheckInStats {
   eventId: string;
   eventTitle: string;
-  total: number;
+  totalTicketsSold: number;
   checkedIn: number;
   pending: number;
-  paid: number;
+  remaining: number;
   percentage: number;
-  totalTicketsSold: number;
   lastCheckIn?: string;
 }

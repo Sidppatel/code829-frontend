@@ -62,7 +62,7 @@ export default function CheckInPage() {
           <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
             <Col xs={12} sm={12} md={6}>
               <Card className="stat-card">
-                <Statistic title="Total Tickets" value={stats.totalTicketsSold} />
+                <Statistic title="Tickets Sold" value={stats.totalTicketsSold} />
               </Card>
             </Col>
             <Col xs={12} sm={12} md={6}>
@@ -72,7 +72,7 @@ export default function CheckInPage() {
             </Col>
             <Col xs={12} sm={12} md={6}>
               <Card className="stat-card">
-                <Statistic title="Pending" value={stats.pending} />
+                <Statistic title="Remaining" value={stats.remaining} valueStyle={{ color: 'var(--ant-color-warning)' }} />
               </Card>
             </Col>
             <Col xs={12} sm={12} md={6}>
