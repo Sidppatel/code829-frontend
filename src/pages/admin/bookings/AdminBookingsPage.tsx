@@ -1,5 +1,5 @@
-import { Table, Button, Space, Input, Select, App, Popconfirm } from 'antd';
-import { SearchOutlined, DownloadOutlined, UndoOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Input, Select, App, Popconfirm, Card, Empty, Pagination, Skeleton } from 'antd';
+import { SearchOutlined, DownloadOutlined, UndoOutlined, CalendarOutlined, UserOutlined, DollarOutlined } from '@ant-design/icons';
 import { adminBookingsApi } from '../../../services/api';
 import { usePagedTable } from '../../../hooks/usePagedTable';
 import { centsToUSD } from '../../../utils/currency';
@@ -41,6 +41,13 @@ export default function AdminBookingsPage() {
     }
   };
 
+  const getDetails = (record: Booking): string => {
+    if (record.tableLabel) return `Table ${record.tableLabel}`;
+    if (record.seatsReserved) return `${record.seatsReserved} seat${record.seatsReserved !== 1 ? 's' : ''}`;
+    return '-';
+  };
+
+  // ── Desktop columns ──
   const columns = [
     { title: 'Booking #', dataIndex: 'bookingNumber', key: 'bookingNumber' },
     { title: 'Event', dataIndex: 'eventTitle', key: 'eventTitle' },
@@ -68,31 +75,112 @@ export default function AdminBookingsPage() {
     },
   ];
 
+  // ── Mobile card ──
+  const renderBookingCard = (booking: Booking) => (
+    <Card
+      key={booking.id}
+      size="small"
+      style={{ marginBottom: 12 }}
+      styles={{ body: { padding: 14 } }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 600, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {booking.eventTitle}
+          </div>
+          <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>
+            #{booking.bookingNumber}
+          </div>
+        </div>
+        <BookingStatusTag status={booking.status} />
+      </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 14px', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 10 }}>
+        <span><UserOutlined style={{ marginRight: 4 }} />{booking.userName}</span>
+        <span><CalendarOutlined style={{ marginRight: 4 }} />{formatEventDate(booking.createdAt)}</span>
+        <span>{getDetails(booking)}</span>
+        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+          <DollarOutlined style={{ marginRight: 4 }} />{centsToUSD(booking.totalCents)}
+        </span>
+      </div>
+
+      {booking.status === 'Paid' && (
+        <Popconfirm title="Refund this booking?" onConfirm={() => handleRefund(booking.id)}>
+          <Button size="small" icon={<UndoOutlined />} danger>
+            Refund
+          </Button>
+        </Popconfirm>
+      )}
+    </Card>
+  );
+
   return (
     <div>
       <PageHeader title="Bookings" subtitle="Manage all bookings"
         extra={
-          <Space>
-            <Button icon={<DownloadOutlined />} onClick={() => handleExport('csv')}>CSV</Button>
-            <Button icon={<DownloadOutlined />} onClick={() => handleExport('xlsx')}>Excel</Button>
+          <Space size="small">
+            <Button size="small" icon={<DownloadOutlined />} onClick={() => handleExport('csv')}>CSV</Button>
+            <Button size="small" icon={<DownloadOutlined />} onClick={() => handleExport('xlsx')}>Excel</Button>
           </Space>
         }
       />
-      <Space style={{ marginBottom: 16 }}>
-        <Input placeholder="Search bookings..." prefix={<SearchOutlined />} allowClear
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+        <Input
+          placeholder="Search bookings..."
+          prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
+          allowClear
           onChange={(e) => setFilters({ search: e.target.value || undefined })}
-          style={{ width: 240 }}
+          style={{ flex: 1, minWidth: 180 }}
         />
-        <Select placeholder="Status" allowClear style={{ width: 140 }}
+        <Select
+          placeholder="Status"
+          allowClear
+          style={{ minWidth: 130 }}
           onChange={(val) => setFilters({ status: val })}
           options={['Pending', 'Paid', 'CheckedIn', 'Cancelled', 'Refunded'].map((s) => ({ label: s, value: s }))}
         />
-      </Space>
-      <div className="responsive-table">
-        <Table dataSource={data} columns={columns} rowKey="id" loading={loading}
-          scroll={{ x: 800 }}
-          pagination={{ current: page, pageSize, total, onChange: (p, ps) => { setPage(p); setPageSize(ps); }, showSizeChanger: true }}
-        />
+      </div>
+
+      {/* Desktop: Table */}
+      <div className="desktop-table">
+        <div className="responsive-table">
+          <Table dataSource={data} columns={columns} rowKey="id" loading={loading}
+            scroll={{ x: 800 }}
+            pagination={{ current: page, pageSize, total, onChange: (p, ps) => { setPage(p); setPageSize(ps); }, showSizeChanger: true }}
+          />
+        </div>
+      </div>
+
+      {/* Mobile: Cards */}
+      <div className="mobile-card-list">
+        {loading ? (
+          [1, 2, 3].map((i) => (
+            <Card key={i} size="small" style={{ marginBottom: 12 }}>
+              <Skeleton active paragraph={{ rows: 2 }} />
+            </Card>
+          ))
+        ) : data.length === 0 ? (
+          <Empty description="No bookings found" style={{ padding: '48px 0' }} />
+        ) : (
+          <>
+            {data.map(renderBookingCard)}
+            {total > pageSize && (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+                <Pagination
+                  current={page}
+                  pageSize={pageSize}
+                  total={total}
+                  onChange={setPage}
+                  showSizeChanger={false}
+                  size="small"
+                  simple
+                />
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
