@@ -1,4 +1,4 @@
-import { Card, Row, Col, Statistic } from 'antd';
+import { Card, Statistic } from 'antd';
 import { TableOutlined, TeamOutlined, DollarOutlined } from '@ant-design/icons';
 import type { LayoutStatsResponse } from '../../../../types/layout';
 import { centsToUSD } from '../../../../utils/currency';
@@ -9,39 +9,41 @@ interface LayoutStatsBarProps {
 }
 
 export default function LayoutStatsBar({ stats, loading }: LayoutStatsBarProps) {
+  const items = [
+    {
+      title: 'Tables',
+      value: stats?.totalTables ?? 0,
+      icon: <TableOutlined />,
+      color: 'var(--accent-violet)',
+    },
+    {
+      title: 'Capacity',
+      value: stats?.totalCapacity ?? 0,
+      icon: <TeamOutlined />,
+      color: 'var(--accent-violet)',
+      suffix: 'seats',
+    },
+    {
+      title: 'Revenue',
+      value: centsToUSD(stats?.totalPotentialRevenueCents ?? 0),
+      icon: <DollarOutlined />,
+      color: 'var(--accent-green)',
+    },
+  ];
+
   return (
-    <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
-      <Col xs={8}>
-        <Card size="small" loading={loading}>
+    <div className="layout-stats-bar">
+      {items.map((item) => (
+        <Card key={item.title} size="small" loading={loading} className="layout-stats-card">
           <Statistic
-            title="Total Tables"
-            value={stats?.totalTables ?? 0}
-            prefix={<TableOutlined />}
-            styles={{ content: { color: 'var(--accent-violet)' } }}
+            title={item.title}
+            value={item.value}
+            prefix={item.icon}
+            suffix={item.suffix}
+            styles={{ content: { color: item.color, fontSize: 20 } }}
           />
         </Card>
-      </Col>
-      <Col xs={8}>
-        <Card size="small" loading={loading}>
-          <Statistic
-            title="Total Capacity"
-            value={stats?.totalCapacity ?? 0}
-            prefix={<TeamOutlined />}
-            styles={{ content: { color: 'var(--accent-violet)' } }}
-            suffix="seats"
-          />
-        </Card>
-      </Col>
-      <Col xs={8}>
-        <Card size="small" loading={loading}>
-          <Statistic
-            title="Potential Revenue"
-            value={centsToUSD(stats?.totalPotentialRevenueCents ?? 0)}
-            prefix={<DollarOutlined />}
-            styles={{ content: { color: 'var(--accent-green)' } }}
-          />
-        </Card>
-      </Col>
-    </Row>
+      ))}
+    </div>
   );
 }
