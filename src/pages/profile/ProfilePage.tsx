@@ -5,6 +5,8 @@ import { useAuthStore } from '../../stores/authStore';
 import type { UserProfile } from '../../types/auth';
 import PageHeader from '../../components/shared/PageHeader';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
+import type { AddressParts } from '../../components/shared/AddressAutocomplete';
 
 export default function ProfilePage() {
   const [form] = Form.useForm();
@@ -51,6 +53,15 @@ export default function ProfilePage() {
     }
   };
 
+  const handleAddressSelect = (parts: AddressParts) => {
+    form.setFieldsValue({
+      address: parts.address,
+      city: parts.city,
+      state: parts.state,
+      zipCode: parts.zipCode,
+    });
+  };
+
   if (loading) return <LoadingSpinner />;
 
   return (
@@ -74,7 +85,7 @@ export default function ProfilePage() {
             <Input />
           </Form.Item>
           <Form.Item name="address" label="Address">
-            <Input />
+            <AddressAutocomplete onSelect={handleAddressSelect} />
           </Form.Item>
           <Row gutter={16}>
             <Col xs={24} sm={8}>
@@ -84,7 +95,7 @@ export default function ProfilePage() {
             </Col>
             <Col xs={24} sm={8}>
               <Form.Item name="state" label="State">
-                <Input />
+                <Input maxLength={2} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={8}>

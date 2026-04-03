@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Alert, Button, Space, App } from 'antd';
-import { InfoCircleOutlined, SaveOutlined } from '@ant-design/icons';
+import { Alert, Button, App } from 'antd';
+import { CloseOutlined, InfoCircleOutlined, SaveOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../../services/api';
 import type { LayoutStatsResponse, TableTemplate, EventTableType } from '../../../types/layout';
 import PageHeader from '../../../components/shared/PageHeader';
@@ -284,19 +284,6 @@ export default function LayoutEditorPage() {
         title="Layout Editor"
         subtitle={`${tables.length} tables · ${gridRows}x${gridCols} grid`}
         onBack={handleBack}
-        extra={
-          <Space>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              onClick={handleSaveLayout}
-              loading={saving}
-              disabled={!isDirty}
-            >
-              Save Layout
-            </Button>
-          </Space>
-        }
       />
 
       {hasLockedTables && (
@@ -346,6 +333,24 @@ export default function LayoutEditorPage() {
           onCellClick={handleCellClick}
           onTableClick={handleTableClick}
         />
+      </div>
+
+      <div className="layout-editor-footer">
+        <Button
+          icon={<CloseOutlined />}
+          onClick={handleBack}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="primary"
+          icon={<SaveOutlined />}
+          onClick={handleSaveLayout}
+          loading={saving}
+          disabled={!isDirty}
+        >
+          Save Layout
+        </Button>
       </div>
     </div>
   );

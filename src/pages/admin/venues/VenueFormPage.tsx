@@ -5,6 +5,8 @@ import { adminVenuesApi } from '../../../services/api';
 import type { CreateVenuePayload } from '../../../services/adminVenuesApi';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
+import AddressAutocomplete from '../../../components/shared/AddressAutocomplete';
+import type { AddressParts } from '../../../components/shared/AddressAutocomplete';
 
 export default function VenueFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -60,6 +62,15 @@ export default function VenueFormPage() {
     }
   };
 
+  const handleAddressSelect = (parts: AddressParts) => {
+    form.setFieldsValue({
+      address: parts.address,
+      city: parts.city,
+      state: parts.state,
+      zipCode: parts.zipCode,
+    });
+  };
+
   if (loading) return <LoadingSpinner />;
 
   return (
@@ -71,14 +82,14 @@ export default function VenueFormPage() {
             <Input />
           </Form.Item>
           <Form.Item name="address" label="Address" rules={[{ required: true }]}>
-            <Input />
+            <AddressAutocomplete onSelect={handleAddressSelect} />
           </Form.Item>
           <Row gutter={16}>
             <Col xs={24} sm={8}>
               <Form.Item name="city" label="City" rules={[{ required: true }]}><Input /></Form.Item>
             </Col>
             <Col xs={24} sm={8}>
-              <Form.Item name="state" label="State" rules={[{ required: true }]}><Input /></Form.Item>
+              <Form.Item name="state" label="State" rules={[{ required: true }]}><Input maxLength={2} /></Form.Item>
             </Col>
             <Col xs={24} sm={8}>
               <Form.Item name="zipCode" label="ZIP Code" rules={[{ required: true }]}><Input /></Form.Item>

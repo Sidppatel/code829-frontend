@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Card,
+  ColorPicker,
   InputNumber,
   Button,
   Space,
@@ -131,7 +132,7 @@ export default function ControlsPanel({
         label: values.label || template?.name || 'Table Type',
         capacity: values.capacity ?? template?.defaultCapacity ?? 4,
         shape: values.shape || template?.defaultShape || 'Round',
-        color: values.color || template?.defaultColor,
+        color: (typeof values.color === 'string' ? values.color : values.color?.toHexString?.()) || template?.defaultColor,
         priceCents: values.priceDollars != null ? Math.round(values.priceDollars * 100) : (template?.defaultPriceCents ?? 0),
       });
       onEventTableCreated(res.data);
@@ -166,7 +167,7 @@ export default function ControlsPanel({
         label: values.label,
         capacity: values.capacity,
         shape: values.shape,
-        color: values.color,
+        color: typeof values.color === 'string' ? values.color : values.color?.toHexString?.(),
         priceCents: Math.round((values.priceDollars ?? 0) * 100),
       });
       onEventTableUpdated(res.data);
@@ -398,8 +399,15 @@ export default function ControlsPanel({
           <Form.Item name="shape" label="Shape" rules={[{ required: true }]}>
             <Select options={SHAPES} />
           </Form.Item>
-          <Form.Item name="color" label="Color">
-            <Input placeholder="#7C3AED" />
+          <Form.Item name="color" label="Color" getValueFromEvent={(color) => color?.toHexString?.() ?? color}>
+            <ColorPicker
+              format="hex"
+              showText
+              presets={[{
+                label: 'Recommended',
+                colors: ['#7C3AED', '#5B21B6', '#2563EB', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#6366F1', '#14B8A6', '#F97316', '#8B5CF6'],
+              }]}
+            />
           </Form.Item>
           <Form.Item name="priceDollars" label="Price ($)" rules={[{ required: true }]}>
             <InputNumber min={0} step={0.01} prefix="$" style={{ width: '100%' }} />
@@ -427,8 +435,15 @@ export default function ControlsPanel({
           <Form.Item name="shape" label="Shape" rules={[{ required: true }]}>
             <Select options={SHAPES} />
           </Form.Item>
-          <Form.Item name="color" label="Color">
-            <Input placeholder="#7C3AED" />
+          <Form.Item name="color" label="Color" getValueFromEvent={(color) => color?.toHexString?.() ?? color}>
+            <ColorPicker
+              format="hex"
+              showText
+              presets={[{
+                label: 'Recommended',
+                colors: ['#7C3AED', '#5B21B6', '#2563EB', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#6366F1', '#14B8A6', '#F97316', '#8B5CF6'],
+              }]}
+            />
           </Form.Item>
           <Form.Item name="priceDollars" label="Price ($)" rules={[{ required: true }]}>
             <InputNumber min={0} step={0.01} prefix="$" style={{ width: '100%' }} />
