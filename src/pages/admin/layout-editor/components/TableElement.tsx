@@ -11,6 +11,12 @@ interface TableElementProps {
   onClick: () => void;
 }
 
+/** Derive display label from grid position: col letter + row number (e.g. A1, B3) */
+function gridLabel(gridRow: number, gridCol: number): string {
+  const col = String.fromCharCode(65 + (gridCol % 26));
+  return `${col}${gridRow + 1}`;
+}
+
 function getShapeClass(shape: string): string {
   switch (shape) {
     case 'Round':
@@ -69,7 +75,7 @@ export default function TableElement({
         </div>
       )}
 
-      <div className="fp-table-label">{table.label}</div>
+      <div className="fp-table-label">{gridLabel(table.gridRow, table.gridCol)}</div>
       <div className="fp-table-meta">
         {table.capacity}p &middot; {centsToUSD(table.priceCents)}
       </div>

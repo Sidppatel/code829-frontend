@@ -303,7 +303,7 @@ export default function ControlsPanel({
       {/* Selected Table Properties */}
       <Card
         size="small"
-        title={selectedTable ? `Edit: ${selectedTable.label}` : 'Table Details'}
+        title={selectedTable ? `Edit: ${String.fromCharCode(65 + (selectedTable.gridCol % 26))}${selectedTable.gridRow + 1}` : 'Table Details'}
         extra={selectedTable ? <Button type="link" size="small" onClick={onDeselectTable}>Close</Button> : null}
       >
         {!selectedTable ? (
