@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
-import { Table, Button, App, Space, Modal, Image, Card, Empty, Pagination, Skeleton } from 'antd';
+import { Table, Button, App, Space, Modal, Image, Card, Empty, Pagination, Skeleton, Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { QrcodeOutlined, CalendarOutlined } from '@ant-design/icons';
+import { QrcodeOutlined, CalendarOutlined, SearchOutlined } from '@ant-design/icons';
 import { bookingsApi } from '../../services/bookingsApi';
 import type { Booking } from '../../types/booking';
 import { usePagedTable } from '../../hooks/usePagedTable';
@@ -10,20 +10,26 @@ import { formatEventDate } from '../../utils/date';
 import BookingStatusTag from '../../components/bookings/BookingStatusTag';
 import PageHeader from '../../components/shared/PageHeader';
 
+type BookingFilters = Record<string, unknown> & {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+};
+
 export default function MyBookingsPage() {
   const { message } = App.useApp();
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
 
   const fetcher = useCallback(
-    (params: { page?: number; pageSize?: number }) =>
-      bookingsApi.getMine(params.page, params.pageSize),
+    (params: BookingFilters) =>
+      bookingsApi.getMine(params.page, params.pageSize, params.search),
     [],
   );
 
-  const { data, total, page, pageSize, loading, setPage, refresh } = usePagedTable<
+  const { data, total, page, pageSize, loading, setPage, setFilters, refresh } = usePagedTable<
     Booking,
-    { page?: number; pageSize?: number }
+    BookingFilters
   >({ fetcher });
 
   const handleCancel = async (id: string) => {
@@ -179,6 +185,14 @@ export default function MyBookingsPage() {
   return (
     <>
       <PageHeader title="My Bookings" subtitle="View and manage your event bookings" />
+
+      <Input.Search
+        placeholder="Search by event name, booking # or status..."
+        allowClear
+        enterButton={<SearchOutlined />}
+        onSearch={(value) => setFilters({ search: value })}
+        style={{ marginBottom: 16, maxWidth: 480 }}
+      />
 
       {/* Desktop: Table */}
       <div className="desktop-only-block">

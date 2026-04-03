@@ -21,8 +21,8 @@ export const bookingsApi = {
   getById: (id: string) =>
     apiClient.get<BookingDetail>(`/bookings/${id}`),
 
-  getMine: (page = 1, pageSize = 20) =>
-    apiClient.get<PagedResponse<Booking>>('/bookings/mine', { params: { page, pageSize } }),
+  getMine: (page = 1, pageSize = 20, search?: string) =>
+    apiClient.get<PagedResponse<Booking>>('/bookings/mine', { params: { page, pageSize, search: search || undefined } }),
 
   getQrCode: (id: string) =>
     apiClient.get(`/bookings/${id}/qr`, { responseType: 'blob' }),
