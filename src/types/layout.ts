@@ -37,6 +37,8 @@ export interface EventTableType {
   tableTemplateId?: string;
   tableTemplateName?: string;
   tableCount?: number;
+  /** True when not yet persisted to the DB — created on first table placement */
+  isPending?: boolean;
 }
 
 export interface LayoutStatsResponse {

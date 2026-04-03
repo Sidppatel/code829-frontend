@@ -177,7 +177,7 @@ export default function LayoutEditorPage() {
     setIsDirty(true);
   }, []);
 
-  const handleCellClick = useCallback((row: number, col: number) => {
+  const handleCellClick = useCallback(async (row: number, col: number) => {
     if (editorMode !== 'add' || !selectedEventTableId) return;
 
     // Check if cell is already occupied
@@ -186,8 +186,30 @@ export default function LayoutEditorPage() {
       return;
     }
 
-    const et = eventTables.find((t) => t.id === selectedEventTableId);
+    let et = eventTables.find((t) => t.id === selectedEventTableId);
     if (!et) return;
+
+    // If this event table type is pending (not yet in DB), persist it now
+    if (et.isPending) {
+      try {
+        const res = await adminLayoutApi.createEventTable(eventId!, {
+          tableTemplateId: et.tableTemplateId,
+          label: et.label,
+          capacity: et.capacity,
+          shape: et.shape,
+          color: et.color,
+          priceCents: et.priceCents,
+        });
+        const savedEt = res.data;
+        // Replace pending entry in eventTables list
+        setEventTables((prev) => prev.map((x) => x.id === selectedEventTableId ? savedEt : x));
+        setSelectedEventTableId(savedEt.id);
+        et = savedEt;
+      } catch {
+        message.error('Failed to save table type');
+        return;
+      }
+    }
 
     const existingLabels = new Set(tables.map((t) => t.label));
     const baseName = et.label.length > 16 ? et.label.slice(0, 16) : et.label;
@@ -215,7 +237,7 @@ export default function LayoutEditorPage() {
     };
     updateTables((prev) => [...prev, newTable]);
     setSelectedTableId(newTable.id);
-  }, [editorMode, selectedEventTableId, eventTables, tables, occupiedCells, updateTables, message]);
+  }, [editorMode, selectedEventTableId, eventTables, tables, occupiedCells, updateTables, message, eventId]);
 
   const handleTableClick = useCallback((tableId: string) => {
     if (editorMode === 'delete') {

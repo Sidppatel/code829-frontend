@@ -10,7 +10,6 @@ import {
   Select,
   Popconfirm,
   Divider,
-  Badge,
   Tag,
   Modal,
   App,
@@ -88,7 +87,7 @@ export default function ControlsPanel({
   const [editingEventTable, setEditingEventTable] = useState<EventTableType | null>(null);
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
-  const [modalSaving, setModalSaving] = useState(false);
+  const [editModalSaving, setEditModalSaving] = useState(false);
 
   useEffect(() => {
     if (selectedTable) {
@@ -125,24 +124,28 @@ export default function ControlsPanel({
   const handleAddFromTemplate = async () => {
     try {
       const values = await addForm.validateFields();
-      setModalSaving(true);
       const template = templates.find((t) => t.id === values.templateId);
-      const res = await adminLayoutApi.createEventTable(eventId, {
+      const color = typeof values.color === 'string' ? values.color : values.color?.toHexString?.();
+      // Create a pending local type — persisted to DB only when first table is placed
+      const pending: EventTableType = {
+        id: crypto.randomUUID(),
+        eventId,
         tableTemplateId: values.templateId,
+        tableTemplateName: template?.name,
         label: values.label || template?.name || 'Table Type',
         capacity: values.capacity ?? template?.defaultCapacity ?? 4,
         shape: values.shape || template?.defaultShape || 'Round',
-        color: (typeof values.color === 'string' ? values.color : values.color?.toHexString?.()) || template?.defaultColor,
+        color: color || template?.defaultColor,
         priceCents: values.priceDollars != null ? Math.round(values.priceDollars * 100) : (template?.defaultPriceCents ?? 0),
-      });
-      onEventTableCreated(res.data);
+        isActive: true,
+        isPending: true,
+      };
+      onEventTableCreated(pending);
       setAddModalOpen(false);
       addForm.resetFields();
-      message.success('Event table type added');
+      message.success('Table type ready — place it on the grid to save');
     } catch {
       message.error('Failed to add event table type');
-    } finally {
-      setModalSaving(false);
     }
   };
 
@@ -162,12 +165,26 @@ export default function ControlsPanel({
     if (!editingEventTable) return;
     try {
       const values = await editForm.validateFields();
-      setModalSaving(true);
+      const color = typeof values.color === 'string' ? values.color : values.color?.toHexString?.();
+      // If still pending (not yet in DB), update locally only
+      if (editingEventTable.isPending) {
+        onEventTableUpdated({
+          ...editingEventTable,
+          label: values.label,
+          capacity: values.capacity,
+          shape: values.shape,
+          color,
+          priceCents: Math.round((values.priceDollars ?? 0) * 100),
+        });
+        setEditModalOpen(false);
+        return;
+      }
+      setEditModalSaving(true);
       const res = await adminLayoutApi.updateEventTable(eventId, editingEventTable.id, {
         label: values.label,
         capacity: values.capacity,
         shape: values.shape,
-        color: typeof values.color === 'string' ? values.color : values.color?.toHexString?.(),
+        color,
         priceCents: Math.round((values.priceDollars ?? 0) * 100),
       });
       onEventTableUpdated(res.data);
@@ -176,7 +193,7 @@ export default function ControlsPanel({
     } catch {
       message.error('Failed to update event table type');
     } finally {
-      setModalSaving(false);
+      setEditModalSaving(false);
     }
   };
 
@@ -253,7 +270,22 @@ export default function ControlsPanel({
                 <AimOutlined /> Deselect
               </Button>
             )}
-            <Button size="small" type="link" onClick={() => { addForm.resetFields(); setAddModalOpen(true); }}>
+            <Button size="small" type="link" onClick={() => {
+              addForm.resetFields();
+              // Pre-populate from the first active template
+              const first = templates.find((t) => t.isActive);
+              if (first) {
+                addForm.setFieldsValue({
+                  templateId: first.id,
+                  label: first.name,
+                  capacity: first.defaultCapacity,
+                  shape: first.defaultShape,
+                  color: first.defaultColor,
+                  priceDollars: first.defaultPriceCents / 100,
+                });
+              }
+              setAddModalOpen(true);
+            }}>
               <PlusOutlined /> Add
             </Button>
           </Space>
@@ -278,7 +310,11 @@ export default function ControlsPanel({
               <div className="table-type-info" style={{ flex: 1 }}>
                 <div className="table-type-name">
                   {et.label}
-                  <Badge status="default" style={{ marginLeft: 6 }} />
+                  {et.isPending && (
+                    <Tag color="orange" style={{ marginLeft: 6, fontSize: 10, padding: '0 4px', lineHeight: '16px' }}>
+                      unsaved
+                    </Tag>
+                  )}
                 </div>
                 <div className="table-type-meta">
                   {et.capacity} seats · {et.shape} · {centsToUSD(et.priceCents)}
@@ -374,7 +410,7 @@ export default function ControlsPanel({
         open={addModalOpen}
         onCancel={() => setAddModalOpen(false)}
         onOk={handleAddFromTemplate}
-        confirmLoading={modalSaving}
+        confirmLoading={false}
         width="100%"
         style={{ top: 16, maxWidth: 480 }}
       >
@@ -421,7 +457,7 @@ export default function ControlsPanel({
         open={editModalOpen}
         onCancel={() => setEditModalOpen(false)}
         onOk={handleEditEventTable}
-        confirmLoading={modalSaving}
+        confirmLoading={editModalSaving}
         width="100%"
         style={{ top: 16, maxWidth: 480 }}
       >
