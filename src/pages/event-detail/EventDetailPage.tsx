@@ -298,7 +298,10 @@ export default function EventDetailPage() {
               {event.layoutMode === 'Grid' ? (
                 <>
                   <Typography.Text>
-                    Table seating &mdash; select and book an entire table
+                    Table seating &mdash; book an entire table for your group
+                  </Typography.Text>
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    Each table has a fixed price that covers all seats. Select your preferred table on the floor plan.
                   </Typography.Text>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography.Text type="secondary">

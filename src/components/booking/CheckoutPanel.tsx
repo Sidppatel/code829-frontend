@@ -57,16 +57,21 @@ export default function CheckoutPanel(props: Props) {
         )}
 
         <Descriptions column={1} size="small">
-          <Descriptions.Item label="Order">{description}</Descriptions.Item>
           {mode === 'grid' && (
-            <Descriptions.Item label="Table">
-              {(props as GridCheckoutProps).tableLock.tableLabel}
-            </Descriptions.Item>
+            <>
+              <Descriptions.Item label="Table">
+                {(props as GridCheckoutProps).tableLock.tableLabel}
+              </Descriptions.Item>
+              <Descriptions.Item label="Seats included">
+                {(props as GridCheckoutProps).tableLock.capacity}
+              </Descriptions.Item>
+              <Descriptions.Item label="Pricing">
+                Whole table (not per seat)
+              </Descriptions.Item>
+            </>
           )}
-          {mode === 'grid' && (
-            <Descriptions.Item label="Seats">
-              {(props as GridCheckoutProps).tableLock.capacity}
-            </Descriptions.Item>
+          {mode === 'open' && (
+            <Descriptions.Item label="Order">{description}</Descriptions.Item>
           )}
         </Descriptions>
 

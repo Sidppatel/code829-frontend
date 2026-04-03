@@ -258,9 +258,12 @@ export default function TableSelectionCanvas({
                 <Typography.Text>{selectedTable.capacity} seats</Typography.Text>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography.Text type="secondary">Price</Typography.Text>
+                <Typography.Text type="secondary">Table price</Typography.Text>
                 <Typography.Text strong>{centsToUSD(selectedTable.priceCents)}</Typography.Text>
               </div>
+              <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                Whole table &mdash; covers all {selectedTable.capacity} seats
+              </Typography.Text>
               {selectedTable.holdExpiresAt && selectedTable.isLockedByYou && (
                 <TableLockTimer expiresAt={selectedTable.holdExpiresAt} />
               )}
