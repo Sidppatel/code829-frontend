@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { ConfigProvider, App as AntApp, theme as antTheme } from 'antd';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { createLogger } from './lib/logger';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
@@ -11,6 +12,22 @@ import '@fontsource/playfair-display/400.css';
 import '@fontsource/playfair-display/700.css';
 import './index.css';
 import App from './App';
+
+// ─── Global error & warning capture ─────────────────────────
+const globalLog = createLogger('Global');
+
+window.addEventListener('error', (event) => {
+  globalLog.error(`Uncaught: ${event.message}`, {
+    filename: event.filename,
+    line: event.lineno,
+    col: event.colno,
+  });
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  const reason = event.reason instanceof Error ? event.reason.message : String(event.reason);
+  globalLog.error(`Unhandled promise rejection: ${reason}`, event.reason);
+});
 
 const darkTokens = {
   colorPrimary: '#7C3AED',
