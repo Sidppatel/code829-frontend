@@ -8,7 +8,7 @@ interface FloorPlanCanvasProps {
   gridCols: number;
   selectedTableId: string | null;
   editorMode: EditorMode;
-  disabled: boolean;
+  lockedTableIds: Set<string>;
   onCanvasClick: (posX: number, posY: number) => void;
   onTableClick: (tableId: string) => void;
   onTableDragEnd: (tableId: string, posX: number, posY: number) => void;
@@ -20,7 +20,7 @@ export default function FloorPlanCanvas({
   gridCols,
   selectedTableId,
   editorMode,
-  disabled,
+  lockedTableIds,
   onCanvasClick,
   onTableClick,
   onTableDragEnd,
@@ -28,7 +28,7 @@ export default function FloorPlanCanvas({
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
-    if (disabled || editorMode !== 'add') return;
+    if (editorMode !== 'add') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -42,7 +42,7 @@ export default function FloorPlanCanvas({
       Math.max(0, Math.min(100, posX)),
       Math.max(0, Math.min(100, posY)),
     );
-  }, [disabled, editorMode, onCanvasClick]);
+  }, [editorMode, onCanvasClick]);
 
   const cursorMap: Record<EditorMode, string> = {
     select: 'default',
@@ -100,7 +100,7 @@ export default function FloorPlanCanvas({
           background: 'var(--bg-secondary)',
           borderRadius: 12,
           border: '1px solid var(--border-default, rgba(255,255,255,0.1))',
-          cursor: disabled ? 'default' : cursorMap[editorMode],
+          cursor: cursorMap[editorMode],
           overflow: 'hidden',
         }}
         onClick={handleCanvasClick}
@@ -125,7 +125,7 @@ export default function FloorPlanCanvas({
             table={table}
             isSelected={table.id === selectedTableId}
             editorMode={editorMode}
-            disabled={disabled}
+            isLocked={lockedTableIds.has(table.id)}
             canvasRef={canvasRef}
             onClick={onTableClick}
             onDragEnd={onTableDragEnd}

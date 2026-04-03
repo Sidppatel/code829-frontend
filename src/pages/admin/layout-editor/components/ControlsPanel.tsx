@@ -10,6 +10,7 @@ import {
   Popconfirm,
   Divider,
   Badge,
+  Tag,
 } from 'antd';
 import {
   AppstoreOutlined,
@@ -18,6 +19,8 @@ import {
   DeleteOutlined,
   SelectOutlined,
   AimOutlined,
+  LockOutlined,
+  CheckCircleOutlined,
 } from '@ant-design/icons';
 import type { TableType } from '../../../../types/layout';
 import type { LayoutTable, EditorMode } from '../LayoutEditorPage';
@@ -38,6 +41,7 @@ interface ControlsPanelProps {
   onTableDelete: () => void;
   onDeselectTable: () => void;
   disabled: boolean;
+  isSelectedTableLocked: boolean;
 }
 
 const SHAPES = ['Round', 'Rectangle', 'Square', 'Cocktail'].map((s) => ({ label: s, value: s }));
@@ -64,6 +68,7 @@ export default function ControlsPanel({
   onTableDelete,
   onDeselectTable,
   disabled,
+  isSelectedTableLocked,
 }: ControlsPanelProps) {
   const [form] = Form.useForm();
 
@@ -200,12 +205,27 @@ export default function ControlsPanel({
           </div>
         ) : (
           <>
+            {/* Status indicator for locked/booked tables */}
+            {isSelectedTableLocked && (
+              <div style={{ marginBottom: 12 }}>
+                {selectedTable.status === 'Booked' ? (
+                  <Tag icon={<CheckCircleOutlined />} color="error" style={{ fontSize: 12 }}>
+                    Booked — position locked
+                  </Tag>
+                ) : (
+                  <Tag icon={<LockOutlined />} color="warning" style={{ fontSize: 12 }}>
+                    Locked by user — position locked
+                  </Tag>
+                )}
+              </div>
+            )}
+
             <Form
               form={form}
               layout="vertical"
               size="small"
               onValuesChange={handleFieldChange}
-              disabled={disabled}
+              disabled={disabled || isSelectedTableLocked}
             >
               <Form.Item name="label" label="Label" rules={[{ required: true }]}>
                 <Input maxLength={20} />
@@ -226,7 +246,7 @@ export default function ControlsPanel({
 
             <Divider style={{ margin: '8px 0' }} />
 
-            {!disabled && (
+            {!isSelectedTableLocked && (
               <Popconfirm
                 title="Remove this table?"
                 onConfirm={onTableDelete}

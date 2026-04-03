@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Alert, Button, Space, App } from 'antd';
-import { LockOutlined, SaveOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, SaveOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../../services/api';
-import { adminEventsApi } from '../../../services/adminEventsApi';
 import type { LayoutStatsResponse, TableType } from '../../../types/layout';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
@@ -24,6 +23,7 @@ export interface LayoutTable {
   sortOrder: number;
   tableTypeId?: string;
   tableTypeName?: string;
+  status?: 'Available' | 'Locked' | 'Booked';
 }
 
 export type EditorMode = 'add' | 'move' | 'delete' | 'select';
@@ -35,7 +35,6 @@ export default function LayoutEditorPage() {
   const [tables, setTables] = useState<LayoutTable[]>([]);
   const [tableTypes, setTableTypes] = useState<TableType[]>([]);
   const [stats, setStats] = useState<LayoutStatsResponse | null>(null);
-  const [layoutLocked, setLayoutLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [statsLoading, setStatsLoading] = useState(true);
@@ -51,14 +50,25 @@ export default function LayoutEditorPage() {
 
   const selectedTable = tables.find((t) => t.id === selectedTableId) ?? null;
 
+  // Derived: set of table IDs that are locked (Booked or Locked status)
+  const lockedTableIds = useMemo(
+    () => new Set(tables.filter((t) => t.status === 'Booked' || t.status === 'Locked').map((t) => t.id)),
+    [tables],
+  );
+  const hasLockedTables = lockedTableIds.size > 0;
+
+  const isTableLocked = useCallback(
+    (tableId: string) => lockedTableIds.has(tableId),
+    [lockedTableIds],
+  );
+
   const loadAll = useCallback(async () => {
     if (!eventId) return;
     setLoading(true);
     setStatsLoading(true);
     try {
-      const [layoutRes, lockedRes, typesRes, statsRes] = await Promise.all([
+      const [layoutRes, typesRes, statsRes] = await Promise.all([
         adminLayoutApi.getLayout(eventId),
-        adminEventsApi.checkLayoutLocked(eventId),
         adminLayoutApi.listTableTypes(),
         adminLayoutApi.getLayoutStats(eventId),
       ]);
@@ -71,7 +81,6 @@ export default function LayoutEditorPage() {
       setGridRows(layoutData.gridRows ?? 10);
       setGridCols(layoutData.gridCols ?? 10);
       setTables(layoutData.tables ?? []);
-      setLayoutLocked(lockedRes.data.locked);
       setTableTypes(typesRes.data ?? []);
       setStats(statsRes.data);
     } catch {
@@ -165,10 +174,6 @@ export default function LayoutEditorPage() {
   }, []);
 
   const handleCanvasClick = useCallback((posX: number, posY: number) => {
-    if (layoutLocked) {
-      message.info('Layout is locked -- tables have active bookings');
-      return;
-    }
     if (editorMode === 'add' && selectedTypeId) {
       const tt = tableTypes.find((t) => t.id === selectedTypeId);
       if (!tt) return;
@@ -195,44 +200,48 @@ export default function LayoutEditorPage() {
         sortOrder: tables.length,
         tableTypeId: tt.id,
         tableTypeName: tt.name,
+        status: 'Available',
       };
       updateTables((prev) => [...prev, newTable]);
       setSelectedTableId(newTable.id);
     }
-  }, [layoutLocked, editorMode, selectedTypeId, tableTypes, tables, updateTables, message]);
+  }, [editorMode, selectedTypeId, tableTypes, tables, updateTables]);
 
   const handleTableClick = useCallback((tableId: string) => {
-    if (layoutLocked) {
-      message.info('Layout is locked -- tables have active bookings');
-      return;
-    }
     if (editorMode === 'delete') {
+      if (isTableLocked(tableId)) {
+        message.warning('This table has active bookings and cannot be removed');
+        return;
+      }
       updateTables((prev) => prev.filter((t) => t.id !== tableId));
       if (selectedTableId === tableId) setSelectedTableId(null);
     } else {
       setSelectedTableId(tableId);
     }
-  }, [layoutLocked, editorMode, selectedTableId, updateTables, message]);
+  }, [editorMode, selectedTableId, updateTables, isTableLocked, message]);
 
   const handleTableDragEnd = useCallback((tableId: string, posX: number, posY: number) => {
-    if (layoutLocked) return;
+    if (isTableLocked(tableId)) return;
     updateTables((prev) => prev.map((t) =>
       t.id === tableId ? { ...t, posX, posY } : t
     ));
-  }, [layoutLocked, updateTables]);
+  }, [isTableLocked, updateTables]);
 
   const handleTableUpdate = useCallback((patch: Partial<LayoutTable>) => {
-    if (!selectedTableId) return;
+    if (!selectedTableId || isTableLocked(selectedTableId)) return;
     updateTables((prev) => prev.map((t) =>
       t.id === selectedTableId ? { ...t, ...patch } : t
     ));
-  }, [selectedTableId, updateTables]);
+  }, [selectedTableId, isTableLocked, updateTables]);
 
   const handleTableDelete = useCallback(() => {
-    if (!selectedTableId) return;
+    if (!selectedTableId || isTableLocked(selectedTableId)) {
+      message.warning('This table has active bookings and cannot be removed');
+      return;
+    }
     updateTables((prev) => prev.filter((t) => t.id !== selectedTableId));
     setSelectedTableId(null);
-  }, [selectedTableId, updateTables]);
+  }, [selectedTableId, isTableLocked, updateTables, message]);
 
   if (loading) return <LoadingSpinner />;
 
@@ -248,7 +257,7 @@ export default function LayoutEditorPage() {
               icon={<SaveOutlined />}
               onClick={handleSaveLayout}
               loading={saving}
-              disabled={!isDirty || layoutLocked}
+              disabled={!isDirty}
             >
               Save Layout
             </Button>
@@ -256,12 +265,12 @@ export default function LayoutEditorPage() {
         }
       />
 
-      {layoutLocked && (
+      {hasLockedTables && (
         <Alert
-          message="Layout Locked"
-          description="This layout cannot be modified because one or more tables have active bookings or holds."
-          type="warning"
-          icon={<LockOutlined />}
+          message="Some tables have active bookings"
+          description={`${lockedTableIds.size} table(s) are locked in position because they have active bookings or holds. You can still add and modify other tables.`}
+          type="info"
+          icon={<InfoCircleOutlined />}
           showIcon
           style={{ marginBottom: 16 }}
         />
@@ -284,7 +293,8 @@ export default function LayoutEditorPage() {
           onTableUpdate={handleTableUpdate}
           onTableDelete={handleTableDelete}
           onDeselectTable={() => setSelectedTableId(null)}
-          disabled={layoutLocked}
+          disabled={false}
+          isSelectedTableLocked={selectedTable ? isTableLocked(selectedTable.id) : false}
         />
 
         <FloorPlanCanvas
@@ -293,7 +303,7 @@ export default function LayoutEditorPage() {
           gridCols={gridCols}
           selectedTableId={selectedTableId}
           editorMode={editorMode}
-          disabled={layoutLocked}
+          lockedTableIds={lockedTableIds}
           onCanvasClick={handleCanvasClick}
           onTableClick={handleTableClick}
           onTableDragEnd={handleTableDragEnd}
