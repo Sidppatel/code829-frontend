@@ -236,11 +236,14 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
               </Typography.Text>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {feeInfo.tableTypes.map((tt) => (
-                  <div key={tt.id}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <Typography.Text>{tt.label}</Typography.Text>
-                      <Typography.Text type="secondary">{centsToUSD(tt.priceCents)}</Typography.Text>
+                  <Card key={tt.id} size="small" styles={{ body: { padding: '8px 12px' } }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <Typography.Text strong style={{ fontSize: 13 }}>{tt.label}</Typography.Text>
+                      <Tag style={{ margin: 0 }}>Table Price: {centsToUSD(tt.priceCents)}</Tag>
                     </div>
+                    <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
+                      Platform Fee
+                    </Typography.Text>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <InputNumber
                         value={tableFees[tt.id] !== null && tableFees[tt.id] !== undefined ? tableFees[tt.id]! / 100 : null}
@@ -264,7 +267,7 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
                         Reset
                       </Button>
                     </div>
-                  </div>
+                  </Card>
                 ))}
               </div>
             </>
