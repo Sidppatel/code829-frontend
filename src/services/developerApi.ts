@@ -47,6 +47,8 @@ export interface EventFeeInfo {
   eventId: string;
   title: string;
   layoutMode: 'Open' | 'Grid';
+  pricePerPersonCents: number | null;
+  maxCapacity: number | null;
   platformFeeCents: number | null;
   defaultFeeCents: number;
   tableTypes: Array<{

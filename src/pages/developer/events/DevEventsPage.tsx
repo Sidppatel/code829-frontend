@@ -195,10 +195,26 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
             <Typography.Text type="secondary" style={{ marginLeft: 8 }}>{defaultLabel}</Typography.Text>
           </div>
 
+          {/* Open seating: show read-only pricing info */}
+          {feeInfo.layoutMode === 'Open' && (
+            <Card size="small" styles={{ body: { padding: '8px 12px' } }} style={{ marginBottom: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>Ticket Price (set by admin)</Typography.Text>
+                <Tag style={{ margin: 0 }}>{feeInfo.pricePerPersonCents ? centsToUSD(feeInfo.pricePerPersonCents) : '—'} / person</Tag>
+              </div>
+              {feeInfo.maxCapacity && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>Max Capacity</Typography.Text>
+                  <Typography.Text style={{ fontSize: 12 }}>{feeInfo.maxCapacity}</Typography.Text>
+                </div>
+              )}
+            </Card>
+          )}
+
           {/* Event-level fee */}
           <div style={{ marginBottom: 16 }}>
             <Typography.Text strong style={{ display: 'block', marginBottom: 4 }}>
-              {feeInfo.layoutMode === 'Open' ? 'Event Platform Fee' : 'Default Event Fee'}
+              {feeInfo.layoutMode === 'Open' ? 'Platform Fee' : 'Default Event Fee'}
             </Typography.Text>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <InputNumber
