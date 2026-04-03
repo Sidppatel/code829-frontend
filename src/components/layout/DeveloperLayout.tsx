@@ -7,6 +7,7 @@ import {
   FileTextOutlined,
   SettingOutlined,
   TeamOutlined,
+  CalendarOutlined,
   MenuOutlined,
   CloseOutlined,
   BellOutlined,
@@ -25,6 +26,7 @@ const menuItems = [
   { key: '/developer/system-logs', label: <Link to="/developer/system-logs">System Logs</Link>, icon: <FileTextOutlined /> },
   { key: '/developer/settings', label: <Link to="/developer/settings">Settings</Link>, icon: <SettingOutlined /> },
   { key: '/developer/users', label: <Link to="/developer/users">Users</Link>, icon: <TeamOutlined /> },
+  { key: '/developer/events', label: <Link to="/developer/events">Platform Fees</Link>, icon: <CalendarOutlined /> },
 ];
 
 type Breakpoint = 'mobile' | 'tablet' | 'desktop';

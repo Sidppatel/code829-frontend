@@ -43,6 +43,29 @@ export interface DevUser {
   createdAt: string;
 }
 
+export interface EventFeeInfo {
+  eventId: string;
+  title: string;
+  layoutMode: 'Open' | 'Grid';
+  platformFeeCents: number | null;
+  defaultFeeCents: number;
+  tableTypes: Array<{
+    id: string;
+    label: string;
+    priceCents: number;
+    platformFeeCents: number | null;
+  }>;
+}
+
+export interface DevEventListItem {
+  id: string;
+  title: string;
+  status: string;
+  startDate: string;
+  layoutMode: string;
+  platformFeeCents: number | null;
+}
+
 export const developerApi = {
   getEmailLogs: (params?: { page?: number; pageSize?: number; recipient?: string }) =>
     apiClient.get<PagedResponse<EmailLogEntry>>('/developer/email-log', { params }),
@@ -64,4 +87,16 @@ export const developerApi = {
 
   updateUserRole: (id: string, role: string) =>
     apiClient.put(`/developer/users/${id}/role`, { role }),
+
+  getEvents: (params?: { page?: number; pageSize?: number }) =>
+    apiClient.get<PagedResponse<DevEventListItem>>('/developer/events', { params }),
+
+  getEventFees: (eventId: string) =>
+    apiClient.get<EventFeeInfo>(`/developer/events/${eventId}/fees`),
+
+  updateEventFee: (eventId: string, platformFeeCents: number | null) =>
+    apiClient.put(`/developer/events/${eventId}/fees`, { platformFeeCents }),
+
+  updateTableTypeFees: (eventId: string, tableTypeFees: Record<string, number | null>) =>
+    apiClient.put(`/developer/events/${eventId}/table-fees`, { tableTypeFees }),
 };

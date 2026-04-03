@@ -7,7 +7,7 @@ interface Props {
   maxCapacity: number;
   totalSold: number;
   pricePerPersonCents: number;
-  platformFeePercent: number;
+  platformFeeCents: number;
   onProceed: (seats: number) => void;
 }
 
@@ -15,15 +15,14 @@ export default function CapacityBookingForm({
   maxCapacity,
   totalSold,
   pricePerPersonCents,
-  platformFeePercent,
+  platformFeeCents,
   onProceed,
 }: Props) {
   const [seats, setSeats] = useState(1);
 
   const available = maxCapacity - totalSold;
   const subtotal = pricePerPersonCents * seats;
-  const feeCents = Math.round(subtotal * (platformFeePercent / 100));
-  const total = subtotal + feeCents;
+  const total = subtotal + platformFeeCents;
 
   return (
     <Card title="Reserve Seats" styles={{ header: { borderBottom: 'none' } }}>
@@ -59,10 +58,8 @@ export default function CapacityBookingForm({
           <Typography.Text>{centsToUSD(subtotal)}</Typography.Text>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography.Text type="secondary">
-            Platform Fee ({platformFeePercent}%)
-          </Typography.Text>
-          <Typography.Text type="secondary">{centsToUSD(feeCents)}</Typography.Text>
+          <Typography.Text type="secondary">Platform Fee</Typography.Text>
+          <Typography.Text type="secondary">{centsToUSD(platformFeeCents)}</Typography.Text>
         </div>
         <Divider style={{ margin: '8px 0' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>

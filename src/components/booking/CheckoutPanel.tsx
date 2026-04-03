@@ -6,7 +6,7 @@ import TableLockTimer from './TableLockTimer';
 interface GridCheckoutProps {
   mode: 'grid';
   tableLock: TableLock;
-  platformFeePercent: number;
+  platformFeeCents: number;
   confirming: boolean;
   error: string | null;
   onConfirm: () => void;
@@ -18,7 +18,7 @@ interface OpenCheckoutProps {
   mode: 'open';
   seatCount: number;
   pricePerPersonCents: number;
-  platformFeePercent: number;
+  platformFeeCents: number;
   confirming: boolean;
   error: string | null;
   onConfirm: () => void;
@@ -28,7 +28,7 @@ interface OpenCheckoutProps {
 type Props = GridCheckoutProps | OpenCheckoutProps;
 
 export default function CheckoutPanel(props: Props) {
-  const { mode, platformFeePercent, confirming, error, onConfirm, onCancel } = props;
+  const { mode, platformFeeCents, confirming, error, onConfirm, onCancel } = props;
 
   let subtotal: number;
   let description: string;
@@ -43,8 +43,7 @@ export default function CheckoutPanel(props: Props) {
     description = `${seatCount} seat${seatCount !== 1 ? 's' : ''} x ${centsToUSD(pricePerPersonCents)}`;
   }
 
-  const feeCents = Math.round(subtotal * (platformFeePercent / 100));
-  const total = subtotal + feeCents;
+  const total = subtotal + platformFeeCents;
 
   return (
     <Card title="Checkout" styles={{ header: { borderBottom: 'none' } }}>
@@ -82,10 +81,8 @@ export default function CheckoutPanel(props: Props) {
           <Typography.Text>{centsToUSD(subtotal)}</Typography.Text>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography.Text type="secondary">
-            Platform Fee ({platformFeePercent}%)
-          </Typography.Text>
-          <Typography.Text type="secondary">{centsToUSD(feeCents)}</Typography.Text>
+          <Typography.Text type="secondary">Platform Fee</Typography.Text>
+          <Typography.Text type="secondary">{centsToUSD(platformFeeCents)}</Typography.Text>
         </div>
         <Divider style={{ margin: '8px 0' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>

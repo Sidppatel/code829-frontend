@@ -33,6 +33,7 @@ const EmailLogsPage = lazy(() => import('./pages/developer/email-logs/EmailLogsP
 const SystemLogsPage = lazy(() => import('./pages/developer/system-logs/SystemLogsPage'));
 const DevSettingsPage = lazy(() => import('./pages/developer/settings/DevSettingsPage'));
 const DevUsersPage = lazy(() => import('./pages/developer/users/DevUsersPage'));
+const DevEventsPage = lazy(() => import('./pages/developer/events/DevEventsPage'));
 
 export default function App() {
   return (
@@ -93,6 +94,7 @@ export default function App() {
               <Route path="system-logs" element={<SystemLogsPage />} />
               <Route path="settings" element={<DevSettingsPage />} />
               <Route path="users" element={<DevUsersPage />} />
+              <Route path="events" element={<DevEventsPage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
