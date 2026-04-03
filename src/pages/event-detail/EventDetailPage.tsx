@@ -33,7 +33,6 @@ export default function EventDetailPage() {
   // Booking flow state
   const [step, setStep] = useState<BookingStep>('info');
   const [tablesData, setTablesData] = useState<EventTablesResponse | null>(null);
-  const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [tableLock, setTableLock] = useState<TableLock | null>(null);
   const [lockingTableId, setLockingTableId] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -81,19 +80,14 @@ export default function EventDetailPage() {
     }
   };
 
-  const handleSelectTable = (table: EventTableDto) => {
-    setSelectedTableId(table.id);
-  };
-
-  const handleBookTable = async (table: EventTableDto) => {
+  // Clicking a table immediately locks it
+  const handleLockTable = async (table: EventTableDto) => {
     if (!event) return;
     setLockingTableId(table.id);
     try {
       const { data } = await tableBookingApi.lockTable(event.id, table.id);
       setTableLock(data);
-      setSelectedTableId(null);
       setCheckoutError(null);
-      setStep('checkout');
       await loadTables();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
@@ -101,6 +95,11 @@ export default function EventDetailPage() {
     } finally {
       setLockingTableId(null);
     }
+  };
+
+  const handleProceedToCheckout = () => {
+    if (!tableLock) return;
+    setStep('checkout');
   };
 
   const handleConfirmPayment = async () => {
@@ -130,7 +129,9 @@ export default function EventDetailPage() {
     } catch { /* ignore release errors */ }
     setTableLock(null);
     setCheckoutError(null);
-    setStep('select-table');
+    if (step === 'checkout') {
+      setStep('select-table');
+    }
     await loadTables();
   };
 
@@ -138,7 +139,9 @@ export default function EventDetailPage() {
     message.warning('Your table reservation has expired');
     setTableLock(null);
     setCheckoutError(null);
-    setStep('select-table');
+    if (step === 'checkout') {
+      setStep('select-table');
+    }
     void loadTables();
   };
 
@@ -158,11 +161,14 @@ export default function EventDetailPage() {
 
   const feePercent = event.platformFeePercent ?? 0;
 
+  // Find the user's locked table from tablesData for the canvas
+  const lockedTableFromGrid = tablesData?.tables.find((t) => t.isLockedByYou) ?? null;
+
   // Table selection view
   if (step === 'select-table' && tablesData) {
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => setStep('info')}>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => { void handleCancelLock(); setStep('info'); }}>
           Back to Event
         </Button>
         <Typography.Title level={3}>Select a Table &mdash; {event.title}</Typography.Title>
@@ -171,10 +177,12 @@ export default function EventDetailPage() {
           eventTableTypes={tablesData.eventTableTypes ?? []}
           gridRows={tablesData.gridRows ?? 10}
           gridCols={tablesData.gridCols ?? 10}
-          selectedTableId={selectedTableId}
-          onSelectTable={handleSelectTable}
-          onBookTable={handleBookTable}
+          lockedTable={lockedTableFromGrid}
+          onLockTable={handleLockTable}
+          onProceedToCheckout={handleProceedToCheckout}
+          onReleaseLock={handleCancelLock}
           lockingTableId={lockingTableId}
+          onLockExpired={handleLockExpired}
         />
       </Space>
     );
