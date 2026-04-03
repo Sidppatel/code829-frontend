@@ -1,5 +1,5 @@
 import { Card, Row, Col, Statistic } from 'antd';
-import { TableOutlined, TeamOutlined, DollarOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { TableOutlined, TeamOutlined, DollarOutlined } from '@ant-design/icons';
 import type { LayoutStatsResponse } from '../../../../types/layout';
 import { centsToUSD } from '../../../../utils/currency';
 
@@ -10,8 +10,8 @@ interface LayoutStatsBarProps {
 
 export default function LayoutStatsBar({ stats, loading }: LayoutStatsBarProps) {
   return (
-    <Row gutter={16} style={{ marginBottom: 16 }}>
-      <Col span={6}>
+    <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+      <Col xs={8}>
         <Card size="small" loading={loading}>
           <Statistic
             title="Total Tables"
@@ -21,7 +21,7 @@ export default function LayoutStatsBar({ stats, loading }: LayoutStatsBarProps) 
           />
         </Card>
       </Col>
-      <Col span={6}>
+      <Col xs={8}>
         <Card size="small" loading={loading}>
           <Statistic
             title="Total Capacity"
@@ -32,22 +32,12 @@ export default function LayoutStatsBar({ stats, loading }: LayoutStatsBarProps) 
           />
         </Card>
       </Col>
-      <Col span={6}>
+      <Col xs={8}>
         <Card size="small" loading={loading}>
           <Statistic
             title="Potential Revenue"
             value={centsToUSD(stats?.totalPotentialRevenueCents ?? 0)}
             prefix={<DollarOutlined />}
-            styles={{ content: { color: 'var(--accent-green)' } }}
-          />
-        </Card>
-      </Col>
-      <Col span={6}>
-        <Card size="small" loading={loading}>
-          <Statistic
-            title="Booked Revenue"
-            value={centsToUSD(stats?.totalBookedRevenueCents ?? 0)}
-            prefix={<CheckCircleOutlined />}
             styles={{ content: { color: 'var(--accent-green)' } }}
           />
         </Card>

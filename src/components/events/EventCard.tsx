@@ -12,10 +12,8 @@ interface Props {
 export default function EventCard({ event }: Props) {
   const navigate = useNavigate();
 
-  const priceLabel = event.minPriceCents
-    ? event.minPriceCents === event.maxPriceCents
-      ? centsToUSD(event.minPriceCents)
-      : `From ${centsToUSD(event.minPriceCents)}`
+  const priceLabel = event.pricePerPersonCents
+    ? centsToUSD(event.pricePerPersonCents)
     : 'Free';
 
   return (

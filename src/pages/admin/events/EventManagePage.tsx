@@ -7,10 +7,11 @@ import {
   Row,
   Col,
   Popconfirm,
+  Tag,
+  Alert,
 } from 'antd';
 import {
   LayoutOutlined,
-  DollarOutlined,
   CheckCircleOutlined,
   EditOutlined,
   InfoCircleOutlined,
@@ -18,11 +19,17 @@ import {
   SendOutlined,
   CheckOutlined,
   CloseOutlined,
+  LockOutlined,
+  AppstoreOutlined,
+  TeamOutlined,
+  DollarOutlined,
 } from '@ant-design/icons';
-import { adminEventsApi } from '../../../services/api';
+import { adminEventsApi } from '../../../services/adminEventsApi';
+import { adminLayoutApi } from '../../../services/api';
 import { centsToUSD } from '../../../utils/currency';
 import { formatDateRange } from '../../../utils/date';
 import type { EventDetail } from '../../../types/event';
+import type { LayoutStatsResponse } from '../../../types/layout';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 
 const STATUS_MAP: Record<string, { className: string; label: string }> = {
@@ -47,6 +54,8 @@ export default function EventManagePage() {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [layoutLocked, setLayoutLocked] = useState(false);
+  const [layoutStats, setLayoutStats] = useState<LayoutStatsResponse | null>(null);
   const { message } = App.useApp();
   const navigate = useNavigate();
 
@@ -56,6 +65,16 @@ export default function EventManagePage() {
       try {
         const { data } = await adminEventsApi.getById(id);
         setEvent(data);
+
+        // Load layout lock status and stats for Grid events
+        if (data.layoutMode === 'Grid') {
+          const [lockedRes, statsRes] = await Promise.all([
+            adminEventsApi.checkLayoutLocked(id),
+            adminLayoutApi.getLayoutStats(id),
+          ]);
+          setLayoutLocked(lockedRes.data.locked);
+          setLayoutStats(statsRes.data);
+        }
       } catch {
         message.error('Failed to load event');
       } finally {
@@ -80,9 +99,12 @@ export default function EventManagePage() {
   if (loading) return <LoadingSpinner />;
   if (!event) return null;
 
+  const isGrid = event.layoutMode === 'Grid';
+  const isOpen = event.layoutMode === 'Open';
+
   return (
     <div>
-      {/* Section 1 — Event Status Banner */}
+      {/* Section 1 -- Event Status Banner */}
       <div className="edit-mode-banner" style={{ marginBottom: 16 }}>
         <StatusPill status={event.status} />
         <span>
@@ -103,7 +125,7 @@ export default function EventManagePage() {
         </div>
       </div>
 
-      {/* Section 2 — Event Overview Details */}
+      {/* Section 2 -- Event Overview Details */}
       <div className="admin-section">
         <div className="admin-section-title"><InfoCircleOutlined /> Overview</div>
         <Row gutter={[16, 12]}>
@@ -120,24 +142,86 @@ export default function EventManagePage() {
             </div>
           </Col>
           <Col xs={24} sm={12}>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>SEATING LAYOUT</div>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-              {event.layoutMode === 'None' ? 'General Admission' : event.layoutMode === 'Grid' ? 'Grid · Table Based' : event.layoutMode}
-              {event.maxCapacity && ` · Max ${event.maxCapacity}`}
-            </div>
-          </Col>
-          <Col xs={24} sm={12}>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>FEATURED</div>
             <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-              {event.isFeatured ? '⭐ Yes' : 'No'}
+              {event.isFeatured ? 'Yes' : 'No'}
             </div>
           </Col>
         </Row>
       </div>
 
-      {/* Section 3 — Tickets */}
+      {/* Section 3 -- Seating & Pricing */}
       <div className="admin-section">
-        <div className="admin-section-title"><CheckCircleOutlined /> Tickets</div>
+        <div className="admin-section-title"><AppstoreOutlined /> Seating & Pricing</div>
+
+        <div style={{ marginBottom: 12 }}>
+          <Tag
+            color={isGrid ? 'purple' : 'blue'}
+            style={{ fontSize: 14, padding: '4px 12px', borderRadius: 8 }}
+          >
+            {isGrid && <><AppstoreOutlined style={{ marginRight: 6 }} />Table Seating (Grid)</>}
+            {isOpen && <><TeamOutlined style={{ marginRight: 6 }} />Open Seating</>}
+          </Tag>
+        </div>
+
+        {isGrid && (
+          <Row gutter={[16, 12]}>
+            <Col xs={12} sm={8}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>TABLES</div>
+              <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 18 }}>
+                {layoutStats?.totalTables ?? 0}
+              </div>
+            </Col>
+            <Col xs={12} sm={8}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>TOTAL CAPACITY</div>
+              <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 18 }}>
+                {layoutStats?.totalCapacity ?? 0}
+              </div>
+            </Col>
+            <Col xs={24} sm={8}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>POTENTIAL REVENUE</div>
+              <div style={{ fontWeight: 600, color: 'var(--accent-gold)', fontSize: 18 }}>
+                {centsToUSD(layoutStats?.totalPotentialRevenueCents ?? 0)}
+              </div>
+            </Col>
+          </Row>
+        )}
+
+        {isOpen && (
+          <Row gutter={[16, 12]}>
+            <Col xs={12} sm={8}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>MAX CAPACITY</div>
+              <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 18 }}>
+                {event.maxCapacity ?? 'N/A'}
+              </div>
+            </Col>
+            <Col xs={12} sm={8}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>PRICE PER PERSON</div>
+              <div style={{ fontWeight: 600, color: 'var(--accent-gold)', fontSize: 18 }}>
+                {event.pricePerPersonCents != null
+                  ? centsToUSD(event.pricePerPersonCents)
+                  : 'N/A'}
+              </div>
+            </Col>
+          </Row>
+        )}
+      </div>
+
+      {/* Layout lock warning */}
+      {isGrid && layoutLocked && (
+        <Alert
+          message="Layout Locked"
+          description="Tables cannot be modified because bookings exist for this event."
+          type="warning"
+          icon={<LockOutlined />}
+          showIcon
+          style={{ marginBottom: 12 }}
+        />
+      )}
+
+      {/* Section 4 -- Sales Stats */}
+      <div className="admin-section">
+        <div className="admin-section-title"><DollarOutlined /> Sales</div>
         <div className="next-event-stats">
           <div className="next-event-stat">
             <div className="next-event-stat-value">{event.quantitySold}</div>
@@ -168,46 +252,42 @@ export default function EventManagePage() {
         </div>
       </div>
 
-      {/* Section 4 — Ticket Types */}
-      {event.ticketTypes.length > 0 && (
-        <div className="admin-section">
-          <div className="admin-section-title">Ticket Types</div>
-          <Row gutter={[16, 16]}>
-            {event.ticketTypes.map((tt) => (
-              <Col xs={24} sm={12} md={8} key={tt.id}>
-                <div className="admin-section" style={{ marginBottom: 0 }}>
-                  <div style={{ fontWeight: 600 }}>{tt.name}</div>
-                  <div style={{ color: 'var(--accent-gold)', fontWeight: 600 }}>{centsToUSD(tt.priceCents)}</div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-                    {tt.quantitySold} / {tt.quantityTotal} sold
-                  </div>
-                </div>
-              </Col>
-            ))}
-          </Row>
-        </div>
-      )}
-
-      {/* Section 5 — Quick Links */}
-      {event.layoutMode !== 'None' && (
-        <Button block icon={<LayoutOutlined />} onClick={() => navigate(`/admin/layout/${id}`)} style={{ borderRadius: 10, marginBottom: 8 }}>
-          Manage Seating Layout
+      {/* Section 5 -- Quick Links */}
+      {isGrid && (
+        <Button
+          block
+          icon={<LayoutOutlined />}
+          onClick={() => navigate(`/admin/layout/${id}`)}
+          style={{ borderRadius: 10, marginBottom: 8 }}
+        >
+          {layoutLocked ? 'View Layout (Locked)' : 'Manage Seating Layout'}
         </Button>
       )}
-      <Button block icon={<DollarOutlined />} onClick={() => navigate(`/admin/pricing/${id}`)} style={{ borderRadius: 10, marginBottom: 8 }}>
-        Pricing
-      </Button>
-      <Button block icon={<CheckCircleOutlined />} onClick={() => navigate(`/admin/checkin/${id}`)} style={{ borderRadius: 10, marginBottom: 8 }}>
+      <Button
+        block
+        icon={<CheckCircleOutlined />}
+        onClick={() => navigate(`/admin/checkin/${id}`)}
+        style={{ borderRadius: 10, marginBottom: 8 }}
+      >
         Check-In
       </Button>
 
-      {/* Section 6 — Status Actions */}
+      {/* Section 6 -- Status Actions */}
       <div className="admin-section">
         <div className="admin-section-title"><ThunderboltOutlined /> Status Actions</div>
         <Space wrap>
           {event.status === 'Draft' && (
-            <Popconfirm title="Publish this event?" description="It will become visible to the public." onConfirm={() => handleStatusChange('Published')} okText="Publish">
-              <Button type="primary" style={{ background: '#10B981', borderColor: '#10B981', borderRadius: 10 }} icon={<SendOutlined />}>
+            <Popconfirm
+              title="Publish this event?"
+              description="It will become visible to the public."
+              onConfirm={() => handleStatusChange('Published')}
+              okText="Publish"
+            >
+              <Button
+                type="primary"
+                style={{ background: 'var(--accent-green)', borderColor: 'var(--accent-green)', borderRadius: 10 }}
+                icon={<SendOutlined />}
+              >
                 Publish Event
               </Button>
             </Popconfirm>

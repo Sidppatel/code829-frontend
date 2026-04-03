@@ -23,7 +23,6 @@ const VenueFormPage = lazy(() => import('./pages/admin/venues/VenueFormPage'));
 const AdminBookingsPage = lazy(() => import('./pages/admin/bookings/AdminBookingsPage'));
 const TableTypesPage = lazy(() => import('./pages/admin/table-types/TableTypesPage'));
 const LayoutEditorPage = lazy(() => import('./pages/admin/layout-editor/LayoutEditorPage'));
-const PricingPage = lazy(() => import('./pages/admin/pricing/PricingPage'));
 const CheckInPage = lazy(() => import('./pages/admin/checkin/CheckInPage'));
 const SettingsPage = lazy(() => import('./pages/admin/settings/SettingsPage'));
 const AnalyticsPage = lazy(() => import('./pages/admin/analytics/AnalyticsPage'));
@@ -70,7 +69,6 @@ export default function App() {
               <Route path="bookings" element={<AdminBookingsPage />} />
               <Route path="table-types" element={<TableTypesPage />} />
               <Route path="layout/:eventId" element={<LayoutEditorPage />} />
-              <Route path="pricing/:eventId" element={<PricingPage />} />
               <Route path="checkin/:eventId" element={<CheckInPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="analytics" element={<AnalyticsPage />} />

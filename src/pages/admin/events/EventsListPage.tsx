@@ -8,6 +8,7 @@ import {
   CalendarOutlined,
   EnvironmentOutlined,
   AppstoreOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { adminEventsApi } from '../../../services/api';
@@ -35,11 +36,22 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-function getLayoutLabel(mode: string): string {
-  if (mode === 'Grid') return 'Grid · Table Based';
-  if (mode === 'None') return 'General Admission';
-  if (mode === 'Map') return 'Map Layout';
-  return mode;
+function LayoutModeTag({ mode }: { mode: string }) {
+  if (mode === 'Grid') {
+    return (
+      <Tag color="purple" style={{ borderRadius: 99 }}>
+        <AppstoreOutlined style={{ marginRight: 4 }} />Grid
+      </Tag>
+    );
+  }
+  if (mode === 'Open') {
+    return (
+      <Tag color="blue" style={{ borderRadius: 99 }}>
+        <TeamOutlined style={{ marginRight: 4 }} />Open
+      </Tag>
+    );
+  }
+  return <Tag style={{ borderRadius: 99 }}>{mode}</Tag>;
 }
 
 export default function EventsListPage() {
@@ -93,14 +105,12 @@ export default function EventsListPage() {
       render: (status: string) => <StatusPill status={status} />,
     },
     {
-      title: 'Date',
-      dataIndex: 'startDate',
-      key: 'startDate',
-      width: 140,
-      render: (d: string) => (
-        <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-          {formatEventDate(d)}
-        </span>
+      title: 'Category',
+      dataIndex: 'category',
+      key: 'category',
+      width: 110,
+      render: (cat: string) => (
+        <span style={{ color: 'var(--text-secondary)' }}>{cat}</span>
       ),
     },
     {
@@ -109,16 +119,27 @@ export default function EventsListPage() {
       width: 150,
       render: (_: unknown, record: EventDetail) => (
         <span style={{ color: 'var(--text-secondary)' }}>
-          {record.venueCity}, {record.venueState}
+          {record.venueName}
         </span>
       ),
     },
     {
-      title: 'Seating',
-      key: 'seating',
-      width: 130,
+      title: 'Layout',
+      key: 'layoutMode',
+      width: 100,
       render: (_: unknown, record: EventDetail) => (
-        <Tag style={{ borderRadius: 99 }}>{getLayoutLabel(record.layoutMode)}</Tag>
+        <LayoutModeTag mode={record.layoutMode} />
+      ),
+    },
+    {
+      title: 'Date',
+      dataIndex: 'startDate',
+      key: 'startDate',
+      width: 140,
+      render: (d: string) => (
+        <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+          {formatEventDate(d)}
+        </span>
       ),
     },
     {
@@ -144,13 +165,12 @@ export default function EventsListPage() {
               description="It will become visible to the public."
               onConfirm={() => handlePublish(record.id)}
               okText="Publish"
-              okButtonProps={{ style: { background: '#10B981', borderColor: '#10B981' } }}
             >
               <Tooltip title="Publish">
                 <Button
                   size="small"
                   icon={<SendOutlined />}
-                  style={{ borderRadius: 8, borderColor: '#10B981', color: '#10B981' }}
+                  style={{ borderRadius: 8, borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}
                 />
               </Tooltip>
             </Popconfirm>
@@ -203,7 +223,7 @@ export default function EventsListPage() {
         />
       </div>
 
-      {/* Mobile card list — hidden on tablet+ */}
+      {/* Mobile card list -- hidden on tablet+ */}
       <div className="mobile-card-list">
         {data.map((record) => (
           <div key={record.id} className="event-mobile-card">
@@ -224,11 +244,10 @@ export default function EventsListPage() {
               </span>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                 <EnvironmentOutlined style={{ marginRight: 5, color: 'var(--accent-violet)' }} />
-                {record.venueCity}, {record.venueState}
+                {record.venueName}
               </span>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                <AppstoreOutlined style={{ marginRight: 5 }} />
-                {getLayoutLabel(record.layoutMode)}
+                <LayoutModeTag mode={record.layoutMode} />
               </span>
             </div>
 
@@ -249,7 +268,7 @@ export default function EventsListPage() {
                   onConfirm={() => handlePublish(record.id)}
                   okText="Publish"
                 >
-                  <Button size="small" style={{ flex: 1, borderRadius: 8, borderColor: '#10B981', color: '#10B981' }}>
+                  <Button size="small" style={{ flex: 1, borderRadius: 8, borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>
                     <SendOutlined /> Publish
                   </Button>
                 </Popconfirm>
@@ -265,7 +284,7 @@ export default function EventsListPage() {
         ))}
       </div>
 
-      {/* Desktop table — hidden on mobile */}
+      {/* Desktop table -- hidden on mobile */}
       <div className="desktop-table">
         <div className="responsive-table">
           <Table

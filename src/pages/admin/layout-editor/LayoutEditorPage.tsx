@@ -1,89 +1,86 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Alert, Button, Space, App } from 'antd';
 import { LockOutlined, SaveOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../../services/api';
-import { useFloorPlanStore, type FloorPlanElement } from '../../../stores/floorPlanStore';
-import type { LayoutStatsResponse, TableStatusInfo, TableType } from '../../../types/layout';
+import { adminEventsApi } from '../../../services/adminEventsApi';
+import type { LayoutStatsResponse, TableType } from '../../../types/layout';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
+import ControlsPanel from './components/ControlsPanel';
+import FloorPlanCanvas from './components/FloorPlanCanvas';
 import LayoutStatsBar from './components/LayoutStatsBar';
-import GridConfigPanel from './components/GridConfigPanel';
-import SeatingGrid from './components/SeatingGrid';
-import TableDetailPanel from './components/TableDetailPanel';
+
+export interface LayoutTable {
+  id: string;
+  label: string;
+  capacity: number;
+  shape: string;
+  color?: string;
+  priceCents: number;
+  isActive: boolean;
+  posX: number;
+  posY: number;
+  sortOrder: number;
+  tableTypeId?: string;
+  tableTypeName?: string;
+}
+
+export type EditorMode = 'add' | 'move' | 'delete' | 'select';
 
 export default function LayoutEditorPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const { message } = App.useApp();
 
-  // Server state
+  const [tables, setTables] = useState<LayoutTable[]>([]);
   const [tableTypes, setTableTypes] = useState<TableType[]>([]);
-  const [lockedIds, setLockedIds] = useState<Set<string>>(new Set());
-  const [layoutLocked, setLayoutLocked] = useState(false);
-  const [tableStatuses, setTableStatuses] = useState<Record<string, TableStatusInfo>>({});
   const [stats, setStats] = useState<LayoutStatsResponse | null>(null);
+  const [layoutLocked, setLayoutLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [bulkInsertLoading, setBulkInsertLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [isDirty, setIsDirty] = useState(false);
+  const [gridRows, setGridRows] = useState(10);
+  const [gridCols, setGridCols] = useState(10);
 
-  // UI state
-  const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
+  const [editorMode, setEditorMode] = useState<EditorMode>('select');
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+  const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
 
-  // Store
-  const loadFromApi = useFloorPlanStore((s) => s.loadFromApi);
-  const addElement = useFloorPlanStore((s) => s.addElement);
-  const updateElement = useFloorPlanStore((s) => s.updateElement);
-  const deleteElement = useFloorPlanStore((s) => s.deleteElement);
-  const isDirty = useFloorPlanStore((s) => s.isDirty);
-  const markClean = useFloorPlanStore((s) => s.markClean);
-  const elements = useFloorPlanStore((s) => s.elements);
-  const gridDimensions = useFloorPlanStore((s) => s.gridDimensions);
-
-  // Draft save timer
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const selectedTable = tables.find((t) => t.id === selectedTableId) ?? null;
 
   const loadAll = useCallback(async () => {
     if (!eventId) return;
     setLoading(true);
     setStatsLoading(true);
     try {
-      const [layoutRes, statusRes, lockedRes, typesRes, statsRes] = await Promise.all([
+      const [layoutRes, lockedRes, typesRes, statsRes] = await Promise.all([
         adminLayoutApi.getLayout(eventId),
-        adminLayoutApi.getLayoutStatus(eventId),
-        adminLayoutApi.getLockedTables(eventId),
+        adminEventsApi.checkLayoutLocked(eventId),
         adminLayoutApi.listTableTypes(),
         adminLayoutApi.getLayoutStats(eventId),
       ]);
 
-      // Feed full layout data into store (has all fields: price, section, etc.)
-      loadFromApi({
-        eventId,
-        editorMode: 'grid',
-        gridRows: layoutRes.data.gridRows ?? 0,
-        gridCols: layoutRes.data.gridCols ?? 0,
-        tables: layoutRes.data.tables ?? [],
-      });
-
-      setLockedIds(new Set(lockedRes.data.lockedTableIds ?? []));
-      setLayoutLocked(lockedRes.data.layoutLocked ?? false);
+      const layoutData = layoutRes.data as {
+        gridRows?: number;
+        gridCols?: number;
+        tables?: LayoutTable[];
+      };
+      setGridRows(layoutData.gridRows ?? 10);
+      setGridCols(layoutData.gridCols ?? 10);
+      setTables(layoutData.tables ?? []);
+      setLayoutLocked(lockedRes.data.locked);
       setTableTypes(typesRes.data ?? []);
       setStats(statsRes.data);
-
-      // Build status lookup from status endpoint (has booking/hold info)
-      const statusMap: Record<string, TableStatusInfo> = {};
-      for (const t of statusRes.data.tables ?? []) {
-        statusMap[t.id] = t;
-      }
-      setTableStatuses(statusMap);
     } catch {
       message.error('Failed to load layout');
     } finally {
       setLoading(false);
       setStatsLoading(false);
     }
-  }, [eventId, loadFromApi, message]);
+  }, [eventId, message]);
 
   useEffect(() => {
     void loadAll();
@@ -94,77 +91,65 @@ export default function LayoutEditorPage() {
     if (!isDirty || !eventId) return;
     if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
     draftTimerRef.current = setTimeout(() => {
-      void adminLayoutApi.saveDraft(eventId, serializeTables());
+      void adminLayoutApi.saveDraft(eventId, {
+        gridRows,
+        gridCols,
+        tables: tables.map((t) => ({
+          id: t.id,
+          label: t.label,
+          capacity: t.capacity,
+          shape: t.shape,
+          color: t.color,
+          priceType: 'PerTable',
+          priceCents: t.priceCents,
+          isActive: t.isActive,
+          posX: t.posX,
+          posY: t.posY,
+          sortOrder: t.sortOrder,
+          tableTypeId: t.tableTypeId,
+        })),
+      });
     }, 800);
     return () => {
       if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
     };
-  }, [isDirty, eventId]);
-
-  // Flush draft on unmount
-  useEffect(() => {
-    return () => {
-      if (eventId && useFloorPlanStore.getState().isDirty) {
-        void adminLayoutApi.flushDraft(eventId);
-      }
-    };
-  }, [eventId]);
+  }, [isDirty, eventId, tables, gridRows, gridCols]);
 
   // beforeunload warning
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (useFloorPlanStore.getState().isDirty) {
-        e.preventDefault();
-      }
+      if (isDirty) e.preventDefault();
     };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
-  }, []);
-
-  const serializeTables = () => {
-    const store = useFloorPlanStore.getState();
-    return {
-      editorMode: 'grid',
-      gridRows: store.gridDimensions?.rows ?? 0,
-      gridCols: store.gridDimensions?.cols ?? 0,
-      tables: Object.values(store.elements).map((el) => ({
-        id: el.id,
-        label: el.label,
-        capacity: el.capacity,
-        shape: el.shape ?? 'Round',
-        color: el.color,
-        section: el.section,
-        priceType: el.priceType ?? 'PerSeat',
-        priceCents: el.priceCents ?? 0,
-        priceOverrideCents: el.priceOverrideCents,
-        isActive: el.isActive ?? true,
-        gridRow: el.gridRow,
-        gridCol: el.gridCol,
-        sortOrder: el.sortOrder ?? 0,
-        tableTypeId: el.tableTypeId,
-      })),
-    };
-  };
+  }, [isDirty]);
 
   const handleSaveLayout = async () => {
     if (!eventId) return;
     setSaving(true);
     try {
-      const payload = serializeTables();
-      await adminLayoutApi.saveLayout(eventId, payload);
-      markClean();
+      await adminLayoutApi.saveLayout(eventId, {
+        gridRows,
+        gridCols,
+        tables: tables.map((t) => ({
+          id: t.id,
+          label: t.label,
+          capacity: t.capacity,
+          shape: t.shape,
+          color: t.color,
+          priceType: 'PerTable',
+          priceCents: t.priceCents,
+          isActive: t.isActive,
+          posX: t.posX,
+          posY: t.posY,
+          sortOrder: t.sortOrder,
+          tableTypeId: t.tableTypeId,
+        })),
+      });
+      setIsDirty(false);
       message.success('Layout saved');
-      // Refresh stats and status after save
-      const [statsRes, statusRes] = await Promise.all([
-        adminLayoutApi.getLayoutStats(eventId),
-        adminLayoutApi.getLayoutStatus(eventId),
-      ]);
+      const statsRes = await adminLayoutApi.getLayoutStats(eventId);
       setStats(statsRes.data);
-      const statusMap: Record<string, TableStatusInfo> = {};
-      for (const t of statusRes.data.tables ?? []) {
-        statusMap[t.id] = t;
-      }
-      setTableStatuses(statusMap);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       const errMsg = axiosErr?.response?.data?.message ?? (err instanceof Error ? err.message : 'Unknown error');
@@ -174,31 +159,21 @@ export default function LayoutEditorPage() {
     }
   };
 
-  const handleCellClick = useCallback(
-    (row: number, col: number, element: FloorPlanElement | null) => {
-      if (layoutLocked) {
-        message.info('Layout is locked — tables have active bookings or holds');
-        return;
-      }
-      if (element) {
-        // Clicking an existing table
-        if (lockedIds.has(element.id)) {
-          message.info('This table is locked due to active bookings');
-          return;
-        }
-        setSelectedTableId(element.id);
-        setSelectedTypeId(null);
-        return;
-      }
+  const updateTables = useCallback((updater: (prev: LayoutTable[]) => LayoutTable[]) => {
+    setTables(updater);
+    setIsDirty(true);
+  }, []);
 
-      // Empty cell
-      if (!selectedTypeId) return;
-
+  const handleCanvasClick = useCallback((posX: number, posY: number) => {
+    if (layoutLocked) {
+      message.info('Layout is locked -- tables have active bookings');
+      return;
+    }
+    if (editorMode === 'add' && selectedTypeId) {
       const tt = tableTypes.find((t) => t.id === selectedTypeId);
       if (!tt) return;
 
-      // Auto-number label to avoid unique constraint on (EventId, Label)
-      const existingLabels = new Set(Object.values(elements).map((el) => el.label));
+      const existingLabels = new Set(tables.map((t) => t.label));
       const baseName = tt.name.length > 16 ? tt.name.slice(0, 16) : tt.name;
       let label = baseName;
       let counter = 1;
@@ -207,74 +182,57 @@ export default function LayoutEditorPage() {
         label = `${baseName} ${counter}`;
       }
 
-      const newId = crypto.randomUUID();
-      const newElement: FloorPlanElement = {
-        id: newId,
+      const newTable: LayoutTable = {
+        id: crypto.randomUUID(),
         label,
         capacity: tt.defaultCapacity,
-        shape: (tt.defaultShape as FloorPlanElement['shape']) ?? 'Round',
+        shape: tt.defaultShape ?? 'Round',
         color: tt.defaultColor,
-        priceType: 'PerTable',
         priceCents: tt.defaultPriceCents ?? 0,
         isActive: true,
-        gridRow: row,
-        gridCol: col,
-        sortOrder: row * (gridDimensions?.cols ?? 0) + col,
+        posX,
+        posY,
+        sortOrder: tables.length,
         tableTypeId: tt.id,
         tableTypeName: tt.name,
       };
-      addElement(newElement);
-      setSelectedTableId(newId);
-    },
-    [selectedTypeId, tableTypes, lockedIds, layoutLocked, gridDimensions, addElement, message],
-  );
+      updateTables((prev) => [...prev, newTable]);
+      setSelectedTableId(newTable.id);
+    }
+  }, [layoutLocked, editorMode, selectedTypeId, tableTypes, tables, updateTables, message]);
 
-  const handleTableUpdate = useCallback(
-    (patch: Partial<FloorPlanElement>) => {
-      if (selectedTableId) {
-        updateElement(selectedTableId, patch);
-      }
-    },
-    [selectedTableId, updateElement],
-  );
+  const handleTableClick = useCallback((tableId: string) => {
+    if (layoutLocked) {
+      message.info('Layout is locked -- tables have active bookings');
+      return;
+    }
+    if (editorMode === 'delete') {
+      updateTables((prev) => prev.filter((t) => t.id !== tableId));
+      if (selectedTableId === tableId) setSelectedTableId(null);
+    } else {
+      setSelectedTableId(tableId);
+    }
+  }, [layoutLocked, editorMode, selectedTableId, updateTables, message]);
+
+  const handleTableDragEnd = useCallback((tableId: string, posX: number, posY: number) => {
+    if (layoutLocked) return;
+    updateTables((prev) => prev.map((t) =>
+      t.id === tableId ? { ...t, posX, posY } : t
+    ));
+  }, [layoutLocked, updateTables]);
+
+  const handleTableUpdate = useCallback((patch: Partial<LayoutTable>) => {
+    if (!selectedTableId) return;
+    updateTables((prev) => prev.map((t) =>
+      t.id === selectedTableId ? { ...t, ...patch } : t
+    ));
+  }, [selectedTableId, updateTables]);
 
   const handleTableDelete = useCallback(() => {
-    if (selectedTableId) {
-      deleteElement(selectedTableId);
-      setSelectedTableId(null);
-    }
-  }, [selectedTableId, deleteElement]);
-
-  const handleBulkInsert = async () => {
-    if (!eventId) return;
-    setBulkInsertLoading(true);
-    try {
-      const unlinkedIds = tableTypes
-        .filter((tt) => tt.isActive && !placedTypeIds.has(tt.id))
-        .map((tt) => tt.id);
-      if (unlinkedIds.length === 0) {
-        message.info('All table types are already placed');
-        return;
-      }
-      const res = await adminLayoutApi.bulkInsertTables(eventId, unlinkedIds);
-      message.success(`Placed ${res.data.insertedCount} table(s)`);
-      await loadAll();
-    } catch {
-      message.error('Failed to bulk insert tables');
-    } finally {
-      setBulkInsertLoading(false);
-    }
-  };
-
-  const selectedTable = selectedTableId ? elements[selectedTableId] ?? null : null;
-
-  const placedTypeIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const el of Object.values(elements)) {
-      if (el.tableTypeId) ids.add(el.tableTypeId);
-    }
-    return ids;
-  }, [elements]);
+    if (!selectedTableId) return;
+    updateTables((prev) => prev.filter((t) => t.id !== selectedTableId));
+    setSelectedTableId(null);
+  }, [selectedTableId, updateTables]);
 
   if (loading) return <LoadingSpinner />;
 
@@ -282,7 +240,7 @@ export default function LayoutEditorPage() {
     <div>
       <PageHeader
         title="Layout Editor"
-        subtitle={`${Object.keys(elements).length} tables on ${gridDimensions?.rows ?? 0}x${gridDimensions?.cols ?? 0} grid`}
+        subtitle={`${tables.length} tables · ${gridRows}x${gridCols} grid`}
         extra={
           <Space>
             <Button
@@ -311,32 +269,34 @@ export default function LayoutEditorPage() {
 
       <LayoutStatsBar stats={stats} loading={statsLoading} />
 
-      <div className="grid-editor-wrapper">
-        <GridConfigPanel
+      <div className="layout-editor-container">
+        <ControlsPanel
+          gridRows={gridRows}
+          gridCols={gridCols}
+          onGridRowsChange={(v) => { setGridRows(v); setIsDirty(true); }}
+          onGridColsChange={(v) => { setGridCols(v); setIsDirty(true); }}
           tableTypes={tableTypes}
           selectedTypeId={selectedTypeId}
           onSelectType={setSelectedTypeId}
-          onBulkInsert={handleBulkInsert}
-          bulkInsertLoading={bulkInsertLoading}
-          placedTypeIds={placedTypeIds}
+          editorMode={editorMode}
+          onEditorModeChange={setEditorMode}
+          selectedTable={selectedTable}
+          onTableUpdate={handleTableUpdate}
+          onTableDelete={handleTableDelete}
+          onDeselectTable={() => setSelectedTableId(null)}
+          disabled={layoutLocked}
         />
 
-        <div className="grid-editor-center">
-          <SeatingGrid
-            selectedTableId={selectedTableId}
-            selectedTypeId={selectedTypeId}
-            lockedIds={lockedIds}
-            tableStatuses={tableStatuses}
-            onCellClick={handleCellClick}
-          />
-        </div>
-
-        <TableDetailPanel
-          selectedTable={selectedTable}
-          isLocked={selectedTableId ? lockedIds.has(selectedTableId) : false}
-          onUpdate={handleTableUpdate}
-          onDelete={handleTableDelete}
-          onClose={() => setSelectedTableId(null)}
+        <FloorPlanCanvas
+          tables={tables}
+          gridRows={gridRows}
+          gridCols={gridCols}
+          selectedTableId={selectedTableId}
+          editorMode={editorMode}
+          disabled={layoutLocked}
+          onCanvasClick={handleCanvasClick}
+          onTableClick={handleTableClick}
+          onTableDragEnd={handleTableDragEnd}
         />
       </div>
     </div>

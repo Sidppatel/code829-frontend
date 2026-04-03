@@ -6,6 +6,7 @@ export interface TablePayload {
   capacity: number;
   shape: string;
   color?: string;
+  priceType?: string;
   priceCents: number;
   isActive: boolean;
   posX: number;
@@ -15,6 +16,9 @@ export interface TablePayload {
 }
 
 export interface SaveLayoutPayload {
+  editorMode?: string;
+  gridRows?: number;
+  gridCols?: number;
   tables: TablePayload[];
 }
 
