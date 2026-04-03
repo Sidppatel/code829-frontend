@@ -187,7 +187,7 @@ export default function PublicLayout() {
       </Drawer>
 
       {/* Content */}
-      <Content style={{ background: 'var(--bg-page)', paddingBottom: 72 }}>
+      <Content style={{ background: 'var(--bg-page)', padding: '16px 16px 72px', maxWidth: 1280, width: '100%', margin: '0 auto' }}>
         <Outlet />
       </Content>
 
