@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Alert, Button, Space, App } from 'antd';
 import { InfoCircleOutlined, SaveOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../../services/api';
@@ -31,7 +31,8 @@ export type EditorMode = 'add' | 'delete' | 'select';
 
 export default function LayoutEditorPage() {
   const { eventId } = useParams<{ eventId: string }>();
-  const { message } = App.useApp();
+  const navigate = useNavigate();
+  const { message, modal } = App.useApp();
 
   const [tables, setTables] = useState<LayoutTable[]>([]);
   const [templates, setTemplates] = useState<TableTemplate[]>([]);
@@ -245,6 +246,22 @@ export default function LayoutEditorPage() {
     setSelectedTableId(null);
   }, [selectedTableId, isTableLocked, updateTables, message]);
 
+  const handleBack = useCallback(() => {
+    const goBack = () => navigate(`/admin/events/${eventId}`);
+    if (isDirty) {
+      modal.confirm({
+        title: 'Unsaved changes',
+        content: 'You have unsaved layout changes. Are you sure you want to leave?',
+        okText: 'Leave',
+        okType: 'danger',
+        cancelText: 'Stay',
+        onOk: goBack,
+      });
+    } else {
+      goBack();
+    }
+  }, [eventId, isDirty, modal, navigate]);
+
   const handleEventTableCreated = useCallback((et: EventTableType) => {
     setEventTables((prev) => [...prev, et]);
   }, []);
@@ -266,6 +283,7 @@ export default function LayoutEditorPage() {
       <PageHeader
         title="Layout Editor"
         subtitle={`${tables.length} tables · ${gridRows}x${gridCols} grid`}
+        onBack={handleBack}
         extra={
           <Space>
             <Button
