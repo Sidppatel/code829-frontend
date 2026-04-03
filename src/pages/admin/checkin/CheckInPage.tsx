@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Input, Row, Col, Statistic, App, Result, Progress, Divider } from 'antd';
 import { ScanOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { checkInApi } from '../../../services/api';
@@ -11,6 +11,7 @@ import QrCameraScanner from '../../../components/checkin/QrCameraScanner';
 
 export default function CheckInPage() {
   const { eventId } = useParams<{ eventId: string }>();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<CheckInStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [scanResult, setScanResult] = useState<ScanResponse | null>(null);
@@ -56,7 +57,7 @@ export default function CheckInPage() {
 
   return (
     <div>
-      <PageHeader title="Check-In" subtitle={stats?.eventTitle ?? 'Event check-in'} />
+      <PageHeader title="Check-In" subtitle={stats?.eventTitle ?? 'Event check-in'} onBack={() => navigate('/staff/checkin/select')} />
       {stats && (
         <>
           <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
