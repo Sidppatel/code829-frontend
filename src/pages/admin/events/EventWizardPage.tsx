@@ -81,7 +81,8 @@ export default function EventWizardPage() {
           title: data.title,
           description: data.description,
           category: data.category,
-          dates: [dayjs(data.startDate), dayjs(data.endDate)],
+          startDate: dayjs(data.startDate),
+          endDate: dayjs(data.endDate),
           venueId: data.venueId,
           isFeatured: data.isFeatured,
           maxCapacity: data.maxCapacity,
@@ -106,8 +107,8 @@ export default function EventWizardPage() {
         title: values.title,
         description: values.description,
         category: values.category,
-        startDate: values.dates[0].toISOString(),
-        endDate: values.dates[1].toISOString(),
+        startDate: values.startDate.toISOString(),
+        endDate: values.endDate.toISOString(),
         venueId: values.venueId,
         isFeatured: values.isFeatured ?? false,
         layoutMode,
@@ -207,18 +208,36 @@ export default function EventWizardPage() {
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item
-            name="dates"
-            label="Date Range"
-            rules={[{ required: true }]}
-          >
-            <DatePicker.RangePicker
-              showTime={{ format: 'hh:mm A', use12Hours: true }}
-              format="MMM D, YYYY hh:mm A"
-              placeholder={['Start date & time', 'End date & time']}
-              style={{ width: '100%' }}
-            />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="startDate"
+                label="Start Date & Time"
+                rules={[{ required: true, message: 'Start date is required' }]}
+              >
+                <DatePicker
+                  showTime={{ format: 'hh:mm A', use12Hours: true }}
+                  format="MMM D, YYYY hh:mm A"
+                  placeholder="Select start date & time"
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="endDate"
+                label="End Date & Time"
+                rules={[{ required: true, message: 'End date is required' }]}
+              >
+                <DatePicker
+                  showTime={{ format: 'hh:mm A', use12Hours: true }}
+                  format="MMM D, YYYY hh:mm A"
+                  placeholder="Select end date & time"
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Row gutter={16}>
             <Col xs={24} sm={12}>
