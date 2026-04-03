@@ -4,6 +4,7 @@ import {
   Input,
   Select,
   DatePicker,
+  TimePicker,
   Switch,
   Button,
   Card,
@@ -82,7 +83,9 @@ export default function EventWizardPage() {
           description: data.description,
           category: data.category,
           startDate: dayjs(data.startDate),
+          startTime: dayjs(data.startDate),
           endDate: dayjs(data.endDate),
+          endTime: dayjs(data.endDate),
           venueId: data.venueId,
           isFeatured: data.isFeatured,
           maxCapacity: data.maxCapacity,
@@ -103,12 +106,20 @@ export default function EventWizardPage() {
     try {
       const values = await form.validateFields();
       setSaving(true);
+      const startDt = values.startDate
+        .hour(values.startTime.hour())
+        .minute(values.startTime.minute())
+        .second(0);
+      const endDt = values.endDate
+        .hour(values.endTime.hour())
+        .minute(values.endTime.minute())
+        .second(0);
       const payload: CreateEventPayload = {
         title: values.title,
         description: values.description,
         category: values.category,
-        startDate: values.startDate.toISOString(),
-        endDate: values.endDate.toISOString(),
+        startDate: startDt.toISOString(),
+        endDate: endDt.toISOString(),
         venueId: values.venueId,
         isFeatured: values.isFeatured ?? false,
         layoutMode,
@@ -209,33 +220,61 @@ export default function EventWizardPage() {
             </Col>
           </Row>
           <Row gutter={16}>
-            <Col xs={24} sm={12}>
+            <Col xs={12} sm={6}>
               <Form.Item
                 name="startDate"
-                label="Start Date & Time"
-                rules={[{ required: true, message: 'Start date is required' }]}
+                label="Start Date"
+                rules={[{ required: true, message: 'Required' }]}
               >
                 <DatePicker
-                  showTime={{ use12Hours: true, format: 'h:mm a' }}
-                  format="YYYY-MM-DD h:mm a"
-                  placeholder="Select start date & time"
+                  format="MMM D, YYYY"
+                  placeholder="Pick date"
                   style={{ width: '100%' }}
-                  needConfirm={false}
                 />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={12}>
+            <Col xs={12} sm={6}>
+              <Form.Item
+                name="startTime"
+                label="Start Time"
+                rules={[{ required: true, message: 'Required' }]}
+              >
+                <TimePicker
+                  use12Hours
+                  format="h:mm a"
+                  placeholder="Pick time"
+                  minuteStep={5}
+                  needConfirm={false}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={12} sm={6}>
               <Form.Item
                 name="endDate"
-                label="End Date & Time"
-                rules={[{ required: true, message: 'End date is required' }]}
+                label="End Date"
+                rules={[{ required: true, message: 'Required' }]}
               >
                 <DatePicker
-                  showTime={{ use12Hours: true, format: 'h:mm a' }}
-                  format="YYYY-MM-DD h:mm a"
-                  placeholder="Select end date & time"
+                  format="MMM D, YYYY"
+                  placeholder="Pick date"
                   style={{ width: '100%' }}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={12} sm={6}>
+              <Form.Item
+                name="endTime"
+                label="End Time"
+                rules={[{ required: true, message: 'Required' }]}
+              >
+                <TimePicker
+                  use12Hours
+                  format="h:mm a"
+                  placeholder="Pick time"
+                  minuteStep={5}
                   needConfirm={false}
+                  style={{ width: '100%' }}
                 />
               </Form.Item>
             </Col>
