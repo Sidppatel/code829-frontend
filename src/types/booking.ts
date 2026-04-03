@@ -11,8 +11,8 @@ export interface Booking {
   totalCents: number;
   qrToken: string;
   tableId?: string;
+  tableLabel?: string;
   seatsReserved?: number;
-  items: BookingItem[];
   payment?: PaymentInfo;
   createdAt: string;
 }
@@ -20,21 +20,6 @@ export interface Booking {
 export type BookingDetail = Booking;
 
 export type BookingStatus = 'Pending' | 'Paid' | 'CheckedIn' | 'Cancelled' | 'Refunded' | 'Expired';
-
-export interface BookingItem {
-  id: string;
-  ticketTypeId: string;
-  ticketTypeName: string;
-  seatId?: string;
-  seatLabel?: string;
-  tableLabel?: string;
-  priceCents: number;
-  qrToken: string;
-  guestName?: string;
-  guestEmail?: string;
-  invitationToken?: string;
-  isCheckedIn: boolean;
-}
 
 export interface PaymentInfo {
   id: string;

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-export type LayoutMode = 'Grid' | 'CapacityOnly' | 'None';
+export type LayoutMode = 'Grid' | 'Open' | 'None';
 
 export interface WizardFormData {
   title: string;
@@ -16,6 +16,7 @@ export interface WizardFormData {
   layoutMode: LayoutMode | '';
   maxCapacity: string;
   platformFeePercent: string;
+  pricePerPersonCents: string;
   isFeatured: boolean;
 }
 
@@ -32,6 +33,7 @@ const DEFAULT_FORM_DATA: WizardFormData = {
   layoutMode: '',
   maxCapacity: '',
   platformFeePercent: '',
+  pricePerPersonCents: '',
   isFeatured: false,
 };
 

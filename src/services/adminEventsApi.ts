@@ -18,16 +18,10 @@ export interface CreateEventPayload {
   endDate: string;
   venueId: string;
   isFeatured?: boolean;
-  layoutMode?: string;
+  layoutMode: string;
   maxCapacity?: number;
   bannerImageUrl?: string;
-  ticketTypes?: {
-    name: string;
-    description?: string;
-    priceCents: number;
-    quantityTotal: number;
-    sortOrder: number;
-  }[];
+  pricePerPersonCents?: number;
 }
 
 export interface UpdateEventPayload extends Partial<CreateEventPayload> {

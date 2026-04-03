@@ -9,13 +9,16 @@ import {
   Card,
   Row,
   Col,
+  InputNumber,
   App,
+  Segmented,
 } from 'antd';
 import {
   EditOutlined,
   AppstoreOutlined,
   InfoCircleOutlined,
-  EnvironmentOutlined,
+  TeamOutlined,
+  DollarOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -37,7 +40,6 @@ const categories = [
   'Business',
   'Other',
 ];
-const layoutModes = ['None', 'Grid', 'Map'];
 
 export default function EventWizardPage() {
   const { id } = useParams<{ id?: string }>();
@@ -46,6 +48,7 @@ export default function EventWizardPage() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [venues, setVenues] = useState<Venue[]>([]);
+  const [layoutMode, setLayoutMode] = useState<'Grid' | 'Open'>('Grid');
   const { message } = App.useApp();
   const navigate = useNavigate();
 
@@ -72,6 +75,8 @@ export default function EventWizardPage() {
           navigate(`/admin/events/${id}`);
           return;
         }
+        const mode = data.layoutMode === 'Open' ? 'Open' : 'Grid';
+        setLayoutMode(mode);
         form.setFieldsValue({
           title: data.title,
           description: data.description,
@@ -79,8 +84,10 @@ export default function EventWizardPage() {
           dates: [dayjs(data.startDate), dayjs(data.endDate)],
           venueId: data.venueId,
           isFeatured: data.isFeatured,
-          layoutMode: data.layoutMode,
           maxCapacity: data.maxCapacity,
+          pricePerPerson: data.pricePerPersonCents != null
+            ? data.pricePerPersonCents / 100
+            : undefined,
         });
       } catch {
         message.error('Failed to load event for editing');
@@ -103,9 +110,12 @@ export default function EventWizardPage() {
         endDate: values.dates[1].toISOString(),
         venueId: values.venueId,
         isFeatured: values.isFeatured ?? false,
-        layoutMode: values.layoutMode ?? 'None',
-        maxCapacity: values.maxCapacity
+        layoutMode,
+        maxCapacity: layoutMode === 'Open' && values.maxCapacity
           ? Number(values.maxCapacity)
+          : undefined,
+        pricePerPersonCents: layoutMode === 'Open' && values.pricePerPerson != null
+          ? Math.round(Number(values.pricePerPerson) * 100)
           : undefined,
       };
       if (isEditMode && id) {
@@ -204,23 +214,9 @@ export default function EventWizardPage() {
           >
             <DatePicker.RangePicker showTime style={{ width: '100%' }} />
           </Form.Item>
+
           <Row gutter={16}>
-            <Col xs={24} sm={8}>
-              <Form.Item name="layoutMode" label="Layout Mode">
-                <Select
-                  options={layoutModes.map((m) => ({
-                    label: m,
-                    value: m,
-                  }))}
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Form.Item name="maxCapacity" label="Max Capacity">
-                <Input type="number" placeholder="Optional" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={8}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="isFeatured"
                 label="Featured"
@@ -231,47 +227,95 @@ export default function EventWizardPage() {
             </Col>
           </Row>
 
-          {/* Seating Layout Section */}
-          <Form.Item shouldUpdate={(prev, curr) => prev.layoutMode !== curr.layoutMode}>
-            {({ getFieldValue }) => {
-              const mode = getFieldValue('layoutMode') as string | undefined;
-              return (
-                <div className="admin-section" style={{ marginTop: 0 }}>
-                  <div className="admin-section-title">
-                    <AppstoreOutlined />
-                    Seating Layout
-                  </div>
+          {/* Seating Type Toggle */}
+          <div className="admin-section" style={{ marginTop: 0 }}>
+            <div className="admin-section-title">
+              <AppstoreOutlined />
+              Seating Type
+            </div>
 
-                  {(!mode || mode === 'None') && (
-                    <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: 13 }}>
-                      General Admission — no assigned seating.
-                      <br />
-                      <span style={{ fontSize: 12, opacity: 0.7 }}>Set Max Capacity above to limit attendance.</span>
+            <Segmented
+              block
+              size="large"
+              value={layoutMode}
+              onChange={(val) => setLayoutMode(val as 'Grid' | 'Open')}
+              options={[
+                {
+                  label: (
+                    <div style={{ padding: '8px 0' }}>
+                      <AppstoreOutlined style={{ fontSize: 20, display: 'block', marginBottom: 4 }} />
+                      <div style={{ fontWeight: 600 }}>Table Seating</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Grid Layout</div>
                     </div>
-                  )}
+                  ),
+                  value: 'Grid',
+                },
+                {
+                  label: (
+                    <div style={{ padding: '8px 0' }}>
+                      <TeamOutlined style={{ fontSize: 20, display: 'block', marginBottom: 4 }} />
+                      <div style={{ fontWeight: 600 }}>Open Seating</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Capacity Based</div>
+                    </div>
+                  ),
+                  value: 'Open',
+                },
+              ]}
+              style={{ marginBottom: 16 }}
+            />
 
-                  {mode === 'Grid' && (
-                    <div>
-                      <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
-                        Table-based grid layout. After saving, use <strong>Manage Seating Layout</strong> to assign tables to grid positions.
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(124,58,237,0.06)', borderRadius: 10, border: '1px solid rgba(124,58,237,0.15)', fontSize: 13, color: 'var(--text-secondary)' }}>
-                        <InfoCircleOutlined style={{ color: 'var(--accent-violet)' }} />
-                        Tables are configured in the Layout Editor after event creation.
-                      </div>
-                    </div>
-                  )}
+            {layoutMode === 'Grid' && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '12px 14px',
+                background: 'var(--bg-elevated, rgba(124,58,237,0.06))',
+                borderRadius: 10,
+                border: '1px solid var(--border-light, rgba(124,58,237,0.15))',
+                fontSize: 13,
+                color: 'var(--text-secondary)',
+              }}>
+                <InfoCircleOutlined style={{ color: 'var(--accent-violet)' }} />
+                Configure tables in the Layout Editor after creation. Price is set per table.
+              </div>
+            )}
 
-                  {mode === 'Map' && (
-                    <div style={{ fontSize: 13, color: 'var(--text-secondary)', padding: '10px 14px', background: 'rgba(124,58,237,0.06)', borderRadius: 10, border: '1px solid rgba(124,58,237,0.15)' }}>
-                      <EnvironmentOutlined style={{ color: 'var(--accent-violet)', marginRight: 6 }} />
-                      Map-based layout. Upload a venue map and place tables in the Layout Editor after saving.
-                    </div>
-                  )}
-                </div>
-              );
-            }}
-          </Form.Item>
+            {layoutMode === 'Open' && (
+              <Row gutter={16}>
+                <Col xs={24} sm={12}>
+                  <Form.Item
+                    name="maxCapacity"
+                    label="Max Capacity"
+                    rules={[{ required: true, message: 'Required for open seating' }]}
+                  >
+                    <InputNumber
+                      min={1}
+                      style={{ width: '100%' }}
+                      placeholder="Total number of people"
+                      prefix={<TeamOutlined />}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item
+                    name="pricePerPerson"
+                    label="Price Per Person ($)"
+                    rules={[{ required: true, message: 'Required for open seating' }]}
+                  >
+                    <InputNumber
+                      min={0}
+                      step={0.01}
+                      precision={2}
+                      style={{ width: '100%' }}
+                      placeholder="0.00"
+                      prefix={<DollarOutlined />}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
+          </div>
 
           <Form.Item>
             <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>

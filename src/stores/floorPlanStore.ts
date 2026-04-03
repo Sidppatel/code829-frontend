@@ -3,7 +3,6 @@ import { create } from 'zustand';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type TableShape = 'Round' | 'Rectangle' | 'Square' | 'Cocktail';
-export type PriceType = 'PerTable' | 'PerSeat';
 
 export interface FloorPlanElement {
   id: string;
@@ -11,13 +10,10 @@ export interface FloorPlanElement {
   capacity: number;
   shape: TableShape;
   color?: string;
-  section?: string;
-  priceType: PriceType;
   priceCents: number;
-  priceOverrideCents?: number;
   isActive: boolean;
-  gridRow?: number;
-  gridCol?: number;
+  posX: number;
+  posY: number;
   sortOrder: number;
   tableTypeId?: string;
   tableTypeName?: string;
@@ -30,13 +26,10 @@ interface ApiTable {
   capacity: number;
   shape: TableShape;
   color?: string;
-  section?: string;
-  priceType: PriceType;
   priceCents: number;
-  priceOverrideCents?: number;
   isActive: boolean;
-  gridRow?: number;
-  gridCol?: number;
+  posX: number;
+  posY: number;
   sortOrder: number;
   tableTypeId?: string;
   tableTypeName?: string;
@@ -44,9 +37,6 @@ interface ApiTable {
 
 export interface ApiLayoutResponse {
   eventId: string;
-  editorMode: 'grid';
-  gridRows: number;
-  gridCols: number;
   tables: ApiTable[];
 }
 
@@ -55,17 +45,14 @@ export interface ApiLayoutResponse {
 interface FloorPlanState {
   elements: Record<string, FloorPlanElement>;
   elementOrder: string[];
-  gridDimensions: { rows: number; cols: number } | null;
-  editorMode: 'grid';
   isDirty: boolean;
 
   // Actions
   addElement: (element: FloorPlanElement) => void;
   updateElement: (id: string, patch: Partial<FloorPlanElement>) => void;
   deleteElement: (id: string) => void;
-  moveElement: (id: string, gridRow: number, gridCol: number) => void;
+  moveElement: (id: string, posX: number, posY: number) => void;
   loadFromApi: (response: ApiLayoutResponse) => void;
-  setGridDimensions: (rows: number, cols: number) => void;
   markClean: () => void;
   clearAll: () => void;
 }
@@ -75,8 +62,6 @@ interface FloorPlanState {
 export const useFloorPlanStore = create<FloorPlanState>((set) => ({
   elements: {},
   elementOrder: [],
-  gridDimensions: null,
-  editorMode: 'grid',
   isDirty: false,
 
   addElement: (element) =>
@@ -109,13 +94,13 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
       };
     }),
 
-  moveElement: (id, gridRow, gridCol) =>
+  moveElement: (id, posX, posY) =>
     set((state) => {
       if (!state.elements[id]) return state;
       return {
         elements: {
           ...state.elements,
-          [id]: { ...state.elements[id], gridRow, gridCol },
+          [id]: { ...state.elements[id], posX, posY },
         },
         isDirty: true,
       };
@@ -131,13 +116,10 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
         capacity: t.capacity,
         shape: t.shape,
         color: t.color,
-        section: t.section,
-        priceType: t.priceType,
         priceCents: t.priceCents,
-        priceOverrideCents: t.priceOverrideCents,
         isActive: t.isActive,
-        gridRow: t.gridRow,
-        gridCol: t.gridCol,
+        posX: t.posX,
+        posY: t.posY,
         sortOrder: t.sortOrder,
         tableTypeId: t.tableTypeId,
         tableTypeName: t.tableTypeName,
@@ -147,15 +129,9 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
     set({
       elements,
       elementOrder,
-      gridDimensions: { rows: response.gridRows, cols: response.gridCols },
-      editorMode: response.editorMode,
       isDirty: false,
     });
   },
-
-  setGridDimensions: (rows, cols) =>
-    set({ gridDimensions: { rows, cols }, isDirty: true }),
-
 
   markClean: () => set({ isDirty: false }),
 

@@ -11,15 +11,14 @@ export interface EventSummary {
   venueName: string;
   venueCity: string;
   venueState: string;
-  minPriceCents?: number;
-  maxPriceCents?: number;
+  layoutMode: string;
+  pricePerPersonCents?: number;
   quantityTotal: number;
   quantitySold: number;
 }
 
 export interface EventDetail extends EventSummary {
   description?: string;
-  layoutMode: string;
   maxCapacity?: number;
   platformFeePercent?: number;
   publishedAt?: string;
@@ -27,7 +26,9 @@ export interface EventDetail extends EventSummary {
   venue: VenueBasic;
   organizerId?: string;
   organizerName?: string;
-  ticketTypes: TicketType[];
+  pricePerPersonCents?: number;
+  gridRows?: number;
+  gridCols?: number;
   createdAt: string;
 }
 
@@ -47,18 +48,6 @@ export interface VenueBasic {
   createdAt: string;
 }
 
-export interface TicketType {
-  id: string;
-  name: string;
-  description?: string;
-  priceCents: number;
-  quantityTotal: number;
-  quantitySold: number;
-  quantityAvailable: number;
-  sortOrder: number;
-  platformFeeCents: number;
-}
-
 export interface EventFacets {
   categories: string[];
   cities: string[];
@@ -72,12 +61,9 @@ export interface EventTableDto {
   capacity: number;
   shape: string;
   color?: string;
-  section?: string;
-  priceType: string;
+  posX: number;
+  posY: number;
   priceCents: number;
-  platformFeeCents: number;
-  gridRow?: number;
-  gridCol?: number;
   sortOrder?: number;
   status: 'Available' | 'Held' | 'HeldByYou' | 'Booked';
   holdExpiresAt?: string;
@@ -86,7 +72,7 @@ export interface EventTableDto {
 
 export interface EventTablesResponse {
   eventId: string;
-  gridRows: number;
-  gridCols: number;
+  gridRows?: number;
+  gridCols?: number;
   tables: EventTableDto[];
 }

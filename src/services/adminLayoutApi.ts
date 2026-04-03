@@ -6,21 +6,15 @@ export interface TablePayload {
   capacity: number;
   shape: string;
   color?: string;
-  section?: string;
-  priceType: string;
   priceCents: number;
-  priceOverrideCents?: number;
   isActive: boolean;
-  gridRow?: number;
-  gridCol?: number;
+  posX: number;
+  posY: number;
   sortOrder?: number;
   tableTypeId?: string;
 }
 
 export interface SaveLayoutPayload {
-  editorMode?: string;
-  gridRows?: number;
-  gridCols?: number;
   tables: TablePayload[];
 }
 
