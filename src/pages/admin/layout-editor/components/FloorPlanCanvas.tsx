@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { LayoutTable, EditorMode } from '../LayoutEditorPage';
 import TableElement from './TableElement';
 
@@ -9,9 +9,8 @@ interface FloorPlanCanvasProps {
   selectedTableId: string | null;
   editorMode: EditorMode;
   lockedTableIds: Set<string>;
-  onCanvasClick: (posX: number, posY: number) => void;
+  onCellClick: (row: number, col: number) => void;
   onTableClick: (tableId: string) => void;
-  onTableDragEnd: (tableId: string, posX: number, posY: number) => void;
 }
 
 export default function FloorPlanCanvas({
@@ -21,116 +20,104 @@ export default function FloorPlanCanvas({
   selectedTableId,
   editorMode,
   lockedTableIds,
-  onCanvasClick,
+  onCellClick,
   onTableClick,
-  onTableDragEnd,
 }: FloorPlanCanvasProps) {
-  const canvasRef = useRef<HTMLDivElement>(null);
+  // Build a map of (row,col) -> table for quick lookup
+  const cellMap = useMemo(() => {
+    const map = new Map<string, LayoutTable>();
+    for (const t of tables) {
+      map.set(`${t.gridRow},${t.gridCol}`, t);
+    }
+    return map;
+  }, [tables]);
 
-  const handleCanvasClick = useCallback((e: React.MouseEvent) => {
-    if (editorMode !== 'add') return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const handleCellClick = useCallback((row: number, col: number) => {
+    const existing = cellMap.get(`${row},${col}`);
+    if (existing) {
+      onTableClick(existing.id);
+    } else if (editorMode === 'add') {
+      onCellClick(row, col);
+    }
+  }, [cellMap, editorMode, onCellClick, onTableClick]);
 
-    // Only fire on direct canvas click, not on table elements
-    if (e.target !== canvas && !(e.target as HTMLElement).classList.contains('floor-plan-grid-overlay')) return;
+  // Build grid cells
+  const cells: React.ReactNode[] = [];
+  for (let r = 0; r < gridRows; r++) {
+    for (let c = 0; c < gridCols; c++) {
+      const key = `${r},${c}`;
+      const table = cellMap.get(key);
 
-    const rect = canvas.getBoundingClientRect();
-    const posX = Math.round(((e.clientX - rect.left) / rect.width) * 10000) / 100;
-    const posY = Math.round(((e.clientY - rect.top) / rect.height) * 10000) / 100;
-    onCanvasClick(
-      Math.max(0, Math.min(100, posX)),
-      Math.max(0, Math.min(100, posY)),
-    );
-  }, [editorMode, onCanvasClick]);
-
-  const cursorMap: Record<EditorMode, string> = {
-    select: 'default',
-    add: 'crosshair',
-    move: 'default',
-    delete: 'default',
-  };
-
-  // Build grid lines for visual reference
-  const gridLines: React.ReactNode[] = [];
-  for (let r = 1; r < gridRows; r++) {
-    const pct = (r / gridRows) * 100;
-    gridLines.push(
-      <div
-        key={`h-${r}`}
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: `${pct}%`,
-          height: 1,
-          background: 'var(--border-light, rgba(255,255,255,0.06))',
-          pointerEvents: 'none',
-        }}
-      />
-    );
-  }
-  for (let c = 1; c < gridCols; c++) {
-    const pct = (c / gridCols) * 100;
-    gridLines.push(
-      <div
-        key={`v-${c}`}
-        style={{
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          left: `${pct}%`,
-          width: 1,
-          background: 'var(--border-light, rgba(255,255,255,0.06))',
-          pointerEvents: 'none',
-        }}
-      />
-    );
+      if (table) {
+        cells.push(
+          <div
+            key={key}
+            style={{
+              gridRow: r + 1,
+              gridColumn: c + 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 2,
+            }}
+          >
+            <TableElement
+              table={table}
+              isSelected={table.id === selectedTableId}
+              editorMode={editorMode}
+              isLocked={lockedTableIds.has(table.id)}
+              onClick={() => onTableClick(table.id)}
+            />
+          </div>
+        );
+      } else {
+        cells.push(
+          <div
+            key={key}
+            role="button"
+            tabIndex={editorMode === 'add' ? 0 : -1}
+            className={`grid-empty-cell${editorMode === 'add' ? ' addable' : ''}`}
+            style={{
+              gridRow: r + 1,
+              gridColumn: c + 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px dashed var(--border-light, rgba(255,255,255,0.08))',
+              borderRadius: 4,
+              cursor: editorMode === 'add' ? 'crosshair' : 'default',
+              transition: 'background 0.15s ease',
+              minHeight: 48,
+            }}
+            onClick={() => handleCellClick(r, c)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleCellClick(r, c);
+            }}
+          />
+        );
+      }
+    }
   }
 
   return (
     <div className="layout-editor-canvas-wrapper">
       <div
-        ref={canvasRef}
         className="layout-editor-canvas"
         style={{
-          position: 'relative',
+          display: 'grid',
+          gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
+          gridTemplateRows: `repeat(${gridRows}, 1fr)`,
+          gap: 4,
           width: '100%',
-          paddingBottom: `${(gridRows / gridCols) * 100}%`,
+          aspectRatio: `${gridCols} / ${gridRows}`,
           background: 'var(--bg-secondary)',
           borderRadius: 12,
           border: '1px solid var(--border-default, rgba(255,255,255,0.1))',
-          cursor: cursorMap[editorMode],
+          padding: 8,
           overflow: 'hidden',
         }}
-        onClick={handleCanvasClick}
       >
-        {/* Grid overlay */}
-        <div
-          className="floor-plan-grid-overlay"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: editorMode === 'add' ? 'auto' : 'none',
-          }}
-          onClick={handleCanvasClick}
-        >
-          {gridLines}
-        </div>
-
-        {/* Table elements */}
-        {tables.map((table) => (
-          <TableElement
-            key={table.id}
-            table={table}
-            isSelected={table.id === selectedTableId}
-            editorMode={editorMode}
-            isLocked={lockedTableIds.has(table.id)}
-            canvasRef={canvasRef}
-            onClick={onTableClick}
-            onDragEnd={onTableDragEnd}
-          />
-        ))}
+        {cells}
       </div>
     </div>
   );

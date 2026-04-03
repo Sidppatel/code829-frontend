@@ -1,28 +1,23 @@
 import apiClient from '../lib/axios';
+import type { EventTableType } from '../types/layout';
 
 export interface TablePayload {
   id?: string;
   label: string;
-  capacity: number;
-  shape: string;
-  color?: string;
-  priceType?: string;
-  priceCents: number;
+  gridRow: number;
+  gridCol: number;
   isActive: boolean;
-  posX: number;
-  posY: number;
   sortOrder?: number;
-  tableTypeId?: string;
+  eventTableId: string;
 }
 
 export interface SaveLayoutPayload {
-  editorMode?: string;
   gridRows?: number;
   gridCols?: number;
   tables: TablePayload[];
 }
 
-export interface CreateTableTypePayload {
+export interface CreateTableTemplatePayload {
   name: string;
   defaultCapacity: number;
   defaultShape: string;
@@ -31,19 +26,52 @@ export interface CreateTableTypePayload {
   isActive?: boolean;
 }
 
+export interface CreateEventTablePayload {
+  tableTemplateId?: string;
+  label: string;
+  capacity: number;
+  shape: string;
+  color?: string;
+  priceCents: number;
+}
+
+export interface UpdateEventTablePayload {
+  label?: string;
+  capacity?: number;
+  shape?: string;
+  color?: string;
+  priceCents?: number;
+  isActive?: boolean;
+}
+
 export const adminLayoutApi = {
-  listTableTypes: () =>
-    apiClient.get('/admin/table-types'),
+  // ── Table Templates (global) ─────────────────────
+  listTableTemplates: () =>
+    apiClient.get('/admin/table-templates'),
 
-  createTableType: (data: CreateTableTypePayload) =>
-    apiClient.post('/admin/table-types', data),
+  createTableTemplate: (data: CreateTableTemplatePayload) =>
+    apiClient.post('/admin/table-templates', data),
 
-  updateTableType: (id: string, data: CreateTableTypePayload) =>
-    apiClient.put(`/admin/table-types/${id}`, data),
+  updateTableTemplate: (id: string, data: CreateTableTemplatePayload) =>
+    apiClient.put(`/admin/table-templates/${id}`, data),
 
-  deleteTableType: (id: string) =>
-    apiClient.delete(`/admin/table-types/${id}`),
+  deleteTableTemplate: (id: string) =>
+    apiClient.delete(`/admin/table-templates/${id}`),
 
+  // ── Event Tables (per-event table types) ─────────
+  listEventTables: (eventId: string) =>
+    apiClient.get<EventTableType[]>(`/admin/events/${eventId}/event-tables`),
+
+  createEventTable: (eventId: string, data: CreateEventTablePayload) =>
+    apiClient.post<EventTableType>(`/admin/events/${eventId}/event-tables`, data),
+
+  updateEventTable: (eventId: string, id: string, data: UpdateEventTablePayload) =>
+    apiClient.put<EventTableType>(`/admin/events/${eventId}/event-tables/${id}`, data),
+
+  deleteEventTable: (eventId: string, id: string) =>
+    apiClient.delete(`/admin/events/${eventId}/event-tables/${id}`),
+
+  // ── Layout ───────────────────────────────────────
   getLayout: (eventId: string) =>
     apiClient.get(`/admin/events/${eventId}/layout`),
 
@@ -77,6 +105,6 @@ export const adminLayoutApi = {
   getLayoutStats: (eventId: string) =>
     apiClient.get(`/admin/events/${eventId}/layout/stats`),
 
-  bulkInsertTables: (eventId: string, tableTypeIds: string[]) =>
-    apiClient.post(`/admin/events/${eventId}/layout/bulk-insert`, { tableTypeIds }),
+  bulkInsertTables: (eventId: string, eventTableIds: string[]) =>
+    apiClient.post(`/admin/events/${eventId}/layout/bulk-insert`, { eventTableIds }),
 };

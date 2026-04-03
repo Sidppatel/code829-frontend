@@ -1,26 +1,42 @@
 export interface LayoutTable {
   id: string;
   label: string;
+  gridRow: number;
+  gridCol: number;
+  isActive: boolean;
+  sortOrder: number;
+  eventTableId: string;
+  eventTableLabel?: string;
+  // Joined from EventTable (read-only in UI)
   capacity: number;
   shape: string;
   color?: string;
   priceCents: number;
-  isActive: boolean;
-  posX: number;
-  posY: number;
-  sortOrder?: number;
-  tableTypeId?: string;
-  tableTypeName?: string;
+  status?: 'Available' | 'Locked' | 'Booked';
 }
 
-export interface TableType {
+export interface TableTemplate {
   id: string;
   name: string;
   defaultCapacity: number;
   defaultShape: string;
   defaultColor?: string;
-  defaultPriceCents?: number;
+  defaultPriceCents: number;
   isActive: boolean;
+}
+
+export interface EventTableType {
+  id: string;
+  label: string;
+  capacity: number;
+  shape: string;
+  color?: string;
+  priceCents: number;
+  isActive: boolean;
+  eventId: string;
+  tableTemplateId?: string;
+  tableTemplateName?: string;
+  tableCount?: number;
 }
 
 export interface LayoutStatsResponse {
@@ -44,11 +60,11 @@ export interface TableLock {
 export interface TableStatusInfo {
   id: string;
   label: string;
+  gridRow: number;
+  gridCol: number;
   capacity: number;
   shape: string;
   color?: string;
-  posX: number;
-  posY: number;
   status: 'Available' | 'Held' | 'Booked';
   seatsSold: number;
   bookingCount: number;

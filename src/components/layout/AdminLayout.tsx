@@ -25,7 +25,7 @@ const menuItems = [
   { key: '/admin/events', label: <Link to="/admin/events">Events</Link>, icon: <CalendarOutlined /> },
   { key: '/admin/venues', label: <Link to="/admin/venues">Venues</Link>, icon: <EnvironmentOutlined /> },
   { key: '/admin/bookings', label: <Link to="/admin/bookings">Bookings</Link>, icon: <BookOutlined /> },
-  { key: '/admin/table-types', label: <Link to="/admin/table-types">Table Types</Link>, icon: <TableOutlined /> },
+  { key: '/admin/table-types', label: <Link to="/admin/table-types">Table Templates</Link>, icon: <TableOutlined /> },
   { key: '/admin/analytics', label: <Link to="/admin/analytics">Analytics</Link>, icon: <BarChartOutlined /> },
 ];
 

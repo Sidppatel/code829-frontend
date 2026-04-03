@@ -3,13 +3,13 @@ import { Table, Button, Switch, App, Tooltip, Modal, Form, Input, InputNumber, S
 import { PlusOutlined, EditOutlined, TeamOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../../services/api';
 import { centsToUSD } from '../../../utils/currency';
-import type { TableType } from '../../../types/layout';
-import type { CreateTableTypePayload } from '../../../services/adminLayoutApi';
+import type { TableTemplate } from '../../../types/layout';
+import type { CreateTableTemplatePayload } from '../../../services/adminLayoutApi';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 
 export default function TableTypesPage() {
-  const [types, setTypes] = useState<TableType[]>([]);
+  const [types, setTypes] = useState<TableTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -20,10 +20,10 @@ export default function TableTypesPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const { data } = await adminLayoutApi.listTableTypes();
+      const { data } = await adminLayoutApi.listTableTemplates();
       setTypes(data);
     } catch {
-      message.error('Failed to load table types');
+      message.error('Failed to load table templates');
     } finally {
       setLoading(false);
     }
@@ -37,16 +37,14 @@ export default function TableTypesPage() {
     setModalOpen(true);
   };
 
-  const openEdit = (record: TableType) => {
+  const openEdit = (record: TableTemplate) => {
     setEditingId(record.id);
     form.setFieldsValue({
       name: record.name,
       defaultCapacity: record.defaultCapacity,
       defaultShape: record.defaultShape,
       defaultColor: record.defaultColor ?? '#7C3AED',
-      defaultPriceCents: record.defaultPriceCents != null
-        ? record.defaultPriceCents / 100
-        : undefined,
+      defaultPriceCents: record.defaultPriceCents / 100,
     });
     setModalOpen(true);
   };
@@ -55,7 +53,7 @@ export default function TableTypesPage() {
     try {
       const values = await form.validateFields();
       setSaving(true);
-      const payload: CreateTableTypePayload = {
+      const payload: CreateTableTemplatePayload = {
         name: values.name,
         defaultCapacity: values.defaultCapacity,
         defaultShape: values.defaultShape,
@@ -67,24 +65,24 @@ export default function TableTypesPage() {
           : undefined,
       };
       if (editingId) {
-        await adminLayoutApi.updateTableType(editingId, payload);
-        message.success('Table type updated');
+        await adminLayoutApi.updateTableTemplate(editingId, payload);
+        message.success('Template updated');
       } else {
-        await adminLayoutApi.createTableType(payload);
-        message.success('Table type created');
+        await adminLayoutApi.createTableTemplate(payload);
+        message.success('Template created');
       }
       setModalOpen(false);
       void load();
     } catch {
-      message.error('Failed to save table type');
+      message.error('Failed to save template');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleToggleActive = async (record: TableType) => {
+  const handleToggleActive = async (record: TableTemplate) => {
     try {
-      await adminLayoutApi.updateTableType(record.id, {
+      await adminLayoutApi.updateTableTemplate(record.id, {
         name: record.name,
         defaultCapacity: record.defaultCapacity,
         defaultShape: record.defaultShape,
@@ -92,18 +90,18 @@ export default function TableTypesPage() {
         defaultPriceCents: record.defaultPriceCents,
         isActive: !record.isActive,
       });
-      message.success(`Table type ${record.isActive ? 'deactivated' : 'activated'}`);
+      message.success(`Template ${record.isActive ? 'deactivated' : 'activated'}`);
       void load();
     } catch {
-      message.error('Failed to update table type');
+      message.error('Failed to update template');
     }
   };
 
   const columns = [
     {
-      title: 'Type',
+      title: 'Template',
       key: 'type',
-      render: (_: unknown, record: TableType) => (
+      render: (_: unknown, record: TableTemplate) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div
             className="tt-swatch"
@@ -130,15 +128,15 @@ export default function TableTypesPage() {
       dataIndex: 'defaultPriceCents',
       key: 'defaultPriceCents',
       width: 110,
-      render: (v: number | undefined) => v != null ? (
+      render: (v: number) => (
         <span style={{ color: 'var(--accent-gold)', fontWeight: 600 }}>{centsToUSD(v)}</span>
-      ) : <span style={{ color: 'var(--text-muted)' }}>—</span>,
+      ),
     },
     {
       title: 'Status',
       key: 'isActive',
       width: 100,
-      render: (_: unknown, record: TableType) => (
+      render: (_: unknown, record: TableTemplate) => (
         <Switch
           checked={record.isActive}
           onChange={() => handleToggleActive(record)}
@@ -152,7 +150,7 @@ export default function TableTypesPage() {
       key: 'actions',
       fixed: 'right' as const,
       width: 70,
-      render: (_: unknown, record: TableType) => (
+      render: (_: unknown, record: TableTemplate) => (
         <Tooltip title="Edit">
           <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(record)} style={{ borderRadius: 8 }} />
         </Tooltip>
@@ -164,8 +162,8 @@ export default function TableTypesPage() {
 
   return (
     <div>
-      <PageHeader title="Table Types" subtitle="Define reusable table configurations"
-        extra={<Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Add Type</Button>}
+      <PageHeader title="Table Templates" subtitle="Define reusable table configurations"
+        extra={<Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Add Template</Button>}
       />
 
       {/* Mobile card grid */}
@@ -189,11 +187,9 @@ export default function TableTypesPage() {
 
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 10 }}>
               <TeamOutlined style={{ marginRight: 3 }} />{tt.defaultCapacity} seats
-              {tt.defaultPriceCents != null && (
-                <span style={{ marginLeft: 8, color: 'var(--accent-gold)', fontWeight: 600 }}>
-                  {centsToUSD(tt.defaultPriceCents)}
-                </span>
-              )}
+              <span style={{ marginLeft: 8, color: 'var(--accent-gold)', fontWeight: 600 }}>
+                {centsToUSD(tt.defaultPriceCents)}
+              </span>
             </div>
 
             <Button
@@ -216,7 +212,7 @@ export default function TableTypesPage() {
         </div>
       </div>
 
-      <Modal title={editingId ? 'Edit Table Type' : 'Add Table Type'} open={modalOpen}
+      <Modal title={editingId ? 'Edit Template' : 'Add Template'} open={modalOpen}
         onCancel={() => setModalOpen(false)} onOk={handleSave} confirmLoading={saving}
         width="100%"
         style={{ top: 16, maxWidth: 520 }}
@@ -227,7 +223,7 @@ export default function TableTypesPage() {
             <InputNumber min={1} style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item name="defaultShape" label="Shape" rules={[{ required: true }]}>
-            <Select options={['Round', 'Rectangle', 'Square', 'Booth'].map((s) => ({ label: s, value: s }))} />
+            <Select options={['Round', 'Rectangle', 'Square', 'Cocktail'].map((s) => ({ label: s, value: s }))} />
           </Form.Item>
           <Form.Item name="defaultColor" label="Color">
             <ColorPicker

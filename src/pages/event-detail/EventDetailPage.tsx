@@ -168,6 +168,9 @@ export default function EventDetailPage() {
         <Typography.Title level={3}>Select a Table &mdash; {event.title}</Typography.Title>
         <TableSelectionCanvas
           tables={tablesData.tables}
+          eventTableTypes={tablesData.eventTableTypes ?? []}
+          gridRows={tablesData.gridRows ?? 10}
+          gridCols={tablesData.gridCols ?? 10}
           selectedTableId={selectedTableId}
           onSelectTable={handleSelectTable}
           onBookTable={handleBookTable}

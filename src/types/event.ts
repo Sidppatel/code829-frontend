@@ -55,24 +55,36 @@ export interface EventFacets {
   priceRange: { min: number; max: number };
 }
 
+export interface EventTableTypeInfo {
+  id: string;
+  label: string;
+  capacity: number;
+  shape: string;
+  color?: string;
+  priceCents: number;
+}
+
 export interface EventTableDto {
   id: string;
   label: string;
   capacity: number;
   shape: string;
   color?: string;
-  posX: number;
-  posY: number;
   priceCents: number;
+  gridRow: number;
+  gridCol: number;
   sortOrder?: number;
   status: 'Available' | 'Held' | 'HeldByYou' | 'Booked';
   holdExpiresAt?: string;
   isLockedByYou: boolean;
+  eventTableId: string;
+  eventTableLabel?: string;
 }
 
 export interface EventTablesResponse {
   eventId: string;
   gridRows?: number;
   gridCols?: number;
+  eventTableTypes: EventTableTypeInfo[];
   tables: EventTableDto[];
 }

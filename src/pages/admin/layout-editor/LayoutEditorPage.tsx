@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Alert, Button, Space, App } from 'antd';
 import { InfoCircleOutlined, SaveOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../../services/api';
-import type { LayoutStatsResponse, TableType } from '../../../types/layout';
+import type { LayoutStatsResponse, TableTemplate, EventTableType } from '../../../types/layout';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import ControlsPanel from './components/ControlsPanel';
@@ -13,27 +13,29 @@ import LayoutStatsBar from './components/LayoutStatsBar';
 export interface LayoutTable {
   id: string;
   label: string;
+  gridRow: number;
+  gridCol: number;
+  isActive: boolean;
+  sortOrder: number;
+  eventTableId: string;
+  eventTableLabel?: string;
+  // Joined from EventTable (read-only)
   capacity: number;
   shape: string;
   color?: string;
   priceCents: number;
-  isActive: boolean;
-  posX: number;
-  posY: number;
-  sortOrder: number;
-  tableTypeId?: string;
-  tableTypeName?: string;
   status?: 'Available' | 'Locked' | 'Booked';
 }
 
-export type EditorMode = 'add' | 'move' | 'delete' | 'select';
+export type EditorMode = 'add' | 'delete' | 'select';
 
 export default function LayoutEditorPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const { message } = App.useApp();
 
   const [tables, setTables] = useState<LayoutTable[]>([]);
-  const [tableTypes, setTableTypes] = useState<TableType[]>([]);
+  const [templates, setTemplates] = useState<TableTemplate[]>([]);
+  const [eventTables, setEventTables] = useState<EventTableType[]>([]);
   const [stats, setStats] = useState<LayoutStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -44,7 +46,7 @@ export default function LayoutEditorPage() {
 
   const [editorMode, setEditorMode] = useState<EditorMode>('select');
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
-  const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
+  const [selectedEventTableId, setSelectedEventTableId] = useState<string | null>(null);
 
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -62,14 +64,24 @@ export default function LayoutEditorPage() {
     [lockedTableIds],
   );
 
+  // Build occupied cells set for collision detection
+  const occupiedCells = useMemo(() => {
+    const set = new Set<string>();
+    for (const t of tables) {
+      set.add(`${t.gridRow},${t.gridCol}`);
+    }
+    return set;
+  }, [tables]);
+
   const loadAll = useCallback(async () => {
     if (!eventId) return;
     setLoading(true);
     setStatsLoading(true);
     try {
-      const [layoutRes, typesRes, statsRes] = await Promise.all([
+      const [layoutRes, templatesRes, eventTablesRes, statsRes] = await Promise.all([
         adminLayoutApi.getLayout(eventId),
-        adminLayoutApi.listTableTypes(),
+        adminLayoutApi.listTableTemplates(),
+        adminLayoutApi.listEventTables(eventId),
         adminLayoutApi.getLayoutStats(eventId),
       ]);
 
@@ -81,7 +93,8 @@ export default function LayoutEditorPage() {
       setGridRows(layoutData.gridRows ?? 10);
       setGridCols(layoutData.gridCols ?? 10);
       setTables(layoutData.tables ?? []);
-      setTableTypes(typesRes.data ?? []);
+      setTemplates(templatesRes.data ?? []);
+      setEventTables(eventTablesRes.data ?? []);
       setStats(statsRes.data);
     } catch {
       message.error('Failed to load layout');
@@ -106,16 +119,11 @@ export default function LayoutEditorPage() {
         tables: tables.map((t) => ({
           id: t.id,
           label: t.label,
-          capacity: t.capacity,
-          shape: t.shape,
-          color: t.color,
-          priceType: 'PerTable',
-          priceCents: t.priceCents,
+          gridRow: t.gridRow,
+          gridCol: t.gridCol,
           isActive: t.isActive,
-          posX: t.posX,
-          posY: t.posY,
           sortOrder: t.sortOrder,
-          tableTypeId: t.tableTypeId,
+          eventTableId: t.eventTableId,
         })),
       });
     }, 800);
@@ -143,16 +151,11 @@ export default function LayoutEditorPage() {
         tables: tables.map((t) => ({
           id: t.id,
           label: t.label,
-          capacity: t.capacity,
-          shape: t.shape,
-          color: t.color,
-          priceType: 'PerTable',
-          priceCents: t.priceCents,
+          gridRow: t.gridRow,
+          gridCol: t.gridCol,
           isActive: t.isActive,
-          posX: t.posX,
-          posY: t.posY,
           sortOrder: t.sortOrder,
-          tableTypeId: t.tableTypeId,
+          eventTableId: t.eventTableId,
         })),
       });
       setIsDirty(false);
@@ -173,39 +176,45 @@ export default function LayoutEditorPage() {
     setIsDirty(true);
   }, []);
 
-  const handleCanvasClick = useCallback((posX: number, posY: number) => {
-    if (editorMode === 'add' && selectedTypeId) {
-      const tt = tableTypes.find((t) => t.id === selectedTypeId);
-      if (!tt) return;
+  const handleCellClick = useCallback((row: number, col: number) => {
+    if (editorMode !== 'add' || !selectedEventTableId) return;
 
-      const existingLabels = new Set(tables.map((t) => t.label));
-      const baseName = tt.name.length > 16 ? tt.name.slice(0, 16) : tt.name;
-      let label = baseName;
-      let counter = 1;
-      while (existingLabels.has(label)) {
-        counter++;
-        label = `${baseName} ${counter}`;
-      }
-
-      const newTable: LayoutTable = {
-        id: crypto.randomUUID(),
-        label,
-        capacity: tt.defaultCapacity,
-        shape: tt.defaultShape ?? 'Round',
-        color: tt.defaultColor,
-        priceCents: tt.defaultPriceCents ?? 0,
-        isActive: true,
-        posX,
-        posY,
-        sortOrder: tables.length,
-        tableTypeId: tt.id,
-        tableTypeName: tt.name,
-        status: 'Available',
-      };
-      updateTables((prev) => [...prev, newTable]);
-      setSelectedTableId(newTable.id);
+    // Check if cell is already occupied
+    if (occupiedCells.has(`${row},${col}`)) {
+      message.warning('This cell is already occupied');
+      return;
     }
-  }, [editorMode, selectedTypeId, tableTypes, tables, updateTables]);
+
+    const et = eventTables.find((t) => t.id === selectedEventTableId);
+    if (!et) return;
+
+    const existingLabels = new Set(tables.map((t) => t.label));
+    const baseName = et.label.length > 16 ? et.label.slice(0, 16) : et.label;
+    let label = `${baseName} ${tables.length + 1}`;
+    let counter = tables.length + 1;
+    while (existingLabels.has(label)) {
+      counter++;
+      label = `${baseName} ${counter}`;
+    }
+
+    const newTable: LayoutTable = {
+      id: crypto.randomUUID(),
+      label,
+      gridRow: row,
+      gridCol: col,
+      isActive: true,
+      sortOrder: tables.length,
+      eventTableId: et.id,
+      eventTableLabel: et.label,
+      capacity: et.capacity,
+      shape: et.shape,
+      color: et.color,
+      priceCents: et.priceCents,
+      status: 'Available',
+    };
+    updateTables((prev) => [...prev, newTable]);
+    setSelectedTableId(newTable.id);
+  }, [editorMode, selectedEventTableId, eventTables, tables, occupiedCells, updateTables, message]);
 
   const handleTableClick = useCallback((tableId: string) => {
     if (editorMode === 'delete') {
@@ -219,13 +228,6 @@ export default function LayoutEditorPage() {
       setSelectedTableId(tableId);
     }
   }, [editorMode, selectedTableId, updateTables, isTableLocked, message]);
-
-  const handleTableDragEnd = useCallback((tableId: string, posX: number, posY: number) => {
-    if (isTableLocked(tableId)) return;
-    updateTables((prev) => prev.map((t) =>
-      t.id === tableId ? { ...t, posX, posY } : t
-    ));
-  }, [isTableLocked, updateTables]);
 
   const handleTableUpdate = useCallback((patch: Partial<LayoutTable>) => {
     if (!selectedTableId || isTableLocked(selectedTableId)) return;
@@ -242,6 +244,20 @@ export default function LayoutEditorPage() {
     updateTables((prev) => prev.filter((t) => t.id !== selectedTableId));
     setSelectedTableId(null);
   }, [selectedTableId, isTableLocked, updateTables, message]);
+
+  const handleEventTableCreated = useCallback((et: EventTableType) => {
+    setEventTables((prev) => [...prev, et]);
+  }, []);
+
+  const handleEventTableUpdated = useCallback((updated: EventTableType) => {
+    setEventTables((prev) => prev.map((et) => et.id === updated.id ? updated : et));
+    // Also update any tables using this event table with the new properties
+    updateTables((prev) => prev.map((t) =>
+      t.eventTableId === updated.id
+        ? { ...t, capacity: updated.capacity, shape: updated.shape, color: updated.color, priceCents: updated.priceCents, eventTableLabel: updated.label }
+        : t
+    ));
+  }, [updateTables]);
 
   if (loading) return <LoadingSpinner />;
 
@@ -280,13 +296,15 @@ export default function LayoutEditorPage() {
 
       <div className="layout-editor-container">
         <ControlsPanel
+          eventId={eventId!}
           gridRows={gridRows}
           gridCols={gridCols}
           onGridRowsChange={(v) => { setGridRows(v); setIsDirty(true); }}
           onGridColsChange={(v) => { setGridCols(v); setIsDirty(true); }}
-          tableTypes={tableTypes}
-          selectedTypeId={selectedTypeId}
-          onSelectType={setSelectedTypeId}
+          templates={templates}
+          eventTables={eventTables}
+          selectedEventTableId={selectedEventTableId}
+          onSelectEventTable={setSelectedEventTableId}
           editorMode={editorMode}
           onEditorModeChange={setEditorMode}
           selectedTable={selectedTable}
@@ -295,6 +313,8 @@ export default function LayoutEditorPage() {
           onDeselectTable={() => setSelectedTableId(null)}
           disabled={false}
           isSelectedTableLocked={selectedTable ? isTableLocked(selectedTable.id) : false}
+          onEventTableCreated={handleEventTableCreated}
+          onEventTableUpdated={handleEventTableUpdated}
         />
 
         <FloorPlanCanvas
@@ -304,9 +324,8 @@ export default function LayoutEditorPage() {
           selectedTableId={selectedTableId}
           editorMode={editorMode}
           lockedTableIds={lockedTableIds}
-          onCanvasClick={handleCanvasClick}
+          onCellClick={handleCellClick}
           onTableClick={handleTableClick}
-          onTableDragEnd={handleTableDragEnd}
         />
       </div>
     </div>

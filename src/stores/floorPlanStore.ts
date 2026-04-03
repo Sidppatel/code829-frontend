@@ -1,38 +1,39 @@
 import { create } from 'zustand';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ── Types ────────────────────────────────────────────────────────────────────
 
 export type TableShape = 'Round' | 'Rectangle' | 'Square' | 'Cocktail';
 
 export interface FloorPlanElement {
   id: string;
   label: string;
+  gridRow: number;
+  gridCol: number;
+  isActive: boolean;
+  sortOrder: number;
+  eventTableId: string;
+  eventTableLabel?: string;
+  // Joined from EventTable (read-only)
   capacity: number;
   shape: TableShape;
   color?: string;
   priceCents: number;
-  isActive: boolean;
-  posX: number;
-  posY: number;
-  sortOrder: number;
-  tableTypeId?: string;
-  tableTypeName?: string;
 }
 
 // API response shape for a single table from GET /admin/events/{id}/layout
 interface ApiTable {
   id: string;
   label: string;
+  gridRow: number;
+  gridCol: number;
+  isActive: boolean;
+  sortOrder: number;
+  eventTableId: string;
+  eventTableLabel?: string;
   capacity: number;
   shape: TableShape;
   color?: string;
   priceCents: number;
-  isActive: boolean;
-  posX: number;
-  posY: number;
-  sortOrder: number;
-  tableTypeId?: string;
-  tableTypeName?: string;
 }
 
 export interface ApiLayoutResponse {
@@ -40,7 +41,7 @@ export interface ApiLayoutResponse {
   tables: ApiTable[];
 }
 
-// ─── Store state ──────────────────────────────────────────────────────────────
+// ── Store state ──────────────────────────────────────────────────────────────
 
 interface FloorPlanState {
   elements: Record<string, FloorPlanElement>;
@@ -51,13 +52,13 @@ interface FloorPlanState {
   addElement: (element: FloorPlanElement) => void;
   updateElement: (id: string, patch: Partial<FloorPlanElement>) => void;
   deleteElement: (id: string) => void;
-  moveElement: (id: string, posX: number, posY: number) => void;
+  moveElement: (id: string, gridRow: number, gridCol: number) => void;
   loadFromApi: (response: ApiLayoutResponse) => void;
   markClean: () => void;
   clearAll: () => void;
 }
 
-// ─── Store ────────────────────────────────────────────────────────────────────
+// ── Store ────────────────────────────────────────────────────────────────────
 
 export const useFloorPlanStore = create<FloorPlanState>((set) => ({
   elements: {},
@@ -94,13 +95,13 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
       };
     }),
 
-  moveElement: (id, posX, posY) =>
+  moveElement: (id, gridRow, gridCol) =>
     set((state) => {
       if (!state.elements[id]) return state;
       return {
         elements: {
           ...state.elements,
-          [id]: { ...state.elements[id], posX, posY },
+          [id]: { ...state.elements[id], gridRow, gridCol },
         },
         isDirty: true,
       };
@@ -113,16 +114,16 @@ export const useFloorPlanStore = create<FloorPlanState>((set) => ({
       elements[t.id] = {
         id: t.id,
         label: t.label,
+        gridRow: t.gridRow,
+        gridCol: t.gridCol,
+        isActive: t.isActive,
+        sortOrder: t.sortOrder,
+        eventTableId: t.eventTableId,
+        eventTableLabel: t.eventTableLabel,
         capacity: t.capacity,
         shape: t.shape,
         color: t.color,
         priceCents: t.priceCents,
-        isActive: t.isActive,
-        posX: t.posX,
-        posY: t.posY,
-        sortOrder: t.sortOrder,
-        tableTypeId: t.tableTypeId,
-        tableTypeName: t.tableTypeName,
       };
       elementOrder.push(t.id);
     }
