@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Layout, Menu, Typography, Button, Drawer, Dropdown, Space, Tag } from 'antd';
+import { Layout, Menu, Typography, Button, Dropdown, Space, Tag } from 'antd';
 import {
   CodeOutlined,
   MailOutlined,
@@ -8,8 +8,6 @@ import {
   SettingOutlined,
   TeamOutlined,
   CalendarOutlined,
-  MenuOutlined,
-  CloseOutlined,
   BellOutlined,
   LogoutOutlined,
   UserOutlined,
@@ -20,14 +18,20 @@ import ThemeToggle from '../shared/ThemeToggle';
 
 const { Sider, Header, Content } = Layout;
 
-const menuItems = [
-  { key: '/developer', label: <Link to="/developer">Logs</Link>, icon: <CodeOutlined /> },
-  { key: '/developer/email-logs', label: <Link to="/developer/email-logs">Email Logs</Link>, icon: <MailOutlined /> },
-  { key: '/developer/system-logs', label: <Link to="/developer/system-logs">System Logs</Link>, icon: <FileTextOutlined /> },
-  { key: '/developer/settings', label: <Link to="/developer/settings">Settings</Link>, icon: <SettingOutlined /> },
-  { key: '/developer/users', label: <Link to="/developer/users">Users</Link>, icon: <TeamOutlined /> },
-  { key: '/developer/events', label: <Link to="/developer/events">Platform Fees</Link>, icon: <CalendarOutlined /> },
+const navItems = [
+  { key: '/developer', shortLabel: 'Logs', label: 'Logs', icon: <CodeOutlined /> },
+  { key: '/developer/email-logs', shortLabel: 'Email', label: 'Email Logs', icon: <MailOutlined /> },
+  { key: '/developer/system-logs', shortLabel: 'System', label: 'System Logs', icon: <FileTextOutlined /> },
+  { key: '/developer/settings', shortLabel: 'Settings', label: 'Settings', icon: <SettingOutlined /> },
+  { key: '/developer/users', shortLabel: 'Users', label: 'Users', icon: <TeamOutlined /> },
+  { key: '/developer/events', shortLabel: 'Fees', label: 'Platform Fees', icon: <CalendarOutlined /> },
 ];
+
+const menuItems = navItems.map((item) => ({
+  key: item.key,
+  label: <Link to={item.key}>{item.label}</Link>,
+  icon: item.icon,
+}));
 
 type Breakpoint = 'mobile' | 'tablet' | 'desktop';
 
@@ -56,11 +60,6 @@ export default function DeveloperLayout() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const bp = useBreakpoint();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  useEffect(() => {
-    setDrawerOpen(false);
-  }, [location.pathname]);
 
   const isMobile = bp === 'mobile';
   const isTablet = bp === 'tablet';
@@ -143,54 +142,46 @@ export default function DeveloperLayout() {
         </Sider>
       )}
 
-      {/* Mobile Drawer */}
+      {/* Mobile Bottom Nav */}
       {isMobile && (
-        <Drawer
-          placement="left"
-          open={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          width={260}
-          closeIcon={<CloseOutlined style={{ color: 'var(--text-primary)' }} />}
-          styles={{
-            header: { background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)' },
-            body: { background: 'var(--bg-surface)', padding: 0, display: 'flex', flexDirection: 'column' },
-          }}
-          title={
-            <Link to="/developer" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ color: 'var(--accent-violet)', fontSize: 20 }}>✦</span>
-              <span className="text-display gradient-text" style={{ fontSize: 18, fontWeight: 700 }}>Code829</span>
-              <Tag
+        <nav className="mobile-bottom-nav">
+          {navItems.map((item) => {
+            const active = location.pathname === item.key;
+            return (
+              <Link
+                key={item.key}
+                to={item.key}
                 style={{
-                  background: 'rgba(245, 158, 11, 0.15)',
-                  border: '1px solid rgba(245, 158, 11, 0.3)',
-                  color: 'var(--accent-gold)',
-                  borderRadius: 99,
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 2,
+                  padding: '4px 8px',
+                  color: active ? 'var(--accent-violet)' : 'var(--text-muted)',
                   fontSize: 10,
-                  lineHeight: '18px',
-                  padding: '0 8px',
-                  marginLeft: 4,
+                  textDecoration: 'none',
+                  position: 'relative',
                 }}
               >
-                Dev
-              </Tag>
-            </Link>
-          }
-        >
-          <div style={{ flex: 1, padding: '8px 0' }}>
-            <Menu
-              mode="inline"
-              selectedKeys={[location.pathname]}
-              items={menuItems}
-              style={{ background: 'transparent', borderRight: 'none' }}
-            />
-          </div>
-          <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <ThemeToggle size="small" />
-            <Button type="text" icon={<LogoutOutlined />} onClick={logout} style={{ color: 'var(--text-secondary)' }}>
-              Logout
-            </Button>
-          </div>
-        </Drawer>
+                <span style={{ fontSize: 20 }}>{item.icon}</span>
+                <span>{item.shortLabel}</span>
+                {active && (
+                  <span style={{
+                    position: 'absolute',
+                    bottom: -2,
+                    width: 4,
+                    height: 4,
+                    borderRadius: '50%',
+                    background: 'var(--accent-violet)',
+                  }} />
+                )}
+              </Link>
+            );
+          })}
+        </nav>
       )}
 
       <Layout style={{ marginLeft: isMobile ? 0 : siderWidth, background: 'var(--bg-page)', transition: 'margin-left 0.2s ease' }}>
@@ -212,12 +203,24 @@ export default function DeveloperLayout() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {isMobile && (
-              <Button
-                type="text"
-                icon={<MenuOutlined style={{ fontSize: 18, color: 'var(--text-primary)' }} />}
-                onClick={() => setDrawerOpen(true)}
-                style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              />
+              <Link to="/developer" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: 'var(--accent-violet)', fontSize: 18 }}>✦</span>
+                <span className="text-display gradient-text" style={{ fontSize: 16, fontWeight: 700 }}>Code829</span>
+                <Tag
+                  style={{
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                    color: 'var(--accent-gold)',
+                    borderRadius: 99,
+                    fontSize: 10,
+                    lineHeight: '18px',
+                    padding: '0 8px',
+                    margin: 0,
+                  }}
+                >
+                  Dev
+                </Tag>
+              </Link>
             )}
           </div>
           <Space>
