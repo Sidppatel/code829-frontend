@@ -867,6 +867,172 @@ html.light .next-event-stat {
   color: var(--text-secondary);
 }
 
+/* ── Table Selection Canvas (User-facing booking grid) ── */
+.ts-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ts-legend, .ts-pricing-legend {
+  padding: 0 4px;
+}
+.ts-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+.ts-legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.ts-main {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.ts-grid {
+  flex: 1 1 auto;
+  max-width: 700px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: auto;
+}
+.ts-grid-row {
+  display: flex;
+}
+.ts-header-row {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-elevated);
+}
+.ts-header-corner {
+  width: 32px;
+  min-width: 32px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.ts-col-header {
+  flex: 1;
+  min-width: 60px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.ts-row-header {
+  width: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-subtle);
+}
+.ts-cell {
+  flex: 1;
+  min-width: 60px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-subtle);
+}
+.ts-cell-empty {
+  background: transparent;
+}
+.ts-cell-occupied {
+  padding: 3px;
+}
+
+/* Table element inside booking grid */
+.ts-table {
+  width: 100%;
+  height: 100%;
+  min-height: 54px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  background: var(--table-bg, var(--accent-violet));
+  color: #fff;
+  text-align: center;
+  user-select: none;
+  position: relative;
+  border: 2px solid;
+  transition: all 0.2s ease;
+  padding: 4px 2px;
+}
+.ts-table:hover:not(.ts-table-disabled) {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  transform: scale(1.03);
+}
+.ts-table-selected {
+  z-index: 2;
+}
+.ts-table-disabled {
+  pointer-events: auto; /* allow tooltip */
+}
+.ts-table-label {
+  font-size: 11px;
+  line-height: 1.2;
+  color: #fff !important;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ts-table-meta {
+  font-size: 9px;
+  opacity: 0.85;
+  line-height: 1.2;
+  font-weight: 500;
+}
+.ts-table-icon {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.9);
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+.ts-table-icon-mine {
+  color: #fff;
+}
+
+/* Detail card */
+.ts-detail-card {
+  flex: 1 1 240px;
+  min-width: 240px;
+  max-width: 320px;
+  align-self: flex-start;
+}
+
+@media (max-width: 768px) {
+  .ts-grid { max-width: 100%; border-radius: 8px; }
+  .ts-cell { min-width: 50px; min-height: 50px; }
+  .ts-col-header { min-width: 50px; }
+  .ts-row-header { width: 26px; min-width: 26px; }
+  .ts-header-corner { width: 26px; min-width: 26px; }
+  .ts-table { min-height: 44px; }
+  .ts-table-label { font-size: 10px; }
+  .ts-table-meta { font-size: 8px; }
+  .ts-detail-card { max-width: 100%; }
+}
+
 /* ── Color picker display ── */
 .color-swatch-trigger {
   width: 36px; height: 36px;

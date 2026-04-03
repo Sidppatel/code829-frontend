@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Tooltip, Card, Button, Typography, Space, Divider, theme } from 'antd';
-import { LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { useState, useCallback } from 'react';
+import { Card, Button, Typography, Space, Divider, theme } from 'antd';
+import { LockOutlined, CheckCircleOutlined, StopOutlined } from '@ant-design/icons';
 import type { EventTableDto, EventTableTypeInfo } from '../../types/event';
 import { centsToUSD } from '../../utils/currency';
 import TableLockTimer from './TableLockTimer';
+import { useHoldTimer } from '../../hooks/useHoldTimer';
 
 interface Props {
   tables: EventTableDto[];
@@ -23,6 +24,19 @@ const SHAPE_RADIUS: Record<string, string> = {
   Rectangle: '6px',
 };
 
+/** Inline countdown rendered inside each cell the user has locked */
+function CellCountdown({ expiresAt }: { expiresAt: string }) {
+  const secondsLeft = useHoldTimer(expiresAt);
+  if (secondsLeft <= 0) return null;
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  return (
+    <span style={{ fontSize: 9, fontWeight: 700, lineHeight: 1 }}>
+      {m}:{s.toString().padStart(2, '0')}
+    </span>
+  );
+}
+
 export default function TableSelectionCanvas({
   tables,
   eventTableTypes,
@@ -38,32 +52,38 @@ export default function TableSelectionCanvas({
 
   const selectedTable = tables.find((t) => t.id === selectedTableId);
 
-  const getStatusColor = (table: EventTableDto): string => {
-    if (table.isLockedByYou) return token.colorPrimary;
-    switch (table.status) {
-      case 'Available': return token.colorSuccess;
-      case 'Held': return token.colorWarning;
-      case 'Booked': return token.colorTextDisabled;
-      default: return token.colorTextDisabled;
-    }
-  };
+  const isClickable = useCallback((table: EventTableDto) =>
+    table.status === 'Available' || table.status === 'HeldByYou', []);
 
-  const getStatusBg = (table: EventTableDto): string => {
-    if (table.isLockedByYou) return token.colorPrimaryBg;
-    switch (table.status) {
-      case 'Available': return token.colorSuccessBg;
-      case 'Held': return token.colorWarningBg;
-      case 'Booked': return token.colorBgContainerDisabled;
-      default: return token.colorBgContainerDisabled;
+  const getStatusStyle = useCallback((table: EventTableDto) => {
+    const tableColor = table.color ?? 'var(--accent-violet)';
+
+    if (table.isLockedByYou) {
+      return {
+        bg: tableColor,
+        border: token.colorPrimary,
+        opacity: 1,
+        cursor: 'pointer' as const,
+      };
     }
-  };
+    switch (table.status) {
+      case 'Available':
+        return { bg: tableColor, border: tableColor, opacity: 1, cursor: 'pointer' as const };
+      case 'Held':
+        return { bg: tableColor, border: token.colorWarning, opacity: 0.5, cursor: 'not-allowed' as const };
+      case 'Booked':
+        return { bg: tableColor, border: token.colorTextDisabled, opacity: 0.5, cursor: 'not-allowed' as const };
+      default:
+        return { bg: tableColor, border: token.colorTextDisabled, opacity: 0.5, cursor: 'not-allowed' as const };
+    }
+  }, [token]);
 
   const getTooltip = (table: EventTableDto): string => {
-    if (table.isLockedByYou) return `${table.label} - Locked by you`;
+    if (table.isLockedByYou) return `${table.label} — Reserved by you`;
     switch (table.status) {
-      case 'Booked': return `${table.label} - Booked`;
-      case 'Held': return `${table.label} - Reserved by another guest`;
-      default: return `${table.label} - ${table.capacity} seats - ${centsToUSD(table.priceCents)}`;
+      case 'Booked': return `${table.label} — Booked`;
+      case 'Held': return `${table.label} — Reserved by another guest`;
+      default: return `${table.label} — ${table.capacity} seats — ${centsToUSD(table.priceCents)}`;
     }
   };
 
@@ -74,13 +94,10 @@ export default function TableSelectionCanvas({
   }
 
   // Column headers
-  const colHeaders: React.ReactNode[] = [<div key="corner" style={{ width: 28, flexShrink: 0 }} />];
+  const colHeaders: React.ReactNode[] = [<div key="corner" className="ts-header-corner" />];
   for (let c = 0; c < gridCols; c++) {
     colHeaders.push(
-      <div key={`col-${c}`} style={{
-        flex: 1, minWidth: 56, height: 28, display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontSize: 10, fontWeight: 700, color: token.colorTextQuaternary,
-      }}>
+      <div key={`col-${c}`} className="ts-col-header">
         {String.fromCharCode(65 + (c % 26))}
       </div>
     );
@@ -90,12 +107,7 @@ export default function TableSelectionCanvas({
   const rows: React.ReactNode[] = [];
   for (let r = 0; r < gridRows; r++) {
     const cells: React.ReactNode[] = [
-      <div key={`rh-${r}`} style={{
-        width: 28, flexShrink: 0, display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontSize: 10, fontWeight: 700, color: token.colorTextQuaternary,
-      }}>
-        {r + 1}
-      </div>,
+      <div key={`rh-${r}`} className="ts-row-header">{r + 1}</div>,
     ];
 
     for (let c = 0; c < gridCols; c++) {
@@ -103,98 +115,102 @@ export default function TableSelectionCanvas({
       const table = cellMap.get(key);
 
       if (table) {
-        const isAvailable = table.status === 'Available';
         const isSelected = table.id === selectedTableId;
         const isHovered = table.id === hoveredId;
+        const clickable = isClickable(table);
         const borderRadius = SHAPE_RADIUS[table.shape] ?? SHAPE_RADIUS.Square;
-        const statusColor = getStatusColor(table);
-        const statusBg = getStatusBg(table);
+        const style = getStatusStyle(table);
 
         cells.push(
-          <div key={key} style={{ flex: 1, minWidth: 56, minHeight: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
-            <Tooltip title={getTooltip(table)} mouseEnterDelay={0.2}>
-              <div
-                role="button"
-                tabIndex={isAvailable ? 0 : -1}
-                aria-label={getTooltip(table)}
-                style={{
-                  width: '100%', height: '100%', minHeight: 50,
-                  borderRadius,
-                  background: statusBg,
-                  border: `2px solid ${statusColor}`,
-                  cursor: isAvailable ? 'pointer' : 'not-allowed',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                  boxShadow: isSelected
-                    ? `0 0 0 3px ${token.colorPrimaryBorder}`
-                    : isHovered && isAvailable
-                      ? `0 0 0 2px ${token.colorPrimaryBgHover}` : 'none',
-                  opacity: table.status === 'Booked' ? 0.6 : 1,
-                  position: 'relative',
-                }}
-                onClick={() => { if (isAvailable) onSelectTable(table); }}
-                onKeyDown={(e) => { if (e.key === 'Enter' && isAvailable) onSelectTable(table); }}
-                onMouseEnter={() => setHoveredId(table.id)}
-                onMouseLeave={() => setHoveredId(null)}
-              >
-                <Typography.Text strong style={{ fontSize: 11, lineHeight: 1.2, textAlign: 'center' }}>
-                  {table.label}
-                </Typography.Text>
-                <Typography.Text type="secondary" style={{ fontSize: 9, lineHeight: 1.2 }}>
-                  x{table.capacity}
-                </Typography.Text>
-                {(table.status === 'Booked' || (table.status === 'Held' && !table.isLockedByYou)) && (
-                  <LockOutlined style={{ fontSize: 9, opacity: 0.6 }} />
-                )}
-                {table.isLockedByYou && (
-                  <CheckCircleOutlined style={{ fontSize: 9, color: token.colorPrimary }} />
-                )}
-              </div>
-            </Tooltip>
+          <div key={key} className="ts-cell ts-cell-occupied">
+            <div
+              role="button"
+              tabIndex={clickable ? 0 : -1}
+              aria-label={getTooltip(table)}
+              title={getTooltip(table)}
+              className={`ts-table${isSelected ? ' ts-table-selected' : ''}${!clickable ? ' ts-table-disabled' : ''}`}
+              style={{
+                '--table-bg': style.bg,
+                borderRadius,
+                borderColor: style.border,
+                opacity: style.opacity,
+                cursor: style.cursor,
+                boxShadow: isSelected
+                  ? `0 0 0 3px ${token.colorPrimaryBorder}`
+                  : isHovered && clickable
+                    ? `0 0 0 2px ${token.colorPrimaryBgHover}` : 'none',
+              } as React.CSSProperties}
+              onClick={() => { if (clickable) onSelectTable(table); }}
+              onKeyDown={(e) => { if (e.key === 'Enter' && clickable) onSelectTable(table); }}
+              onMouseEnter={() => setHoveredId(table.id)}
+              onMouseLeave={() => setHoveredId(null)}
+            >
+              {/* Status icon overlay */}
+              {table.status === 'Booked' && (
+                <StopOutlined className="ts-table-icon" />
+              )}
+              {table.status === 'Held' && !table.isLockedByYou && (
+                <LockOutlined className="ts-table-icon" />
+              )}
+              {table.isLockedByYou && (
+                <CheckCircleOutlined className="ts-table-icon ts-table-icon-mine" />
+              )}
+
+              <Typography.Text strong className="ts-table-label">
+                {table.label}
+              </Typography.Text>
+              <span className="ts-table-meta">
+                {table.capacity}p &middot; {centsToUSD(table.priceCents)}
+              </span>
+
+              {/* Inline countdown for user's locked table */}
+              {table.isLockedByYou && table.holdExpiresAt && (
+                <CellCountdown expiresAt={table.holdExpiresAt} />
+              )}
+            </div>
           </div>
         );
       } else {
-        cells.push(
-          <div key={key} style={{
-            flex: 1, minWidth: 56, minHeight: 56,
-            border: `1px solid ${token.colorBorderSecondary}`,
-            borderRadius: 2, opacity: 0.3,
-          }} />
-        );
+        cells.push(<div key={key} className="ts-cell ts-cell-empty" />);
       }
     }
 
     rows.push(
-      <div key={`row-${r}`} style={{ display: 'flex' }}>
-        {cells}
-      </div>
+      <div key={`row-${r}`} className="ts-grid-row">{cells}</div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="ts-wrapper">
       {/* Status legend */}
-      <Space size="large" wrap>
+      <Space size="large" wrap className="ts-legend">
         <Space size="small">
-          <div style={{ width: 12, height: 12, borderRadius: 2, background: token.colorSuccess }} />
+          <div className="ts-legend-dot" style={{ background: token.colorSuccess }} />
           <Typography.Text type="secondary">Available</Typography.Text>
         </Space>
         <Space size="small">
-          <div style={{ width: 12, height: 12, borderRadius: 2, background: token.colorWarning }} />
-          <Typography.Text type="secondary">Locked</Typography.Text>
+          <div className="ts-legend-dot" style={{ background: token.colorWarning, opacity: 0.5 }} />
+          <Typography.Text type="secondary">Reserved</Typography.Text>
         </Space>
         <Space size="small">
-          <div style={{ width: 12, height: 12, borderRadius: 2, background: token.colorTextDisabled }} />
+          <div className="ts-legend-dot" style={{ background: token.colorTextDisabled, opacity: 0.5 }} />
           <Typography.Text type="secondary">Booked</Typography.Text>
+        </Space>
+        <Space size="small">
+          <div className="ts-legend-dot" style={{ background: token.colorPrimary }} />
+          <Typography.Text type="secondary">Your hold</Typography.Text>
         </Space>
       </Space>
 
       {/* Pricing legend */}
       {eventTableTypes.length > 0 && (
-        <Space size="middle" wrap>
+        <Space size="middle" wrap className="ts-pricing-legend">
           {eventTableTypes.map((ett) => (
             <Space key={ett.id} size="small">
-              <div style={{ width: 14, height: 14, borderRadius: 3, background: ett.color ?? 'var(--accent-violet)', border: '1px solid rgba(0,0,0,0.15)' }} />
+              <div
+                className="ts-legend-swatch"
+                style={{ background: ett.color ?? 'var(--accent-violet)' }}
+              />
               <Typography.Text style={{ fontSize: 12 }}>
                 {ett.label} &middot; {ett.capacity}p &middot; {centsToUSD(ett.priceCents)}
               </Typography.Text>
@@ -205,28 +221,30 @@ export default function TableSelectionCanvas({
 
       <Divider style={{ margin: '4px 0' }} />
 
-      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+      <div className="ts-main">
         {/* Grid floor plan */}
-        <div style={{
-          flex: '1 1 auto', maxWidth: 700, background: token.colorBgContainer,
-          border: `1px solid ${token.colorBorderSecondary}`, borderRadius: token.borderRadiusLG,
-          overflow: 'auto',
-        }}>
-          {/* Col headers */}
-          <div style={{ display: 'flex', position: 'sticky', top: 0, zIndex: 2, background: token.colorBgContainer }}>
-            {colHeaders}
-          </div>
+        <div className="ts-grid">
+          <div className="ts-grid-row ts-header-row">{colHeaders}</div>
           {rows}
         </div>
 
-        {/* Details panel */}
+        {/* Detail panel */}
         {selectedTable && (
           <Card
             size="small"
             title={`Table ${selectedTable.label}`}
-            style={{ flex: '1 1 240px', minWidth: 240, maxWidth: 320, alignSelf: 'flex-start' }}
+            className="ts-detail-card"
           >
             <Space direction="vertical" size="small" style={{ width: '100%' }}>
+              {selectedTable.color && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography.Text type="secondary">Color</Typography.Text>
+                  <div style={{
+                    width: 20, height: 20, borderRadius: 4,
+                    background: selectedTable.color, border: '1px solid var(--border)',
+                  }} />
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography.Text type="secondary">Type</Typography.Text>
                 <Typography.Text>{selectedTable.eventTableLabel}</Typography.Text>
@@ -252,8 +270,9 @@ export default function TableSelectionCanvas({
                 style={{ marginTop: 8 }}
                 onClick={() => onBookTable(selectedTable)}
                 loading={lockingTableId === selectedTable.id}
+                disabled={!isClickable(selectedTable)}
               >
-                Book This Table
+                {selectedTable.isLockedByYou ? 'Proceed to Checkout' : 'Book This Table'}
               </Button>
             </Space>
           </Card>
