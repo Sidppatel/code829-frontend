@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
-import { Table, Button, App, Space, Modal, Image } from 'antd';
+import { Table, Button, App, Space, Modal, Image, Card, Empty, Pagination, Skeleton } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { QrcodeOutlined } from '@ant-design/icons';
+import { QrcodeOutlined, CalendarOutlined } from '@ant-design/icons';
 import { bookingsApi } from '../../services/bookingsApi';
 import type { Booking } from '../../types/booking';
 import { usePagedTable } from '../../hooks/usePagedTable';
@@ -56,6 +56,13 @@ export default function MyBookingsPage() {
     }
   };
 
+  const getDetails = (record: Booking): string => {
+    if (record.tableLabel) return `Table ${record.tableLabel}`;
+    if (record.seatsReserved) return `${record.seatsReserved} seat${record.seatsReserved !== 1 ? 's' : ''}`;
+    return '-';
+  };
+
+  // ── Desktop Table ──
   const columns: ColumnsType<Booking> = [
     { title: 'Booking #', dataIndex: 'bookingNumber', key: 'bookingNumber', width: 140 },
     { title: 'Event', dataIndex: 'eventTitle', key: 'eventTitle' },
@@ -63,11 +70,7 @@ export default function MyBookingsPage() {
       title: 'Details',
       key: 'details',
       width: 160,
-      render: (_, record) => {
-        if (record.tableLabel) return `Table ${record.tableLabel}`;
-        if (record.seatsReserved) return `${record.seatsReserved} seat${record.seatsReserved !== 1 ? 's' : ''}`;
-        return '-';
-      },
+      render: (_, record) => getDetails(record),
     },
     {
       title: 'Status',
@@ -116,22 +119,110 @@ export default function MyBookingsPage() {
     },
   ];
 
+  // ── Mobile Card ──
+  const renderBookingCard = (booking: Booking) => (
+    <Card
+      key={booking.id}
+      size="small"
+      style={{ marginBottom: 12 }}
+      styles={{ body: { padding: 16 } }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {booking.eventTitle}
+          </div>
+          <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>
+            #{booking.bookingNumber}
+          </div>
+        </div>
+        <BookingStatusTag status={booking.status} />
+      </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+        <span><CalendarOutlined style={{ marginRight: 4 }} />{formatEventDate(booking.createdAt)}</span>
+        <span>{getDetails(booking)}</span>
+        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{centsToUSD(booking.totalCents)}</span>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        {(booking.status === 'Paid' || booking.status === 'CheckedIn') && (
+          <Button
+            size="small"
+            icon={<QrcodeOutlined />}
+            onClick={() => handleShowQr(booking.id)}
+            loading={qrLoading}
+          >
+            QR Code
+          </Button>
+        )}
+        {booking.status === 'Pending' && (
+          <Button size="small" danger onClick={() => handleCancel(booking.id)}>
+            Cancel
+          </Button>
+        )}
+      </div>
+    </Card>
+  );
+
+  // ── Mobile loading skeleton ──
+  const renderMobileSkeleton = () => (
+    <>
+      {[1, 2, 3].map((i) => (
+        <Card key={i} size="small" style={{ marginBottom: 12 }}>
+          <Skeleton active paragraph={{ rows: 2 }} />
+        </Card>
+      ))}
+    </>
+  );
+
   return (
     <>
       <PageHeader title="My Bookings" subtitle="View and manage your event bookings" />
-      <Table
-        columns={columns}
-        dataSource={data}
-        rowKey="id"
-        loading={loading}
-        pagination={{
-          current: page,
-          pageSize,
-          total,
-          onChange: setPage,
-          showSizeChanger: false,
-        }}
-      />
+
+      {/* Desktop: Table */}
+      <div className="desktop-only-block">
+        <Table
+          columns={columns}
+          dataSource={data}
+          rowKey="id"
+          loading={loading}
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            onChange: setPage,
+            showSizeChanger: false,
+          }}
+        />
+      </div>
+
+      {/* Mobile: Cards */}
+      <div className="mobile-only-block">
+        {loading ? (
+          renderMobileSkeleton()
+        ) : data.length === 0 ? (
+          <Empty description="No bookings yet" style={{ padding: '48px 0' }} />
+        ) : (
+          <>
+            {data.map(renderBookingCard)}
+            {total > pageSize && (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+                <Pagination
+                  current={page}
+                  pageSize={pageSize}
+                  total={total}
+                  onChange={setPage}
+                  showSizeChanger={false}
+                  size="small"
+                  simple
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
       <Modal
         open={qrUrl !== null}
         onCancel={handleCloseQr}

@@ -249,8 +249,16 @@ html.light .glass-card {
 
 /* Mobile-only elements */
 .mobile-only-btn { display: flex !important; }
+.mobile-only-block { display: block !important; }
 @media (min-width: 768px) {
   .mobile-only-btn { display: none !important; }
+  .mobile-only-block { display: none !important; }
+}
+
+/* Desktop-only block (vs flex default of .desktop-nav) */
+.desktop-only-block { display: none; }
+@media (min-width: 768px) {
+  .desktop-only-block { display: block; }
 }
 
 @media (prefers-reduced-motion: reduce) {
