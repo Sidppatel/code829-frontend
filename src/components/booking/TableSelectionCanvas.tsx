@@ -61,11 +61,10 @@ export default function TableSelectionCanvas({
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const isClickable = useCallback((table: EventTableDto) => {
-    // Can only click available tables (and only if user doesn't already hold one, unless it's theirs)
-    if (table.status === 'Available' && !lockedTable) return true;
+    if (table.status === 'Available') return true;
     if (table.isLockedByYou) return true;
     return false;
-  }, [lockedTable]);
+  }, []);
 
   const getStatusStyle = useCallback((table: EventTableDto) => {
     const tableColor = table.color ?? 'var(--accent-violet)';
@@ -83,8 +82,8 @@ export default function TableSelectionCanvas({
         return {
           bg: tableColor,
           border: tableColor,
-          opacity: lockedTable ? 0.4 : 1,
-          cursor: lockedTable ? 'not-allowed' as const : 'pointer' as const,
+          opacity: 1,
+          cursor: 'pointer' as const,
         };
       case 'Held':
         return { bg: tableColor, border: token.colorWarning, opacity: 0.5, cursor: 'not-allowed' as const };
@@ -93,11 +92,11 @@ export default function TableSelectionCanvas({
       default:
         return { bg: tableColor, border: token.colorTextDisabled, opacity: 0.5, cursor: 'not-allowed' as const };
     }
-  }, [token, lockedTable]);
+  }, [token]);
 
   const getTooltip = (table: EventTableDto): string => {
     if (table.isLockedByYou) return `${table.label} — Reserved by you (click to view details)`;
-    if (lockedTable && table.status === 'Available') return `${table.label} — Release your current table first`;
+    if (lockedTable && table.status === 'Available') return `${table.label} — ${table.capacity} seats — ${centsToUSD(table.priceCents)} — Click to switch`;
     switch (table.status) {
       case 'Booked': return `${table.label} — Booked`;
       case 'Held': return `${table.label} — Reserved by another guest`;
