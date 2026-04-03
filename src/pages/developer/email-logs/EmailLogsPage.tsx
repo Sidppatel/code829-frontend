@@ -58,7 +58,7 @@ export default function EmailLogsPage() {
         prefix={<SearchOutlined />}
         allowClear
         onChange={(e) => { setRecipient(e.target.value || undefined); setPage(1); }}
-        style={{ width: 300, marginBottom: 16 }}
+        style={{ maxWidth: 300, width: '100%', marginBottom: 16 }}
       />
       <div className="responsive-table">
         <Table

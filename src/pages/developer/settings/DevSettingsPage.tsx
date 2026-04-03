@@ -54,18 +54,17 @@ export default function DevSettingsPage() {
           className="responsive-list"
           dataSource={settings}
           renderItem={(item) => (
-            <List.Item
-              actions={[
-                <Button key="save" type="primary" size="small" icon={<SaveOutlined />}
+            <List.Item style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12 }}>
+              <List.Item.Meta title={item.key} description={item.description ?? 'No description'} />
+              <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+                <Input value={editValues[item.key] ?? ''} style={{ flex: 1 }}
+                  onChange={(e) => setEditValues((prev) => ({ ...prev, [item.key]: e.target.value }))}
+                />
+                <Button type="primary" size="small" icon={<SaveOutlined />}
                   loading={savingKey === item.key} onClick={() => handleSave(item.key)}
                   disabled={editValues[item.key] === item.value}
-                >Save</Button>,
-              ]}
-            >
-              <List.Item.Meta title={item.key} description={item.description ?? 'No description'} />
-              <Input value={editValues[item.key] ?? ''} style={{ width: '100%', maxWidth: 300 }}
-                onChange={(e) => setEditValues((prev) => ({ ...prev, [item.key]: e.target.value }))}
-              />
+                >Save</Button>
+              </div>
             </List.Item>
           )}
         />

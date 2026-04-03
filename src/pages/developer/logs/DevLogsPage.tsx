@@ -1,4 +1,4 @@
-import { Table, Tag, Input, Select, Space } from 'antd';
+import { Table, Tag, Input, Select } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { developerApi } from '../../../services/api';
 import { usePagedTable } from '../../../hooks/usePagedTable';
@@ -41,22 +41,22 @@ export default function DevLogsPage() {
   return (
     <div>
       <PageHeader title="Dev Logs" subtitle="Application request logs" />
-      <Space style={{ marginBottom: 16 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
         <Input
           placeholder="Filter by path..."
           prefix={<SearchOutlined />}
           allowClear
           onChange={(e) => setFilters({ path: e.target.value || undefined })}
-          style={{ width: 240 }}
+          style={{ flex: '1 1 200px', maxWidth: 300 }}
         />
         <Select
           placeholder="Severity"
           allowClear
-          style={{ width: 140 }}
+          style={{ flex: '0 0 140px' }}
           onChange={(val) => setFilters({ severity: val })}
           options={['Info', 'Warning', 'Error', 'Debug'].map((s) => ({ label: s, value: s }))}
         />
-      </Space>
+      </div>
       <div className="responsive-table">
         <Table
           dataSource={data}

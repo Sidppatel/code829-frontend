@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Select, Space, App } from 'antd';
+import { Table, Select, App } from 'antd';
 import { developerApi } from '../../../services/api';
 import { formatEventDate } from '../../../utils/date';
 import PageHeader from '../../../components/shared/PageHeader';
@@ -50,16 +50,16 @@ export default function SystemLogsPage() {
   return (
     <div>
       <PageHeader title="System Logs" subtitle="Audit trail and system events" />
-      <Space style={{ marginBottom: 16 }}>
-        <Select placeholder="Category" allowClear style={{ width: 160 }}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+        <Select placeholder="Category" allowClear style={{ flex: '1 1 140px', maxWidth: 200 }}
           onChange={setCategory}
           options={['Auth', 'Booking', 'Event', 'Payment', 'System'].map((s) => ({ label: s, value: s }))}
         />
-        <Select placeholder="Entity Type" allowClear style={{ width: 160 }}
+        <Select placeholder="Entity Type" allowClear style={{ flex: '1 1 140px', maxWidth: 200 }}
           onChange={setEntityType}
           options={['Event', 'Booking', 'User', 'Venue', 'Payment'].map((s) => ({ label: s, value: s }))}
         />
-      </Space>
+      </div>
       <div className="responsive-table">
         <Table dataSource={logs} columns={columns} rowKey="id" loading={loading} size="small"
           scroll={{ x: 700 }}
