@@ -14,7 +14,6 @@ interface Props {
   lockedTable: EventTableDto | null;
   onLockTable: (table: EventTableDto) => void;
   onProceedToCheckout: () => void;
-  onReleaseLock: () => void;
   lockingTableId: string | null;
   onLockExpired: () => void;
 }
@@ -59,7 +58,6 @@ export default function TableSelectionCanvas({
   lockedTable,
   onLockTable,
   onProceedToCheckout,
-  onReleaseLock,
   lockingTableId,
   onLockExpired,
 }: Props) {
@@ -316,13 +314,6 @@ export default function TableSelectionCanvas({
                 onClick={onProceedToCheckout}
               >
                 Proceed to Checkout
-              </Button>
-              <Button
-                block
-                danger
-                onClick={onReleaseLock}
-              >
-                Release Table
               </Button>
             </Space>
           </Card>

@@ -57,8 +57,13 @@ export default function EventDetailPage() {
   const loadTables = useCallback(async () => {
     if (!event) return;
     try {
-      const { data } = await eventsApi.getTables(event.id);
-      setTablesData(data);
+      const [tablesRes, locksRes] = await Promise.all([
+        eventsApi.getTables(event.id),
+        tableBookingApi.getMyLocks(event.id),
+      ]);
+      setTablesData(tablesRes.data);
+      // Always sync tableLock from server so checkout works after page reload
+      setTableLock(locksRes.data.length > 0 ? locksRes.data[0] : null);
     } catch {
       message.error('Failed to load table layout');
     }
@@ -180,7 +185,6 @@ export default function EventDetailPage() {
           lockedTable={lockedTableFromGrid}
           onLockTable={handleLockTable}
           onProceedToCheckout={handleProceedToCheckout}
-          onReleaseLock={handleCancelLock}
           lockingTableId={lockingTableId}
           onLockExpired={handleLockExpired}
         />
