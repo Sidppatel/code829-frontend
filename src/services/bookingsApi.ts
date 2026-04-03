@@ -26,4 +26,7 @@ export const bookingsApi = {
 
   getQrCode: (id: string) =>
     apiClient.get(`/bookings/${id}/qr`, { responseType: 'blob' }),
+
+  getStripeConfig: () =>
+    apiClient.get<{ publishableKey: string }>('/bookings/stripe-config'),
 };

@@ -1,15 +1,21 @@
-import { Button, Card, Descriptions, Divider, Typography, Space, Alert } from 'antd';
+import { Card, Descriptions, Divider, Typography, Space, Alert } from 'antd';
+import { Elements } from '@stripe/react-stripe-js';
+import type { Stripe } from '@stripe/stripe-js';
 import { centsToUSD } from '../../utils/currency';
 import type { TableLock } from '../../types/layout';
 import TableLockTimer from './TableLockTimer';
+import StripePaymentForm from './StripePaymentForm';
 
 interface GridCheckoutProps {
   mode: 'grid';
   tableLock: TableLock;
   platformFeeCents: number;
   confirming: boolean;
+  setConfirming: (v: boolean) => void;
   error: string | null;
-  onConfirm: () => void;
+  clientSecret: string | null;
+  stripePromise: Promise<Stripe | null> | null;
+  onPaymentSuccess: () => void;
   onCancel: () => void;
   onExpired: () => void;
 }
@@ -20,15 +26,18 @@ interface OpenCheckoutProps {
   pricePerPersonCents: number;
   platformFeeCents: number;
   confirming: boolean;
+  setConfirming: (v: boolean) => void;
   error: string | null;
-  onConfirm: () => void;
+  clientSecret: string | null;
+  stripePromise: Promise<Stripe | null> | null;
+  onPaymentSuccess: () => void;
   onCancel: () => void;
 }
 
 type Props = GridCheckoutProps | OpenCheckoutProps;
 
 export default function CheckoutPanel(props: Props) {
-  const { mode, platformFeeCents, confirming, error, onConfirm, onCancel } = props;
+  const { mode, platformFeeCents, confirming, setConfirming, error, clientSecret, stripePromise, onPaymentSuccess, onCancel } = props;
 
   let subtotal: number;
   let description: string;
@@ -94,14 +103,18 @@ export default function CheckoutPanel(props: Props) {
           <Alert type="error" message={error} showIcon />
         )}
 
-        <Space direction="vertical" size="small" style={{ width: '100%', marginTop: 8 }}>
-          <Button type="primary" size="large" block onClick={onConfirm} loading={confirming}>
-            Confirm & Pay
-          </Button>
-          <Button block onClick={onCancel}>
-            Cancel
-          </Button>
-        </Space>
+        {clientSecret && stripePromise ? (
+          <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <StripePaymentForm
+              onSuccess={onPaymentSuccess}
+              onCancel={onCancel}
+              confirming={confirming}
+              setConfirming={setConfirming}
+            />
+          </Elements>
+        ) : (
+          <Typography.Text type="secondary">Loading payment form...</Typography.Text>
+        )}
       </Space>
     </Card>
   );

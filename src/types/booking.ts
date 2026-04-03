@@ -15,6 +15,7 @@ export interface Booking {
   seatsReserved?: number;
   payment?: PaymentInfo;
   createdAt: string;
+  clientSecret?: string;
 }
 
 export type BookingDetail = Booking;

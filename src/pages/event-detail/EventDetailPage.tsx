@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Typography, Card, Row, Col, Tag, Button, Descriptions, Space, Divider, App, theme,
@@ -6,6 +6,8 @@ import {
 import {
   CalendarOutlined, EnvironmentOutlined, ArrowLeftOutlined, TagOutlined,
 } from '@ant-design/icons';
+import { loadStripe } from '@stripe/stripe-js';
+import type { Stripe } from '@stripe/stripe-js';
 import { eventsApi } from '../../services/eventsApi';
 import { tableBookingApi } from '../../services/tableBookingApi';
 import { bookingsApi } from '../../services/bookingsApi';
@@ -38,6 +40,26 @@ export default function EventDetailPage() {
   const [confirming, setConfirming] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [seatCount, setSeatCount] = useState(1);
+
+  // Stripe state
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [bookingId, setBookingId] = useState<string | null>(null);
+  const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
+
+  // Load Stripe publishable key once
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const { data } = await bookingsApi.getStripeConfig();
+        if (data.publishableKey) {
+          stripePromiseRef.current = loadStripe(data.publishableKey);
+        }
+      } catch {
+        // Stripe not configured — will show loading state in checkout
+      }
+    };
+    void init();
+  }, []);
 
   useEffect(() => {
     if (!slug) return;
@@ -74,7 +96,6 @@ export default function EventDetailPage() {
     if (!event) return;
 
     if (event.layoutMode === 'Grid') {
-      // Fetch tables + any existing lock in one round-trip
       const [tablesRes, locksRes] = await Promise.all([
         eventsApi.getTables(event.id),
         tableBookingApi.getMyLocks(event.id),
@@ -87,7 +108,6 @@ export default function EventDetailPage() {
     }
   };
 
-  // Clicking a table immediately locks it
   const handleLockTable = async (table: EventTableDto) => {
     if (!event) return;
     setLockingTableId(table.id);
@@ -104,13 +124,9 @@ export default function EventDetailPage() {
     }
   };
 
-  const handleProceedToCheckout = () => {
-    if (!tableLock) return;
-    setStep('checkout');
-  };
-
-  const handleConfirmPayment = async () => {
-    if (!event || !tableLock) return;
+  // Grid: proceed to checkout — create booking to get clientSecret
+  const handleProceedToCheckout = async () => {
+    if (!tableLock || !event) return;
     setConfirming(true);
     setCheckoutError(null);
     try {
@@ -118,13 +134,27 @@ export default function EventDetailPage() {
         eventId: event.id,
         tableId: tableLock.tableId,
       });
-      await bookingsApi.confirmPayment(booking.id);
+      setBookingId(booking.id);
+      setClientSecret(booking.clientSecret ?? null);
+      setStep('checkout');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setCheckoutError(axiosErr?.response?.data?.message ?? 'Failed to create booking');
+    } finally {
+      setConfirming(false);
+    }
+  };
+
+  // After Stripe payment succeeds client-side, confirm on backend
+  const handlePaymentSuccess = async () => {
+    if (!bookingId) return;
+    try {
+      await bookingsApi.confirmPayment(bookingId);
       message.success('Booking confirmed!');
       navigate('/bookings');
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      setCheckoutError(axiosErr?.response?.data?.message ?? 'Payment failed');
-    } finally {
+      setCheckoutError(axiosErr?.response?.data?.message ?? 'Failed to confirm booking');
       setConfirming(false);
     }
   };
@@ -136,6 +166,8 @@ export default function EventDetailPage() {
     } catch { /* ignore release errors */ }
     setTableLock(null);
     setCheckoutError(null);
+    setClientSecret(null);
+    setBookingId(null);
     if (step === 'checkout') {
       setStep('select-table');
     }
@@ -146,6 +178,8 @@ export default function EventDetailPage() {
     message.warning('Your table reservation has expired');
     setTableLock(null);
     setCheckoutError(null);
+    setClientSecret(null);
+    setBookingId(null);
     if (step === 'checkout') {
       setStep('select-table');
     }
@@ -158,32 +192,42 @@ export default function EventDetailPage() {
     setStep('checkout-open');
   };
 
-  const handleConfirmOpenPayment = async () => {
-    if (!event) return;
-    setConfirming(true);
+  // Open: create booking when entering checkout to get clientSecret
+  useEffect(() => {
+    if (step !== 'checkout-open' || !event || clientSecret) return;
+
+    const createBooking = async () => {
+      setConfirming(true);
+      setCheckoutError(null);
+      try {
+        const { data: booking } = await bookingsApi.create({
+          eventId: event.id,
+          seatsReserved: seatCount,
+        });
+        setBookingId(booking.id);
+        setClientSecret(booking.clientSecret ?? null);
+      } catch (err: unknown) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        setCheckoutError(axiosErr?.response?.data?.message ?? 'Failed to create booking');
+        setStep('capacity');
+      } finally {
+        setConfirming(false);
+      }
+    };
+    void createBooking();
+  }, [step, event, seatCount, clientSecret]);
+
+  const handleCancelOpen = () => {
     setCheckoutError(null);
-    try {
-      const { data: booking } = await bookingsApi.create({
-        eventId: event.id,
-        seatsReserved: seatCount,
-      });
-      await bookingsApi.confirmPayment(booking.id);
-      message.success('Booking confirmed!');
-      navigate('/bookings');
-    } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { message?: string } } };
-      setCheckoutError(axiosErr?.response?.data?.message ?? 'Payment failed');
-    } finally {
-      setConfirming(false);
-    }
+    setClientSecret(null);
+    setBookingId(null);
+    setStep('capacity');
   };
 
   if (loading) return <LoadingSpinner />;
   if (!event) return null;
 
   const feeCents = event.platformFeeCents ?? 1500;
-
-  // Find the user's locked table from tablesData for the canvas
   const lockedTableFromGrid = tablesData?.tables.find((t) => t.isLockedByYou) ?? null;
 
   // Table selection view
@@ -224,8 +268,11 @@ export default function EventDetailPage() {
               tableLock={tableLock}
               platformFeeCents={feeCents}
               confirming={confirming}
+              setConfirming={setConfirming}
               error={checkoutError}
-              onConfirm={handleConfirmPayment}
+              clientSecret={clientSecret}
+              stripePromise={stripePromiseRef.current}
+              onPaymentSuccess={handlePaymentSuccess}
               onCancel={handleCancelLock}
               onExpired={handleLockExpired}
             />
@@ -262,7 +309,7 @@ export default function EventDetailPage() {
   if (step === 'checkout-open') {
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => { setCheckoutError(null); setStep('capacity'); }}>
+        <Button icon={<ArrowLeftOutlined />} onClick={handleCancelOpen}>
           Back to Seat Selection
         </Button>
         <Typography.Title level={3}>Complete Your Booking &mdash; {event.title}</Typography.Title>
@@ -274,9 +321,12 @@ export default function EventDetailPage() {
               pricePerPersonCents={event.pricePerPersonCents ?? 0}
               platformFeeCents={feeCents}
               confirming={confirming}
+              setConfirming={setConfirming}
               error={checkoutError}
-              onConfirm={handleConfirmOpenPayment}
-              onCancel={() => { setCheckoutError(null); setStep('capacity'); }}
+              clientSecret={clientSecret}
+              stripePromise={stripePromiseRef.current}
+              onPaymentSuccess={handlePaymentSuccess}
+              onCancel={handleCancelOpen}
             />
           </Col>
         </Row>
@@ -290,7 +340,6 @@ export default function EventDetailPage() {
       <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/events')}>
         All Events
       </Button>
-      {/* Banner */}
       {event.imageUrl ? (
         <img
           src={event.imageUrl}
@@ -313,7 +362,6 @@ export default function EventDetailPage() {
       )}
 
       <Row gutter={[32, 24]}>
-        {/* Event Info */}
         <Col xs={24} lg={16}>
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             <div>
@@ -348,7 +396,6 @@ export default function EventDetailPage() {
           </Space>
         </Col>
 
-        {/* Booking Panel */}
         <Col xs={24} lg={8}>
           <Card title="Booking" styles={{ header: { borderBottom: 'none' } }}>
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
