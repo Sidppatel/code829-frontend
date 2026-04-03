@@ -34,6 +34,7 @@ const SystemLogsPage = lazy(() => import('./pages/developer/system-logs/SystemLo
 const DevSettingsPage = lazy(() => import('./pages/developer/settings/DevSettingsPage'));
 const DevUsersPage = lazy(() => import('./pages/developer/users/DevUsersPage'));
 const DevEventsPage = lazy(() => import('./pages/developer/events/DevEventsPage'));
+const VerifyMagicLinkPage = lazy(() => import('./pages/auth/VerifyMagicLinkPage'));
 
 export default function App() {
   return (
@@ -47,6 +48,7 @@ export default function App() {
               <Route path="events" element={<EventsPage />} />
               <Route path="events/:slug" element={<EventDetailPage />} />
               <Route path="login" element={<LoginPage />} />
+              <Route path="auth/verify" element={<VerifyMagicLinkPage />} />
             </Route>
 
             {/* Authenticated Users */}
