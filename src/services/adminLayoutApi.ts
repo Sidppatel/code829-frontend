@@ -74,7 +74,7 @@ export const adminLayoutApi = {
     apiClient.get(`/admin/events/${eventId}/layout/status`),
 
   getLockedTables: (eventId: string) =>
-    apiClient.get<{ lockedTableIds: string[] }>(`/admin/events/${eventId}/layout/locked`),
+    apiClient.get<{ layoutLocked: boolean; lockedTableIds: string[] }>(`/admin/events/${eventId}/layout/locked`),
 
   getLayoutStats: (eventId: string) =>
     apiClient.get(`/admin/events/${eventId}/layout/stats`),

@@ -2,6 +2,7 @@ export { authApi } from './authApi';
 export { eventsApi } from './eventsApi';
 export { seatsApi } from './seatsApi';
 export { bookingsApi } from './bookingsApi';
+export { tableBookingApi } from './tableBookingApi';
 export { checkInApi } from './checkInApi';
 export { adminEventsApi } from './adminEventsApi';
 export { adminBookingsApi } from './adminBookingsApi';

@@ -80,7 +80,8 @@ export interface EventTableDto {
   gridCol?: number;
   sortOrder?: number;
   status: 'Available' | 'Held' | 'HeldByYou' | 'Booked';
-  expiresAt?: string;
+  holdExpiresAt?: string;
+  isLockedByYou: boolean;
 }
 
 export interface EventTablesResponse {

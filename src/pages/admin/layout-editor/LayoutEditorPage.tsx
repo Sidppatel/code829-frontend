@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Space, App } from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
+import { Alert, Button, Space, App } from 'antd';
+import { LockOutlined, SaveOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../../services/api';
 import { useFloorPlanStore, type FloorPlanElement } from '../../../stores/floorPlanStore';
 import type { LayoutStatsResponse, TableStatusInfo, TableType } from '../../../types/layout';
@@ -19,6 +19,7 @@ export default function LayoutEditorPage() {
   // Server state
   const [tableTypes, setTableTypes] = useState<TableType[]>([]);
   const [lockedIds, setLockedIds] = useState<Set<string>>(new Set());
+  const [layoutLocked, setLayoutLocked] = useState(false);
   const [tableStatuses, setTableStatuses] = useState<Record<string, TableStatusInfo>>({});
   const [stats, setStats] = useState<LayoutStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,6 +67,7 @@ export default function LayoutEditorPage() {
       });
 
       setLockedIds(new Set(lockedRes.data.lockedTableIds ?? []));
+      setLayoutLocked(lockedRes.data.layoutLocked ?? false);
       setTableTypes(typesRes.data ?? []);
       setStats(statsRes.data);
 
@@ -174,6 +176,10 @@ export default function LayoutEditorPage() {
 
   const handleCellClick = useCallback(
     (row: number, col: number, element: FloorPlanElement | null) => {
+      if (layoutLocked) {
+        message.info('Layout is locked — tables have active bookings or holds');
+        return;
+      }
       if (element) {
         // Clicking an existing table
         if (lockedIds.has(element.id)) {
@@ -220,7 +226,7 @@ export default function LayoutEditorPage() {
       addElement(newElement);
       setSelectedTableId(newId);
     },
-    [selectedTypeId, tableTypes, lockedIds, gridDimensions, addElement, message],
+    [selectedTypeId, tableTypes, lockedIds, layoutLocked, gridDimensions, addElement, message],
   );
 
   const handleTableUpdate = useCallback(
@@ -284,13 +290,24 @@ export default function LayoutEditorPage() {
               icon={<SaveOutlined />}
               onClick={handleSaveLayout}
               loading={saving}
-              disabled={!isDirty}
+              disabled={!isDirty || layoutLocked}
             >
               Save Layout
             </Button>
           </Space>
         }
       />
+
+      {layoutLocked && (
+        <Alert
+          message="Layout Locked"
+          description="This layout cannot be modified because one or more tables have active bookings or holds."
+          type="warning"
+          icon={<LockOutlined />}
+          showIcon
+          style={{ marginBottom: 16 }}
+        />
+      )}
 
       <LayoutStatsBar stats={stats} loading={statsLoading} />
 

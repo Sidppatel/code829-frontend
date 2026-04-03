@@ -7,6 +7,7 @@ const STATUS_COLORS: Record<BookingStatus, string> = {
   CheckedIn: 'blue',
   Cancelled: 'default',
   Refunded: 'red',
+  Expired: 'default',
 };
 
 interface Props {

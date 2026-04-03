@@ -8,9 +8,37 @@ export interface CreateBookingItem {
   quantity?: number;
 }
 
+export interface CreateTableBookingRequest {
+  eventId: string;
+  tableId: string;
+  ticketTypeId: string;
+}
+
+export interface CreateCapacityBookingRequest {
+  eventId: string;
+  ticketTypeId: string;
+  seatsReserved: number;
+}
+
 export const bookingsApi = {
   create: (eventId: string, items: CreateBookingItem[]) =>
     apiClient.post<{ id: string }>('/bookings', { eventId, items }),
+
+  createTableBooking: (request: CreateTableBookingRequest) =>
+    apiClient.post<Booking>('/bookings', {
+      eventId: request.eventId,
+      tableId: request.tableId,
+      ticketTypeId: request.ticketTypeId,
+      items: [],
+    }),
+
+  createCapacityBooking: (request: CreateCapacityBookingRequest) =>
+    apiClient.post<Booking>('/bookings', {
+      eventId: request.eventId,
+      ticketTypeId: request.ticketTypeId,
+      seatsReserved: request.seatsReserved,
+      items: [],
+    }),
 
   confirmPayment: (id: string) =>
     apiClient.post<BookingDetail>(`/bookings/${id}/confirm`),

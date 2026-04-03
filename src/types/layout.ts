@@ -44,6 +44,19 @@ export interface LayoutStatsResponse {
   totalBookedRevenueCents: number;
 }
 
+export interface TableLock {
+  tableId: string;
+  tableLabel: string;
+  eventId: string;
+  userId: string;
+  status: string;
+  capacity: number;
+  priceType: string;
+  priceCents: number;
+  platformFeeCents: number;
+  expiresAt: string;
+}
+
 export interface TableStatusInfo {
   id: string;
   label: string;
