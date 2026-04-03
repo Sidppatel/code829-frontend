@@ -301,26 +301,23 @@ export default function EventWizardPage() {
 
             <Segmented
               block
-              size="large"
               value={layoutMode}
               onChange={(val) => setLayoutMode(val as 'Grid' | 'Open')}
               options={[
                 {
                   label: (
-                    <div style={{ padding: '8px 0' }}>
-                      <AppstoreOutlined style={{ fontSize: 20, display: 'block', marginBottom: 4 }} />
-                      <div style={{ fontWeight: 600 }}>Table Seating</div>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Grid Layout</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '4px 0' }}>
+                      <AppstoreOutlined style={{ fontSize: 15 }} />
+                      <span style={{ fontWeight: 600, fontSize: 13 }}>Table Seating</span>
                     </div>
                   ),
                   value: 'Grid',
                 },
                 {
                   label: (
-                    <div style={{ padding: '8px 0' }}>
-                      <TeamOutlined style={{ fontSize: 20, display: 'block', marginBottom: 4 }} />
-                      <div style={{ fontWeight: 600 }}>Open Seating</div>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Capacity Based</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '4px 0' }}>
+                      <TeamOutlined style={{ fontSize: 15 }} />
+                      <span style={{ fontWeight: 600, fontSize: 13 }}>Open Seating</span>
                     </div>
                   ),
                   value: 'Open',
