@@ -51,7 +51,7 @@ export default function FloorPlanCanvas({
   for (let c = 0; c < gridCols; c++) {
     colHeaders.push(
       <div key={`col-${c}`} className="fp-col-header">
-        {String.fromCharCode(65 + (c % 26))}{c >= 26 ? Math.floor(c / 26) : ''}
+        {c + 1}
       </div>
     );
   }

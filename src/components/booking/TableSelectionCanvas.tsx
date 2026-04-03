@@ -127,7 +127,7 @@ export default function TableSelectionCanvas({
   for (let c = 0; c < gridCols; c++) {
     colHeaders.push(
       <div key={`col-${c}`} className="ts-col-header">
-        {String.fromCharCode(65 + (c % 26))}
+        {c + 1}
       </div>
     );
   }
