@@ -15,6 +15,9 @@ export const bookingsApi = {
   confirmPayment: (id: string) =>
     apiClient.post<BookingDetail>(`/bookings/${id}/confirm`),
 
+  confirmByPaymentIntent: (paymentIntentId: string) =>
+    apiClient.post<BookingDetail>('/bookings/confirm-by-intent', { paymentIntentId }),
+
   cancel: (id: string) =>
     apiClient.post<BookingDetail>(`/bookings/${id}/cancel`),
 

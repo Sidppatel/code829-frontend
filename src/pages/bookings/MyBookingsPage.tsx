@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Table, Button, App, Space, Modal, Image, Card, Empty, Pagination, Skeleton, Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { QrcodeOutlined, CalendarOutlined, SearchOutlined } from '@ant-design/icons';
@@ -20,6 +21,8 @@ export default function MyBookingsPage() {
   const { message } = App.useApp();
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const confirmedRef = useRef(false);
 
   const fetcher = useCallback(
     (params: BookingFilters) =>
@@ -31,6 +34,27 @@ export default function MyBookingsPage() {
     Booking,
     BookingFilters
   >({ fetcher });
+
+  // Auto-confirm booking after Stripe payment redirect
+  useEffect(() => {
+    if (confirmedRef.current) return;
+    const paymentIntent = searchParams.get('payment_intent');
+    const redirectStatus = searchParams.get('redirect_status');
+    if (!paymentIntent || redirectStatus !== 'succeeded') return;
+
+    confirmedRef.current = true;
+    const confirm = async () => {
+      try {
+        await bookingsApi.confirmByPaymentIntent(paymentIntent);
+        message.success('Payment confirmed!');
+      } catch {
+        message.warning('Payment received — booking will update shortly');
+      }
+      setSearchParams({}, { replace: true });
+      refresh();
+    };
+    void confirm();
+  }, [searchParams, setSearchParams, message, refresh]);
 
   const handleCancel = async (id: string) => {
     try {
