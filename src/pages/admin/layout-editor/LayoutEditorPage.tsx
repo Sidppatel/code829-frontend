@@ -324,6 +324,7 @@ export default function LayoutEditorPage() {
           selectedTableId={selectedTableId}
           editorMode={editorMode}
           lockedTableIds={lockedTableIds}
+          selectedEventTableColor={eventTables.find((et) => et.id === selectedEventTableId)?.color ?? undefined}
           onCellClick={handleCellClick}
           onTableClick={handleTableClick}
         />

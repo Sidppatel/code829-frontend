@@ -16,11 +16,11 @@ interface Props {
   lockingTableId: string | null;
 }
 
-const SHAPE_STYLES: Record<string, React.CSSProperties> = {
-  Round: { borderRadius: '50%' },
-  Cocktail: { borderRadius: '50%' },
-  Square: { borderRadius: 'var(--border-radius-sm, 4px)' },
-  Rectangle: { borderRadius: 'var(--border-radius-sm, 4px)' },
+const SHAPE_RADIUS: Record<string, string> = {
+  Round: '50%',
+  Cocktail: '50%',
+  Square: '4px',
+  Rectangle: '6px',
 };
 
 export default function TableSelectionCanvas({
@@ -41,40 +41,29 @@ export default function TableSelectionCanvas({
   const getStatusColor = (table: EventTableDto): string => {
     if (table.isLockedByYou) return token.colorPrimary;
     switch (table.status) {
-      case 'Available':
-        return token.colorSuccess;
-      case 'Held':
-        return token.colorWarning;
-      case 'Booked':
-        return token.colorTextDisabled;
-      default:
-        return token.colorTextDisabled;
+      case 'Available': return token.colorSuccess;
+      case 'Held': return token.colorWarning;
+      case 'Booked': return token.colorTextDisabled;
+      default: return token.colorTextDisabled;
     }
   };
 
   const getStatusBg = (table: EventTableDto): string => {
     if (table.isLockedByYou) return token.colorPrimaryBg;
     switch (table.status) {
-      case 'Available':
-        return token.colorSuccessBg;
-      case 'Held':
-        return token.colorWarningBg;
-      case 'Booked':
-        return token.colorBgContainerDisabled;
-      default:
-        return token.colorBgContainerDisabled;
+      case 'Available': return token.colorSuccessBg;
+      case 'Held': return token.colorWarningBg;
+      case 'Booked': return token.colorBgContainerDisabled;
+      default: return token.colorBgContainerDisabled;
     }
   };
 
   const getTooltip = (table: EventTableDto): string => {
     if (table.isLockedByYou) return `${table.label} - Locked by you`;
     switch (table.status) {
-      case 'Booked':
-        return `${table.label} - Booked`;
-      case 'Held':
-        return `${table.label} - Reserved by another guest`;
-      default:
-        return `${table.label} - ${table.capacity} seats - ${centsToUSD(table.priceCents)}`;
+      case 'Booked': return `${table.label} - Booked`;
+      case 'Held': return `${table.label} - Reserved by another guest`;
+      default: return `${table.label} - ${table.capacity} seats - ${centsToUSD(table.priceCents)}`;
     }
   };
 
@@ -84,8 +73,31 @@ export default function TableSelectionCanvas({
     cellMap.set(`${t.gridRow},${t.gridCol}`, t);
   }
 
-  const cells: React.ReactNode[] = [];
+  // Column headers
+  const colHeaders: React.ReactNode[] = [<div key="corner" style={{ width: 28, flexShrink: 0 }} />];
+  for (let c = 0; c < gridCols; c++) {
+    colHeaders.push(
+      <div key={`col-${c}`} style={{
+        flex: 1, minWidth: 56, height: 28, display: 'flex', alignItems: 'center',
+        justifyContent: 'center', fontSize: 10, fontWeight: 700, color: token.colorTextQuaternary,
+      }}>
+        {String.fromCharCode(65 + (c % 26))}
+      </div>
+    );
+  }
+
+  // Build rows
+  const rows: React.ReactNode[] = [];
   for (let r = 0; r < gridRows; r++) {
+    const cells: React.ReactNode[] = [
+      <div key={`rh-${r}`} style={{
+        width: 28, flexShrink: 0, display: 'flex', alignItems: 'center',
+        justifyContent: 'center', fontSize: 10, fontWeight: 700, color: token.colorTextQuaternary,
+      }}>
+        {r + 1}
+      </div>,
+    ];
+
     for (let c = 0; c < gridCols; c++) {
       const key = `${r},${c}`;
       const table = cellMap.get(key);
@@ -94,45 +106,34 @@ export default function TableSelectionCanvas({
         const isAvailable = table.status === 'Available';
         const isSelected = table.id === selectedTableId;
         const isHovered = table.id === hoveredId;
-        const shapeStyle = SHAPE_STYLES[table.shape] ?? SHAPE_STYLES.Square;
+        const borderRadius = SHAPE_RADIUS[table.shape] ?? SHAPE_RADIUS.Square;
         const statusColor = getStatusColor(table);
         const statusBg = getStatusBg(table);
 
         cells.push(
-          <div key={key} style={{ gridRow: r + 1, gridColumn: c + 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 2 }}>
+          <div key={key} style={{ flex: 1, minWidth: 56, minHeight: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
             <Tooltip title={getTooltip(table)} mouseEnterDelay={0.2}>
               <div
                 role="button"
                 tabIndex={isAvailable ? 0 : -1}
                 aria-label={getTooltip(table)}
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  maxWidth: 72,
-                  maxHeight: 72,
-                  aspectRatio: table.shape === 'Rectangle' ? '1.4 / 1' : '1 / 1',
-                  ...shapeStyle,
+                  width: '100%', height: '100%', minHeight: 50,
+                  borderRadius,
                   background: statusBg,
                   border: `2px solid ${statusColor}`,
                   cursor: isAvailable ? 'pointer' : 'not-allowed',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   transition: 'all 0.2s ease',
                   boxShadow: isSelected
                     ? `0 0 0 3px ${token.colorPrimaryBorder}`
                     : isHovered && isAvailable
-                      ? `0 0 0 2px ${token.colorPrimaryBgHover}`
-                      : 'none',
+                      ? `0 0 0 2px ${token.colorPrimaryBgHover}` : 'none',
                   opacity: table.status === 'Booked' ? 0.6 : 1,
+                  position: 'relative',
                 }}
-                onClick={() => {
-                  if (isAvailable) onSelectTable(table);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && isAvailable) onSelectTable(table);
-                }}
+                onClick={() => { if (isAvailable) onSelectTable(table); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' && isAvailable) onSelectTable(table); }}
                 onMouseEnter={() => setHoveredId(table.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
@@ -154,10 +155,20 @@ export default function TableSelectionCanvas({
         );
       } else {
         cells.push(
-          <div key={key} style={{ gridRow: r + 1, gridColumn: c + 1 }} />
+          <div key={key} style={{
+            flex: 1, minWidth: 56, minHeight: 56,
+            border: `1px solid ${token.colorBorderSecondary}`,
+            borderRadius: 2, opacity: 0.3,
+          }} />
         );
       }
     }
+
+    rows.push(
+      <div key={`row-${r}`} style={{ display: 'flex' }}>
+        {cells}
+      </div>
+    );
   }
 
   return (
@@ -185,7 +196,7 @@ export default function TableSelectionCanvas({
             <Space key={ett.id} size="small">
               <div style={{ width: 14, height: 14, borderRadius: 3, background: ett.color ?? 'var(--accent-violet)', border: '1px solid rgba(0,0,0,0.15)' }} />
               <Typography.Text style={{ fontSize: 12 }}>
-                {ett.label} · {ett.capacity}p · {centsToUSD(ett.priceCents)}
+                {ett.label} &middot; {ett.capacity}p &middot; {centsToUSD(ett.priceCents)}
               </Typography.Text>
             </Space>
           ))}
@@ -195,24 +206,17 @@ export default function TableSelectionCanvas({
       <Divider style={{ margin: '4px 0' }} />
 
       <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-        {/* Grid Canvas */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
-            gridTemplateRows: `repeat(${gridRows}, 1fr)`,
-            gap: 4,
-            width: '100%',
-            maxWidth: 600,
-            aspectRatio: `${gridCols} / ${gridRows}`,
-            background: token.colorBgContainer,
-            border: `1px solid ${token.colorBorderSecondary}`,
-            borderRadius: token.borderRadiusLG,
-            padding: 8,
-            flexShrink: 0,
-          }}
-        >
-          {cells}
+        {/* Grid floor plan */}
+        <div style={{
+          flex: '1 1 auto', maxWidth: 700, background: token.colorBgContainer,
+          border: `1px solid ${token.colorBorderSecondary}`, borderRadius: token.borderRadiusLG,
+          overflow: 'auto',
+        }}>
+          {/* Col headers */}
+          <div style={{ display: 'flex', position: 'sticky', top: 0, zIndex: 2, background: token.colorBgContainer }}>
+            {colHeaders}
+          </div>
+          {rows}
         </div>
 
         {/* Details panel */}
@@ -220,7 +224,7 @@ export default function TableSelectionCanvas({
           <Card
             size="small"
             title={`Table ${selectedTable.label}`}
-            style={{ flex: '1 1 240px', minWidth: 240, alignSelf: 'flex-start' }}
+            style={{ flex: '1 1 240px', minWidth: 240, maxWidth: 320, alignSelf: 'flex-start' }}
           >
             <Space direction="vertical" size="small" style={{ width: '100%' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>

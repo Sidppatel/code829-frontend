@@ -9,6 +9,7 @@ interface FloorPlanCanvasProps {
   selectedTableId: string | null;
   editorMode: EditorMode;
   lockedTableIds: Set<string>;
+  selectedEventTableColor?: string;
   onCellClick: (row: number, col: number) => void;
   onTableClick: (tableId: string) => void;
 }
@@ -20,10 +21,10 @@ export default function FloorPlanCanvas({
   selectedTableId,
   editorMode,
   lockedTableIds,
+  selectedEventTableColor,
   onCellClick,
   onTableClick,
 }: FloorPlanCanvasProps) {
-  // Build a map of (row,col) -> table for quick lookup
   const cellMap = useMemo(() => {
     const map = new Map<string, LayoutTable>();
     for (const t of tables) {
@@ -41,26 +42,34 @@ export default function FloorPlanCanvas({
     }
   }, [cellMap, editorMode, onCellClick, onTableClick]);
 
-  // Build grid cells
-  const cells: React.ReactNode[] = [];
+  const isAddMode = editorMode === 'add';
+
+  // Column headers (A, B, C, ...)
+  const colHeaders: React.ReactNode[] = [
+    <div key="corner" className="fp-header-corner" />,
+  ];
+  for (let c = 0; c < gridCols; c++) {
+    colHeaders.push(
+      <div key={`col-${c}`} className="fp-col-header">
+        {String.fromCharCode(65 + (c % 26))}{c >= 26 ? Math.floor(c / 26) : ''}
+      </div>
+    );
+  }
+
+  // Build rows with row headers + cells
+  const rows: React.ReactNode[] = [];
   for (let r = 0; r < gridRows; r++) {
+    const rowCells: React.ReactNode[] = [
+      <div key={`row-${r}`} className="fp-row-header">{r + 1}</div>,
+    ];
+
     for (let c = 0; c < gridCols; c++) {
       const key = `${r},${c}`;
       const table = cellMap.get(key);
 
       if (table) {
-        cells.push(
-          <div
-            key={key}
-            style={{
-              gridRow: r + 1,
-              gridColumn: c + 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 2,
-            }}
-          >
+        rowCells.push(
+          <div key={key} className="fp-cell fp-cell-occupied">
             <TableElement
               table={table}
               isSelected={table.id === selectedTableId}
@@ -71,54 +80,43 @@ export default function FloorPlanCanvas({
           </div>
         );
       } else {
-        cells.push(
+        rowCells.push(
           <div
             key={key}
-            role="button"
-            tabIndex={editorMode === 'add' ? 0 : -1}
-            className={`grid-empty-cell${editorMode === 'add' ? ' addable' : ''}`}
-            style={{
-              gridRow: r + 1,
-              gridColumn: c + 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px dashed var(--border-light, rgba(255,255,255,0.08))',
-              borderRadius: 4,
-              cursor: editorMode === 'add' ? 'crosshair' : 'default',
-              transition: 'background 0.15s ease',
-              minHeight: 48,
-            }}
+            role={isAddMode ? 'button' : undefined}
+            tabIndex={isAddMode ? 0 : -1}
+            className={`fp-cell fp-cell-empty${isAddMode ? ' fp-cell-addable' : ''}`}
+            style={isAddMode && selectedEventTableColor ? {
+              '--add-preview-color': selectedEventTableColor,
+            } as React.CSSProperties : undefined}
             onClick={() => handleCellClick(r, c)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleCellClick(r, c);
             }}
-          />
+          >
+            {isAddMode && (
+              <span className="fp-cell-plus">+</span>
+            )}
+          </div>
         );
       }
     }
+
+    rows.push(
+      <div key={`row-${r}`} className="fp-grid-row">
+        {rowCells}
+      </div>
+    );
   }
 
   return (
-    <div className="layout-editor-canvas-wrapper">
-      <div
-        className="layout-editor-canvas"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
-          gridTemplateRows: `repeat(${gridRows}, 1fr)`,
-          gap: 4,
-          width: '100%',
-          aspectRatio: `${gridCols} / ${gridRows}`,
-          background: 'var(--bg-secondary)',
-          borderRadius: 12,
-          border: '1px solid var(--border-default, rgba(255,255,255,0.1))',
-          padding: 8,
-          overflow: 'hidden',
-        }}
-      >
-        {cells}
+    <div className="fp-wrapper">
+      {/* Column headers */}
+      <div className="fp-grid-row fp-header-row">
+        {colHeaders}
       </div>
+      {/* Grid rows */}
+      {rows}
     </div>
   );
 }
