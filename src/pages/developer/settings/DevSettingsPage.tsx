@@ -7,11 +7,21 @@ import type { AppSetting } from '../../../services/developerApi';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 
+const SENSITIVE_KEYS = new Set([
+  'jwt_secret',
+  'stripe_secret_key',
+  'stripe_publishable_key',
+  'stripe_webhook_secret',
+  'resend_api_key',
+  'email_api_key',
+]);
+
 export default function DevSettingsPage() {
   const [settings, setSettings] = useState<AppSetting[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
+  const [dirty, setDirty] = useState<Record<string, boolean>>({});
   const isMobile = useIsMobile();
   const { message } = App.useApp();
 
@@ -21,7 +31,9 @@ export default function DevSettingsPage() {
         const { data } = await developerApi.getSettings();
         setSettings(data);
         const vals: Record<string, string> = {};
-        data.forEach((s) => { vals[s.key] = s.value; });
+        data.forEach((s) => {
+          vals[s.key] = SENSITIVE_KEYS.has(s.key) ? '' : s.value;
+        });
         setEditValues(vals);
       } catch {
         message.error('Failed to load settings');
@@ -33,17 +45,30 @@ export default function DevSettingsPage() {
   }, [message]);
 
   const handleSave = async (key: string) => {
+    const value = editValues[key];
+    if (!value) return;
     setSavingKey(key);
     try {
-      await developerApi.updateSetting(key, editValues[key]);
+      await developerApi.updateSetting(key, value);
       message.success(`Setting "${key}" updated`);
-      const updated = settings.map((s) => s.key === key ? { ...s, value: editValues[key] } : s);
+      const updated = settings.map((s) =>
+        s.key === key ? { ...s, value: SENSITIVE_KEYS.has(key) ? maskValue(value) : value } : s,
+      );
       setSettings(updated);
+      if (SENSITIVE_KEYS.has(key)) {
+        setEditValues((prev) => ({ ...prev, [key]: '' }));
+      }
+      setDirty((prev) => ({ ...prev, [key]: false }));
     } catch {
       message.error('Failed to update setting');
     } finally {
       setSavingKey(null);
     }
+  };
+
+  const handleChange = (key: string, value: string) => {
+    setEditValues((prev) => ({ ...prev, [key]: value }));
+    setDirty((prev) => ({ ...prev, [key]: true }));
   };
 
   if (loading) return <LoadingSpinner />;
@@ -55,25 +80,57 @@ export default function DevSettingsPage() {
         <List
           className="responsive-list"
           dataSource={settings}
-          renderItem={(item) => (
-            <List.Item style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, padding: '12px 0' }}>
-              <div>
-                <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{item.key}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{item.description ?? 'No description'}</div>
-              </div>
-              <div style={{ display: 'flex', gap: 8, width: '100%' }}>
-                <Input value={editValues[item.key] ?? ''} size={isMobile ? 'middle' : 'middle'} style={{ flex: 1 }}
-                  onChange={(e) => setEditValues((prev) => ({ ...prev, [item.key]: e.target.value }))}
-                />
-                <Button type="primary" size="small" icon={<SaveOutlined />}
-                  loading={savingKey === item.key} onClick={() => handleSave(item.key)}
-                  disabled={editValues[item.key] === item.value}
-                >Save</Button>
-              </div>
-            </List.Item>
-          )}
+          renderItem={(item) => {
+            const isSensitive = SENSITIVE_KEYS.has(item.key);
+            return (
+              <List.Item style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, padding: '12px 0' }}>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{item.key}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    {item.description ?? 'No description'}
+                    {isSensitive && item.value && item.value !== 'MOCK_DEV' && (
+                      <span style={{ marginLeft: 8, fontFamily: 'monospace' }}>Current: {item.value}</span>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+                  {isSensitive ? (
+                    <Input.Password
+                      value={editValues[item.key] ?? ''}
+                      placeholder="Enter new value"
+                      size="middle"
+                      style={{ flex: 1 }}
+                      onChange={(e) => handleChange(item.key, e.target.value)}
+                    />
+                  ) : (
+                    <Input
+                      value={editValues[item.key] ?? ''}
+                      size="middle"
+                      style={{ flex: 1 }}
+                      onChange={(e) => handleChange(item.key, e.target.value)}
+                    />
+                  )}
+                  <Button
+                    type="primary"
+                    size="small"
+                    icon={<SaveOutlined />}
+                    loading={savingKey === item.key}
+                    onClick={() => handleSave(item.key)}
+                    disabled={!dirty[item.key] || !editValues[item.key]}
+                  >
+                    Save
+                  </Button>
+                </div>
+              </List.Item>
+            );
+          }}
         />
       </Card>
     </div>
   );
+}
+
+function maskValue(val: string): string {
+  if (val.length <= 4) return '****';
+  return '*'.repeat(val.length - 4) + val.slice(-4);
 }
