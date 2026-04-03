@@ -19,7 +19,7 @@ import TableSelectionCanvas from '../../components/booking/TableSelectionCanvas'
 import CheckoutPanel from '../../components/booking/CheckoutPanel';
 import CapacityBookingForm from '../../components/booking/CapacityBookingForm';
 
-type BookingStep = 'info' | 'select-table' | 'checkout' | 'capacity';
+type BookingStep = 'info' | 'select-table' | 'checkout' | 'capacity' | 'checkout-open';
 
 export default function EventDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -37,6 +37,7 @@ export default function EventDetailPage() {
   const [lockingTableId, setLockingTableId] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [seatCount, setSeatCount] = useState(1);
 
   useEffect(() => {
     if (!slug) return;
@@ -151,14 +152,29 @@ export default function EventDetailPage() {
     void loadTables();
   };
 
-  const handleCapacityBookingCreated = async (bookingId: string) => {
+  const handleCapacityProceed = (seats: number) => {
+    setSeatCount(seats);
+    setCheckoutError(null);
+    setStep('checkout-open');
+  };
+
+  const handleConfirmOpenPayment = async () => {
+    if (!event) return;
+    setConfirming(true);
+    setCheckoutError(null);
     try {
-      await bookingsApi.confirmPayment(bookingId);
+      const { data: booking } = await bookingsApi.create({
+        eventId: event.id,
+        seatsReserved: seatCount,
+      });
+      await bookingsApi.confirmPayment(booking.id);
       message.success('Booking confirmed!');
       navigate('/bookings');
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      message.error(axiosErr?.response?.data?.message ?? 'Payment failed');
+      setCheckoutError(axiosErr?.response?.data?.message ?? 'Payment failed');
+    } finally {
+      setConfirming(false);
     }
   };
 
@@ -219,7 +235,7 @@ export default function EventDetailPage() {
     );
   }
 
-  // Capacity booking view (Open)
+  // Capacity seat selection view (Open)
   if (step === 'capacity') {
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -230,12 +246,37 @@ export default function EventDetailPage() {
         <Row gutter={[24, 24]} justify="center">
           <Col xs={24} sm={16} md={12} lg={8}>
             <CapacityBookingForm
-              eventId={event.id}
               maxCapacity={event.maxCapacity ?? 0}
               totalSold={event.quantitySold}
               pricePerPersonCents={event.pricePerPersonCents ?? 0}
               platformFeePercent={feePercent}
-              onBookingCreated={handleCapacityBookingCreated}
+              onProceed={handleCapacityProceed}
+            />
+          </Col>
+        </Row>
+      </Space>
+    );
+  }
+
+  // Checkout confirmation view (Open)
+  if (step === 'checkout-open') {
+    return (
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => { setCheckoutError(null); setStep('capacity'); }}>
+          Back to Seat Selection
+        </Button>
+        <Typography.Title level={3}>Complete Your Booking &mdash; {event.title}</Typography.Title>
+        <Row gutter={[24, 24]} justify="center">
+          <Col xs={24} sm={16} md={12} lg={8}>
+            <CheckoutPanel
+              mode="open"
+              seatCount={seatCount}
+              pricePerPersonCents={event.pricePerPersonCents ?? 0}
+              platformFeePercent={feePercent}
+              confirming={confirming}
+              error={checkoutError}
+              onConfirm={handleConfirmOpenPayment}
+              onCancel={() => { setCheckoutError(null); setStep('capacity'); }}
             />
           </Col>
         </Row>
