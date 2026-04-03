@@ -84,8 +84,8 @@ export const developerApi = {
   updateSetting: (key: string, value: string) =>
     apiClient.put('/developer/settings', { key, value }),
 
-  getUsers: () =>
-    apiClient.get<DevUser[]>('/developer/users'),
+  getUsers: (params?: { page?: number; pageSize?: number; search?: string }) =>
+    apiClient.get<PagedResponse<DevUser>>('/developer/users', { params }),
 
   updateUserRole: (id: string, role: string) =>
     apiClient.put(`/developer/users/${id}/role`, { role }),
