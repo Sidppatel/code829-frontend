@@ -73,7 +73,7 @@ export default function CapacityBookingForm({
             min={1}
             max={available}
             value={seats}
-            onChange={(v) => setSeats(v ?? 1)}
+            onChange={(v: number | null) => setSeats(v ?? 1)}
             style={{ width: '100%' }}
             disabled={available <= 0}
           />

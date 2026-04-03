@@ -203,7 +203,7 @@ export default function ControlsPanel({
               min={1}
               max={30}
               value={gridRows}
-              onChange={(v) => onGridRowsChange(v ?? 1)}
+              onChange={(v: number | null) => onGridRowsChange(v ?? 1)}
               style={{ width: '100%' }}
               disabled={disabled}
             />
@@ -215,7 +215,7 @@ export default function ControlsPanel({
               min={1}
               max={30}
               value={gridCols}
-              onChange={(v) => onGridColsChange(v ?? 1)}
+              onChange={(v: number | null) => onGridColsChange(v ?? 1)}
               style={{ width: '100%' }}
               disabled={disabled}
             />
