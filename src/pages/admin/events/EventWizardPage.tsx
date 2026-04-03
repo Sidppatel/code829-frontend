@@ -216,10 +216,11 @@ export default function EventWizardPage() {
                 rules={[{ required: true, message: 'Start date is required' }]}
               >
                 <DatePicker
-                  showTime={{ format: 'hh:mm A', use12Hours: true }}
-                  format="MMM D, YYYY hh:mm A"
+                  showTime={{ use12Hours: true, format: 'h:mm a' }}
+                  format="YYYY-MM-DD h:mm a"
                   placeholder="Select start date & time"
                   style={{ width: '100%' }}
+                  needConfirm={false}
                 />
               </Form.Item>
             </Col>
@@ -230,10 +231,11 @@ export default function EventWizardPage() {
                 rules={[{ required: true, message: 'End date is required' }]}
               >
                 <DatePicker
-                  showTime={{ format: 'hh:mm A', use12Hours: true }}
-                  format="MMM D, YYYY hh:mm A"
+                  showTime={{ use12Hours: true, format: 'h:mm a' }}
+                  format="YYYY-MM-DD h:mm a"
                   placeholder="Select end date & time"
                   style={{ width: '100%' }}
+                  needConfirm={false}
                 />
               </Form.Item>
             </Col>
