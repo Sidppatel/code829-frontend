@@ -1,26 +1,19 @@
 import { useState, useCallback } from 'react';
-import { Table, Button, App, Space } from 'antd';
+import { Table, Button, App, Space, Modal, Image } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { EyeOutlined, EditOutlined } from '@ant-design/icons';
-import { bookingsApi } from '../../services/api';
-import type { Booking, BookingItem } from '../../types/booking';
+import { QrcodeOutlined } from '@ant-design/icons';
+import { bookingsApi } from '../../services/bookingsApi';
+import type { Booking } from '../../types/booking';
 import { usePagedTable } from '../../hooks/usePagedTable';
 import { centsToUSD } from '../../utils/currency';
 import { formatEventDate } from '../../utils/date';
 import BookingStatusTag from '../../components/bookings/BookingStatusTag';
-import GuestEditModal from '../../components/bookings/GuestEditModal';
 import PageHeader from '../../components/shared/PageHeader';
 
-interface GuestEditState {
-  bookingId: string;
-  itemId: string;
-  guestName?: string;
-  guestEmail?: string;
-}
-
 export default function MyBookingsPage() {
-  const [guestEdit, setGuestEdit] = useState<GuestEditState | null>(null);
   const { message } = App.useApp();
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [qrLoading, setQrLoading] = useState(false);
 
   const fetcher = useCallback(
     (params: { page?: number; pageSize?: number }) =>
@@ -43,9 +36,39 @@ export default function MyBookingsPage() {
     }
   };
 
+  const handleShowQr = async (bookingId: string) => {
+    setQrLoading(true);
+    try {
+      const { data: blob } = await bookingsApi.getQrCode(bookingId);
+      const url = URL.createObjectURL(blob as Blob);
+      setQrUrl(url);
+    } catch {
+      message.error('Failed to load QR code');
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  const handleCloseQr = () => {
+    if (qrUrl) {
+      URL.revokeObjectURL(qrUrl);
+      setQrUrl(null);
+    }
+  };
+
   const columns: ColumnsType<Booking> = [
     { title: 'Booking #', dataIndex: 'bookingNumber', key: 'bookingNumber', width: 140 },
     { title: 'Event', dataIndex: 'eventTitle', key: 'eventTitle' },
+    {
+      title: 'Details',
+      key: 'details',
+      width: 160,
+      render: (_, record) => {
+        if (record.tableLabel) return `Table ${record.tableLabel}`;
+        if (record.seatsReserved) return `${record.seatsReserved} seat${record.seatsReserved !== 1 ? 's' : ''}`;
+        return '-';
+      },
+    },
     {
       title: 'Status',
       dataIndex: 'status',
@@ -70,10 +93,19 @@ export default function MyBookingsPage() {
     {
       title: 'Actions',
       key: 'actions',
-      width: 120,
+      width: 140,
       render: (_, record) => (
         <Space>
-          <Button size="small" icon={<EyeOutlined />} onClick={() => message.info(`Booking ${record.bookingNumber}`)} />
+          {(record.status === 'Paid' || record.status === 'CheckedIn') && (
+            <Button
+              size="small"
+              icon={<QrcodeOutlined />}
+              onClick={() => handleShowQr(record.id)}
+              loading={qrLoading}
+            >
+              QR
+            </Button>
+          )}
           {record.status === 'Pending' && (
             <Button size="small" danger onClick={() => handleCancel(record.id)}>
               Cancel
@@ -84,44 +116,6 @@ export default function MyBookingsPage() {
     },
   ];
 
-  const expandedRowRender = (booking: Booking) => {
-    const itemColumns: ColumnsType<BookingItem> = [
-      { title: 'Ticket', dataIndex: 'ticketTypeName', key: 'ticketTypeName' },
-      { title: 'Seat/Table', key: 'seat', render: (_, item) => item.tableLabel ?? item.seatLabel ?? '-' },
-      { title: 'Price', dataIndex: 'priceCents', key: 'price', render: (c: number) => centsToUSD(c) },
-      { title: 'Guest', key: 'guest', render: (_, item) => item.guestName ?? '-' },
-      {
-        title: '',
-        key: 'editGuest',
-        width: 40,
-        render: (_, item) => (
-          <Button
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() =>
-              setGuestEdit({
-                bookingId: booking.id,
-                itemId: item.id,
-                guestName: item.guestName,
-                guestEmail: item.guestEmail,
-              })
-            }
-          />
-        ),
-      },
-    ];
-
-    return (
-      <Table
-        columns={itemColumns}
-        dataSource={booking.items}
-        rowKey="id"
-        pagination={false}
-        size="small"
-      />
-    );
-  };
-
   return (
     <>
       <PageHeader title="My Bookings" subtitle="View and manage your event bookings" />
@@ -130,7 +124,6 @@ export default function MyBookingsPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
-        expandable={{ expandedRowRender }}
         pagination={{
           current: page,
           pageSize,
@@ -139,17 +132,19 @@ export default function MyBookingsPage() {
           showSizeChanger: false,
         }}
       />
-      {guestEdit && (
-        <GuestEditModal
-          open
-          bookingId={guestEdit.bookingId}
-          itemId={guestEdit.itemId}
-          initialName={guestEdit.guestName}
-          initialEmail={guestEdit.guestEmail}
-          onClose={() => setGuestEdit(null)}
-          onSaved={refresh}
-        />
-      )}
+      <Modal
+        open={qrUrl !== null}
+        onCancel={handleCloseQr}
+        footer={null}
+        title="Booking QR Code"
+        centered
+      >
+        {qrUrl && (
+          <div style={{ textAlign: 'center', padding: 16 }}>
+            <Image src={qrUrl} alt="Booking QR Code" width={240} preview={false} />
+          </div>
+        )}
+      </Modal>
     </>
   );
 }

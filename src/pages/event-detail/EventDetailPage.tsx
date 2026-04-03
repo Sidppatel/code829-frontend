@@ -4,9 +4,9 @@ import {
   Typography, Card, Row, Col, Tag, Button, Descriptions, Space, Divider, App, theme,
 } from 'antd';
 import {
-  CalendarOutlined, EnvironmentOutlined, TeamOutlined, TagOutlined, ArrowLeftOutlined,
+  CalendarOutlined, EnvironmentOutlined, ArrowLeftOutlined, TagOutlined,
 } from '@ant-design/icons';
-import { eventsApi } from '../../services/api';
+import { eventsApi } from '../../services/eventsApi';
 import { tableBookingApi } from '../../services/tableBookingApi';
 import { bookingsApi } from '../../services/bookingsApi';
 import type { EventDetail, EventTableDto, EventTablesResponse } from '../../types/event';
@@ -15,7 +15,7 @@ import { centsToUSD } from '../../utils/currency';
 import { formatDateRange } from '../../utils/date';
 import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
-import TableSelectionGrid from '../../components/booking/TableSelectionGrid';
+import TableSelectionCanvas from '../../components/booking/TableSelectionCanvas';
 import CheckoutPanel from '../../components/booking/CheckoutPanel';
 import CapacityBookingForm from '../../components/booking/CapacityBookingForm';
 
@@ -33,9 +33,11 @@ export default function EventDetailPage() {
   // Booking flow state
   const [step, setStep] = useState<BookingStep>('info');
   const [tablesData, setTablesData] = useState<EventTablesResponse | null>(null);
-  const [selectedTicketTypeId, setSelectedTicketTypeId] = useState<string>('');
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [tableLock, setTableLock] = useState<TableLock | null>(null);
+  const [lockingTableId, setLockingTableId] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -71,46 +73,51 @@ export default function EventDetailPage() {
     }
     if (!event) return;
 
-    if (event.ticketTypes.length > 0) {
-      setSelectedTicketTypeId(event.ticketTypes[0].id);
-    }
-
     if (event.layoutMode === 'Grid') {
       await loadTables();
       setStep('select-table');
-    } else if (event.layoutMode === 'CapacityOnly') {
+    } else if (event.layoutMode === 'Open') {
       setStep('capacity');
     }
   };
 
-  const handleSelectTable = async (table: EventTableDto) => {
-    if (!event || !selectedTicketTypeId) return;
+  const handleSelectTable = (table: EventTableDto) => {
+    setSelectedTableId(table.id);
+  };
+
+  const handleBookTable = async (table: EventTableDto) => {
+    if (!event) return;
+    setLockingTableId(table.id);
     try {
-      const { data } = await tableBookingApi.lockTable(event.id, table.id, selectedTicketTypeId);
+      const { data } = await tableBookingApi.lockTable(event.id, table.id);
       setTableLock(data);
+      setSelectedTableId(null);
+      setCheckoutError(null);
       setStep('checkout');
       await loadTables();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       message.error(axiosErr?.response?.data?.message ?? 'Failed to reserve table');
+    } finally {
+      setLockingTableId(null);
     }
   };
 
   const handleConfirmPayment = async () => {
-    if (!event || !tableLock || !selectedTicketTypeId) return;
+    if (!event || !tableLock) return;
     setConfirming(true);
+    setCheckoutError(null);
     try {
-      const { data: booking } = await bookingsApi.createTableBooking({
+      const { data: booking } = await bookingsApi.create({
         eventId: event.id,
         tableId: tableLock.tableId,
-        ticketTypeId: selectedTicketTypeId,
       });
       await bookingsApi.confirmPayment(booking.id);
       message.success('Booking confirmed!');
       navigate('/bookings');
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      message.error(axiosErr?.response?.data?.message ?? 'Payment failed');
+      setCheckoutError(axiosErr?.response?.data?.message ?? 'Payment failed');
     } finally {
       setConfirming(false);
     }
@@ -122,6 +129,7 @@ export default function EventDetailPage() {
       await tableBookingApi.releaseTable(event.id, tableLock.tableId);
     } catch { /* ignore release errors */ }
     setTableLock(null);
+    setCheckoutError(null);
     setStep('select-table');
     await loadTables();
   };
@@ -129,6 +137,7 @@ export default function EventDetailPage() {
   const handleLockExpired = () => {
     message.warning('Your table reservation has expired');
     setTableLock(null);
+    setCheckoutError(null);
     setStep('select-table');
     void loadTables();
   };
@@ -147,53 +156,43 @@ export default function EventDetailPage() {
   if (loading) return <LoadingSpinner />;
   if (!event) return null;
 
-  const availableTickets = event.ticketTypes.filter((t) => t.quantityAvailable > 0);
-  const selectedTicketType = event.ticketTypes.find((t) => t.id === selectedTicketTypeId);
+  const feePercent = event.platformFeePercent ?? 0;
 
-  // Table selection / checkout views
+  // Table selection view
   if (step === 'select-table' && tablesData) {
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => setStep('info')}>
           Back to Event
         </Button>
-        <Typography.Title level={3}>Select a Table — {event.title}</Typography.Title>
-        <Row gutter={[24, 24]}>
-          <Col xs={24} lg={16}>
-            <TableSelectionGrid
-              tables={tablesData.tables}
-              gridRows={tablesData.gridRows}
-              gridCols={tablesData.gridCols}
-              onSelectTable={handleSelectTable}
-            />
-          </Col>
-          <Col xs={24} lg={8}>
-            <Card title="Legend" size="small">
-              <Space direction="vertical" size="small">
-                <Space><div className="seat-cell available" style={{ width: 16, height: 16, minWidth: 16 }} /> Available</Space>
-                <Space><div className="seat-cell held" style={{ width: 16, height: 16, minWidth: 16 }} /> Reserved</Space>
-                <Space><div className="seat-cell booked" style={{ width: 16, height: 16, minWidth: 16 }} /> Booked</Space>
-              </Space>
-            </Card>
-          </Col>
-        </Row>
+        <Typography.Title level={3}>Select a Table &mdash; {event.title}</Typography.Title>
+        <TableSelectionCanvas
+          tables={tablesData.tables}
+          selectedTableId={selectedTableId}
+          onSelectTable={handleSelectTable}
+          onBookTable={handleBookTable}
+          lockingTableId={lockingTableId}
+        />
       </Space>
     );
   }
 
-  if (step === 'checkout' && tableLock && selectedTicketType) {
+  // Checkout view (Grid)
+  if (step === 'checkout' && tableLock) {
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={handleCancelLock}>
           Back to Table Selection
         </Button>
-        <Typography.Title level={3}>Complete Your Booking — {event.title}</Typography.Title>
+        <Typography.Title level={3}>Complete Your Booking &mdash; {event.title}</Typography.Title>
         <Row gutter={[24, 24]} justify="center">
           <Col xs={24} sm={16} md={12} lg={8}>
             <CheckoutPanel
+              mode="grid"
               tableLock={tableLock}
-              ticketType={selectedTicketType}
+              platformFeePercent={feePercent}
               confirming={confirming}
+              error={checkoutError}
               onConfirm={handleConfirmPayment}
               onCancel={handleCancelLock}
               onExpired={handleLockExpired}
@@ -204,19 +203,22 @@ export default function EventDetailPage() {
     );
   }
 
+  // Capacity booking view (Open)
   if (step === 'capacity') {
     return (
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => setStep('info')}>
           Back to Event
         </Button>
-        <Typography.Title level={3}>Reserve Seats — {event.title}</Typography.Title>
+        <Typography.Title level={3}>Reserve Seats &mdash; {event.title}</Typography.Title>
         <Row gutter={[24, 24]} justify="center">
           <Col xs={24} sm={16} md={12} lg={8}>
             <CapacityBookingForm
               eventId={event.id}
               maxCapacity={event.maxCapacity ?? 0}
-              ticketTypes={availableTickets}
+              totalSold={event.quantitySold}
+              pricePerPersonCents={event.pricePerPersonCents ?? 0}
+              platformFeePercent={feePercent}
               onBookingCreated={handleCapacityBookingCreated}
             />
           </Col>
@@ -288,50 +290,46 @@ export default function EventDetailPage() {
 
         {/* Booking Panel */}
         <Col xs={24} lg={8}>
-          <Card title="Tickets" styles={{ header: { borderBottom: 'none' } }}>
-            {availableTickets.length > 0 ? (
-              <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                {event.ticketTypes.map((tt) => (
-                  <div
-                    key={tt.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '8px 0',
-                    }}
-                  >
-                    <div>
-                      <Typography.Text strong>{tt.name}</Typography.Text>
-                      {tt.description && (
-                        <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12 }}>
-                          {tt.description}
-                        </Typography.Text>
-                      )}
-                      <Space size="small" style={{ marginTop: 4 }}>
-                        <Tag icon={<TeamOutlined />} color="default">
-                          {tt.quantityAvailable} left
-                        </Tag>
-                      </Space>
-                    </div>
-                    <Typography.Text strong style={{ fontSize: 16 }}>
-                      {tt.priceCents === 0 ? 'Free' : centsToUSD(tt.priceCents)}
+          <Card title="Booking" styles={{ header: { borderBottom: 'none' } }}>
+            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+              {event.layoutMode === 'Grid' ? (
+                <>
+                  <Typography.Text>
+                    Table seating &mdash; select and book an entire table
+                  </Typography.Text>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography.Text type="secondary">
+                      <TagOutlined /> Platform fee applies
                     </Typography.Text>
                   </div>
-                ))}
-                <Divider style={{ margin: '8px 0' }} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography.Text type="secondary">
-                    <TagOutlined /> Platform fee applies
-                  </Typography.Text>
-                </div>
-                <Button type="primary" size="large" block onClick={handleBookNow}>
-                  Book Now
-                </Button>
-              </Space>
-            ) : (
-              <Typography.Text type="secondary">No tickets available</Typography.Text>
-            )}
+                </>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography.Text type="secondary">Price per person</Typography.Text>
+                    <Typography.Text strong>
+                      {event.pricePerPersonCents
+                        ? centsToUSD(event.pricePerPersonCents)
+                        : 'Free'}
+                    </Typography.Text>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography.Text type="secondary">Available</Typography.Text>
+                    <Typography.Text>
+                      {(event.maxCapacity ?? 0) - event.quantitySold} of {event.maxCapacity ?? 0} seats
+                    </Typography.Text>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography.Text type="secondary">
+                      <TagOutlined /> Platform fee applies
+                    </Typography.Text>
+                  </div>
+                </>
+              )}
+              <Button type="primary" size="large" block onClick={handleBookNow}>
+                Book Now
+              </Button>
+            </Space>
           </Card>
         </Col>
       </Row>

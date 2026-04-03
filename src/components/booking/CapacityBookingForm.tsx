@@ -1,36 +1,40 @@
 import { useState } from 'react';
-import { Button, Card, InputNumber, Select, Space, Typography, Divider, App } from 'antd';
-import type { TicketType } from '../../types/event';
+import { Button, Card, InputNumber, Space, Typography, Divider, App } from 'antd';
+import { TeamOutlined } from '@ant-design/icons';
 import { centsToUSD } from '../../utils/currency';
 import { bookingsApi } from '../../services/bookingsApi';
 
 interface Props {
   eventId: string;
   maxCapacity: number;
-  ticketTypes: TicketType[];
+  totalSold: number;
+  pricePerPersonCents: number;
+  platformFeePercent: number;
   onBookingCreated: (bookingId: string) => void;
 }
 
-export default function CapacityBookingForm({ eventId, maxCapacity, ticketTypes, onBookingCreated }: Props) {
+export default function CapacityBookingForm({
+  eventId,
+  maxCapacity,
+  totalSold,
+  pricePerPersonCents,
+  platformFeePercent,
+  onBookingCreated,
+}: Props) {
   const [seats, setSeats] = useState(1);
-  const [ticketTypeId, setTicketTypeId] = useState<string>(ticketTypes[0]?.id ?? '');
   const [loading, setLoading] = useState(false);
   const { message } = App.useApp();
 
-  const selectedType = ticketTypes.find((t) => t.id === ticketTypeId);
-  const price = selectedType?.priceCents ?? 0;
-  const fee = selectedType?.platformFeeCents ?? 0;
-  const subtotal = price * seats;
-  const totalFee = fee * seats;
-  const total = subtotal + totalFee;
+  const available = maxCapacity - totalSold;
+  const subtotal = pricePerPersonCents * seats;
+  const feeCents = Math.round(subtotal * (platformFeePercent / 100));
+  const total = subtotal + feeCents;
 
   const handleBook = async () => {
-    if (!ticketTypeId) return;
     setLoading(true);
     try {
-      const { data } = await bookingsApi.createCapacityBooking({
+      const { data } = await bookingsApi.create({
         eventId,
-        ticketTypeId,
         seatsReserved: seats,
       });
       message.success('Booking created');
@@ -46,32 +50,38 @@ export default function CapacityBookingForm({ eventId, maxCapacity, ticketTypes,
   return (
     <Card title="Reserve Seats" styles={{ header: { borderBottom: 'none' } }}>
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-        <div>
-          <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>
-            Ticket Type
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 12px',
+            borderRadius: 'var(--border-radius-sm, 6px)',
+          }}
+        >
+          <TeamOutlined />
+          <Typography.Text>
+            {available} of {maxCapacity} seats available
           </Typography.Text>
-          <Select
-            value={ticketTypeId}
-            onChange={setTicketTypeId}
-            style={{ width: '100%' }}
-            options={ticketTypes.map((t) => ({
-              value: t.id,
-              label: `${t.name} — ${centsToUSD(t.priceCents)}`,
-            }))}
-          />
         </div>
 
         <div>
           <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>
-            Number of Seats (max {maxCapacity})
+            Number of Seats
           </Typography.Text>
           <InputNumber
             min={1}
-            max={maxCapacity}
+            max={available}
             value={seats}
             onChange={(v) => setSeats(v ?? 1)}
             style={{ width: '100%' }}
+            disabled={available <= 0}
           />
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography.Text type="secondary">Price per person</Typography.Text>
+          <Typography.Text>{centsToUSD(pricePerPersonCents)}</Typography.Text>
         </div>
 
         <Divider style={{ margin: '8px 0' }} />
@@ -81,8 +91,8 @@ export default function CapacityBookingForm({ eventId, maxCapacity, ticketTypes,
           <Typography.Text>{centsToUSD(subtotal)}</Typography.Text>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography.Text type="secondary">Fee</Typography.Text>
-          <Typography.Text type="secondary">{centsToUSD(totalFee)}</Typography.Text>
+          <Typography.Text type="secondary">Platform Fee ({platformFeePercent}%)</Typography.Text>
+          <Typography.Text type="secondary">{centsToUSD(feeCents)}</Typography.Text>
         </div>
         <Divider style={{ margin: '8px 0' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -90,7 +100,14 @@ export default function CapacityBookingForm({ eventId, maxCapacity, ticketTypes,
           <Typography.Text strong style={{ fontSize: 18 }}>{centsToUSD(total)}</Typography.Text>
         </div>
 
-        <Button type="primary" size="large" block onClick={handleBook} loading={loading} disabled={!ticketTypeId}>
+        <Button
+          type="primary"
+          size="large"
+          block
+          onClick={handleBook}
+          loading={loading}
+          disabled={available <= 0}
+        >
           Book {seats} {seats === 1 ? 'Seat' : 'Seats'}
         </Button>
       </Space>

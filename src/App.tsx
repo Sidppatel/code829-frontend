@@ -10,7 +10,6 @@ import DeveloperLayout from './components/layout/DeveloperLayout';
 const HomePage = lazy(() => import('./pages/home/HomePage'));
 const EventsPage = lazy(() => import('./pages/events/EventsPage'));
 const EventDetailPage = lazy(() => import('./pages/event-detail/EventDetailPage'));
-const InvitationPage = lazy(() => import('./pages/invitation/InvitationPage'));
 const LoginPage = lazy(() => import('./pages/login/LoginPage'));
 const MyBookingsPage = lazy(() => import('./pages/bookings/MyBookingsPage'));
 const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
@@ -46,7 +45,6 @@ export default function App() {
               <Route index element={<HomePage />} />
               <Route path="events" element={<EventsPage />} />
               <Route path="events/:slug" element={<EventDetailPage />} />
-              <Route path="invitation/:token" element={<InvitationPage />} />
               <Route path="login" element={<LoginPage />} />
             </Route>
 
