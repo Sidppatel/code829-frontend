@@ -19,6 +19,12 @@ interface Props {
   onLockExpired: () => void;
 }
 
+/** Derive display label from grid position: col letter + row number (e.g. A1, B3) */
+function gridLabel(gridRow: number, gridCol: number): string {
+  const col = String.fromCharCode(65 + (gridCol % 26));
+  return `${col}${gridRow + 1}`;
+}
+
 const SHAPE_RADIUS: Record<string, string> = {
   Round: '50%',
   Cocktail: '50%',
@@ -95,12 +101,13 @@ export default function TableSelectionCanvas({
   }, [token]);
 
   const getTooltip = (table: EventTableDto): string => {
-    if (table.isLockedByYou) return `${table.label} — Reserved by you (click to view details)`;
-    if (lockedTable && table.status === 'Available') return `${table.label} — ${table.capacity} seats — ${centsToUSD(table.priceCents)} — Click to switch`;
+    const label = gridLabel(table.gridRow, table.gridCol);
+    if (table.isLockedByYou) return `${label} — Reserved by you (click to view details)`;
+    if (lockedTable && table.status === 'Available') return `${label} — ${table.capacity} seats — ${centsToUSD(table.priceCents)} — Click to switch`;
     switch (table.status) {
-      case 'Booked': return `${table.label} — Booked`;
-      case 'Held': return `${table.label} — Reserved by another guest`;
-      default: return `${table.label} — ${table.capacity} seats — ${centsToUSD(table.priceCents)} — Click to reserve`;
+      case 'Booked': return `${label} — Booked`;
+      case 'Held': return `${label} — Reserved by another guest`;
+      default: return `${label} — ${table.capacity} seats — ${centsToUSD(table.priceCents)} — Click to reserve`;
     }
   };
 
@@ -122,12 +129,12 @@ export default function TableSelectionCanvas({
     cellMap.set(`${t.gridRow},${t.gridCol}`, t);
   }
 
-  // Column headers
+  // Column headers (A, B, C, ...)
   const colHeaders: React.ReactNode[] = [<div key="corner" className="ts-header-corner" />];
   for (let c = 0; c < gridCols; c++) {
     colHeaders.push(
       <div key={`col-${c}`} className="ts-col-header">
-        {c + 1}
+        {String.fromCharCode(65 + (c % 26))}
       </div>
     );
   }
@@ -192,7 +199,7 @@ export default function TableSelectionCanvas({
               )}
 
               <Typography.Text strong className="ts-table-label">
-                {table.label}
+                {gridLabel(table.gridRow, table.gridCol)}
               </Typography.Text>
               <span className="ts-table-meta">
                 {table.capacity}p &middot; {centsToUSD(table.priceCents)}
@@ -267,7 +274,7 @@ export default function TableSelectionCanvas({
         {lockedTable && lockedTable.isLockedByYou && (
           <Card
             size="small"
-            title={`Table ${lockedTable.label} — Reserved`}
+            title={`Table ${gridLabel(lockedTable.gridRow, lockedTable.gridCol)} — Reserved`}
             className="ts-detail-card"
           >
             <Space direction="vertical" size="small" style={{ width: '100%' }}>
