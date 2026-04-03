@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Tag, Card, InputNumber, Button, Spin, App, Pagination, Modal, Typography, Divider } from 'antd';
-import { DollarOutlined, UndoOutlined } from '@ant-design/icons';
+import { Table, Tag, Card, InputNumber, Button, Spin, App, Pagination, Modal, Typography, Divider, Input } from 'antd';
+import { DollarOutlined, UndoOutlined, SearchOutlined } from '@ant-design/icons';
 import { developerApi } from '../../../services/api';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import { centsToUSD } from '../../../utils/currency';
@@ -9,11 +9,22 @@ import type { DevEventListItem, EventFeeInfo } from '../../../services/developer
 import type { PagedResponse } from '../../../types/shared';
 import PageHeader from '../../../components/shared/PageHeader';
 
+function getStatusColor(status: string): string {
+  switch (status) {
+    case 'Published': return 'green';
+    case 'Draft': return 'orange';
+    case 'Cancelled': return 'red';
+    case 'Completed': return 'default';
+    default: return 'default';
+  }
+}
+
 export default function DevEventsPage() {
   const isMobile = useIsMobile();
   const [events, setEvents] = useState<DevEventListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const { message } = App.useApp();
@@ -21,7 +32,7 @@ export default function DevEventsPage() {
   const loadEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await developerApi.getEvents({ page, pageSize: 20 });
+      const { data } = await developerApi.getEvents({ page, pageSize: 20, search: search || undefined });
       const paged = data as PagedResponse<DevEventListItem>;
       setEvents(paged.items);
       setTotal(paged.total);
@@ -30,7 +41,7 @@ export default function DevEventsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, message]);
+  }, [page, search, message]);
 
   useEffect(() => { void loadEvents(); }, [loadEvents]);
 
@@ -44,7 +55,10 @@ export default function DevEventsPage() {
       title: 'Type', dataIndex: 'layoutMode', key: 'layoutMode', width: 100,
       render: (m: string) => <Tag color={m === 'Open' ? 'blue' : 'purple'}>{m}</Tag>,
     },
-    { title: 'Status', dataIndex: 'status', key: 'status', width: 100 },
+    {
+      title: 'Status', dataIndex: 'status', key: 'status', width: 110,
+      render: (s: string) => <Tag color={getStatusColor(s)}>{s}</Tag>,
+    },
     {
       title: 'Fee', key: 'fee', width: 120,
       render: (_: unknown, record: DevEventListItem) => (
@@ -67,6 +81,14 @@ export default function DevEventsPage() {
     <div>
       <PageHeader title="Platform Fees" subtitle="Manage per-event platform fees" />
 
+      <Input
+        placeholder="Search events..."
+        prefix={<SearchOutlined />}
+        allowClear
+        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+        style={{ maxWidth: 300, width: '100%', marginBottom: 16 }}
+      />
+
       {isMobile ? (
         <Spin spinning={loading}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -82,7 +104,10 @@ export default function DevEventsPage() {
                   <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 8 }}>
                     {ev.title}
                   </span>
-                  <Tag color={ev.layoutMode === 'Open' ? 'blue' : 'purple'}>{ev.layoutMode}</Tag>
+                  <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                    <Tag color={getStatusColor(ev.status)} style={{ margin: 0 }}>{ev.status}</Tag>
+                    <Tag color={ev.layoutMode === 'Open' ? 'blue' : 'purple'} style={{ margin: 0 }}>{ev.layoutMode}</Tag>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)' }}>
                   <span>{formatEventDate(ev.startDate)}</span>

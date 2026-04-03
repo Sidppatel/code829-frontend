@@ -90,7 +90,7 @@ export const developerApi = {
   updateUserRole: (id: string, role: string) =>
     apiClient.put(`/developer/users/${id}/role`, { role }),
 
-  getEvents: (params?: { page?: number; pageSize?: number }) =>
+  getEvents: (params?: { page?: number; pageSize?: number; search?: string }) =>
     apiClient.get<PagedResponse<DevEventListItem>>('/developer/events', { params }),
 
   getEventFees: (eventId: string) =>
