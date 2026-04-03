@@ -9,6 +9,7 @@ import {
   EnvironmentOutlined,
   AppstoreOutlined,
   TeamOutlined,
+  ScanOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { adminEventsApi } from '../../../services/api';
@@ -175,7 +176,17 @@ export default function EventsListPage() {
               </Tooltip>
             </Popconfirm>
           )}
-          <Tooltip title="View Details">
+          {(record.status === 'Published' || record.status === 'Completed') && (
+            <Tooltip title="Check-In">
+              <Button
+                size="small"
+                icon={<ScanOutlined />}
+                onClick={() => navigate(`/admin/checkin/${record.id}`)}
+                style={{ borderRadius: 8, borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}
+              />
+            </Tooltip>
+          )}
+          <Tooltip title="Manage">
             <Button
               size="small"
               icon={<EyeOutlined />}
@@ -272,6 +283,16 @@ export default function EventsListPage() {
                     <SendOutlined /> Publish
                   </Button>
                 </Popconfirm>
+              )}
+              {(record.status === 'Published' || record.status === 'Completed') && (
+                <Button
+                  size="small"
+                  icon={<ScanOutlined />}
+                  onClick={() => navigate(`/admin/checkin/${record.id}`)}
+                  style={{ flex: 1, borderRadius: 8, borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}
+                >
+                  Check-In
+                </Button>
               )}
               <Button
                 size="small"
