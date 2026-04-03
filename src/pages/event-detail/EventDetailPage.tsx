@@ -57,13 +57,8 @@ export default function EventDetailPage() {
   const loadTables = useCallback(async () => {
     if (!event) return;
     try {
-      const [tablesRes, locksRes] = await Promise.all([
-        eventsApi.getTables(event.id),
-        tableBookingApi.getMyLocks(event.id),
-      ]);
-      setTablesData(tablesRes.data);
-      // Always sync tableLock from server so checkout works after page reload
-      setTableLock(locksRes.data.length > 0 ? locksRes.data[0] : null);
+      const { data } = await eventsApi.getTables(event.id);
+      setTablesData(data);
     } catch {
       message.error('Failed to load table layout');
     }
@@ -78,7 +73,13 @@ export default function EventDetailPage() {
     if (!event) return;
 
     if (event.layoutMode === 'Grid') {
-      await loadTables();
+      // Fetch tables + any existing lock in one round-trip
+      const [tablesRes, locksRes] = await Promise.all([
+        eventsApi.getTables(event.id),
+        tableBookingApi.getMyLocks(event.id),
+      ]);
+      setTablesData(tablesRes.data);
+      if (locksRes.data.length > 0) setTableLock(locksRes.data[0]);
       setStep('select-table');
     } else if (event.layoutMode === 'Open') {
       setStep('capacity');
