@@ -212,7 +212,12 @@ export default function EventWizardPage() {
             label="Date Range"
             rules={[{ required: true }]}
           >
-            <DatePicker.RangePicker showTime style={{ width: '100%' }} />
+            <DatePicker.RangePicker
+              showTime={{ format: 'hh:mm A', use12Hours: true }}
+              format="MMM D, YYYY hh:mm A"
+              placeholder={['Start date & time', 'End date & time']}
+              style={{ width: '100%' }}
+            />
           </Form.Item>
 
           <Row gutter={16}>
