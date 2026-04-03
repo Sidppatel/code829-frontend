@@ -10,6 +10,7 @@ import {
   SettingOutlined,
   MenuOutlined,
   CloseOutlined,
+  ScanOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '../../hooks/useAuth';
@@ -42,6 +43,9 @@ export default function PublicLayout() {
   const userMenuItems: MenuProps['items'] = [
     { key: 'bookings', label: 'My Bookings', icon: <BookOutlined />, onClick: () => navigate('/bookings') },
     { key: 'profile', label: 'Profile', icon: <UserOutlined />, onClick: () => navigate('/profile') },
+    ...(hasRole('Staff') ? [
+      { key: 'checkin', label: 'Staff Check-In', icon: <ScanOutlined />, onClick: () => navigate('/staff/checkin/select') },
+    ] : []),
     ...(hasRole('Admin') ? [
       { key: 'admin', label: 'Admin Panel', icon: <SettingOutlined />, onClick: () => navigate('/admin') },
     ] : []),
@@ -161,6 +165,9 @@ export default function PublicLayout() {
               ...(isAuthenticated ? [
                 { key: '/bookings', label: <Link to="/bookings">My Bookings</Link>, icon: <BookOutlined /> },
                 { key: '/profile', label: <Link to="/profile">Profile</Link>, icon: <UserOutlined /> },
+              ] : []),
+              ...(hasRole('Staff') ? [
+                { key: '/staff', label: <Link to="/staff/checkin/select">Staff Check-In</Link>, icon: <ScanOutlined /> },
               ] : []),
               ...(hasRole('Admin') ? [
                 { key: '/admin', label: <Link to="/admin">Admin Panel</Link>, icon: <SettingOutlined /> },

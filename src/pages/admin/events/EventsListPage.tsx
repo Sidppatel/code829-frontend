@@ -181,7 +181,7 @@ export default function EventsListPage() {
               <Button
                 size="small"
                 icon={<ScanOutlined />}
-                onClick={() => navigate(`/admin/checkin/${record.id}`)}
+                onClick={() => navigate(`/staff/checkin/${record.id}`)}
                 style={{ borderRadius: 8, borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}
               />
             </Tooltip>
@@ -288,7 +288,7 @@ export default function EventsListPage() {
                 <Button
                   size="small"
                   icon={<ScanOutlined />}
-                  onClick={() => navigate(`/admin/checkin/${record.id}`)}
+                  onClick={() => navigate(`/staff/checkin/${record.id}`)}
                   style={{ flex: 1, borderRadius: 8, borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}
                 >
                   Check-In

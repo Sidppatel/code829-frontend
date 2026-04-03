@@ -268,7 +268,7 @@ export default function EventManagePage() {
       <Button
         block
         icon={<CheckCircleOutlined />}
-        onClick={() => navigate(`/admin/checkin/${id}`)}
+        onClick={() => navigate(`/staff/checkin/${id}`)}
         style={{ borderRadius: 10, marginBottom: 8 }}
       >
         Check-In
