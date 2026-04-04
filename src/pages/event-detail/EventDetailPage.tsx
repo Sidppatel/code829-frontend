@@ -266,7 +266,7 @@ export default function EventDetailPage() {
             <CheckoutPanel
               mode="grid"
               tableLock={tableLock}
-              platformFeeCents={feeCents}
+              platformFeeCents={tableLock.platformFeeCents}
               confirming={confirming}
               setConfirming={setConfirming}
               error={checkoutError}

@@ -56,6 +56,7 @@ export interface TableLock {
   status: string;
   capacity: number;
   priceCents: number;
+  platformFeeCents: number;
   expiresAt: string;
 }
 
