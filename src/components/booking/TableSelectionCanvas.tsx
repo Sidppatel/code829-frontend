@@ -263,7 +263,7 @@ export default function TableSelectionCanvas({
 
       <div className="ts-main">
         {/* Grid floor plan */}
-        <div className="ts-grid">
+        <div className="ts-grid" role="grid" aria-label="Table selection floor plan">
           <div className="ts-grid-row ts-header-row">{colHeaders}</div>
           {rows}
         </div>
