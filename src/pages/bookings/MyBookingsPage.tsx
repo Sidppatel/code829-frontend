@@ -2,10 +2,12 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Table, Button, App, Space, Modal, Image, Card, Empty, Pagination, Skeleton, Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { QrcodeOutlined, CalendarOutlined, SearchOutlined, SendOutlined } from '@ant-design/icons';
+import { QrcodeOutlined, CalendarOutlined, SearchOutlined, SendOutlined, GiftOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { bookingsApi } from '../../services/bookingsApi';
+import { ticketsApi } from '../../services/ticketsApi';
 import type { Booking } from '../../types/booking';
+import type { GuestTicket } from '../../types/ticket';
 import { usePagedTable } from '../../hooks/usePagedTable';
 import { centsToUSD } from '../../utils/currency';
 import { formatEventDate } from '../../utils/date';
@@ -25,6 +27,9 @@ export default function MyBookingsPage() {
   const [qrLoading, setQrLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const confirmedRef = useRef(false);
+  const [guestTickets, setGuestTickets] = useState<GuestTicket[]>([]);
+  const [guestQrUrl, setGuestQrUrl] = useState<string | null>(null);
+  const [guestQrLabel, setGuestQrLabel] = useState('');
 
   const fetcher = useCallback(
     (params: BookingFilters) =>
@@ -57,6 +62,32 @@ export default function MyBookingsPage() {
     };
     void confirm();
   }, [searchParams, setSearchParams, message, refresh]);
+
+  // Fetch guest tickets (tickets shared with this user via invite)
+  useEffect(() => {
+    const loadGuestTickets = async () => {
+      try {
+        const { data: tickets } = await ticketsApi.getMine();
+        // Filter out tickets for bookings the user owns (those show in the main list)
+        // We only want tickets where the user is a guest, not the booker
+        setGuestTickets(tickets);
+      } catch {
+        // Silently fail — guest tickets are supplementary
+      }
+    };
+    void loadGuestTickets();
+  }, []);
+
+  const handleGuestQr = async (ticket: GuestTicket) => {
+    try {
+      const { data: blob } = await ticketsApi.getMyTicketQr(ticket.id);
+      const url = URL.createObjectURL(blob as Blob);
+      setGuestQrUrl(url);
+      setGuestQrLabel(`Seat #${ticket.seatNumber} — ${ticket.eventTitle}`);
+    } catch {
+      message.error('Failed to load QR code');
+    }
+  };
 
   const handleCancel = async (id: string) => {
     try {
@@ -281,6 +312,40 @@ export default function MyBookingsPage() {
         )}
       </div>
 
+      {/* Guest Tickets Section */}
+      {guestTickets.length > 0 && (
+        <div style={{ marginTop: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <GiftOutlined style={{ fontSize: 18, color: 'var(--accent-violet)' }} />
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>Guest Tickets</h3>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+            {guestTickets.map((ticket) => (
+              <Card
+                key={ticket.id}
+                size="small"
+                style={{ borderRadius: 12 }}
+                styles={{ body: { padding: 16 } }}
+              >
+                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{ticket.eventTitle}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+                  <span><CalendarOutlined style={{ marginRight: 6 }} />{formatEventDate(ticket.eventDate)}</span>
+                  <span><EnvironmentOutlined style={{ marginRight: 6 }} />{ticket.venueName}</span>
+                  <span>Seat #{ticket.seatNumber}{ticket.tableLabel ? ` • Table ${ticket.tableLabel}` : ''}</span>
+                </div>
+                <Button
+                  size="small"
+                  icon={<QrcodeOutlined />}
+                  onClick={() => handleGuestQr(ticket)}
+                >
+                  QR Code
+                </Button>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
       <Modal
         open={qrUrl !== null}
         onCancel={handleCloseQr}
@@ -291,6 +356,27 @@ export default function MyBookingsPage() {
         {qrUrl && (
           <div style={{ textAlign: 'center', padding: 16 }}>
             <Image src={qrUrl} alt="Booking QR Code" width={240} preview={false} />
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        open={guestQrUrl !== null}
+        onCancel={() => {
+          if (guestQrUrl) URL.revokeObjectURL(guestQrUrl);
+          setGuestQrUrl(null);
+          setGuestQrLabel('');
+        }}
+        footer={null}
+        title={guestQrLabel}
+        centered
+      >
+        {guestQrUrl && (
+          <div style={{ textAlign: 'center', padding: 16 }}>
+            <Image src={guestQrUrl} alt="Ticket QR Code" width={240} preview={false} />
+            <div style={{ marginTop: 12, color: 'var(--text-muted)', fontSize: 13 }}>
+              Show this QR code at the venue for check-in
+            </div>
           </div>
         )}
       </Modal>
