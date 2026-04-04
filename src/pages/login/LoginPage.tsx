@@ -89,6 +89,10 @@ export default function LoginPage() {
                 We sent a login link to your email address.
               </Typography.Text>
               <br />
+              <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 8, display: 'inline-block' }}>
+                Don't see it? Check your spam or junk folder.
+              </Typography.Text>
+              <br />
               <Button
                 type="link"
                 onClick={() => setMagicLinkSent(false)}

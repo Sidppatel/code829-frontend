@@ -16,7 +16,8 @@ export default function VerifyMagicLinkPage() {
     if (verifiedRef.current) return;
     const token = searchParams.get('token');
     if (!token) {
-      setError('No token provided');
+      // Defer setState to avoid synchronous setState in effect body
+      queueMicrotask(() => setError('No token provided'));
       return;
     }
 
