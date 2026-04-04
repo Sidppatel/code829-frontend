@@ -25,8 +25,12 @@ export default function VerifyMagicLinkPage() {
       try {
         const { data } = await authApi.verifyMagicLink(token);
         setAuth(data.token, data.user);
-        message.success(`Welcome, ${data.user.firstName}!`);
-        navigate('/', { replace: true });
+        if (!data.user.hasCompletedOnboarding) {
+          navigate('/onboarding', { replace: true });
+        } else {
+          message.success(`Welcome back, ${data.user.firstName}!`);
+          navigate('/', { replace: true });
+        }
       } catch {
         setError('This link is invalid or has expired. Please request a new one.');
       }
