@@ -275,7 +275,7 @@ export default function TableSelectionCanvas({
             title={`Table ${gridLabel(lockedTable.gridRow, lockedTable.gridCol)} — Reserved`}
             className="ts-detail-card"
           >
-            <Space direction="vertical" size="small" style={{ width: '100%' }}>
+            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
               {lockedTable.holdExpiresAt && (
                 <TableLockTimer expiresAt={lockedTable.holdExpiresAt} onExpired={onLockExpired} />
               )}

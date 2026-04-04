@@ -33,7 +33,7 @@ export default function PageHeader({ title, subtitle, extra, onBack }: Props) {
             onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
           />
         )}
-        <Space direction="vertical" size={0} style={{ minWidth: 0 }}>
+        <Space orientation="vertical" size={0} style={{ minWidth: 0 }}>
           <Typography.Title level={2} style={{ margin: 0, whiteSpace: 'nowrap' }}>{title}</Typography.Title>
           {subtitle && <Typography.Text type="secondary">{subtitle}</Typography.Text>}
         </Space>

@@ -310,7 +310,7 @@ export default function LayoutEditorPage() {
 
       {hasLockedTables && (
         <Alert
-          message={`${lockedTableIds.size} table(s) locked — active bookings`}
+          title={`${lockedTableIds.size} table(s) locked — active bookings`}
           description="Locked tables can't be moved or removed. You can still add and modify other tables."
           type="info"
           icon={<InfoCircleOutlined />}

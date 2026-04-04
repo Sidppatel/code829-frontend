@@ -45,10 +45,10 @@ export default function StripePaymentForm({ onSuccess, onCancel, confirming, set
   };
 
   return (
-    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+    <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
       <PaymentElement />
 
-      {error && <Alert type="error" message={error} showIcon />}
+      {error && <Alert type="error" title={error} showIcon />}
 
       <Button
         type="primary"

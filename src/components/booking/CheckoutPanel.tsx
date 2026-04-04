@@ -56,7 +56,7 @@ export default function CheckoutPanel(props: Props) {
 
   return (
     <Card title="Checkout" styles={{ header: { borderBottom: 'none' } }}>
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         {mode === 'grid' && (
           <TableLockTimer
             expiresAt={(props as GridCheckoutProps).tableLock.expiresAt}
@@ -100,7 +100,7 @@ export default function CheckoutPanel(props: Props) {
         </div>
 
         {error && (
-          <Alert type="error" message={error} showIcon />
+          <Alert type="error" title={error} showIcon />
         )}
 
         {clientSecret && stripePromise ? (

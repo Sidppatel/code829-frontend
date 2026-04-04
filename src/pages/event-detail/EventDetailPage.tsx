@@ -278,7 +278,7 @@ export default function EventDetailPage() {
   // Table selection view
   if (step === 'select-table' && tablesData) {
     return (
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => { void handleCancelLock(); setStep('info'); }}>
           Back to Event
         </Button>
@@ -301,7 +301,7 @@ export default function EventDetailPage() {
   // Checkout view (Grid)
   if (step === 'checkout' && tableLock) {
     return (
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={handleCancelLock}>
           Back to Table Selection
         </Button>
@@ -330,7 +330,7 @@ export default function EventDetailPage() {
   // Capacity seat selection view (Open)
   if (step === 'capacity') {
     return (
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => setStep('info')}>
           Back to Event
         </Button>
@@ -353,7 +353,7 @@ export default function EventDetailPage() {
   // Checkout confirmation view (Open)
   if (step === 'checkout-open') {
     return (
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={handleCancelOpen}>
           Back to Seat Selection
         </Button>
@@ -381,7 +381,7 @@ export default function EventDetailPage() {
 
   // Default: event info view
   return (
-    <Space direction="vertical" size="large" style={{ width: '100%' }}>
+    <Space orientation="vertical" size="large" style={{ width: '100%' }}>
       <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/events')}>
         All Events
       </Button>
@@ -408,7 +408,7 @@ export default function EventDetailPage() {
 
       <Row gutter={[32, 24]}>
         <Col xs={24} lg={16}>
-          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+          <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
             <div>
               <Tag color="blue">{event.category}</Tag>
               {event.isFeatured && <Tag color="gold">Featured</Tag>}
@@ -443,7 +443,7 @@ export default function EventDetailPage() {
 
         <Col xs={24} lg={8}>
           <Card title="Booking" styles={{ header: { borderBottom: 'none' } }}>
-            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
               {event.layoutMode === 'Grid' ? (
                 <>
                   <Typography.Text>

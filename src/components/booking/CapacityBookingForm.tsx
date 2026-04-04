@@ -26,7 +26,7 @@ export default function CapacityBookingForm({
 
   return (
     <Card title="Reserve Seats" styles={{ header: { borderBottom: 'none' } }}>
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px' }}>
           <TeamOutlined />
           <Typography.Text>{available} of {maxCapacity} seats available</Typography.Text>
