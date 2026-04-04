@@ -19,7 +19,7 @@ jobs:
 
       - run: npm run build
         env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_APP_NAME: Code829
           VITE_DEFAULT_THEME: system
 
