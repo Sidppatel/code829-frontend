@@ -108,8 +108,9 @@ export default function ProfilePage() {
             name="optInLocationEmail"
             label="Receive emails about events near you"
             valuePropName="checked"
+            tooltip="Coming soon"
           >
-            <Switch />
+            <Switch disabled />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={saving}>

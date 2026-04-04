@@ -35,6 +35,46 @@ interface Props {
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 const DEBOUNCE_MS = 400;
 
+const US_STATES: Record<string, string> = {
+  'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR',
+  'California': 'CA', 'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE',
+  'Florida': 'FL', 'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID',
+  'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA', 'Kansas': 'KS',
+  'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD',
+  'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS',
+  'Missouri': 'MO', 'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV',
+  'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY',
+  'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK',
+  'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
+  'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT',
+  'Vermont': 'VT', 'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV',
+  'Wisconsin': 'WI', 'Wyoming': 'WY', 'District of Columbia': 'DC',
+};
+
+function toStateAbbr(state: string): string {
+  if (!state) return '';
+  if (state.length === 2) return state.toUpperCase();
+  return US_STATES[state] ?? state;
+}
+
+/** Build a short display label: "600 Townsend Circle, Chickasaw, AL 36611" */
+function formatSuggestion(result: NominatimResult): string {
+  const addr = result.address;
+  const street = [addr.house_number, addr.road].filter(Boolean).join(' ');
+  const city = addr.city || addr.town || addr.village || '';
+  const state = toStateAbbr(addr.state ?? '');
+  const zip = addr.postcode ?? '';
+
+  const parts: string[] = [];
+  if (street) parts.push(street);
+  if (city) parts.push(city);
+  if (state && zip) parts.push(`${state} ${zip}`);
+  else if (state) parts.push(state);
+  else if (zip) parts.push(zip);
+
+  return parts.join(', ');
+}
+
 export default function AddressAutocomplete({ value, onChange, onSelect, placeholder }: Props) {
   const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -107,7 +147,7 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
     const addr = result.address;
     const street = [addr.house_number, addr.road].filter(Boolean).join(' ');
     const city = addr.city || addr.town || addr.village || addr.county || '';
-    const stateAbbr = addr.state || '';
+    const stateAbbr = toStateAbbr(addr.state ?? '');
     const zip = addr.postcode || '';
 
     onChange?.(street);
@@ -141,7 +181,7 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
               onClick={() => handleSelect(s)}
             >
               <EnvironmentOutlined style={{ color: 'var(--accent-violet)', flexShrink: 0, marginTop: 2 }} />
-              <span>{s.display_name}</span>
+              <span>{formatSuggestion(s)}</span>
             </div>
           ))}
         </div>,
