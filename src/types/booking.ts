@@ -17,9 +17,6 @@ export interface Booking {
   createdAt: string;
   clientSecret?: string;
 }
-
-export type BookingDetail = Booking;
-
 export type BookingStatus = 'Pending' | 'Paid' | 'CheckedIn' | 'Cancelled' | 'Refunded' | 'Expired';
 
 export interface PaymentInfo {

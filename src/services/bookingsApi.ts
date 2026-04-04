@@ -1,5 +1,5 @@
 import apiClient from '../lib/axios';
-import type { Booking, BookingDetail } from '../types/booking';
+import type { Booking } from '../types/booking';
 import type { PagedResponse } from '../types/shared';
 
 export interface CreateBookingRequest {
@@ -13,16 +13,16 @@ export const bookingsApi = {
     apiClient.post<Booking>('/bookings', request),
 
   confirmPayment: (id: string) =>
-    apiClient.post<BookingDetail>(`/bookings/${id}/confirm`),
+    apiClient.post<Booking>(`/bookings/${id}/confirm`),
 
   confirmByPaymentIntent: (paymentIntentId: string) =>
-    apiClient.post<BookingDetail>('/bookings/confirm-by-intent', { paymentIntentId }),
+    apiClient.post<Booking>('/bookings/confirm-by-intent', { paymentIntentId }),
 
   cancel: (id: string) =>
-    apiClient.post<BookingDetail>(`/bookings/${id}/cancel`),
+    apiClient.post<Booking>(`/bookings/${id}/cancel`),
 
   getById: (id: string) =>
-    apiClient.get<BookingDetail>(`/bookings/${id}`),
+    apiClient.get<Booking>(`/bookings/${id}`),
 
   getMine: (page = 1, pageSize = 20, search?: string) =>
     apiClient.get<PagedResponse<Booking>>('/bookings/mine', { params: { page, pageSize, search: search || undefined } }),
