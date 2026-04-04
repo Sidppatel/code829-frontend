@@ -46,6 +46,47 @@ export default function EventDetailPage() {
   const [bookingId, setBookingId] = useState<string | null>(null);
   const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
 
+  // Refs for cleanup (accessible in beforeunload/unmount)
+  const tableLockRef = useRef<TableLock | null>(null);
+  const eventRef = useRef<EventDetail | null>(null);
+
+  useEffect(() => { tableLockRef.current = tableLock; }, [tableLock]);
+  useEffect(() => { eventRef.current = event; }, [event]);
+
+  // Release table lock on page leave (close tab, navigate away, refresh)
+  useEffect(() => {
+    const releaseLock = () => {
+      const lock = tableLockRef.current;
+      const ev = eventRef.current;
+      if (!lock || !ev) return;
+      // Use sendBeacon for reliable fire-and-forget on page unload
+      const apiUrl = import.meta.env.VITE_API_URL ?? '';
+      const token = localStorage.getItem('auth-storage');
+      if (token) {
+        try {
+          const parsed = JSON.parse(token) as { state?: { token?: string } };
+          const jwt = parsed?.state?.token;
+          if (jwt) {
+            const payload = JSON.stringify({ eventId: ev.id, tableId: lock.tableId });
+            const blob = new Blob([payload], { type: 'application/json' });
+            navigator.sendBeacon(`${apiUrl}/tables/release-beacon?token=${jwt}`, blob);
+          }
+        } catch { /* ignore */ }
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      releaseLock();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Also release on unmount (navigating to different route)
+      releaseLock();
+    };
+  }, []);
+
   // Load Stripe publishable key once
   useEffect(() => {
     const init = async () => {
@@ -161,6 +202,10 @@ export default function EventDetailPage() {
 
   const handleCancelLock = async () => {
     if (!event || !tableLock) return;
+    // Cancel pending booking if one exists
+    if (bookingId) {
+      try { await bookingsApi.cancel(bookingId); } catch { /* ignore */ }
+    }
     try {
       await tableBookingApi.releaseTable(event.id, tableLock.tableId);
     } catch { /* ignore release errors */ }
