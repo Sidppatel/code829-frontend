@@ -61,7 +61,7 @@ export default function EventDetailPage() {
       if (!lock || !ev) return;
       // Use sendBeacon for reliable fire-and-forget on page unload
       const apiUrl = import.meta.env.VITE_API_URL ?? '';
-      const token = localStorage.getItem('auth-storage');
+      const token = localStorage.getItem('code829-auth');
       if (token) {
         try {
           const parsed = JSON.parse(token) as { state?: { token?: string } };
