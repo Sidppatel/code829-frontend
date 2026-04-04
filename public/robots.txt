@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /developer/
+Disallow: /auth/
+Disallow: /onboarding
+
+Sitemap: https://code829.com/sitemap.xml

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Typography, App } from 'antd';
-import { MailOutlined, LoginOutlined } from '@ant-design/icons';
+import { MailOutlined, LoginOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
+import { AxiosError } from 'axios';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 import ThemeToggle from '../../components/shared/ThemeToggle';
@@ -12,9 +13,37 @@ export default function LoginPage() {
   const [devForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { message } = App.useApp();
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
+
+  const startCooldown = useCallback((seconds: number) => {
+    setCooldown(seconds);
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+    cooldownRef.current = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          if (cooldownRef.current) clearInterval(cooldownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+    };
+  }, []);
+
+  const formatCooldown = (s: number) => {
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
+  };
 
   const handleMagicLink = async (values: { email: string }) => {
     setLoading(true);
@@ -22,8 +51,14 @@ export default function LoginPage() {
       await authApi.requestMagicLink(values.email);
       setMagicLinkSent(true);
       message.success('Check your email for the login link');
-    } catch {
-      message.error('Failed to send magic link');
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ retryAfterSeconds?: number }>;
+      if (axiosErr.response?.status === 429 && axiosErr.response.data?.retryAfterSeconds) {
+        startCooldown(axiosErr.response.data.retryAfterSeconds);
+        message.warning('Please wait before requesting another link');
+      } else {
+        message.error('Failed to send magic link');
+      }
     } finally {
       setLoading(false);
     }
@@ -116,6 +151,7 @@ export default function LoginPage() {
                   placeholder="you@example.com"
                   size="large"
                   style={{ borderRadius: 10 }}
+                  disabled={cooldown > 0}
                 />
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
@@ -123,17 +159,22 @@ export default function LoginPage() {
                   type="primary"
                   htmlType="submit"
                   loading={loading}
+                  disabled={cooldown > 0}
                   block
                   size="large"
+                  icon={cooldown > 0 ? <ClockCircleOutlined /> : undefined}
                   style={{
                     fontWeight: 600,
                     height: 44,
                     borderRadius: 99,
-                    background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-violet-dark))',
+                    background: cooldown > 0
+                      ? 'var(--bg-elevated)'
+                      : 'linear-gradient(135deg, var(--accent-violet), var(--accent-violet-dark))',
                     border: 'none',
+                    color: cooldown > 0 ? 'var(--text-muted)' : undefined,
                   }}
                 >
-                  Send Magic Link
+                  {cooldown > 0 ? `Try again in ${formatCooldown(cooldown)}` : 'Send Magic Link'}
                 </Button>
               </Form.Item>
             </Form>
