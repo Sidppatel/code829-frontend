@@ -11,6 +11,7 @@ import {
   MenuOutlined,
   CloseOutlined,
   ScanOutlined,
+  QrcodeOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '../../hooks/useAuth';
@@ -42,6 +43,7 @@ export default function PublicLayout() {
 
   const userMenuItems: MenuProps['items'] = [
     { key: 'bookings', label: 'My Bookings', icon: <BookOutlined />, onClick: () => navigate('/bookings') },
+    { key: 'tickets', label: 'My Tickets', icon: <QrcodeOutlined />, onClick: () => navigate('/tickets') },
     { key: 'profile', label: 'Profile', icon: <UserOutlined />, onClick: () => navigate('/profile') },
     ...(hasRole('Staff') ? [
       { key: 'checkin', label: 'Staff Check-In', icon: <ScanOutlined />, onClick: () => navigate('/staff/checkin/select') },

@@ -2,7 +2,8 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Table, Button, App, Space, Modal, Image, Card, Empty, Pagination, Skeleton, Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { QrcodeOutlined, CalendarOutlined, SearchOutlined } from '@ant-design/icons';
+import { QrcodeOutlined, CalendarOutlined, SearchOutlined, SendOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { bookingsApi } from '../../services/bookingsApi';
 import type { Booking } from '../../types/booking';
 import { usePagedTable } from '../../hooks/usePagedTable';
@@ -19,6 +20,7 @@ type BookingFilters = Record<string, unknown> & {
 
 export default function MyBookingsPage() {
   const { message } = App.useApp();
+  const navigate = useNavigate();
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -130,14 +132,23 @@ export default function MyBookingsPage() {
       render: (_, record) => (
         <Space>
           {(record.status === 'Paid' || record.status === 'CheckedIn') && (
-            <Button
-              size="small"
-              icon={<QrcodeOutlined />}
-              onClick={() => handleShowQr(record.id)}
-              loading={qrLoading}
-            >
-              QR
-            </Button>
+            <>
+              <Button
+                size="small"
+                icon={<SendOutlined />}
+                onClick={() => navigate(`/bookings/${record.id}/tickets`)}
+              >
+                Tickets
+              </Button>
+              <Button
+                size="small"
+                icon={<QrcodeOutlined />}
+                onClick={() => handleShowQr(record.id)}
+                loading={qrLoading}
+              >
+                QR
+              </Button>
+            </>
           )}
           {record.status === 'Pending' && (
             <Button size="small" danger onClick={() => handleCancel(record.id)}>
@@ -175,16 +186,25 @@ export default function MyBookingsPage() {
         <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{centsToUSD(booking.totalCents)}</span>
       </div>
 
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {(booking.status === 'Paid' || booking.status === 'CheckedIn') && (
-          <Button
-            size="small"
-            icon={<QrcodeOutlined />}
-            onClick={() => handleShowQr(booking.id)}
-            loading={qrLoading}
-          >
-            QR Code
-          </Button>
+          <>
+            <Button
+              size="small"
+              icon={<SendOutlined />}
+              onClick={() => navigate(`/bookings/${booking.id}/tickets`)}
+            >
+              Manage Tickets
+            </Button>
+            <Button
+              size="small"
+              icon={<QrcodeOutlined />}
+              onClick={() => handleShowQr(booking.id)}
+              loading={qrLoading}
+            >
+              QR Code
+            </Button>
+          </>
         )}
         {booking.status === 'Pending' && (
           <Button size="small" danger onClick={() => handleCancel(booking.id)}>

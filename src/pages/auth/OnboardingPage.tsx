@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Form, Input, Button, Typography, App, Card } from 'antd';
 import { UserOutlined, PhoneOutlined } from '@ant-design/icons';
 import { authApi } from '../../services/api';
@@ -10,6 +10,8 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl');
   const user = useAuthStore((s) => s.user);
   const setAuth = useAuthStore((s) => s.setAuth);
   const token = useAuthStore((s) => s.token);
@@ -32,7 +34,7 @@ export default function OnboardingPage() {
         setAuth(token, updatedUser);
       }
       message.success('Welcome to Code829!');
-      navigate('/', { replace: true });
+      navigate(returnUrl ?? '/', { replace: true });
     } catch {
       message.error('Failed to save profile');
     } finally {

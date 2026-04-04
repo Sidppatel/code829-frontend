@@ -36,6 +36,9 @@ const DevUsersPage = lazy(() => import('./pages/developer/users/DevUsersPage'));
 const DevEventsPage = lazy(() => import('./pages/developer/events/DevEventsPage'));
 const VerifyMagicLinkPage = lazy(() => import('./pages/auth/VerifyMagicLinkPage'));
 const OnboardingPage = lazy(() => import('./pages/auth/OnboardingPage'));
+const BookingTicketsPage = lazy(() => import('./pages/bookings/BookingTicketsPage'));
+const MyTicketsPage = lazy(() => import('./pages/tickets/MyTicketsPage'));
+const TicketClaimPage = lazy(() => import('./pages/tickets/TicketClaimPage'));
 
 export default function App() {
   return (
@@ -51,11 +54,14 @@ export default function App() {
               <Route path="login" element={<LoginPage />} />
               <Route path="auth/verify" element={<VerifyMagicLinkPage />} />
               <Route path="onboarding" element={<OnboardingPage />} />
+              <Route path="tickets/claim" element={<TicketClaimPage />} />
             </Route>
 
             {/* Authenticated Users */}
             <Route element={<ProtectedRoute><PublicLayout /></ProtectedRoute>}>
               <Route path="bookings" element={<MyBookingsPage />} />
+              <Route path="bookings/:bookingId/tickets" element={<BookingTicketsPage />} />
+              <Route path="tickets" element={<MyTicketsPage />} />
               <Route path="profile" element={<ProfilePage />} />
             </Route>
 
