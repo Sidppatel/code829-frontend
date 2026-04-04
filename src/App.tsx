@@ -40,6 +40,7 @@ const BookingDetailPage = lazy(() => import('./pages/bookings/BookingDetailPage'
 const BookingTicketsPage = lazy(() => import('./pages/bookings/BookingTicketsPage'));
 const MyTicketsPage = lazy(() => import('./pages/tickets/MyTicketsPage'));
 const TicketClaimPage = lazy(() => import('./pages/tickets/TicketClaimPage'));
+const FeedbackPage = lazy(() => import('./pages/feedback/FeedbackPage'));
 
 export default function App() {
   return (
@@ -56,6 +57,7 @@ export default function App() {
               <Route path="auth/verify" element={<VerifyMagicLinkPage />} />
               <Route path="onboarding" element={<OnboardingPage />} />
               <Route path="tickets/claim" element={<TicketClaimPage />} />
+              <Route path="feedback" element={<FeedbackPage />} />
             </Route>
 
             {/* Authenticated Users */}

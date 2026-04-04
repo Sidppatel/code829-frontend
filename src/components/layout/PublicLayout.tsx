@@ -12,6 +12,7 @@ import {
   CloseOutlined,
   ScanOutlined,
   QrcodeOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '../../hooks/useAuth';
@@ -39,6 +40,7 @@ export default function PublicLayout() {
   const menuItems: MenuProps['items'] = [
     { key: '/', label: <Link to="/">Home</Link>, icon: <HomeOutlined /> },
     { key: '/events', label: <Link to="/events">Events</Link>, icon: <CalendarOutlined /> },
+    { key: '/feedback', label: <Link to="/feedback">Feedback</Link>, icon: <MessageOutlined /> },
   ];
 
   const userMenuItems: MenuProps['items'] = [
@@ -164,6 +166,7 @@ export default function PublicLayout() {
             items={[
               { key: '/', label: <Link to="/">Home</Link>, icon: <HomeOutlined /> },
               { key: '/events', label: <Link to="/events">Events</Link>, icon: <CalendarOutlined /> },
+              { key: '/feedback', label: <Link to="/feedback">Feedback</Link>, icon: <MessageOutlined /> },
               ...(isAuthenticated ? [
                 { key: '/bookings', label: <Link to="/bookings">My Bookings</Link>, icon: <BookOutlined /> },
                 { key: '/profile', label: <Link to="/profile">Profile</Link>, icon: <UserOutlined /> },
@@ -227,6 +230,7 @@ export default function PublicLayout() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <Link to="/" style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Home</Link>
               <Link to="/events" style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Events</Link>
+              <Link to="/feedback" style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Feedback</Link>
               <Link to="/login" style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Sign In</Link>
             </div>
           </Col>
