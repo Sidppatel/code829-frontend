@@ -50,6 +50,7 @@ export default function EventWizardPage() {
   const [loading, setLoading] = useState(false);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [layoutMode, setLayoutMode] = useState<'Grid' | 'Open'>('Grid');
+  const [layoutLocked, setLayoutLocked] = useState(false);
   const { message } = App.useApp();
   const navigate = useNavigate();
 
@@ -78,6 +79,15 @@ export default function EventWizardPage() {
         }
         const mode = data.layoutMode === 'Open' ? 'Open' : 'Grid';
         setLayoutMode(mode);
+
+        // Check if layout mode is locked (has active bookings or table locks)
+        try {
+          const { data: lockData } = await adminEventsApi.checkLayoutLocked(id);
+          setLayoutLocked(lockData.locked);
+        } catch {
+          // If check fails, default to unlocked
+        }
+
         form.setFieldsValue({
           title: data.title,
           description: data.description,
@@ -302,6 +312,7 @@ export default function EventWizardPage() {
             <Segmented
               block
               value={layoutMode}
+              disabled={layoutLocked}
               onChange={(val) => setLayoutMode(val as 'Grid' | 'Open')}
               options={[
                 {
@@ -325,6 +336,11 @@ export default function EventWizardPage() {
               ]}
               style={{ marginBottom: 16 }}
             />
+            {layoutLocked && (
+              <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: -8, marginBottom: 12 }}>
+                Seating type cannot be changed — this event has active bookings or locked tables.
+              </div>
+            )}
 
             {layoutMode === 'Grid' && (
               <div style={{
