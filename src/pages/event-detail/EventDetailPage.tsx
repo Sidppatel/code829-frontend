@@ -67,9 +67,9 @@ export default function EventDetailPage() {
           const parsed = JSON.parse(token) as { state?: { token?: string } };
           const jwt = parsed?.state?.token;
           if (jwt) {
-            const payload = JSON.stringify({ eventId: ev.id, tableId: lock.tableId });
+            const payload = JSON.stringify({ eventId: ev.id, tableId: lock.tableId, token: jwt });
             const blob = new Blob([payload], { type: 'application/json' });
-            navigator.sendBeacon(`${apiUrl}/tables/release-beacon?token=${jwt}`, blob);
+            navigator.sendBeacon(`${apiUrl}/tables/release-beacon`, blob);
           }
         } catch { /* ignore */ }
       }
