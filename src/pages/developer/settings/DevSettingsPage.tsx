@@ -14,6 +14,7 @@ const SENSITIVE_KEYS = new Set([
   'stripe_webhook_secret',
   'resend_api_key',
   'email_api_key',
+  'smtp_password',
 ]);
 
 export default function DevSettingsPage() {
