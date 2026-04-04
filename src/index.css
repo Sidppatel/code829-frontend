@@ -261,6 +261,12 @@ html.light .glass-card {
   .desktop-only-block { display: block; }
 }
 
+@media (max-width: 360px) {
+  .orb { display: none; }
+  .hero-cta-row { max-width: calc(100% - 32px); }
+  .mini-kpi-strip { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition-duration: 0.01ms !important;

@@ -227,7 +227,7 @@ export default function AdminLayout() {
             <Button
               type="text"
               icon={<BellOutlined style={{ fontSize: 18, color: 'var(--text-secondary)' }} />}
-              style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             />
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
               <Button
@@ -237,7 +237,7 @@ export default function AdminLayout() {
                   border: '1px solid var(--border)',
                   background: 'var(--bg-surface)',
                   color: 'var(--text-primary)',
-                  height: 36,
+                  height: 44,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 6,

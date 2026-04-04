@@ -147,7 +147,7 @@ export default function AdminBookingsPage() {
       <div className="desktop-table">
         <div className="responsive-table">
           <Table dataSource={data} columns={columns} rowKey="id" loading={loading}
-            scroll={{ x: 800 }}
+            scroll={{ x: 600 }}
             pagination={{ current: page, pageSize, total, onChange: (p, ps) => { setPage(p); setPageSize(ps); }, showSizeChanger: true }}
           />
         </div>

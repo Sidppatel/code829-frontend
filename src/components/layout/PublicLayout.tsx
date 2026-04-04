@@ -142,7 +142,7 @@ export default function PublicLayout() {
         placement="left"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        width={280}
+        width="min(280px, 85vw)"
         closeIcon={<CloseOutlined style={{ color: 'var(--text-primary)' }} />}
         styles={{
           header: { background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)' },
