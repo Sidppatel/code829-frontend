@@ -38,7 +38,7 @@ export default function DevUsersPage() {
     try {
       const { data } = await developerApi.getUsers({ page, pageSize, search: search || undefined });
       setUsers(data.items);
-      setTotal(data.total);
+      setTotal(data.totalCount);
     } catch {
       message.error('Failed to load users');
     } finally {

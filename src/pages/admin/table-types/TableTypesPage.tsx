@@ -110,13 +110,12 @@ export default function TableTypesPage() {
           <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{record.name}</span>
         </div>
       ),
-      minWidth: 160,
     },
     {
       title: 'Capacity',
       dataIndex: 'defaultCapacity',
       key: 'defaultCapacity',
-      width: 90,
+      width: 100,
       render: (v: number) => (
         <span style={{ color: 'var(--text-secondary)' }}>
           <TeamOutlined style={{ marginRight: 4 }} />{v}
@@ -148,8 +147,7 @@ export default function TableTypesPage() {
     {
       title: 'Actions',
       key: 'actions',
-      fixed: 'right' as const,
-      width: 70,
+      width: 80,
       render: (_: unknown, record: TableTemplate) => (
         <Tooltip title="Edit">
           <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(record)} style={{ borderRadius: 8 }} />
@@ -208,7 +206,7 @@ export default function TableTypesPage() {
       {/* Desktop table */}
       <div className="desktop-table">
         <div className="responsive-table">
-          <Table dataSource={types} columns={columns} rowKey="id" pagination={false} scroll={{ x: 600 }} />
+          <Table dataSource={types} columns={columns} rowKey="id" pagination={false} />
         </div>
       </div>
 

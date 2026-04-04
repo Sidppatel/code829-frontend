@@ -25,7 +25,7 @@ export default function EventsPage() {
     try {
       const { data } = await eventsApi.list({ ...filters, page, pageSize });
       setEvents(data.items);
-      setTotal(data.total);
+      setTotal(data.totalCount);
     } catch {
       message.error('Failed to load events');
     } finally {

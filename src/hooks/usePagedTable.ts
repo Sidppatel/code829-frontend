@@ -42,7 +42,7 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
       const params = { ...filters, page, pageSize } as unknown as P;
       const res = await fetcher(params);
       setData(res.data.items);
-      setTotal(res.data.total);
+      setTotal(res.data.totalCount);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to load data';
       setError(msg);

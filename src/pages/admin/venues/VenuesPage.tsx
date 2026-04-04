@@ -21,7 +21,7 @@ export default function VenuesPage() {
     try {
       const { data } = await adminVenuesApi.list(p, ps);
       setVenues(data.items);
-      setTotal(data.total);
+      setTotal(data.totalCount);
     } catch {
       message.error('Failed to load venues');
     } finally {

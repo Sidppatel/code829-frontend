@@ -35,7 +35,7 @@ export default function DevEventsPage() {
       const { data } = await developerApi.getEvents({ page, pageSize: 20, search: search || undefined });
       const paged = data as PagedResponse<DevEventListItem>;
       setEvents(paged.items);
-      setTotal(paged.total);
+      setTotal(paged.totalCount);
     } catch {
       message.error('Failed to load events');
     } finally {

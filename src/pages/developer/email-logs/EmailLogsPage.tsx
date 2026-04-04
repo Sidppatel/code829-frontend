@@ -29,7 +29,7 @@ export default function EmailLogsPage() {
     try {
       const { data } = await developerApi.getEmailLogs({ page, pageSize, recipient });
       setLogs(data.items);
-      setTotal(data.total);
+      setTotal(data.totalCount);
     } catch {
       message.error('Failed to load email logs');
     } finally {
