@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Input, Spin } from 'antd';
 import { EnvironmentOutlined } from '@ant-design/icons';
 
@@ -38,8 +39,31 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
   const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const updateDropdownPosition = useCallback(() => {
+    if (!wrapperRef.current) return;
+    const rect = wrapperRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: 'fixed',
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    updateDropdownPosition();
+    window.addEventListener('scroll', updateDropdownPosition, true);
+    window.addEventListener('resize', updateDropdownPosition);
+    return () => {
+      window.removeEventListener('scroll', updateDropdownPosition, true);
+      window.removeEventListener('resize', updateDropdownPosition);
+    };
+  }, [open, updateDropdownPosition]);
 
   const fetchSuggestions = useCallback(async (query: string) => {
     if (query.length < 3) {
@@ -93,7 +117,6 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
   };
 
   const handleBlur = () => {
-    // Delay to allow click on suggestion
     setTimeout(() => setOpen(false), 200);
   };
 
@@ -108,8 +131,8 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
         prefix={<EnvironmentOutlined style={{ color: 'var(--text-muted)' }} />}
         suffix={loading ? <Spin size="small" /> : null}
       />
-      {open && suggestions.length > 0 && (
-        <div className="address-autocomplete-dropdown">
+      {open && suggestions.length > 0 && createPortal(
+        <div className="address-autocomplete-dropdown" style={dropdownStyle}>
           {suggestions.map((s) => (
             <div
               key={s.place_id}
@@ -121,7 +144,8 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
               <span>{s.display_name}</span>
             </div>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
