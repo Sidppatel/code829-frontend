@@ -1,7 +1,7 @@
 # Environment
 .env
 .env.local
-.env.production
+# .env.production is tracked (public config only, no secrets)
 .env.*.local
 !.env.example
 
