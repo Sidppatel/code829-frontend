@@ -127,8 +127,23 @@ export default function MyBookingsPage() {
 
   // ── Desktop Table ──
   const columns: ColumnsType<Booking> = [
-    { title: 'Booking #', dataIndex: 'bookingNumber', key: 'bookingNumber', width: 140 },
-    { title: 'Event', dataIndex: 'eventTitle', key: 'eventTitle' },
+    {
+      title: 'Booking #',
+      dataIndex: 'bookingNumber',
+      key: 'bookingNumber',
+      width: 140,
+      render: (num: string, record) => (
+        <a onClick={() => navigate(`/bookings/${record.id}`)} style={{ fontWeight: 600 }}>{num}</a>
+      ),
+    },
+    {
+      title: 'Event',
+      dataIndex: 'eventTitle',
+      key: 'eventTitle',
+      render: (title: string, record) => (
+        <a onClick={() => navigate(`/bookings/${record.id}`)}>{title}</a>
+      ),
+    },
     {
       title: 'Details',
       key: 'details',
@@ -196,7 +211,9 @@ export default function MyBookingsPage() {
     <Card
       key={booking.id}
       size="small"
-      style={{ marginBottom: 12 }}
+      hoverable
+      onClick={() => navigate(`/bookings/${booking.id}`)}
+      style={{ marginBottom: 12, cursor: 'pointer' }}
       styles={{ body: { padding: 16 } }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
@@ -217,7 +234,7 @@ export default function MyBookingsPage() {
         <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{centsToUSD(booking.totalCents)}</span>
       </div>
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }} onClick={(e) => e.stopPropagation()}>
         {(booking.status === 'Paid' || booking.status === 'CheckedIn') && (
           <>
             <Button

@@ -6,6 +6,12 @@ export interface Booking {
   userName: string;
   eventId: string;
   eventTitle: string;
+  eventDate: string;
+  eventEndDate?: string;
+  eventCategory?: string;
+  eventImagePath?: string;
+  venueName?: string;
+  venueAddress?: string;
   subtotalCents: number;
   feeCents: number;
   totalCents: number;
@@ -13,6 +19,7 @@ export interface Booking {
   tableId?: string;
   tableLabel?: string;
   seatsReserved?: number;
+  ticketCount: number;
   payment?: PaymentInfo;
   createdAt: string;
   clientSecret?: string;
