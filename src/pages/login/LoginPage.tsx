@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Form, Input, Button, Typography, App } from 'antd';
 import { MailOutlined, LoginOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
@@ -17,6 +17,8 @@ export default function LoginPage() {
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl');
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const startCooldown = useCallback((seconds: number) => {
@@ -48,7 +50,7 @@ export default function LoginPage() {
   const handleMagicLink = async (values: { email: string }) => {
     setLoading(true);
     try {
-      await authApi.requestMagicLink(values.email);
+      await authApi.requestMagicLink(values.email, returnUrl ?? undefined);
       setMagicLinkSent(true);
       message.success('Check your email for the login link');
     } catch (err) {
@@ -70,7 +72,7 @@ export default function LoginPage() {
       const { data } = await authApi.devLogin(values.email);
       setAuth(data.token, data.user);
       message.success(`Logged in as ${data.user.firstName}`);
-      navigate('/');
+      navigate(returnUrl ?? '/');
     } catch {
       message.error('Dev login failed');
     } finally {

@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import type { UserRole } from '../../types/auth';
 
@@ -16,7 +16,11 @@ interface Props {
 
 export default function ProtectedRoute({ children, minRole = 'User' }: Props) {
   const { token, user } = useAuthStore();
-  if (!token || !user) return <Navigate to="/login" replace />;
+  const location = useLocation();
+  if (!token || !user) {
+    const returnUrl = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?returnUrl=${returnUrl}`} replace />;
+  }
   if (ROLE_LEVEL[user.role] < ROLE_LEVEL[minRole]) return <Navigate to="/" replace />;
   return <>{children}</>;
 }

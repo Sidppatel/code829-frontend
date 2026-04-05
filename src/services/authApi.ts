@@ -13,8 +13,8 @@ export interface UpdateProfilePayload {
 }
 
 export const authApi = {
-  requestMagicLink: (email: string) =>
-    apiClient.post('/auth/magic-link', { email }),
+  requestMagicLink: (email: string, returnUrl?: string) =>
+    apiClient.post('/auth/magic-link', { email, returnUrl }),
 
   verifyMagicLink: (token: string) =>
     apiClient.post<AuthResponse>('/auth/magic-link/verify', { token }),

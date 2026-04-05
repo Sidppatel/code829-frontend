@@ -131,7 +131,7 @@ export default function EventDetailPage() {
   const handleBookNow = async () => {
     if (!isAuthenticated) {
       message.info('Please log in to book');
-      navigate('/login');
+      navigate(`/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
     if (!event) return;
