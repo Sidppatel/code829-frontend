@@ -25,8 +25,8 @@ function gridLabel(gridRow: number, gridCol: number): string {
 }
 
 const SHAPE_RADIUS: Record<string, string> = {
-  Round: '50%',
-  Cocktail: '50%',
+  Round: '16px',
+  Cocktail: '16px',
   Square: '4px',
   Rectangle: '6px',
 };

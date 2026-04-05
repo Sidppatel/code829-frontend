@@ -120,7 +120,7 @@ export default function EventsListPage() {
       width: 150,
       render: (_: unknown, record: EventDetail) => (
         <span style={{ color: 'var(--text-secondary)' }}>
-          {record.venueName}
+          {record.venueName || record.venue?.name}
         </span>
       ),
     },
@@ -255,7 +255,7 @@ export default function EventsListPage() {
               </span>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                 <EnvironmentOutlined style={{ marginRight: 5, color: 'var(--accent-violet)' }} />
-                {record.venueName}
+                {record.venueName || record.venue?.name}
               </span>
               <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                 <LayoutModeTag mode={record.layoutMode} />
