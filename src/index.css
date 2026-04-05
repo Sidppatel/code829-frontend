@@ -964,11 +964,6 @@ html.light .next-event-stat {
   justify-content: center;
   border: 1px solid var(--border-subtle);
   overflow: hidden;
-}
-.ts-cell-empty {
-  background: transparent;
-}
-.ts-cell-occupied {
   padding: 3px;
 }
 
