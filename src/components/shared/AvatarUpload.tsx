@@ -1,6 +1,62 @@
-import { useState } from 'react';
-import { Upload, Avatar, App, Button, Popconfirm } from 'antd';
-import { CameraOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
+import { useState, useCallback, useRef } from 'react';
+import { Upload, Avatar, App, Button, Popconfirm, Modal, Slider } from 'antd';
+import {
+  CameraOutlined,
+  DeleteOutlined,
+  UserOutlined,
+  ZoomInOutlined,
+  ZoomOutOutlined,
+  CheckOutlined,
+  CloseOutlined,
+} from '@ant-design/icons';
+import Cropper from 'react-easy-crop';
+import type { Area, Point } from 'react-easy-crop';
+
+// ─── canvas helper ───────────────────────────────────────────────────────────
+async function getCroppedBlob(
+  imageSrc: string,
+  croppedArea: Area,
+  outputSize = 400,
+): Promise<Blob> {
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.addEventListener('load', () => resolve(img));
+    img.addEventListener('error', reject);
+    img.src = imageSrc;
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = outputSize;
+  canvas.height = outputSize;
+  const ctx = canvas.getContext('2d')!;
+
+  // Clip to circle
+  ctx.beginPath();
+  ctx.arc(outputSize / 2, outputSize / 2, outputSize / 2, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.clip();
+
+  ctx.drawImage(
+    image,
+    croppedArea.x,
+    croppedArea.y,
+    croppedArea.width,
+    croppedArea.height,
+    0,
+    0,
+    outputSize,
+    outputSize,
+  );
+
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error('Canvas toBlob failed'));
+    }, 'image/webp', 0.9);
+  });
+}
+
+// ─── component ───────────────────────────────────────────────────────────────
 interface AvatarUploadProps {
   currentUrl?: string | null;
   onUpload: (file: File) => Promise<string | undefined>;
@@ -16,21 +72,53 @@ export default function AvatarUpload({
   size = 100,
   shape = 'circle',
 }: AvatarUploadProps) {
-  const [uploading, setUploading] = useState(false);
-  const [url, setUrl] = useState(currentUrl);
   const { message } = App.useApp();
 
-  const handleUpload = async (file: File) => {
+  // displayed URL (after confirmed upload)
+  const [url, setUrl] = useState(currentUrl);
+
+  // crop modal state
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedArea, setCroppedArea] = useState<Area | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const originalFileName = useRef('avatar.webp');
+
+  // Called when user picks a file
+  const handleFileSelect = (file: File) => {
+    originalFileName.current = file.name;
+    const reader = new FileReader();
+    reader.addEventListener('load', () => {
+      setCropSrc(reader.result as string);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+    });
+    reader.readAsDataURL(file);
+    return false; // prevent antd auto-upload
+  };
+
+  const onCropComplete = useCallback((_: Area, areaPixels: Area) => {
+    setCroppedArea(areaPixels);
+  }, []);
+
+  // User confirms the crop
+  const handleConfirm = async () => {
+    if (!cropSrc || !croppedArea) return;
     setUploading(true);
     try {
+      const blob = await getCroppedBlob(cropSrc, croppedArea);
+      const file = new File([blob], 'avatar.webp', { type: 'image/webp' });
       const newUrl = await onUpload(file);
       if (newUrl) setUrl(newUrl);
+      setCropSrc(null);
+      message.success('Profile picture updated');
     } catch {
-      message.error('Failed to upload image');
+      message.error('Failed to upload picture');
     } finally {
       setUploading(false);
     }
-    return false;
   };
 
   const handleDelete = async () => {
@@ -38,53 +126,189 @@ export default function AvatarUpload({
     try {
       await onDelete();
       setUrl(null);
-      message.success('Image removed');
+      message.success('Profile picture removed');
     } catch {
-      message.error('Failed to remove image');
+      message.error('Failed to remove picture');
     }
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-      <Avatar
-        src={url}
-        icon={!url ? <UserOutlined /> : undefined}
-        size={size}
-        shape={shape}
-        style={{
-          background: url ? undefined : 'var(--accent-violet, #7c3aed)',
-          border: '2px solid var(--border, rgba(255,255,255,0.1))',
-        }}
-      />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <Upload
-          accept="image/jpeg,image/png,image/webp"
-          showUploadList={false}
-          beforeUpload={(file) => handleUpload(file as unknown as File)}
-          disabled={uploading}
-        >
-          <Button
-            icon={<CameraOutlined />}
-            loading={uploading}
-            size="small"
-            style={{ borderRadius: 8 }}
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+        {/* Avatar preview */}
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <Avatar
+            src={url}
+            icon={!url ? <UserOutlined /> : undefined}
+            size={size}
+            shape={shape}
+            style={{
+              background: url ? undefined : 'var(--accent-violet, #7c3aed)',
+              border: '3px solid var(--border, rgba(255,255,255,0.12))',
+              display: 'block',
+            }}
+          />
+          {/* Camera overlay on hover */}
+          <Upload
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            showUploadList={false}
+            beforeUpload={(f) => handleFileSelect(f as unknown as File)}
           >
-            {url ? 'Change' : 'Upload'}
-          </Button>
-        </Upload>
-        {url && onDelete && (
-          <Popconfirm title="Remove image?" onConfirm={handleDelete} okText="Remove" cancelText="Cancel">
-            <Button
-              icon={<DeleteOutlined />}
-              size="small"
-              danger
-              style={{ borderRadius: 8 }}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: shape === 'circle' ? '50%' : 10,
+                background: 'rgba(0,0,0,0)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'background 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0.45)';
+                const icon = e.currentTarget.querySelector('span') as HTMLElement | null;
+                if (icon) icon.style.opacity = '1';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0)';
+                const icon = e.currentTarget.querySelector('span') as HTMLElement | null;
+                if (icon) icon.style.opacity = '0';
+              }}
             >
-              Remove
+              <CameraOutlined
+                style={{
+                  color: '#fff',
+                  fontSize: size * 0.28,
+                  opacity: 0,
+                  transition: 'opacity 0.2s',
+                  pointerEvents: 'none',
+                }}
+              />
+            </div>
+          </Upload>
+        </div>
+
+        {/* Side buttons */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Upload
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            showUploadList={false}
+            beforeUpload={(f) => handleFileSelect(f as unknown as File)}
+          >
+            <Button icon={<CameraOutlined />} size="small" style={{ borderRadius: 8 }}>
+              {url ? 'Change photo' : 'Upload photo'}
             </Button>
-          </Popconfirm>
-        )}
+          </Upload>
+
+          {url && onDelete && (
+            <Popconfirm
+              title="Remove profile picture?"
+              description="Your avatar will be cleared."
+              onConfirm={handleDelete}
+              okText="Remove"
+              cancelText="Cancel"
+            >
+              <Button icon={<DeleteOutlined />} size="small" danger style={{ borderRadius: 8 }}>
+                Remove
+              </Button>
+            </Popconfirm>
+          )}
+
+          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            JPG, PNG or WebP · max 10 MB
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* ── Crop Modal ─────────────────────────────────────────────────────── */}
+      <Modal
+        open={!!cropSrc}
+        onCancel={() => setCropSrc(null)}
+        title="Crop your photo"
+        width={480}
+        centered
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <Button
+              icon={<CloseOutlined />}
+              onClick={() => setCropSrc(null)}
+              disabled={uploading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              icon={<CheckOutlined />}
+              loading={uploading}
+              onClick={handleConfirm}
+            >
+              Apply & Upload
+            </Button>
+          </div>
+        }
+      >
+        {cropSrc && (
+          <div>
+            {/* Cropper area */}
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: 340,
+                background: '#111',
+                borderRadius: 12,
+                overflow: 'hidden',
+                marginBottom: 20,
+              }}
+            >
+              <Cropper
+                image={cropSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape={shape === 'circle' ? 'round' : 'rect'}
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+                style={{
+                  containerStyle: { borderRadius: 12 },
+                  cropAreaStyle: {
+                    border: '2px solid var(--accent-violet, #7c3aed)',
+                    boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)',
+                  },
+                }}
+              />
+            </div>
+
+            {/* Zoom slider */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <ZoomOutOutlined style={{ color: 'var(--text-muted)', fontSize: 16 }} />
+              <Slider
+                min={1}
+                max={3}
+                step={0.05}
+                value={zoom}
+                onChange={setZoom}
+                style={{ flex: 1 }}
+                tooltip={{ formatter: (v) => `${Math.round((v ?? 1) * 100)}%` }}
+              />
+              <ZoomInOutlined style={{ color: 'var(--text-muted)', fontSize: 16 }} />
+            </div>
+
+            <div style={{
+              marginTop: 10,
+              fontSize: 12,
+              color: 'var(--text-muted)',
+              textAlign: 'center',
+            }}>
+              Drag to reposition · Scroll or use slider to zoom
+            </div>
+          </div>
+        )}
+      </Modal>
+    </>
   );
 }
