@@ -9,10 +9,28 @@ export interface DashboardStats {
 
 export interface NextEventDashboard {
   eventId: string;
-  eventTitle: string;
+  title: string;
+  slug: string;
+  status: string;
+  category: string;
   startDate: string;
+  endDate: string;
   venueName: string;
-  ticketsSold: number;
-  ticketsTotal: number;
+  venueAddress: string;
+  venueCity: string;
+  venueState: string;
+  imagePath: string | null;
+  layoutMode: string;
+  daysUntil: number;
+  totalBookings: number;
+  paidBookings: number;
+  checkedInBookings: number;
+  pendingBookings: number;
+  cancelledBookings: number;
+  refundedBookings: number;
   revenueCents: number;
+  potentialRevenueCents: number;
+  totalCapacity: number;
+  soldCount: number;
+  recentBookings: unknown[];
 }

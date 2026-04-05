@@ -106,7 +106,7 @@ export default function AdminDashboardPage() {
             ⚡ {getCountdownLabel(nextEvent.startDate)}
           </div>
 
-          <div className="next-event-title">{nextEvent.eventTitle}</div>
+          <div className="next-event-title">{nextEvent.title}</div>
 
           <div className="next-event-meta">
             <span className="next-event-meta-item">
@@ -123,15 +123,15 @@ export default function AdminDashboardPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', marginTop: 14, marginBottom: 6 }}>
               <span>Tickets Sold</span>
               <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>
-                {nextEvent.ticketsSold} / {nextEvent.ticketsTotal}
+                {nextEvent.soldCount} / {nextEvent.totalCapacity}
               </span>
             </div>
             <div className="next-event-progress-bar">
               <div
                 className="next-event-progress-fill"
                 style={{
-                  width: `${nextEvent.ticketsTotal > 0
-                    ? Math.min((nextEvent.ticketsSold / nextEvent.ticketsTotal) * 100, 100)
+                  width: `${nextEvent.totalCapacity > 0
+                    ? Math.min((nextEvent.soldCount / nextEvent.totalCapacity) * 100, 100)
                     : 0}%`
                 }}
               />
@@ -141,8 +141,8 @@ export default function AdminDashboardPage() {
           <div className="next-event-stats">
             <div className="next-event-stat">
               <div className="next-event-stat-value">
-                {nextEvent.ticketsTotal > 0
-                  ? `${Math.round((nextEvent.ticketsSold / nextEvent.ticketsTotal) * 100)}%`
+                {nextEvent.totalCapacity > 0
+                  ? `${Math.round((nextEvent.soldCount / nextEvent.totalCapacity) * 100)}%`
                   : '0%'}
               </div>
               <div className="next-event-stat-label">Sold</div>
@@ -152,7 +152,7 @@ export default function AdminDashboardPage() {
               <div className="next-event-stat-label">Revenue</div>
             </div>
             <div className="next-event-stat">
-              <div className="next-event-stat-value">{nextEvent.ticketsTotal - nextEvent.ticketsSold}</div>
+              <div className="next-event-stat-value">{nextEvent.totalCapacity - nextEvent.soldCount}</div>
               <div className="next-event-stat-label">Available</div>
             </div>
           </div>
