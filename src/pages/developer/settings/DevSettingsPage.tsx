@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Card, List, Input, Button, App } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
-import { developerApi } from '../../../services/api';
+import { developerApi, imagesApi } from '../../../services/api';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import type { AppSetting } from '../../../services/developerApi';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
+import AvatarUpload from '../../../components/shared/AvatarUpload';
 
 const SENSITIVE_KEYS = new Set([
   'jwt_secret',
@@ -23,6 +24,7 @@ export default function DevSettingsPage() {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const [dirty, setDirty] = useState<Record<string, boolean>>({});
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const { message } = App.useApp();
 
@@ -36,6 +38,11 @@ export default function DevSettingsPage() {
           vals[s.key] = SENSITIVE_KEYS.has(s.key) ? '' : s.value;
         });
         setEditValues(vals);
+        // Load company logo
+        try {
+          const { data: logo } = await imagesApi.getLogo();
+          setLogoUrl(logo.url);
+        } catch { /* no logo yet */ }
       } catch {
         message.error('Failed to load settings');
       } finally {
@@ -77,6 +84,23 @@ export default function DevSettingsPage() {
   return (
     <div>
       <PageHeader title="Developer Settings" subtitle="Application configuration" />
+      <Card style={{ marginBottom: 16 }}>
+        <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 12 }}>Company Logo</div>
+        <AvatarUpload
+          currentUrl={logoUrl}
+          size={80}
+          shape="square"
+          onUpload={async (file) => {
+            const { data } = await imagesApi.uploadLogo(file);
+            setLogoUrl(data.url);
+            return data.url;
+          }}
+        />
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+          Used in emails, public pages, and branding. Only developers can change this.
+        </div>
+      </Card>
+
       <Card styles={isMobile ? { body: { padding: '8px 12px' } } : undefined}>
         <List
           className="responsive-list"

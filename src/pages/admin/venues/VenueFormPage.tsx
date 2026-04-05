@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Form, Input, Button, Space, App, Row, Col } from 'antd';
-import { adminVenuesApi } from '../../../services/api';
+import { adminVenuesApi, imagesApi } from '../../../services/api';
 import type { CreateVenuePayload } from '../../../services/adminVenuesApi';
+import type { ImageDto } from '../../../types/image';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import AddressAutocomplete from '../../../components/shared/AddressAutocomplete';
 import type { AddressParts } from '../../../components/shared/AddressAutocomplete';
+import ImageUpload from '../../../components/shared/ImageUpload';
 
 export default function VenueFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +16,7 @@ export default function VenueFormPage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
+  const [images, setImages] = useState<ImageDto[]>([]);
   const { message } = App.useApp();
   const navigate = useNavigate();
 
@@ -23,6 +26,10 @@ export default function VenueFormPage() {
       try {
         const { data } = await adminVenuesApi.getById(id);
         form.setFieldsValue(data);
+        try {
+          const { data: imgs } = await imagesApi.getByEntity('venue', id);
+          setImages(imgs);
+        } catch { /* images may not exist yet */ }
       } catch {
         message.error('Failed to load venue');
       } finally {
@@ -97,6 +104,14 @@ export default function VenueFormPage() {
           </Row>
           <Form.Item name="description" label="Description">
             <Input.TextArea rows={3} />
+          </Form.Item>
+          <Form.Item label="Images">
+            <ImageUpload
+              entityType="venue"
+              entityId={id}
+              images={images}
+              onImagesChange={setImages}
+            />
           </Form.Item>
           <Row gutter={16}>
             <Col xs={24} sm={8}>

@@ -27,10 +27,12 @@ import {
   adminEventsApi,
   type CreateEventPayload,
 } from '../../../services/adminEventsApi';
-import { adminVenuesApi } from '../../../services/api';
+import { adminVenuesApi, imagesApi } from '../../../services/api';
 import type { Venue } from '../../../types/venue';
+import type { ImageDto } from '../../../types/image';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
+import ImageUpload from '../../../components/shared/ImageUpload';
 
 const categories = [
   'Music',
@@ -51,6 +53,7 @@ export default function EventWizardPage() {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [layoutMode, setLayoutMode] = useState<'Grid' | 'Open'>('Grid');
   const [layoutLocked, setLayoutLocked] = useState(false);
+  const [images, setImages] = useState<ImageDto[]>([]);
   const { message } = App.useApp();
   const navigate = useNavigate();
 
@@ -87,6 +90,11 @@ export default function EventWizardPage() {
         } catch {
           // If check fails, default to unlocked
         }
+
+        try {
+          const { data: imgs } = await imagesApi.getByEntity('event', id);
+          setImages(imgs);
+        } catch { /* images may not exist yet */ }
 
         form.setFieldsValue({
           title: data.title,
@@ -191,6 +199,16 @@ export default function EventWizardPage() {
           <Form.Item name="description" label="Description">
             <Input.TextArea rows={4} placeholder="Event description" />
           </Form.Item>
+          {isEditMode && id && (
+            <Form.Item label="Event Images">
+              <ImageUpload
+                entityType="event"
+                entityId={id}
+                images={images}
+                onImagesChange={setImages}
+              />
+            </Form.Item>
+          )}
           <Row gutter={16}>
             <Col xs={24} sm={12}>
               <Form.Item

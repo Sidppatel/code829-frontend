@@ -16,6 +16,7 @@ export interface UserProfile {
   zipCode?: string;
   optInLocationEmail: boolean;
   hasCompletedOnboarding: boolean;
+  avatarUrl?: string;
   createdAt: string;
 }
 

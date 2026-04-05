@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Card, Form, Input, Switch, Button, App, Row, Col } from 'antd';
-import { authApi } from '../../services/api';
+import { authApi, imagesApi } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 import type { UserProfile } from '../../types/auth';
 import PageHeader from '../../components/shared/PageHeader';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import type { AddressParts } from '../../components/shared/AddressAutocomplete';
+import AvatarUpload from '../../components/shared/AvatarUpload';
 
 export default function ProfilePage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { message } = App.useApp();
   const setUser = useAuthStore((s) => s.setUser);
 
@@ -19,6 +21,7 @@ export default function ProfilePage() {
     const load = async () => {
       try {
         const { data } = await authApi.getMe();
+        setAvatarUrl(data.avatarUrl ?? null);
         form.setFieldsValue({
           firstName: data.firstName,
           lastName: data.lastName,
@@ -68,6 +71,22 @@ export default function ProfilePage() {
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
       <PageHeader title="Profile" subtitle="Manage your account information" />
       <Card>
+        <AvatarUpload
+          currentUrl={avatarUrl}
+          onUpload={async (file) => {
+            const { data } = await imagesApi.uploadAvatar(file);
+            setAvatarUrl(data.url);
+            const { data: me } = await authApi.getMe();
+            setUser(me as UserProfile);
+            return data.url;
+          }}
+          onDelete={async () => {
+            await imagesApi.deleteAvatar();
+            setAvatarUrl(null);
+            const { data: me } = await authApi.getMe();
+            setUser(me as UserProfile);
+          }}
+        />
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Row gutter={16}>
             <Col xs={24} sm={12}>

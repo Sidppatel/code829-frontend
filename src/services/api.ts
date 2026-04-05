@@ -9,3 +9,4 @@ export { adminVenuesApi } from './adminVenuesApi';
 export { adminLayoutApi } from './adminLayoutApi';
 export { adminDashboardApi } from './adminDashboardApi';
 export { developerApi } from './developerApi';
+export { imagesApi } from './imagesApi';
