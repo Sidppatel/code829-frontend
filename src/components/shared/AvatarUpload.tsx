@@ -85,6 +85,7 @@ export default function AvatarUpload({
   const [uploading, setUploading] = useState(false);
 
   const originalFileName = useRef('avatar.webp');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Called when user picks a file
   const handleFileSelect = (file: File) => {
@@ -148,46 +149,54 @@ export default function AvatarUpload({
               display: 'block',
             }}
           />
-          {/* Camera overlay on hover */}
-          <Upload
+          {/* Hidden file input — triggered by the overlay click */}
+          <input
+            ref={fileInputRef}
+            type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
-            showUploadList={false}
-            beforeUpload={(f) => handleFileSelect(f as unknown as File)}
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFileSelect(file);
+              e.target.value = '';          // reset so same file can be re-selected
+            }}
+          />
+
+          {/* Camera overlay — direct child of the relative container so inset:0 works */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: shape === 'circle' ? '50%' : 10,
+              background: 'rgba(0,0,0,0)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+            }}
+            onClick={() => fileInputRef.current?.click()}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0.45)';
+              const icon = e.currentTarget.querySelector('span') as HTMLElement | null;
+              if (icon) icon.style.opacity = '1';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0)';
+              const icon = e.currentTarget.querySelector('span') as HTMLElement | null;
+              if (icon) icon.style.opacity = '0';
+            }}
           >
-            <div
+            <CameraOutlined
               style={{
-                position: 'absolute',
-                inset: 0,
-                borderRadius: shape === 'circle' ? '50%' : 10,
-                background: 'rgba(0,0,0,0)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'background 0.2s',
+                color: '#fff',
+                fontSize: size * 0.28,
+                opacity: 0,
+                transition: 'opacity 0.2s',
+                pointerEvents: 'none',
               }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0.45)';
-                const icon = e.currentTarget.querySelector('span') as HTMLElement | null;
-                if (icon) icon.style.opacity = '1';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0)';
-                const icon = e.currentTarget.querySelector('span') as HTMLElement | null;
-                if (icon) icon.style.opacity = '0';
-              }}
-            >
-              <CameraOutlined
-                style={{
-                  color: '#fff',
-                  fontSize: size * 0.28,
-                  opacity: 0,
-                  transition: 'opacity 0.2s',
-                  pointerEvents: 'none',
-                }}
-              />
-            </div>
-          </Upload>
+            />
+          </div>
         </div>
 
         {/* Side buttons */}
