@@ -958,11 +958,12 @@ html.light .next-event-stat {
 .ts-cell {
   flex: 1;
   min-width: 60px;
-  min-height: 60px;
+  height: 68px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border-subtle);
+  overflow: hidden;
 }
 .ts-cell-empty {
   background: transparent;
@@ -975,7 +976,6 @@ html.light .next-event-stat {
 .ts-table {
   width: 100%;
   height: 100%;
-  min-height: 54px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -987,12 +987,11 @@ html.light .next-event-stat {
   user-select: none;
   position: relative;
   border: 2px solid;
-  transition: all 0.2s ease;
+  transition: box-shadow 0.2s ease, opacity 0.2s ease;
   padding: 4px 2px;
 }
 .ts-table:hover:not(.ts-table-disabled) {
   box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-  transform: scale(1.03);
 }
 .ts-table-selected {
   z-index: 2;
@@ -1037,11 +1036,10 @@ html.light .next-event-stat {
 
 @media (max-width: 768px) {
   .ts-grid { max-width: 100%; border-radius: 8px; }
-  .ts-cell { min-width: 50px; min-height: 50px; }
+  .ts-cell { min-width: 50px; height: 58px; }
   .ts-col-header { min-width: 50px; }
   .ts-row-header { width: 26px; min-width: 26px; }
   .ts-header-corner { width: 26px; min-width: 26px; }
-  .ts-table { min-height: 44px; }
   .ts-table-label { font-size: 10px; }
   .ts-table-meta { font-size: 8px; }
   .ts-detail-card { max-width: 100%; }
