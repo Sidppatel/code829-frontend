@@ -200,33 +200,33 @@ export default function SystemLogsPage() {
             {selected?.action}
           </span>
         }
-        width={700}
+        width={isMobile ? '95vw' : 700}
         styles={{ body: { maxHeight: '70vh', overflowY: 'auto' } }}
       >
         {selected && (
           <div>
-            <Descriptions column={2} size="small" bordered style={{ marginBottom: 12 }}>
-              <Descriptions.Item label="Timestamp" span={2}>
+            <Descriptions column={isMobile ? 1 : 2} size="small" bordered style={{ marginBottom: 12 }}>
+              <Descriptions.Item label="Timestamp" span={isMobile ? 1 : 2}>
                 <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{formatTs(selected.timestamp)}</span>
               </Descriptions.Item>
               <Descriptions.Item label="Category">{selected.category}</Descriptions.Item>
               <Descriptions.Item label="Action">{selected.action}</Descriptions.Item>
               <Descriptions.Item label="Entity Type">{selected.entityType ?? '—'}</Descriptions.Item>
               <Descriptions.Item label="Entity ID">
-                <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{selected.entityId ?? '—'}</span>
+                <span style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>{selected.entityId ?? '—'}</span>
               </Descriptions.Item>
-              <Descriptions.Item label="Source" span={2}>{selected.source ?? '—'}</Descriptions.Item>
+              <Descriptions.Item label="Source" span={isMobile ? 1 : 2}>{selected.source ?? '—'}</Descriptions.Item>
               <Descriptions.Item label="Actor ID">
-                <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{selected.actorId ?? '—'}</span>
+                <span style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>{selected.actorId ?? '—'}</span>
               </Descriptions.Item>
               <Descriptions.Item label="Correlation ID">
-                <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{selected.correlationId ?? '—'}</span>
+                <span style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>{selected.correlationId ?? '—'}</span>
               </Descriptions.Item>
               <Descriptions.Item label="Duration">
                 {selected.durationMs != null ? `${selected.durationMs}ms` : '—'}
               </Descriptions.Item>
               <Descriptions.Item label="Log ID">
-                <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{selected.id}</span>
+                <span style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>{selected.id}</span>
               </Descriptions.Item>
             </Descriptions>
 

@@ -24,8 +24,9 @@ export interface EmailLogEntry {
   id: string;
   recipient: string;
   subject: string;
+  body: string;
   status: string;
-  sentAt: string;
+  timestamp: string;
 }
 
 export interface AppSetting {
