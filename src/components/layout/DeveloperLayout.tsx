@@ -9,7 +9,6 @@ import {
   TeamOutlined,
   CalendarOutlined,
   LogoutOutlined,
-  UserOutlined,
   GlobalOutlined,
   ThunderboltOutlined,
   RocketOutlined,

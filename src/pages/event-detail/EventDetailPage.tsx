@@ -508,7 +508,7 @@ export default function EventDetailPage() {
                 {event.title}
               </h1>
 
-              <Space direction={isMobile ? 'vertical' : 'horizontal'} size={isMobile ? 8 : 40} style={{ color: 'rgba(255,255,255,0.9)', fontSize: isMobile ? 14 : 16, fontWeight: 600 }}>
+              <Space orientation={isMobile ? 'vertical' : 'horizontal'} size={isMobile ? 8 : 40} style={{ color: 'rgba(255,255,255,0.9)', fontSize: isMobile ? 14 : 16, fontWeight: 600 }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <CalendarOutlined style={{ color: 'var(--accent-rose)' }} />
                   {formatDateRange(event.startDate, event.endDate)}
