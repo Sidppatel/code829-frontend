@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Tag, Input, Select, Pagination, Spin, Modal, Descriptions, Button } from 'antd';
+import { Table, Tag, Input, Pagination, Spin, Modal, Descriptions, Button } from 'antd';
 import { SearchOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { developerApi } from '../../../services/api';
 import { usePagedTable } from '../../../hooks/usePagedTable';
@@ -7,6 +7,7 @@ import { useIsMobile } from '../../../hooks/useIsMobile';
 import type { DevLogEntry, DevLogParams } from '../../../services/developerApi';
 import PageHeader from '../../../components/shared/PageHeader';
 import HumanCard from '../../../components/shared/HumanCard';
+import EmptyState from '../../../components/shared/EmptyState';
 import dayjs from 'dayjs';
 
 const severityColors: Record<string, string> = {
@@ -115,26 +116,56 @@ export default function DevLogsPage() {
   return (
     <div className="spring-up">
       <PageHeader 
-        title="Application Logs" 
-        subtitle="Real-time system health and error tracking. Click a row for deep-dive analysis." 
+        title="DevCore: App Stream" 
+        subtitle={[
+          "Real-time application health and error tracking.",
+          "Analyzing request throughput and endpoint latency.",
+          "Monitoring exception patterns across the cluster."
+        ]}
+        rotateSubtitle
       />
       
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 24, alignItems: 'center' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: 16, 
+        marginBottom: 32, 
+        flexWrap: 'wrap', 
+        alignItems: 'center',
+        background: 'var(--bg-surface)',
+        padding: '16px 24px',
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
         <Input
-          placeholder="Filter by endpoint path..."
+          placeholder="Filter by endpoint path (e.g. /api/events)..."
           prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
           allowClear
           onChange={(e) => setFilters({ path: e.target.value || undefined })}
-          style={{ flex: '1 1 200px', maxWidth: 360, height: 44, borderRadius: 'var(--radius-md)' }}
+          style={{ flex: 1, minWidth: 260, height: 44, borderRadius: 'var(--radius-full)', border: '1px solid var(--border)', paddingLeft: 16 }}
         />
-        <Select
-          placeholder="Select Severity"
-          allowClear
-          style={{ flex: '0 0 160px', height: 44 }}
-          className="human-select"
-          onChange={(val) => setFilters({ severity: val })}
-          options={['Warning', 'Error', 'Critical'].map((s) => ({ label: s, value: s }))}
-        />
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {['Info', 'Warning', 'Error', 'Critical'].map(level => (
+            <div 
+              key={level}
+              onClick={() => setFilters({ severity: level as DevLogParams['severity'] })}
+              style={{
+                padding: '8px 20px',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--bg-soft)',
+                border: '1px solid var(--border)',
+                fontSize: 13,
+                fontWeight: 600,
+                color: level === 'Error' || level === 'Critical' ? 'var(--accent-rose)' : 'var(--text-secondary)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              className="hover-lift press-state"
+            >
+              {level}
+            </div>
+          ))}
+        </div>
       </div>
 
       {isMobile ? (
@@ -143,42 +174,49 @@ export default function DevLogsPage() {
             {data.map((log) => (
               <HumanCard
                 key={log.id}
+                className="human-noise"
                 onClick={() => setSelected(log)}
-                style={{ padding: 16 }}
+                style={{ 
+                  padding: 16,
+                  borderLeft: `4px solid ${severityColors[log.severity]}`
+                }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <Tag 
-                     color={severityColors[log.severity] + '15'} 
-                     style={{ 
-                       color: severityColors[log.severity], 
-                       borderColor: severityColors[log.severity] + '30',
-                       fontWeight: 700,
-                       borderRadius: 6,
-                       textTransform: 'uppercase',
-                       fontSize: 10,
-                       letterSpacing: '0.05em'
-                     }}
-                  >
+                  <div style={{ 
+                    fontSize: 10, 
+                    fontWeight: 800, 
+                    color: severityColors[log.severity],
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
                     {log.severity}
-                  </Tag>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: (log.statusCode && log.statusCode >= 400) ? 'var(--accent-rose)' : 'var(--text-muted)' }}>
-                    {log.method && <span style={{ marginRight: 6 }}>{log.method}</span>}
-                    {log.statusCode ?? ''}
-                  </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {log.method && (
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', background: 'var(--bg-soft)', padding: '2px 6px', borderRadius: 4 }}>
+                        {log.method}
+                      </span>
+                    )}
+                    {log.statusCode && (
+                      <span style={{ fontSize: 11, fontWeight: 800, color: log.statusCode >= 400 ? 'var(--accent-rose)' : 'var(--accent-green)' }}>
+                        {log.statusCode}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8, lineHeight: 1.4 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, fontFamily: 'monospace', lineHeight: 1.4 }}>
                   {log.message}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '50%', fontFamily: 'monospace' }}>
-                    {log.path ?? ''}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>
+                    {log.path ?? 'System'}
                   </span>
                   <span>{formatTs(log.timestamp)}</span>
                 </div>
               </HumanCard>
             ))}
             {data.length === 0 && !loading && (
-              <div style={{ textAlign: 'center', padding: 48 }}>No log entries found</div>
+              <EmptyState title="No logs found" description="Application stream is clear for these filters." actionLabel="Reset Filters" onAction={() => setFilters({})} />
             )}
           </div>
           <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>

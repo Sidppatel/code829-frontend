@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Button, Switch, App, Tooltip, Pagination, Empty } from 'antd';
+import { Button, Switch, App, Pagination } from 'antd';
 import { PlusOutlined, EditOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { adminVenuesApi } from '../../../services/api';
@@ -7,6 +7,7 @@ import type { Venue } from '../../../types/venue';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import HumanCard from '../../../components/shared/HumanCard';
+import EmptyState from '../../../components/shared/EmptyState';
 
 export default function VenuesPage() {
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -45,14 +46,25 @@ export default function VenuesPage() {
   return (
     <div className="spring-up">
       <PageHeader 
-        title="Venues" 
-        subtitle="Explore and manage the beautiful spaces where your events come to life."
+        title="Venue Collection" 
+        subtitle={[
+          "Explore the beautiful spaces where your events come to life.",
+          "Manage capacity, layouts, and availability across your portfolio.",
+          "Add new spaces to host even more unforgettable gatherings."
+        ]}
+        rotateSubtitle
         extra={
           <Button 
             type="primary" 
             icon={<PlusOutlined />} 
             onClick={() => navigate('/admin/venues/new')}
-            style={{ borderRadius: 'var(--radius-md)', height: 44, padding: '0 24px', fontWeight: 600 }}
+            style={{ 
+              borderRadius: 'var(--radius-full)', 
+              height: 48, 
+              padding: '0 32px', 
+              fontWeight: 700,
+              boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
+            }}
           >
             Add Venue
           </Button>
@@ -65,81 +77,97 @@ export default function VenuesPage() {
         <>
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', 
             gap: 24,
             marginBottom: 40 
           }}>
             {venues.map((v) => (
               <HumanCard
                 key={v.id}
+                className="human-noise"
                 style={{ 
-                  opacity: v.isActive ? 1 : 0.7,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  opacity: v.isActive ? 1 : 0.8,
                   border: v.isActive ? '1px solid var(--border)' : '1px dashed var(--border)',
                 }}
               >
-                <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
                   <div style={{ 
-                    width: 56, 
-                    height: 56, 
-                    borderRadius: 'var(--radius-md)', 
+                    width: 48, 
+                    height: 48, 
+                    borderRadius: 12, 
                     background: v.isActive ? 'var(--primary-soft)' : 'var(--bg-soft)', 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
-                    fontSize: 24,
-                    flexShrink: 0
+                    fontSize: 20,
+                    flexShrink: 0,
+                    boxShadow: v.isActive ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
                   }}>
                     🏛️
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ 
-                      fontSize: 18, 
-                      fontWeight: 700, 
-                      margin: 0, 
-                      color: 'var(--text-primary)',
-                      fontFamily: "'Playfair Display', serif",
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}>
-                      {v.name}
-                    </h3>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, color: 'var(--text-secondary)', fontSize: 13 }}>
-                      <EnvironmentOutlined style={{ fontSize: 12, color: 'var(--primary)' }} />
-                      {v.city}, {v.state}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ 
-                  marginTop: 20, 
-                  paddingTop: 16, 
-                  borderTop: '1px solid var(--border)', 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center' 
-                }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: v.isActive ? 'var(--accent-green)' : 'var(--text-muted)' }}>
+                      {v.isActive ? 'Active' : 'Archived'}
+                    </span>
                     <Switch
                       checked={v.isActive}
                       onChange={() => handleToggleActive(v)}
                       size="small"
                     />
-                    <span style={{ fontSize: 12, fontWeight: 600, color: v.isActive ? 'var(--primary)' : 'var(--text-muted)' }}>
-                      {v.isActive ? 'Active' : 'Hidden'}
-                    </span>
                   </div>
-                  
-                  <Tooltip title="Edit Venue Details">
-                    <Button
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={() => navigate(`/admin/venues/${v.id}`)}
-                      style={{ color: 'var(--text-secondary)' }}
-                    >
-                      Edit
-                    </Button>
-                  </Tooltip>
+                </div>
+
+                <h3 style={{ 
+                  fontSize: 22, 
+                  fontWeight: 700, 
+                  margin: '0 0 8px 0', 
+                  color: 'var(--text-primary)',
+                  fontFamily: "'Playfair Display', serif",
+                }}>
+                  {v.name}
+                </h3>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)', fontSize: 14, fontWeight: 500, marginBottom: 24 }}>
+                  <EnvironmentOutlined style={{ color: 'var(--primary)' }} />
+                  {v.city}, {v.state}
+                </div>
+
+                <div style={{ 
+                  background: 'var(--bg-soft)', 
+                  padding: '16px', 
+                  borderRadius: 'var(--radius-md)',
+                  marginBottom: 24,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 12
+                }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Capacity</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      {v.totalSeats || '800+'}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Layout</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      Grid Base
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{ marginTop: 'auto' }}>
+                  <Button
+                    type="primary"
+                    block
+                    icon={<EditOutlined />}
+                    onClick={() => navigate(`/admin/venues/${v.id}`)}
+                    style={{ borderRadius: 'var(--radius-full)', fontWeight: 600, height: 40 }}
+                  >
+                    Manage Venue
+                  </Button>
                 </div>
               </HumanCard>
             ))}
@@ -160,17 +188,12 @@ export default function VenuesPage() {
           </div>
         </>
       ) : (
-        <div style={{ textAlign: 'center', padding: '100px 24px' }}>
-          <Empty description="No venues hosted yet." />
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />} 
-            onClick={() => navigate('/admin/venues/new')}
-            style={{ marginTop: 16, borderRadius: 'var(--radius-full)' }}
-          >
-            Add Your First Venue
-          </Button>
-        </div>
+        <EmptyState
+          title="No spaces yet"
+          description="Your venue collection is empty. Add your first space to start hosting events."
+          actionLabel="Add My First Venue"
+          onAction={() => navigate('/admin/venues/new')}
+        />
       )}
     </div>
   );

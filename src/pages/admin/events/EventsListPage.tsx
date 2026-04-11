@@ -1,15 +1,8 @@
-import { Button, Tag, Input, Select, App, Popconfirm, Tooltip, Pagination, Empty } from 'antd';
+import { Button, Input, Tooltip, Pagination } from 'antd';
 import {
   PlusOutlined,
   SearchOutlined,
-  EditOutlined,
-  SendOutlined,
-  EyeOutlined,
-  CalendarOutlined,
   EnvironmentOutlined,
-  AppstoreOutlined,
-  TeamOutlined,
-  ScanOutlined,
   MoreOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -21,13 +14,14 @@ import type { AdminEventListParams } from '../../../services/adminEventsApi';
 import PageHeader from '../../../components/shared/PageHeader';
 import HumanCard from '../../../components/shared/HumanCard';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
+import EmptyState from '../../../components/shared/EmptyState';
 
-const STATUS_MAP: Record<string, { className: string; label: string; color: string }> = {
-  Draft:     { className: 'status-pill status-draft',     label: 'Draft',     color: '#9CA3AF' },
-  Published: { className: 'status-pill status-published', label: 'Published', color: '#10B981' },
-  SoldOut:   { className: 'status-pill status-soldout',   label: 'Sold Out',  color: '#F59E0B' },
-  Cancelled: { className: 'status-pill status-cancelled', label: 'Cancelled', color: '#EF4444' },
-  Completed: { className: 'status-pill status-completed', label: 'Completed', color: 'var(--primary)' },
+const STATUS_MAP: Record<string, { label: string; color: string }> = {
+  Draft:     { label: 'Draft',     color: '#9CA3AF' },
+  Published: { label: 'Published', color: '#10B981' },
+  SoldOut:   { label: 'Sold Out',  color: '#F59E0B' },
+  Cancelled: { label: 'Cancelled', color: '#EF4444' },
+  Completed: { label: 'Completed', color: 'var(--primary)' },
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -57,18 +51,8 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function LayoutModeBadge({ mode }: { mode: string }) {
-  const icon = mode === 'Grid' ? <AppstoreOutlined /> : <TeamOutlined />;
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-muted)' }}>
-      {icon} {mode}
-    </div>
-  );
-}
-
 export default function EventsListPage() {
   const navigate = useNavigate();
-  const { message } = App.useApp();
   const {
     data,
     total,
@@ -78,33 +62,33 @@ export default function EventsListPage() {
     setPage,
     setPageSize,
     setFilters,
-    refresh,
   } = usePagedTable<EventDetail, AdminEventListParams>({
     fetcher: adminEventsApi.list,
     defaultPageSize: 12,
   });
 
-  const handlePublish = async (id: string) => {
-    try {
-      await adminEventsApi.changeStatus(id, 'Published');
-      message.success('Event published successfully');
-      refresh();
-    } catch {
-      message.error('Failed to publish event');
-    }
-  };
-
   return (
     <div className="spring-up">
       <PageHeader
-        title="Your Events"
-        subtitle="Manage and oversee all your upcoming and past gatherings."
+        title="Human Gallery"
+        subtitle={[
+          "Design unforgettable nights for your guests.",
+          "Track ticket sales and check-in progress in real-time.",
+          "Manage your events with ease."
+        ]}
+        rotateSubtitle
         extra={
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => navigate('/admin/events/new')}
-            style={{ borderRadius: 'var(--radius-md)', height: 44, padding: '0 24px', fontWeight: 600 }}
+            style={{ 
+              borderRadius: 'var(--radius-full)', 
+              height: 48, 
+              padding: '0 32px',
+              fontWeight: 700,
+              boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
+            }}
           >
             Create Event
           </Button>
@@ -112,23 +96,46 @@ export default function EventsListPage() {
       />
 
       <div style={{
-        display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap', alignItems: 'center'
+        display: 'flex', 
+        gap: 16, 
+        marginBottom: 32, 
+        flexWrap: 'wrap', 
+        alignItems: 'center',
+        padding: '24px',
+        background: 'var(--bg-surface)',
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)'
       }}>
         <Input
-          placeholder="Search events by title..."
+          placeholder="Search by title..."
           prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
           allowClear
           onChange={(e) => setFilters({ search: e.target.value || undefined })}
-          style={{ flex: 1, minWidth: 260, height: 44, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}
+          style={{ flex: 1, minWidth: 260, height: 44, borderRadius: 'var(--radius-full)', border: '1px solid var(--border)', paddingLeft: 16 }}
         />
-        <Select
-          placeholder="All Statuses"
-          allowClear
-          className="human-select"
-          style={{ minWidth: 160, height: 44 }}
-          onChange={(val) => setFilters({ status: val })}
-          options={['Draft', 'Published', 'SoldOut', 'Cancelled', 'Completed'].map(s => ({ label: s, value: s }))}
-        />
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {['Draft', 'Published', 'SoldOut', 'Completed'].map(status => (
+            <div 
+              key={status}
+              onClick={() => setFilters({ status: status as EventDetail['status'] })}
+              style={{
+                padding: '8px 20px',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--bg-soft)',
+                border: '1px solid var(--border)',
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              className="hover-lift press-state"
+            >
+              {status}
+            </div>
+          ))}
+        </div>
       </div>
 
       {loading ? (
@@ -137,7 +144,7 @@ export default function EventsListPage() {
         <>
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', 
             gap: 24,
             marginBottom: 40
           }}>
@@ -145,94 +152,83 @@ export default function EventsListPage() {
               <HumanCard
                 key={record.id}
                 onClick={() => navigate(`/admin/events/${record.id}`)}
-                style={{ padding: 0, overflow: 'hidden' }}
+                className="human-noise"
+                style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
               >
-                <div style={{ padding: '24px 24px 16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                    <StatusBadge status={record.status} />
-                    <Tooltip title="Manage">
-                      <Button 
-                        type="text" 
-                        icon={<MoreOutlined />} 
-                        onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${record.id}`); }}
-                        style={{ color: 'var(--text-muted)' }}
-                      />
-                    </Tooltip>
-                  </div>
-
-                  <h3 style={{ 
-                    fontSize: 20, 
-                    fontWeight: 700, 
-                    fontFamily: "'Playfair Display', serif", 
-                    color: 'var(--text-primary)',
-                    margin: '0 0 12px 0',
-                    lineHeight: 1.3
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                  <StatusBadge status={record.status} />
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 6, 
+                    fontSize: 12, 
+                    color: 'var(--text-muted)',
+                    fontWeight: 600
                   }}>
-                    {record.title}
-                  </h3>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-                    <div style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <CalendarOutlined style={{ color: 'var(--accent-gold)' }} />
-                      {formatEventDate(record.startDate)}
-                    </div>
-                    <div style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <EnvironmentOutlined style={{ color: 'var(--primary)' }} />
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {record.venueName || record.venue?.name}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div style={{ padding: '12px 0', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <LayoutModeBadge mode={record.layoutMode} />
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
-                      {record.category}
-                    </span>
+                    <EnvironmentOutlined />
+                    {record.venueName || 'Virtual'}
                   </div>
                 </div>
 
-                <div style={{ background: 'var(--bg-soft)', padding: '12px 24px', display: 'flex', gap: 12 }}>
-                  {(record.status === 'Draft' || record.status === 'Published') && (
-                    <Button
-                      size="small"
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${record.id}/edit`); }}
-                      style={{ color: 'var(--primary)', fontWeight: 600 }}
-                    >
-                      Edit
-                    </Button>
-                  )}
-                  {record.status === 'Draft' && (
-                    <Popconfirm
-                      title="Ready to share?"
-                      description="This will make the event visible to everyone."
-                      onConfirm={() => handlePublish(record.id)}
-                      okText="Publish"
-                    >
-                      <Button 
-                        size="small" 
-                        type="text" 
-                        icon={<SendOutlined />}
-                        onClick={(e) => e.stopPropagation()}
-                        style={{ color: 'var(--accent-green)', fontWeight: 600 }}
-                      >
-                        Publish
-                      </Button>
-                    </Popconfirm>
-                  )}
-                  {(record.status === 'Published' || record.status === 'Completed') && (
-                    <Button
-                      size="small"
-                      type="text"
-                      icon={<ScanOutlined />}
-                      onClick={(e) => { e.stopPropagation(); navigate(`/staff/checkin/${record.id}`); }}
-                      style={{ color: 'var(--accent-gold)', fontWeight: 600 }}
-                    >
-                      Check-In
-                    </Button>
-                  )}
+                <h3 style={{ 
+                  fontSize: 22, 
+                  fontWeight: 700, 
+                  fontFamily: "'Playfair Display', serif", 
+                  color: 'var(--text-primary)',
+                  margin: '0 0 16px 0',
+                  lineHeight: 1.2,
+                  minHeight: 52,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden'
+                }}>
+                  {record.title}
+                </h3>
+
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500, marginBottom: 20 }}>
+                  {formatEventDate(record.startDate)}
+                </div>
+
+                <div style={{ 
+                  background: 'var(--bg-soft)', 
+                  padding: '16px', 
+                  borderRadius: 'var(--radius-md)',
+                  marginBottom: 20,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 12
+                }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Sales</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      {record.soldCount || 0} / {record.totalCapacity || '∞'}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Check-ins</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      {record.checkInCount || 0}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 'auto', display: 'flex', gap: 12, paddingTop: 8 }}>
+                  <Button
+                    type="primary"
+                    block
+                    style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
+                    onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${record.id}`); }}
+                  >
+                    View Details
+                  </Button>
+                  <Tooltip title="More options">
+                    <Button 
+                      icon={<MoreOutlined />} 
+                      style={{ borderRadius: 'var(--radius-full)', width: 40 }}
+                      onClick={(e) => { e.stopPropagation(); }}
+                    />
+                  </Tooltip>
                 </div>
               </HumanCard>
             ))}
@@ -253,16 +249,12 @@ export default function EventsListPage() {
           </div>
         </>
       ) : (
-        <div style={{ textAlign: 'center', padding: '100px 24px' }}>
-          <Empty description="No events found matched your search." />
-          <Button 
-            type="primary" 
-            onClick={() => setFilters({})} 
-            style={{ marginTop: 16, borderRadius: 'var(--radius-full)' }}
-          >
-            Clear Filters
-          </Button>
-        </div>
+        <EmptyState
+          title="No events yet"
+          description="It looks like you haven't created any events matching these criteria. Time to start something new?"
+          actionLabel="Create Event"
+          onAction={() => navigate('/admin/events/new')}
+        />
       )}
     </div>
   );

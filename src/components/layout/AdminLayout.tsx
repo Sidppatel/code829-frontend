@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Layout, Menu, Typography, Button, Dropdown, Space, Tag } from 'antd';
+import { Layout, Menu, Typography, Button, Dropdown, Space } from 'antd';
 import {
   DashboardOutlined,
   CalendarOutlined,
@@ -18,14 +18,37 @@ import ThemeToggle from '../shared/ThemeToggle';
 
 const { Sider, Header, Content } = Layout;
 
-const navItems = [
-  { key: '/admin', shortLabel: 'Home', label: 'Dashboard', icon: <DashboardOutlined /> },
-  { key: '/admin/events', shortLabel: 'Events', label: 'Events', icon: <CalendarOutlined /> },
-  { key: '/admin/venues', shortLabel: 'Venues', label: 'Venues', icon: <EnvironmentOutlined /> },
-  { key: '/admin/bookings', shortLabel: 'Bookings', label: 'Bookings', icon: <BookOutlined /> },
-  { key: '/admin/table-types', shortLabel: 'Tables', label: 'Table Templates', icon: <TableOutlined /> },
-  { key: '/admin/analytics', shortLabel: 'Analytics', label: 'Analytics', icon: <BarChartOutlined /> },
+const navGroups = [
+  {
+    title: 'Overview',
+    items: [
+      { key: '/admin', shortLabel: 'Home', label: 'Dashboard', icon: <DashboardOutlined /> },
+      { key: '/admin/analytics', shortLabel: 'Reports', label: 'Analytics', icon: <BarChartOutlined /> },
+    ]
+  },
+  {
+    title: 'Events',
+    items: [
+      { key: '/admin/events', shortLabel: 'Events', label: 'Events List', icon: <CalendarOutlined /> },
+      { key: '/admin/bookings', shortLabel: 'Sales', label: 'Bookings', icon: <BookOutlined /> },
+    ]
+  },
+  {
+    title: 'Spaces',
+    items: [
+      { key: '/admin/venues', shortLabel: 'Venues', label: 'Venues', icon: <EnvironmentOutlined /> },
+      { key: '/admin/table-types', shortLabel: 'Tables', label: 'Table Templates', icon: <TableOutlined /> },
+    ]
+  },
+  {
+    title: 'Settings',
+    items: [
+      { key: '/admin/settings', shortLabel: 'Settings', label: 'Settings', icon: <UserOutlined /> },
+    ]
+  }
 ];
+
+const navItems = navGroups.flatMap(g => g.items);
 
 type Breakpoint = 'mobile' | 'tablet' | 'desktop';
 
@@ -66,41 +89,7 @@ export default function AdminLayout() {
     { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, onClick: logout },
   ];
 
-  const menuItems = navItems.map((item) => {
-    const active = location.pathname === item.key || (item.key !== '/admin' && location.pathname.startsWith(item.key));
-    return {
-      key: item.key,
-      icon: (
-        <span style={{ 
-          fontSize: 18, 
-          color: active ? 'var(--primary)' : 'var(--text-secondary)',
-          transition: 'all 0.3s ease',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 24,
-          height: 24,
-          borderRadius: 'var(--radius-sm)',
-          background: active ? 'var(--primary-soft)' : 'transparent'
-        }}>
-          {item.icon}
-        </span>
-      ),
-      label: (
-        <Link 
-          to={item.key} 
-          style={{ 
-            fontWeight: active ? 600 : 500, 
-            color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
-            fontSize: 14,
-            paddingLeft: 4
-          }}
-        >
-          {item.label}
-        </Link>
-      ),
-    };
-  });
+
 
   const siderContent = (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '24px 12px' }}>
@@ -133,41 +122,115 @@ export default function AdminLayout() {
         )}
       </div>
 
-      <div style={{ flex: 1 }}>
-        <Menu
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          items={menuItems}
-          inlineCollapsed={collapsed}
-          style={{ 
-            background: 'transparent', 
-            borderRight: 'none',
-          }}
-          className="human-side-menu"
-        />
+      <div style={{ flex: 1, overflowY: 'auto', margin: '0 -4px', padding: '0 4px' }}>
+        {navGroups.map((group, idx) => (
+          <div key={group.title} style={{ marginBottom: idx === navGroups.length - 1 ? 0 : 24 }}>
+            {!collapsed && (
+              <div style={{ 
+                fontSize: 11, 
+                fontWeight: 700, 
+                color: 'var(--text-muted)', 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.1em',
+                padding: '0 16px',
+                marginBottom: 12
+              }}>
+                {group.title}
+              </div>
+            )}
+            <Menu
+              mode="inline"
+              selectedKeys={[location.pathname]}
+              items={group.items.map(item => {
+                const active = location.pathname === item.key || (item.key !== '/admin' && location.pathname.startsWith(item.key));
+                return {
+                  key: item.key,
+                  icon: (
+                    <span style={{ 
+                      fontSize: 18, 
+                      color: active ? 'var(--primary)' : 'var(--text-secondary)',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 24,
+                      height: 24,
+                      borderRadius: 'var(--radius-sm)',
+                      background: active ? 'var(--primary-soft)' : 'transparent'
+                    }}>
+                      {item.icon}
+                    </span>
+                  ),
+                  label: (
+                    <Link 
+                      to={item.key} 
+                      style={{ 
+                        fontWeight: active ? 600 : 500, 
+                        color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
+                        fontSize: 14,
+                        paddingLeft: 4
+                      }}
+                    >
+                      {item.label}
+                    </Link>
+                  ),
+                };
+              })}
+              inlineCollapsed={collapsed}
+              style={{ 
+                background: 'transparent', 
+                borderRight: 'none',
+              }}
+              className="human-side-menu"
+            />
+          </div>
+        ))}
       </div>
 
       <div style={{ 
         marginTop: 'auto', 
-        padding: '16px 8px', 
+        padding: '12px', 
         background: 'var(--bg-soft)', 
         borderRadius: 'var(--radius-md)',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        gap: 12
+        gap: 16,
+        border: '1px solid var(--border)'
       }}>
-        <ThemeToggle size="small" />
         {!collapsed && user && (
-          <div style={{ textAlign: 'center', width: '100%' }}>
-            <Typography.Text ellipsis style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, display: 'block' }}>
-              {user.firstName} {user.lastName}
-            </Typography.Text>
-            <Tag color="cyan" style={{ fontSize: 10, margin: '4px 0 0 0', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Admin
-            </Tag>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px' }}>
+            <div style={{ 
+              width: 40, height: 40, borderRadius: '50%', background: 'var(--primary)', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700 
+            }}>
+              {user.firstName?.[0]}
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <Typography.Text ellipsis style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 700, display: 'block', lineHeight: 1.2 }}>
+                {user.firstName} {user.lastName}
+              </Typography.Text>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>Owner</span>
+                <div style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--border)' }} />
+                <Link to="/staff/checkin/select" style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 600 }}>
+                  Staff view
+                </Link>
+              </div>
+            </div>
           </div>
         )}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: collapsed ? '0' : '0 4px' }}>
+          <ThemeToggle size="small" />
+          {!collapsed && (
+            <Button 
+              type="text" 
+              size="small" 
+              icon={<LogoutOutlined />} 
+              onClick={logout}
+              style={{ color: 'var(--text-muted)' }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -261,9 +324,14 @@ export default function AdminLayout() {
                </div>
             )}
            {!isMobile && (
-             <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-                Welcome back, <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{user?.firstName}</span>
-             </Typography.Text>
+             <div style={{ display: 'flex', flexDirection: 'column' }}>
+               <Typography.Text style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 700, lineHeight: 1.2 }}>
+                  Welcome back, {user?.firstName}
+               </Typography.Text>
+               <Typography.Text style={{ color: 'var(--text-secondary)', fontSize: 12, fontWeight: 500 }}>
+                  Here’s what needs your attention today.
+               </Typography.Text>
+             </div>
            )}
           </div>
           

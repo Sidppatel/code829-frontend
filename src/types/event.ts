@@ -13,8 +13,9 @@ export interface EventSummary {
   venueState: string;
   layoutMode: string;
   pricePerPersonCents?: number;
-  quantityTotal: number;
-  quantitySold: number;
+  totalCapacity: number;
+  totalSold: number;
+  noOfAvailableTables: number;
 }
 
 export interface EventDetail extends EventSummary {

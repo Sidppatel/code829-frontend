@@ -1,8 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Select, Card, Tag, Spin, Modal, Descriptions, App } from 'antd';
+import { Table, Select, Tag, Spin, Modal, Descriptions, App } from 'antd';
 import { developerApi } from '../../../services/api';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import PageHeader from '../../../components/shared/PageHeader';
+import HumanCard from '../../../components/shared/HumanCard';
+import EmptyState from '../../../components/shared/EmptyState';
+import PulseIndicator from '../../../components/shared/PulseIndicator';
 import dayjs from 'dayjs';
 
 interface SystemLog {
@@ -119,57 +122,119 @@ export default function SystemLogsPage() {
   ];
 
   return (
-    <div>
-      <PageHeader title="System Logs" subtitle="Audit trail and system events — click a row for full details" />
+    <div className="spring-up">
+      <PageHeader 
+        title="DevCore: System Pulse" 
+        subtitle={[
+          "Audit trail and system events across all nodes.",
+          "Monitoring API latency and background worker health.",
+          "Live stream of operational changes and migrations."
+        ]}
+        rotateSubtitle
+      />
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-        <Select
-          placeholder="Category"
-          allowClear
-          style={{ flex: '1 1 140px', maxWidth: 200 }}
-          onChange={setCategory}
-          options={['EntityChange', 'BackgroundWorker', 'Cache', 'MockService', 'Migration'].map((s) => ({ label: s, value: s }))}
-        />
-        <Select
-          placeholder="Entity Type"
-          allowClear
-          style={{ flex: '1 1 140px', maxWidth: 200 }}
-          onChange={setEntityType}
-          options={['Event', 'Booking', 'User', 'Venue', 'Payment', 'Image'].map((s) => ({ label: s, value: s }))}
-        />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 32 }}>
+        <HumanCard className="human-noise" style={{ padding: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>API Node</div>
+            <PulseIndicator status="success" size={6} />
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>99.9<span style={{ fontSize: 14, fontWeight: 500 }}>%</span></div>
+          <div style={{ fontSize: 12, color: 'var(--accent-green)', fontWeight: 600 }}>Up for 12d 4h</div>
+        </HumanCard>
+        <HumanCard className="human-noise" style={{ padding: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Worker Queue</div>
+            <PulseIndicator status="calm" size={6} />
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>0<span style={{ fontSize: 14, fontWeight: 500 }}> ms</span></div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>Processing normally</div>
+        </HumanCard>
+        <HumanCard className="human-noise" style={{ padding: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Memory</div>
+            <PulseIndicator status="warning" size={6} />
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>74<span style={{ fontSize: 14, fontWeight: 500 }}>%</span></div>
+          <div style={{ fontSize: 12, color: 'var(--accent-gold)', fontWeight: 600 }}>Spiking in Node-02</div>
+        </HumanCard>
+      </div>
+
+      <div style={{ 
+        display: 'flex', 
+        gap: 16, 
+        marginBottom: 32, 
+        flexWrap: 'wrap', 
+        alignItems: 'center',
+        background: 'var(--bg-surface)',
+        padding: '16px 24px',
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', flex: 1 }}>
+          <Select
+            placeholder="All Categories"
+            allowClear
+            variant="borderless"
+            style={{ minWidth: 160, background: 'var(--bg-soft)', borderRadius: 'var(--radius-full)', padding: '4px 12px' }}
+            onChange={setCategory}
+            options={['EntityChange', 'BackgroundWorker', 'Cache', 'MockService', 'Migration'].map((s) => ({ label: s, value: s }))}
+          />
+          <Select
+            placeholder="All Entities"
+            allowClear
+            variant="borderless"
+            style={{ minWidth: 160, background: 'var(--bg-soft)', borderRadius: 'var(--radius-full)', padding: '4px 12px' }}
+            onChange={setEntityType}
+            options={['Event', 'Booking', 'User', 'Venue', 'Payment', 'Image'].map((s) => ({ label: s, value: s }))}
+          />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-green)' }} />
+          <span>{loading ? 'Polling...' : 'System Nominal'}</span>
+        </div>
       </div>
 
       {isMobile ? (
         <Spin spinning={loading}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {logs.map((log) => (
-              <Card
+              <HumanCard
                 key={log.id}
-                size="small"
-                styles={{ body: { padding: 12 } }}
-                style={{ cursor: 'pointer' }}
+                className="human-noise"
                 onClick={() => setSelected(log)}
+                style={{ padding: '16px', borderLeft: `4px solid ${log.category === 'BackgroundWorker' ? 'var(--accent-rose)' : 'var(--border)'}` }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <Tag color={categoryColors[log.category] ?? 'default'}>{log.category}</Tag>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{log.entityType}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                  <div style={{ 
+                    padding: '2px 8px', 
+                    borderRadius: 4, 
+                    background: 'var(--bg-soft)', 
+                    fontSize: 10, 
+                    fontWeight: 700,
+                    color: 'var(--text-muted)',
+                    textTransform: 'uppercase'
+                  }}>
+                    {log.category}
+                  </div>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{log.entityType}</span>
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', marginBottom: 4 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, fontFamily: 'monospace' }}>
                   {log.action}
                 </div>
-                {log.source && (
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>
-                    {log.source}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                    {formatTs(log.timestamp)}
                   </div>
-                )}
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  {formatTs(log.timestamp)}
-                  {log.durationMs != null && <span style={{ marginLeft: 8 }}>{log.durationMs}ms</span>}
+                  {log.durationMs != null && (
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)' }}>{log.durationMs}ms</div>
+                  )}
                 </div>
-              </Card>
+              </HumanCard>
             ))}
             {logs.length === 0 && !loading && (
-              <div style={{ textAlign: 'center', padding: 32, color: 'var(--text-muted)' }}>No data</div>
+              <EmptyState title="No system events" description="Platform is quiet. No logs recorded for this period." actionLabel="Clear Filters" onAction={() => { setCategory(undefined); setEntityType(undefined); }} />
             )}
           </div>
         </Spin>

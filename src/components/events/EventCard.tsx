@@ -1,5 +1,5 @@
 import { Tag, Space } from 'antd';
-import { CalendarOutlined, EnvironmentOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { CalendarOutlined, EnvironmentOutlined, ArrowRightOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { EventSummary } from '../../types/event';
 import { centsToUSD } from '../../utils/currency';
@@ -90,6 +90,12 @@ export default function EventCard({ event }: Props) {
             <EnvironmentOutlined style={{ color: 'var(--accent-violet)' }} />
             {event.venueCity || event.venue?.name}
           </Space>
+          {event.layoutMode === 'Grid' && (
+            <Space style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+              <AppstoreOutlined style={{ color: 'var(--accent-violet)' }} />
+              {event.noOfAvailableTables} tables available
+            </Space>
+          )}
         </div>
 
         <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

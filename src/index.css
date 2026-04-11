@@ -21,6 +21,7 @@
   --primary-light:  hsl(var(--p-h), var(--p-s), calc(var(--p-l) + 15%));
   --primary-dark:   hsl(var(--p-h), var(--p-s), calc(var(--p-l) - 10%));
   --primary-soft:   hsla(var(--p-h), var(--p-s), var(--p-l), 0.1);
+  --primary-tint:   hsla(var(--p-h), 4%, var(--p-l), 0.03);
 
   /* Semantic Colors */
   --accent-gold:    #FBBF24;
@@ -30,7 +31,7 @@
   /* Shared Radius & Shadows */
   --radius-sm: 8px;
   --radius-md: 14px;
-  --radius-lg: 24px;
+  --radius-lg: 20px;
   --radius-full: 9999px;
 
   /* Premium Layered Shadows */
@@ -41,6 +42,15 @@
     0 2px 4px rgba(0,0,0,0.02),
     0 10px 20px rgba(0,0,0,0.04),
     0 20px 40px rgba(0,0,0,0.06);
+  --shadow-hover:
+    0 20px 40px hsla(var(--p-h), var(--p-s), 10%, 0.1),
+    0 2px 4px hsla(var(--p-h), var(--p-s), 10%, 0.02);
+
+  /* Motion Tokens */
+  --ease-human: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
 }
 
 /* Light Mode (Priority) */
@@ -140,6 +150,24 @@ html, body {
   100% { transform: scale(1.1) translate(5%, 5%) rotate(8deg); }
 }
 
+/* Base64 Noise Overlay */
+.human-noise {
+  position: relative;
+}
+.human-noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.25;
+  z-index: 1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PScwIDAgMjAwIDIwMCcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJz4KICA8ZmlsdGVyIGlkPSduJz4KICAgIDxmZVR1cmJ1bGVuY2UgdHlwZT0nZnJhY3RhbE5vaXNlJyBiYXNlRnJlcXVlbmN5PScwLjY1JyBudW1PY3RhdmVzPSczJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+CiAgPC9maWx0ZXI+CiAgPHJlY3Qgd2lkdGg9JzEwMCUnIGhlaWdodD0nMTAwJScgZmlsdGVyPSd1cmwoI24pJyBvcGFjaXR5PScwLjA1Jy8+Cjwvc3ZnPg==");
+  background-repeat: repeat;
+}
+[data-theme='dark'] .human-noise::before { opacity: 0.15; }
+
 /* Navigation & Menu */
 .human-side-menu.ant-menu-inline {
   border-right: none !important;
@@ -197,12 +225,18 @@ html, body {
 }
 
 .hover-lift {
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all var(--duration-normal) var(--ease-human);
 }
 
 .hover-lift:hover {
-  transform: translateY(-8px) scale(1.01);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--shadow-hover);
+}
+
+.press-state:active {
+  transform: translateY(-1px) scale(0.99);
+  background-color: var(--bg-soft);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
 }
 
 /* Human-Touch Animations */

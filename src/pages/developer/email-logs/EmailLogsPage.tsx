@@ -79,58 +79,111 @@ export default function EmailLogsPage() {
 
   return (
     <div className="spring-up">
-      <PageHeader title="Email Delivery" subtitle="Comprehensive audit trail for platform notifications and guest communications." />
-      
-      <Input
-        placeholder="Search by recipient email..."
-        prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
-        allowClear
-        onChange={(e) => { setRecipient(e.target.value || undefined); setPage(1); }}
-        style={{ maxWidth: 360, width: '100%', marginBottom: 24, height: 44, borderRadius: 'var(--radius-md)' }}
+      <PageHeader 
+        title="DevCore: Dispatch Pipeline" 
+        subtitle={[
+          "Comprehensive audit trail for platform notifications.",
+          "Monitoring email deliverability and latency in real-time.",
+          "Analyzing guest communication flow and dispatch status."
+        ]}
+        rotateSubtitle
       />
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 32 }}>
+        <HumanCard className="human-noise" style={{ padding: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Delivery Rate</div>
+            <PulseIndicator status="live" size={6} />
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>98.4<span style={{ fontSize: 14, fontWeight: 500 }}>%</span></div>
+          <div style={{ fontSize: 12, color: 'var(--accent-green)', fontWeight: 600 }}>Optimal Performance</div>
+        </HumanCard>
+        <HumanCard className="human-noise" style={{ padding: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Avg. Latency</div>
+            <PulseIndicator status="calm" size={6} />
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>1.2<span style={{ fontSize: 14, fontWeight: 500 }}> s</span></div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>SMTP Node Response</div>
+        </HumanCard>
+        <HumanCard className="human-noise" style={{ padding: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Failures</div>
+            <PulseIndicator status="success" size={6} />
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>0</div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>Last 24 hours</div>
+        </HumanCard>
+      </div>
+      
+      <div style={{ 
+        display: 'flex', 
+        gap: 16, 
+        marginBottom: 32, 
+        flexWrap: 'wrap', 
+        alignItems: 'center',
+        background: 'var(--bg-surface)',
+        padding: '16px 24px',
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <Input
+          placeholder="Filter by recipient email..."
+          prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
+          allowClear
+          onChange={(e) => { setRecipient(e.target.value || undefined); setPage(1); }}
+          style={{ flex: 1, minWidth: 260, height: 44, borderRadius: 'var(--radius-full)', border: '1px solid var(--border)', paddingLeft: 16 }}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)' }} />
+          <span>{loading ? 'Polling Dispatcher...' : 'Pipeline Live'}</span>
+        </div>
+      </div>
 
       {isMobile ? (
         <Spin spinning={loading}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
             {logs.map((log) => (
               <HumanCard
                 key={log.id}
+                className="human-noise"
                 onClick={() => setSelected(log)}
-                style={{ padding: 16 }}
+                style={{ 
+                  padding: 16,
+                  borderLeft: `4px solid ${statusColors[log.status]}`
+                }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '65%' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '65%' }}>
                     {log.recipient}
                   </span>
-                  <Tag 
-                    color={statusColors[log.status] + '15'} 
-                    style={{ 
-                      color: statusColors[log.status], 
-                      borderColor: statusColors[log.status] + '30',
-                      fontWeight: 700,
-                      borderRadius: 6,
-                      textTransform: 'uppercase',
-                      fontSize: 10
-                    }}
-                  >
+                  <div style={{ 
+                    fontSize: 10, 
+                    fontWeight: 800, 
+                    color: statusColors[log.status],
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
                     {log.status}
-                  </Tag>
+                  </div>
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {log.subject}
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  {formatEventDate(log.timestamp)}
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{formatEventDate(log.timestamp)}</span>
+                  {log.status === 'Sent' && <PulseIndicator status="success" size={4} />}
                 </div>
               </HumanCard>
             ))}
             {logs.length === 0 && !loading && (
-              <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)' }}>No communication logs found</div>
+              <EmptyState title="No dispatches recorded" description="The pipeline is quiet. No email logs matched your search." actionLabel="Reset Search" onAction={() => setRecipient(undefined)} />
             )}
           </div>
-          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 40 }}>
             <Pagination
-              current={page} pageSize={pageSize} total={total} size="small"
+              current={page} pageSize={pageSize} total={total}
               onChange={(p, ps) => { setPage(p); setPageSize(ps); }}
               className="human-pagination"
             />

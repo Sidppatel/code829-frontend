@@ -223,8 +223,8 @@ export default function EventManagePage() {
       <div className="admin-section">
         <div className="admin-section-title"><DollarOutlined /> Sales</div>
         {(() => {
-          const sold = event.quantitySold ?? 0;
-          const total = event.quantityTotal ?? 0;
+          const sold = event.totalSold ?? 0;
+          const total = event.totalCapacity ?? 0;
           const available = total - sold;
           const fillRate = total > 0 ? Math.round((sold / total) * 100) : 0;
           return (
@@ -238,6 +238,12 @@ export default function EventManagePage() {
                   <div className="next-event-stat-value">{available}</div>
                   <div className="next-event-stat-label">Available</div>
                 </div>
+                {event.layoutMode === 'Grid' && (
+                  <div className="next-event-stat">
+                    <div className="next-event-stat-value">{event.noOfAvailableTables}</div>
+                    <div className="next-event-stat-label">Avail. Tables</div>
+                  </div>
+                )}
                 <div className="next-event-stat">
                   <div className="next-event-stat-value">{fillRate}%</div>
                   <div className="next-event-stat-label">Fill Rate</div>

@@ -23,24 +23,23 @@ export default function HumanCard({
   variant = 'elevated',
   hover = true,
 }: HumanCardProps) {
-  const baseClass = variant === 'glass' ? 'glass-card' : 'human-card-base';
-  const hoverClass = hover ? 'hover-lift' : '';
-  
   return (
     <div
       onClick={onClick}
-      className={`${baseClass} ${hoverClass} ${className} spring-up`}
+      className={`human-card ${variant}-variant ${hover ? 'hover-lift' : ''} ${onClick ? 'press-state' : ''} ${className} spring-up`}
       style={{
         ...style,
         cursor: onClick ? 'pointer' : 'default',
-        padding: '24px',
+        padding: '20px 20px 16px',
         backgroundColor: variant === 'elevated' ? 'var(--bg-surface)' : 'transparent',
         border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-lg)',
+        borderRadius: 'var(--radius-md)',
         boxShadow: variant === 'elevated' ? 'var(--card-shadow)' : 'none',
         display: 'flex',
         flexDirection: 'column',
         gap: '12px',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       {(title || extra) && (

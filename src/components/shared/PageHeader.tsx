@@ -3,12 +3,25 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 
 interface Props {
   title: string;
-  subtitle?: string;
+  subtitle?: string | string[];
   extra?: React.ReactNode;
   onBack?: () => void;
+  rotateSubtitle?: boolean;
 }
 
-export default function PageHeader({ title, subtitle, extra, onBack }: Props) {
+export default function PageHeader({ title, subtitle, extra, onBack, rotateSubtitle = false }: Props) {
+  const [activeSubtitleIndex, setActiveSubtitleIndex] = React.useState(0);
+  const subtitles = Array.isArray(subtitle) ? subtitle : subtitle ? [subtitle] : [];
+
+  React.useEffect(() => {
+    if (rotateSubtitle && subtitles.length > 1) {
+      const interval = setInterval(() => {
+        setActiveSubtitleIndex((prev) => (prev + 1) % subtitles.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [rotateSubtitle, subtitles.length]);
+
   return (
     <div style={{
       marginBottom: 32,
@@ -54,14 +67,16 @@ export default function PageHeader({ title, subtitle, extra, onBack }: Props) {
           }}>
             {title}
           </h1>
-          {subtitle && (
+          {subtitles.length > 0 && (
             <p style={{ 
               margin: '4px 0 0 0', 
               fontSize: 14, 
               color: 'var(--text-secondary)',
               fontWeight: 500,
+              transition: 'all 0.5s ease',
+              opacity: 1,
             }}>
-              {subtitle}
+              {subtitles[activeSubtitleIndex]}
             </p>
           )}
         </div>

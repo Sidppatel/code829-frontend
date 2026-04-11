@@ -1,5 +1,5 @@
-import { Table, Button, Space, Input, Select, App, Popconfirm, Card, Empty, Pagination, Skeleton } from 'antd';
-import { SearchOutlined, DownloadOutlined, UndoOutlined, CalendarOutlined, UserOutlined, DollarOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Input, App, Popconfirm, Pagination } from 'antd';
+import { SearchOutlined, DownloadOutlined, UndoOutlined, UserOutlined, DollarOutlined } from '@ant-design/icons';
 import { adminBookingsApi } from '../../../services/api';
 import { usePagedTable } from '../../../hooks/usePagedTable';
 import { centsToUSD } from '../../../utils/currency';
@@ -8,6 +8,9 @@ import type { Booking, BookingStatus } from '../../../types/booking';
 import type { AdminBookingListParams } from '../../../services/adminBookingsApi';
 import BookingStatusTag from '../../../components/bookings/BookingStatusTag';
 import PageHeader from '../../../components/shared/PageHeader';
+import EmptyState from '../../../components/shared/EmptyState';
+import HumanCard from '../../../components/shared/HumanCard';
+import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 
 export default function AdminBookingsPage() {
   const { message } = App.useApp();
@@ -41,11 +44,7 @@ export default function AdminBookingsPage() {
     }
   };
 
-  const getDetails = (record: Booking): string => {
-    if (record.tableLabel) return `Table ${record.tableLabel}`;
-    if (record.seatsReserved) return `${record.seatsReserved} seat${record.seatsReserved !== 1 ? 's' : ''}`;
-    return '-';
-  };
+
 
   // ── Desktop columns ──
   const columns = [
@@ -75,72 +74,80 @@ export default function AdminBookingsPage() {
     },
   ];
 
-  // ── Mobile card ──
-  const renderBookingCard = (booking: Booking) => (
-    <Card
-      key={booking.id}
-      size="small"
-      style={{ marginBottom: 12 }}
-      styles={{ body: { padding: 14 } }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 600, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {booking.eventTitle}
-          </div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>
-            #{booking.bookingNumber}
-          </div>
-        </div>
-        <BookingStatusTag status={booking.status} />
-      </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 14px', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 10 }}>
-        <span><UserOutlined style={{ marginRight: 4 }} />{booking.userName}</span>
-        <span><CalendarOutlined style={{ marginRight: 4 }} />{formatEventDate(booking.createdAt)}</span>
-        <span>{getDetails(booking)}</span>
-        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-          <DollarOutlined style={{ marginRight: 4 }} />{centsToUSD(booking.totalCents)}
-        </span>
-      </div>
-
-      {booking.status === 'Paid' && (
-        <Popconfirm title="Refund this booking?" onConfirm={() => handleRefund(booking.id)}>
-          <Button size="small" icon={<UndoOutlined />} danger>
-            Refund
-          </Button>
-        </Popconfirm>
-      )}
-    </Card>
-  );
 
   return (
-    <div>
-      <PageHeader title="Bookings" subtitle="Manage all bookings"
+    <div className="spring-up">
+      <PageHeader 
+        title="Sales Pipeline" 
+        subtitle={[
+          "Track and manage every guest booking with ease.",
+          "Process refunds and oversee entry status in real-time.",
+          "Monitor your revenue and guest list at a glance."
+        ]}
+        rotateSubtitle
         extra={
-          <Space size="small">
-            <Button size="small" icon={<DownloadOutlined />} onClick={() => handleExport('csv')}>CSV</Button>
-            <Button size="small" icon={<DownloadOutlined />} onClick={() => handleExport('xlsx')}>Excel</Button>
-          </Space>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Button 
+              icon={<DownloadOutlined />} 
+              onClick={() => handleExport('csv')}
+              style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
+            >
+              CSV
+            </Button>
+            <Button 
+              icon={<DownloadOutlined />} 
+              onClick={() => handleExport('xlsx')}
+              style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
+            >
+              Excel
+            </Button>
+          </div>
         }
       />
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: 16, 
+        marginBottom: 32, 
+        flexWrap: 'wrap', 
+        alignItems: 'center',
+        background: 'var(--bg-surface)',
+        padding: '16px 24px',
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
         <Input
-          placeholder="Search bookings..."
+          placeholder="Search customer or booking number..."
           prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
           allowClear
           onChange={(e) => setFilters({ search: e.target.value || undefined })}
-          style={{ flex: 1, minWidth: 180 }}
+          style={{ flex: 1, minWidth: 260, height: 44, borderRadius: 'var(--radius-full)', border: '1px solid var(--border)', paddingLeft: 16 }}
         />
-        <Select
-          placeholder="Status"
-          allowClear
-          style={{ minWidth: 130 }}
-          onChange={(val) => setFilters({ status: val })}
-          options={['Pending', 'Paid', 'CheckedIn', 'Cancelled', 'Refunded'].map((s) => ({ label: s, value: s }))}
-        />
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {['Pending', 'Paid', 'CheckedIn', 'Refunded'].map(status => (
+            <div 
+              key={status}
+              onClick={() => setFilters({ status: status as BookingStatus })}
+              style={{
+                padding: '8px 20px',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--bg-soft)',
+                border: '1px solid var(--border)',
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              className="hover-lift press-state"
+            >
+              {status}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Desktop: Table */}
@@ -156,26 +163,73 @@ export default function AdminBookingsPage() {
       {/* Mobile: Cards */}
       <div className="mobile-card-list">
         {loading ? (
-          [1, 2, 3].map((i) => (
-            <Card key={i} size="small" style={{ marginBottom: 12 }}>
-              <Skeleton active paragraph={{ rows: 2 }} />
-            </Card>
-          ))
+          <div style={{ padding: '24px 0' }}>
+            <LoadingSpinner skeleton="card" />
+          </div>
         ) : data.length === 0 ? (
-          <Empty description="No bookings found" style={{ padding: '48px 0' }} />
+          <EmptyState
+            title="No bookings found"
+            description="It looks like no one has reserved a spot under these filters yet."
+            actionLabel="Clear Filters"
+            onAction={() => setFilters({})}
+          />
         ) : (
           <>
-            {data.map(renderBookingCard)}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 40 }}>
+              {data.map((booking) => (
+                <HumanCard 
+                  key={booking.id} 
+                  className="human-noise"
+                  onClick={() => {}} // Optional: navigate to booking details
+                  style={{ borderLeft: `4px solid ${booking.status === 'Paid' ? 'var(--accent-green)' : 'var(--border)'}` }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-primary)', fontFamily: "'Playfair Display', serif" }}>
+                        {booking.eventTitle}
+                      </div>
+                      <div style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 500 }}>
+                        #{booking.bookingNumber}
+                      </div>
+                    </div>
+                    <BookingStatusTag status={booking.status} />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)' }}>
+                      <UserOutlined style={{ color: 'var(--primary)', opacity: 0.7 }} />
+                      <span style={{ fontWeight: 600 }}>{booking.userName}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)' }}>
+                      <DollarOutlined style={{ color: 'var(--accent-gold)' }} />
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{centsToUSD(booking.totalCents)}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
+                      Captured {formatEventDate(booking.createdAt)}
+                    </div>
+                    {booking.status === 'Paid' && (
+                      <Popconfirm title="Refund this booking?" onConfirm={() => handleRefund(booking.id)}>
+                        <Button size="small" type="text" icon={<UndoOutlined />} danger style={{ fontWeight: 600 }}>
+                          Refund
+                        </Button>
+                      </Popconfirm>
+                    )}
+                  </div>
+                </HumanCard>
+              ))}
+            </div>
             {total > pageSize && (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 40 }}>
                 <Pagination
                   current={page}
                   pageSize={pageSize}
                   total={total}
                   onChange={setPage}
                   showSizeChanger={false}
-                  size="small"
-                  simple
+                  className="human-pagination"
                 />
               </div>
             )}

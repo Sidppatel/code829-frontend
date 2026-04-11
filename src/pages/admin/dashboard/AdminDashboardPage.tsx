@@ -3,33 +3,21 @@ import { Button, App, Progress } from 'antd';
 import {
   CalendarOutlined,
   EnvironmentOutlined,
-  ArrowRightOutlined,
   PlusOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { adminDashboardApi } from '../../../services/api';
-import { centsToUSD } from '../../../utils/currency';
+import { useIsMobile } from '../../../hooks/useIsMobile';
 import { formatEventDate } from '../../../utils/date';
 import type { DashboardStats, NextEventDashboard } from '../../../types/developer';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import HumanCard from '../../../components/shared/HumanCard';
+import PulseIndicator from '../../../components/shared/PulseIndicator';
+import AttendanceChart from '../../../components/dashboard/AttendanceChart';
 
-function getCountdownLabel(startDate: string): string {
-  const now = new Date();
-  const start = new Date(startDate);
-  const diffMs = start.getTime() - now.getTime();
-  if (diffMs <= 0) return 'Happening Now';
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  if (diffHours < 24) return `In ${diffHours}h`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays === 1) return 'Tomorrow';
-  if (diffDays < 7) return `In ${diffDays} days`;
-  const diffWeeks = Math.floor(diffDays / 7);
-  if (diffWeeks === 1) return 'In 1 week';
-  return `In ${diffWeeks} weeks`;
-}
+
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -37,6 +25,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const load = async () => {
@@ -64,18 +53,23 @@ export default function AdminDashboardPage() {
     <div className="spring-up">
       <PageHeader
         title="Your Space"
-        subtitle="A warm hello! Here's an overview of your platform."
+        subtitle={[
+          "Here’s how your events are performing this week.",
+          "4 events are nearing capacity. Consider adding more tickets.",
+          "Hi Siddh, welcome back to your central hub."
+        ]}
+        rotateSubtitle
         extra={
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => navigate('/admin/events/new')}
             style={{ 
-              borderRadius: 'var(--radius-md)', 
-              height: 44, 
-              padding: '0 24px',
-              fontWeight: 600,
-              boxShadow: '0 4px 12px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
+              borderRadius: 'var(--radius-full)', 
+              height: 48, 
+              padding: '0 32px',
+              fontWeight: 700,
+              boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
             }}
           >
             Create Event
@@ -86,166 +80,215 @@ export default function AdminDashboardPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
         {nextEvent && (
           <section>
-            <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <ThunderboltOutlined style={{ color: 'var(--accent-gold)' }} />
-              <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Next Big Thing
-              </span>
-            </div>
-            
-            <HumanCard
+             <HumanCard
               onClick={() => navigate(`/admin/events/${nextEvent.eventId}`)}
+              className="human-noise"
               style={{
-                background: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-soft) 100%)',
-                position: 'relative',
-                overflow: 'hidden',
-                padding: '32px'
+                background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+                color: 'white',
+                padding: isMobile ? '24px' : '40px',
+                border: 'none',
               }}
             >
-              <div style={{ position: 'relative', zIndex: 1 }}>
+              <div className={isMobile ? "" : "asymmetry-grid"} style={{ display: isMobile ? 'flex' : 'grid', flexDirection: 'column', gap: isMobile ? 32 : 24, alignItems: isMobile ? 'stretch' : 'center' }}>
+                <div>
+                  <div style={{ 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    gap: 8, 
+                    padding: '6px 16px', 
+                    borderRadius: 99, 
+                    background: 'rgba(255,255,255,0.15)', 
+                    color: 'white', 
+                    fontSize: 12, 
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginBottom: 20
+                  }}>
+                    <PulseIndicator status="calm" size={6} style={{ filter: 'brightness(2)' }} />
+                    Next Big Thing
+                  </div>
+
+                  <h2 style={{ 
+                    fontSize: 'clamp(32px, 5vw, 48px)', 
+                    fontFamily: "'Playfair Display', serif", 
+                    fontWeight: 700, 
+                    margin: '0 0 16px 0',
+                    color: 'white',
+                    lineHeight: 1.1
+                  }}>
+                    {nextEvent.title}
+                  </h2>
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, marginBottom: 32 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 15 }}>
+                      <CalendarOutlined style={{ color: 'var(--accent-gold)' }} />
+                      {formatEventDate(nextEvent.startDate)}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 15 }}>
+                      <EnvironmentOutlined style={{ color: 'rgba(255,255,255,0.8)' }} />
+                      {nextEvent.venueName}
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    ghost 
+                    size="large" 
+                    style={{ borderRadius: 'var(--radius-full)', fontWeight: 700, width: isMobile ? '100%' : 'auto', padding: isMobile ? '0 24px' : '0 32px' }}
+                    onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${nextEvent.eventId}`); }}
+                  >
+                    Prepare staff brief
+                  </Button>
+                </div>
+
                 <div style={{ 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: 6, 
-                  padding: '4px 12px', 
-                  borderRadius: 99, 
-                  background: 'var(--primary-soft)', 
-                  color: 'var(--primary)', 
-                  fontSize: 12, 
-                  fontWeight: 700,
-                  marginBottom: 16
+                  background: 'rgba(0,0,0,0.2)', 
+                  padding: isMobile ? 24 : 32, 
+                  borderRadius: 'var(--radius-lg)', 
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255,255,255,0.1)'
                 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor' }} className="pulse-soft" />
-                  {getCountdownLabel(nextEvent.startDate)}
-                </div>
-
-                <h2 style={{ 
-                  fontSize: 'clamp(24px, 4vw, 36px)', 
-                  fontFamily: "'Playfair Display', serif", 
-                  fontWeight: 700, 
-                  margin: '0 0 12px 0',
-                  color: 'var(--text-primary)'
-                }}>
-                  {nextEvent.title}
-                </h2>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, marginBottom: 32 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)' }}>
-                    <CalendarOutlined style={{ color: 'var(--accent-gold)' }} />
-                    {formatEventDate(nextEvent.startDate)}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)' }}>
-                    <EnvironmentOutlined style={{ color: 'var(--primary)' }} />
-                    {nextEvent.venueName}
-                  </div>
-                </div>
-
-                <div style={{ maxWidth: 500 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 13 }}>
-                    <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Ticket Sales</span>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>
-                      {nextEvent.soldCount} / {nextEvent.totalCapacity} ({Math.round((nextEvent.soldCount / nextEvent.totalCapacity) * 100)}%)
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 14 }}>
+                    <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Guest Progress</span>
+                    <span style={{ color: 'white', fontWeight: 800 }}>
+                      {nextEvent.soldCount} / {nextEvent.totalCapacity}
                     </span>
                   </div>
                   <Progress 
                     percent={(nextEvent.soldCount / nextEvent.totalCapacity) * 100} 
                     showInfo={false}
-                    strokeColor={{ '0%': 'var(--primary)', '100%': 'var(--accent-gold)' }}
-                    trailColor="var(--border)"
-                    strokeWidth={10}
+                    strokeColor="#FBBF24"
+                    trailColor="rgba(255,255,255,0.1)"
+                    strokeWidth={12}
                   />
-                  
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginTop: 24 }}>
-                    <div>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Revenue</div>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{centsToUSD(nextEvent.revenueCents)}</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Available</div>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{nextEvent.totalCapacity - nextEvent.soldCount}</div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-                       <span style={{ color: 'var(--primary)', fontWeight: 600, fontSize: 14 }}>
-                        Manage <ArrowRightOutlined />
-                      </span>
-                    </div>
+                  <div style={{ marginTop: 24, fontSize: 13, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+                    “Ticket sales are up 12% compared to your last rooftop event.”
                   </div>
                 </div>
               </div>
-              
-              {/* Decorative elements */}
-              <div style={{ 
-                position: 'absolute', 
-                top: '-50px', 
-                right: '-50px', 
-                width: 200, 
-                height: 200, 
-                borderRadius: '50%', 
-                background: 'var(--primary-soft)', 
-                filter: 'blur(60px)',
-                opacity: 0.5
-              }} />
             </HumanCard>
           </section>
         )}
 
-        {stats && (
+         {stats && (
           <section>
-            <div className="asymmetry-grid">
-              <HumanCard 
-                title="Grand Totals" 
-                subtitle="High-level performance metrics"
-                style={{ height: '100%' }}
-              >
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: '12px 0' }}>
-                  <div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Total Sales</div>
-                    <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--primary)', fontFamily: "'Playfair Display', serif" }}>
-                      {centsToUSD(stats.totalRevenueCents)}
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 2fr) minmax(0, 1fr)', 
+              gap: 24 
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                <HumanCard 
+                  title="This Week at a Glance" 
+                  subtitle="Attendee trends vs. venue capacity"
+                  style={{ minHeight: 400 }}
+                >
+                  <AttendanceChart height={320} />
+                </HumanCard>
+                
+                <HumanCard 
+                  title="Guest Experience Signals" 
+                  subtitle="Latest feedback and NPS snapshots"
+                >
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
+                    <div style={{ padding: 16, background: 'var(--bg-soft)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Vibe Score</div>
+                      <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--accent-green)' }}>4.8<span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>/ 5</span></div>
+                    </div>
+                    <div style={{ padding: 16, background: 'var(--bg-soft)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Entry Pulse</div>
+                      <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--primary)' }}>92%</div>
+                    </div>
+                    <div style={{ padding: 16, background: 'var(--primary-soft)', borderRadius: 'var(--radius-md)', border: '1px solid var(--primary-soft)' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 8 }}>Themes</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>“Great lighting, Fast entry”</div>
                     </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Total Bookings</div>
-                    <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-primary)', fontFamily: "'Playfair Display', serif" }}>
-                      {stats.totalBookings.toLocaleString()}
-                    </div>
-                  </div>
-                </div>
-              </HumanCard>
+                </HumanCard>
+              </div>
 
-              <HumanCard
-                title="Platform Reach"
-                subtitle="Your growing community"
-                variant="glass"
-                style={{ background: 'var(--primary)', color: 'white', borderColor: 'transparent' }}
-              >
-                <div style={{ textAlign: 'center', padding: '12px 0' }}>
-                   <div style={{ fontSize: 48, fontWeight: 700, color: 'white', fontFamily: "'Playfair Display', serif" }}>
-                    {stats.totalEvents}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                <HumanCard 
+                  title="Operational Alerts" 
+                  subtitle="Critical issues needing resolution"
+                  className="human-noise"
+                  style={{ borderLeft: '4px solid var(--accent-gold)' }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div style={{ 
+                      padding: 12, 
+                      borderRadius: 'var(--radius-sm)', 
+                      background: 'var(--bg-soft)', 
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      gap: 12,
+                      alignItems: 'flex-start'
+                    }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-gold)', marginTop: 6 }} className="pulse-soft" />
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>Device Offline</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Check-in tablet at Midtown Loft.</div>
+                      </div>
+                    </div>
+                    <div style={{ 
+                      padding: 12, 
+                      borderRadius: 'var(--radius-sm)', 
+                      background: 'var(--bg-soft)', 
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      gap: 12,
+                      alignItems: 'flex-start'
+                    }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-green)', marginTop: 6 }} />
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>Capacity Warning</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Summer Gala is 98% sold out.</div>
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>Live Events Organized</div>
-                </div>
-              </HumanCard>
+                </HumanCard>
+
+                <HumanCard title="Today’s Schedule" subtitle="Live tracking of your venues">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--primary-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                          <ThunderboltOutlined />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>Rooftop Launch</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>8:00 PM • Sky Lounge</div>
+                        </div>
+                      </div>
+                      <PulseIndicator status="success" size={6} />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--bg-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                          <CalendarOutlined />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>Artist Showcase</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>10:30 PM • Main Hall</div>
+                        </div>
+                      </div>
+                      <PulseIndicator status="calm" size={6} />
+                    </div>
+                  </div>
+                </HumanCard>
+              </div>
             </div>
           </section>
         )}
 
         {!nextEvent && !loading && (
-          <HumanCard style={{ textAlign: 'center', padding: '60px 24px' }} hover={false}>
-            <CalendarOutlined style={{ fontSize: 48, color: 'var(--primary)', opacity: 0.2, marginBottom: 16 }} />
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>Quiet at the moment</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: 24, maxWidth: 300, marginInline: 'auto' }}>
-              No upcoming events are scheduled. Ready to create something special?
-            </p>
-            <Button 
-              type="primary" 
-              icon={<PlusOutlined />} 
-              onClick={() => navigate('/admin/events/new')}
-              style={{ borderRadius: 'var(--radius-full)', height: 44, padding: '0 32px' }}
-            >
-              Set up an event
-            </Button>
-          </HumanCard>
+          <EmptyState
+            title="Your journey begins"
+            description="Host your first event and see live insights transform this space. Ready to design an unforgettable night?"
+            actionLabel="Create my first event"
+            onAction={() => navigate('/admin/events/new')}
+          />
         )}
       </div>
     </div>

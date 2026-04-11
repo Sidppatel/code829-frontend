@@ -7,6 +7,7 @@ import {
 import {
   CalendarOutlined, EnvironmentOutlined, ArrowLeftOutlined, ShareAltOutlined, MessageOutlined,
 } from '@ant-design/icons';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 const containerVariants = {
   initial: { opacity: 0 },
@@ -18,10 +19,10 @@ const containerVariants = {
 
 const itemVariants = {
   initial: { opacity: 0, y: 30 },
-  animate: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } 
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
   }
 };
 import { loadStripe } from '@stripe/stripe-js';
@@ -48,6 +49,7 @@ export default function EventDetailPage() {
   const { message } = App.useApp();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const isMobile = useIsMobile();
 
   // Booking flow state
   const [step, setStep] = useState<BookingStep>('info');
@@ -356,7 +358,7 @@ export default function EventDetailPage() {
           <Col xs={24} sm={16} md={12} lg={8}>
             <CapacityBookingForm
               maxCapacity={event.maxCapacity ?? 0}
-              totalSold={event.quantitySold}
+              totalSold={event.totalSold}
               pricePerPersonCents={event.pricePerPersonCents ?? 0}
               platformFeeCents={feeCents}
               onProceed={handleCapacityProceed}
@@ -396,6 +398,12 @@ export default function EventDetailPage() {
     );
   }
 
+  const capacity = event.layoutMode === 'Open' ? ((event.totalCapacity && event.totalCapacity > 0) ? event.totalCapacity : (event.maxCapacity ?? 0)) : 0;
+  const remaining = capacity - (event.totalSold ?? 0);
+  const isSoldOut = event.layoutMode === 'Open' && remaining <= 0;
+
+
+
   // Default: event info view
   return (
     <motion.div
@@ -413,9 +421,9 @@ export default function EventDetailPage() {
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
-          <div style={{ 
-            width: '100%', 
-            height: '100%', 
+          <div style={{
+            width: '100%',
+            height: '100%',
             background: 'linear-gradient(135deg, var(--accent-violet-dark), var(--bg-elevated))',
             display: 'flex',
             alignItems: 'center',
@@ -424,11 +432,11 @@ export default function EventDetailPage() {
             <CalendarOutlined style={{ fontSize: 120, color: 'rgba(255,255,255,0.05)' }} />
           </div>
         )}
-        
+
         {/* Overlay for Header */}
-        <div style={{ 
-          position: 'absolute', 
-          inset: 0, 
+        <div style={{
+          position: 'absolute',
+          inset: 0,
           background: 'linear-gradient(to bottom, rgba(11, 14, 20, 0.4) 0%, rgba(11, 14, 20, 0.95) 90%)',
           display: 'flex',
           flexDirection: 'column',
@@ -437,13 +445,13 @@ export default function EventDetailPage() {
         }}>
           <div className="page-container">
             <motion.div variants={itemVariants}>
-              <Button 
-                type="text" 
-                icon={<ArrowLeftOutlined />} 
+              <Button
+                type="text"
+                icon={<ArrowLeftOutlined />}
                 onClick={() => navigate('/events')}
-                style={{ 
-                  marginBottom: 32, 
-                  color: 'rgba(255,255,255,0.8)', 
+                style={{
+                  marginBottom: 32,
+                  color: 'rgba(255,255,255,0.8)',
                   fontWeight: 600,
                   fontSize: 15,
                   padding: 0
@@ -462,18 +470,25 @@ export default function EventDetailPage() {
                   </Tag>
                 )}
               </Space>
-              
-              <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 6rem)', fontWeight: 900, color: '#fff', marginBottom: 24, letterSpacing: '-0.06em', lineHeight: 0.9 }}>
+
+              <h1 style={{
+                fontSize: isMobile ? 'clamp(2.5rem, 12vw, 4rem)' : 'clamp(2.5rem, 8vw, 6rem)',
+                fontWeight: 900,
+                color: '#fff',
+                marginBottom: 24,
+                letterSpacing: '-0.06em',
+                lineHeight: 0.9
+              }}>
                 {event.title}
               </h1>
 
               <Space size={40} style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16, fontWeight: 600 }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <CalendarOutlined style={{ color: 'var(--accent-rose)' }} /> 
+                  <CalendarOutlined style={{ color: 'var(--accent-rose)' }} />
                   {formatDateRange(event.startDate, event.endDate)}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <EnvironmentOutlined style={{ color: 'var(--accent-violet)' }} /> 
+                  <EnvironmentOutlined style={{ color: 'var(--accent-violet)' }} />
                   {event.venue.name}, {event.venue.city}
                 </span>
               </Space>
@@ -482,8 +497,8 @@ export default function EventDetailPage() {
         </div>
       </section>
 
-      <div className="page-container" style={{ marginTop: 60 }}>
-        <Row gutter={[60, 60]}>
+      <div className="page-container" style={{ marginTop: isMobile ? 32 : 60 }}>
+        <Row gutter={isMobile ? [24, 24] : [60, 60]}>
           {/* Main Content */}
           <Col xs={24} lg={15}>
             <motion.div variants={itemVariants}>
@@ -492,9 +507,9 @@ export default function EventDetailPage() {
                   <div style={{ width: 6, height: 32, background: 'var(--accent-violet)', borderRadius: 10 }} />
                   About the Experience
                 </h3>
-                <div style={{ 
-                  fontSize: 18, 
-                  lineHeight: 1.8, 
+                <div style={{
+                  fontSize: 18,
+                  lineHeight: 1.8,
                   color: 'var(--text-secondary)',
                   background: 'var(--bg-surface)',
                   padding: 40,
@@ -531,45 +546,63 @@ export default function EventDetailPage() {
 
           {/* Booking Sidebar */}
           <Col xs={24} lg={9}>
-            <motion.div variants={itemVariants} style={{ position: 'sticky', top: 130 }}>
-              <div className="glass-card" style={{ padding: 48, borderRadius: 32 }}>
-                <div style={{ marginBottom: 40 }}>
+            <motion.div variants={itemVariants} style={{ position: isMobile ? 'relative' : 'sticky', top: isMobile ? 0 : 130 }}>
+              <div className="glass-card" style={{ padding: isMobile ? '24px 32px' : 48, borderRadius: 32 }}>
+                <div style={{ marginBottom: isMobile ? 24 : 40 }}>
                   <Typography.Text style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 800, fontSize: 11 }}>Starting at</Typography.Text>
-                  <div style={{ fontSize: 48, fontWeight: 900, color: 'var(--text-primary)', marginTop: 8, letterSpacing: '-1px' }}>
+                  <div style={{
+                    fontSize: isMobile ? 'clamp(24px, 8vw, 36px)' : 48,
+                    fontWeight: 900,
+                    color: 'var(--text-primary)',
+                    marginTop: 8,
+                    letterSpacing: '-1px',
+                    lineHeight: 1.1
+                  }}>
                     {event.pricePerPersonCents ? centsToUSD(event.pricePerPersonCents) : 'Complimentary'}
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                  <Button 
-                    type="primary" 
-                    size="large" 
+                  <Button
+                    type="primary"
+                    size="large"
                     block
                     onClick={handleBookNow}
-                    style={{ 
-                      height: 72, 
-                      borderRadius: 18, 
-                      fontSize: 18, 
+                    disabled={isSoldOut}
+                    style={{
+                      height: 72,
+                      borderRadius: 18,
+                      fontSize: 18,
                       fontWeight: 800,
-                      background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                      background: isSoldOut ? 'var(--bg-soft)' : 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
                       border: 'none',
-                      boxShadow: '0 15px 35px rgba(99, 102, 241, 0.35)'
+                      boxShadow: isSoldOut ? 'none' : '0 15px 35px rgba(99, 102, 241, 0.35)',
+                      color: isSoldOut ? 'var(--text-muted)' : 'white'
                     }}
                   >
-                    Reserve tickets
+                    {isSoldOut ? 'Sold Out' : 'Reserve tickets'}
                   </Button>
-                  
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     gap: 10,
                     color: 'var(--text-secondary)',
                     fontSize: 14,
                     fontWeight: 600
                   }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />
-                    {(event.maxCapacity ?? 0) - event.quantitySold} spots remaining
+                    <div style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: !isSoldOut ? '#22c55e' : 'var(--accent-rose)'
+                    }} />
+                    {!isSoldOut
+                      ? (event.layoutMode === 'Grid'
+                        ? `${event.noOfAvailableTables} tables available`
+                        : `${remaining} spots remaining`)
+                      : 'Sold Out'}
                   </div>
                 </div>
 

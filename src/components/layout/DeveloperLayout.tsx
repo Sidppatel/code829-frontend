@@ -11,10 +11,13 @@ import {
   BellOutlined,
   LogoutOutlined,
   UserOutlined,
+  GlobalOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from '../shared/ThemeToggle';
+import PulseIndicator from '../shared/PulseIndicator';
 
 const { Sider, Header, Content } = Layout;
 
@@ -262,14 +265,56 @@ export default function DeveloperLayout() {
                </div>
             )}
            {!isMobile && (
-             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-               <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-                  System Health: <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>Optimal</span>
-               </Typography.Text>
-               <div style={{ width: 4, height: 4, background: 'var(--border)', borderRadius: '50%' }} />
-               <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-                  Active Node: <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Production-Primary</span>
-               </Typography.Text>
+             <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                   <PulseIndicator status="success" size={6} />
+                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>API</span>
+                 </div>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                   <PulseIndicator status="success" size={6} />
+                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Worker</span>
+                 </div>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                   <PulseIndicator status="success" size={6} />
+                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Email</span>
+                 </div>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                   <PulseIndicator status="warning" size={6} />
+                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Storage</span>
+                 </div>
+               </div>
+               
+               <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
+               
+               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                 <div style={{ 
+                   padding: '4px 12px', 
+                   background: 'var(--bg-soft)', 
+                   borderRadius: 99, 
+                   border: '1px solid var(--border)',
+                   display: 'flex',
+                   alignItems: 'center',
+                   gap: 8,
+                   cursor: 'pointer'
+                 }}>
+                   <GlobalOutlined style={{ fontSize: 14, color: 'var(--primary)' }} />
+                   <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>Production</span>
+                 </div>
+                 <div style={{ 
+                   padding: '4px 12px', 
+                   background: 'var(--bg-surface)', 
+                   borderRadius: 99, 
+                   border: '1px solid var(--border)',
+                   display: 'flex',
+                   alignItems: 'center',
+                   gap: 8,
+                   cursor: 'pointer'
+                 }}>
+                   <ThunderboltOutlined style={{ fontSize: 14, color: 'var(--accent-gold)' }} />
+                   <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Last 24h</span>
+                 </div>
+               </div>
              </div>
            )}
           </div>
