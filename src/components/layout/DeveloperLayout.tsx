@@ -8,7 +8,6 @@ import {
   SettingOutlined,
   TeamOutlined,
   CalendarOutlined,
-  BellOutlined,
   LogoutOutlined,
   UserOutlined,
   GlobalOutlined,
@@ -161,7 +160,6 @@ export default function DeveloperLayout() {
         alignItems: 'center',
         gap: 12
       }}>
-        <ThemeToggle size="small" />
         {!collapsed && user && (
           <div style={{ textAlign: 'center', width: '100%' }}>
             <Typography.Text ellipsis style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, display: 'block' }}>
@@ -320,20 +318,12 @@ export default function DeveloperLayout() {
           </div>
           
           <Space size={16}>
-            <Button
-              type="text"
-              icon={<BellOutlined style={{ fontSize: 20, color: 'var(--text-secondary)' }} />}
-              style={{ 
-                width: 44, 
-                height: 44, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                borderRadius: 'var(--radius-md)',
+            <ThemeToggle 
+              className="hover-lift"
+              style={{
                 border: '1px solid var(--border)',
                 background: 'var(--bg-surface)'
               }}
-              className="hover-lift"
             />
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <Button

@@ -4,9 +4,11 @@ import { useTheme } from '../../hooks/useTheme';
 
 interface ThemeToggleProps {
   size?: 'small' | 'middle' | 'large';
+  style?: React.CSSProperties;
+  className?: string;
 }
 
-export default function ThemeToggle({ size = 'middle' }: ThemeToggleProps) {
+export default function ThemeToggle({ size = 'middle', style, className }: ThemeToggleProps) {
   const { isDark, toggleTheme } = useTheme();
   
   return (
@@ -14,9 +16,18 @@ export default function ThemeToggle({ size = 'middle' }: ThemeToggleProps) {
       <Button
         type="text"
         size={size}
-        icon={isDark ? <SunOutlined style={{ color: 'var(--accent-gold)', fontSize: 18 }} /> : <MoonOutlined style={{ color: 'var(--accent-violet)', fontSize: 18 }} />}
+        icon={isDark ? <SunOutlined style={{ color: 'var(--accent-gold)', fontSize: 20 }} /> : <MoonOutlined style={{ color: 'var(--accent-violet)', fontSize: 20 }} />}
         onClick={toggleTheme}
-        style={{ borderRadius: 8, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        className={className}
+        style={{ 
+          borderRadius: 'var(--radius-md)', 
+          width: 44, 
+          height: 44, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          ...style 
+        }}
       />
     </Tooltip>
   );

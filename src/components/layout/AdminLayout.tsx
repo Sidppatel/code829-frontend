@@ -8,7 +8,6 @@ import {
   BookOutlined,
   TableOutlined,
   BarChartOutlined,
-  BellOutlined,
   LogoutOutlined,
   UserOutlined,
 } from '@ant-design/icons';
@@ -220,7 +219,6 @@ export default function AdminLayout() {
           </div>
         )}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: collapsed ? '0' : '0 4px' }}>
-          <ThemeToggle size="small" />
           {!collapsed && (
             <Button 
               type="text" 
@@ -336,20 +334,12 @@ export default function AdminLayout() {
           </div>
           
           <Space size={16}>
-            <Button
-              type="text"
-              icon={<BellOutlined style={{ fontSize: 20, color: 'var(--text-secondary)' }} />}
-              style={{ 
-                width: 44, 
-                height: 44, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                borderRadius: 'var(--radius-md)',
+            <ThemeToggle 
+              className="hover-lift"
+              style={{
                 border: '1px solid var(--border)',
                 background: 'var(--bg-surface)'
               }}
-              className="hover-lift"
             />
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <Button
