@@ -12,6 +12,8 @@ import {
   UserOutlined,
   GlobalOutlined,
   ThunderboltOutlined,
+  RocketOutlined,
+  EyeOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '../../hooks/useAuth';
@@ -63,8 +65,8 @@ export default function DeveloperLayout() {
   const collapsed = isTablet;
 
   const userMenuItems: MenuProps['items'] = [
-    { key: 'admin', label: 'Go to Admin', icon: <SettingOutlined />, onClick: () => navigate('/admin') },
-    { key: 'home', label: 'View Site', icon: <UserOutlined />, onClick: () => navigate('/') },
+    { key: 'home', label: 'View Site', icon: <EyeOutlined />, onClick: () => navigate('/') },
+    { key: 'admin', label: 'Admin Panel', icon: <SettingOutlined />, onClick: () => navigate('/admin') },
     { type: 'divider' as const },
     { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, onClick: logout },
   ];
@@ -318,6 +320,28 @@ export default function DeveloperLayout() {
           </div>
           
           <Space size={16}>
+            {!isMobile && (
+              <Button
+                type="primary"
+                icon={<RocketOutlined />}
+                onClick={() => navigate('/')}
+                style={{
+                  borderRadius: 'var(--radius-md)',
+                  background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                  border: 'none',
+                  boxShadow: '0 8px 16px rgba(99, 102, 241, 0.25)',
+                  fontWeight: 700,
+                  height: 44,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '0 20px',
+                }}
+                className="hover-lift"
+              >
+                Live Experience
+              </Button>
+            )}
             <ThemeToggle 
               className="hover-lift"
               style={{

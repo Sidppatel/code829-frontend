@@ -10,6 +10,9 @@ import {
   BarChartOutlined,
   LogoutOutlined,
   UserOutlined,
+  RocketOutlined,
+  EyeOutlined,
+  GlobalOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '../../hooks/useAuth';
@@ -74,7 +77,7 @@ function useBreakpoint(): Breakpoint {
 export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
   const bp = useBreakpoint();
 
   const isMobile = bp === 'mobile';
@@ -83,6 +86,11 @@ export default function AdminLayout() {
   const collapsed = isTablet;
 
   const userMenuItems: MenuProps['items'] = [
+    { key: 'home', label: 'View Site', icon: <EyeOutlined />, onClick: () => navigate('/') },
+    ...(hasRole('Developer') ? [
+      { key: 'developer', label: 'Dev Console', icon: <GlobalOutlined />, onClick: () => navigate('/developer') },
+    ] : []),
+    { type: 'divider' as const },
     { key: 'profile', label: 'Profile', icon: <UserOutlined />, onClick: () => navigate('/profile') },
     { type: 'divider' as const },
     { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, onClick: logout },
@@ -334,6 +342,28 @@ export default function AdminLayout() {
           </div>
           
           <Space size={16}>
+            {!isMobile && (
+              <Button
+                type="primary"
+                icon={<RocketOutlined />}
+                onClick={() => navigate('/')}
+                style={{
+                  borderRadius: 'var(--radius-md)',
+                  background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                  border: 'none',
+                  boxShadow: '0 8px 16px rgba(99, 102, 241, 0.25)',
+                  fontWeight: 700,
+                  height: 44,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '0 20px',
+                }}
+                className="hover-lift"
+              >
+                Live Experience
+              </Button>
+            )}
             <ThemeToggle 
               className="hover-lift"
               style={{

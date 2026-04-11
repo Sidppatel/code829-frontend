@@ -445,31 +445,57 @@ export default function EventDetailPage() {
         }}>
           <div className="page-container">
             <motion.div variants={itemVariants}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: isMobile ? 12 : 24,
+                marginBottom: isMobile ? 32 : 48,
+                width: '100%',
+                paddingInline: isMobile ? 4 : 0
+              }}>
                 <Button
                   type="text"
                   icon={<ArrowLeftOutlined />}
                   onClick={() => navigate('/events')}
                   style={{
-                    marginBottom: isMobile ? 24 : 32,
                     color: 'rgba(255,255,255,0.8)',
                     fontWeight: 600,
                     fontSize: isMobile ? 14 : 15,
-                    padding: 0
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center'
                   }}
                 >
                   {isMobile ? 'Back' : 'Back to Collection'}
                 </Button>
 
-              <Space style={{ marginBottom: 20 }}>
-                <Tag style={{ borderRadius: 10, border: 'none', background: 'var(--accent-violet)', color: '#fff', fontWeight: 800, padding: '4px 18px' }}>
-                  {event.category}
-                </Tag>
-                {event.isFeatured && (
-                  <Tag style={{ borderRadius: 10, border: 'none', background: 'var(--accent-gold)', color: '#000', fontWeight: 800, padding: '4px 18px' }}>
-                    Featured
+                <Space size={isMobile ? 8 : 12}>
+                  <Tag style={{ 
+                    borderRadius: 10, 
+                    border: 'none', 
+                    background: 'var(--accent-violet)', 
+                    color: '#fff', 
+                    fontWeight: 800, 
+                    padding: isMobile ? '2px 12px' : '4px 18px',
+                    margin: 0
+                  }}>
+                    {event.category}
                   </Tag>
-                )}
-              </Space>
+                  {event.isFeatured && (
+                    <Tag style={{ 
+                      borderRadius: 10, 
+                      border: 'none', 
+                      background: 'var(--accent-gold)', 
+                      color: '#000', 
+                      fontWeight: 800, 
+                      padding: isMobile ? '2px 12px' : '4px 18px',
+                      margin: 0
+                    }}>
+                      Featured
+                    </Tag>
+                  )}
+                </Space>
+              </div>
 
               <h1 style={{
                 fontSize: isMobile ? 'clamp(1.8rem, 10vw, 3rem)' : 'clamp(2.5rem, 8vw, 6rem)',
