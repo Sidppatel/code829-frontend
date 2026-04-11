@@ -1,5 +1,5 @@
-import { Card, Tag, Typography, Button } from 'antd';
-import { CalendarOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { Tag, Space } from 'antd';
+import { CalendarOutlined, EnvironmentOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { EventSummary } from '../../types/event';
 import { centsToUSD } from '../../utils/currency';
@@ -17,121 +17,104 @@ export default function EventCard({ event }: Props) {
     : 'Free';
 
   return (
-    <Card
-      hoverable
+    <div 
+      className="glass-card hover-lift"
       onClick={() => navigate(`/events/${event.slug}`)}
       style={{
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border)',
-        borderRadius: 14,
+        borderRadius: 24,
         overflow: 'hidden',
+        cursor: 'pointer',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
-      styles={{ body: { padding: 16 } }}
-      cover={
-        <div style={{ position: 'relative', height: 180, overflow: 'hidden' }}>
-          {event.imageUrl ? (
-            <>
-              <img
-                alt={event.title}
-                src={event.imageUrl}
-                style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: 60,
-                  background: 'linear-gradient(to top, var(--bg-surface), transparent)',
-                }}
-              />
-            </>
-          ) : (
-            <div
-              style={{
-                height: 180,
-                background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.25), var(--bg-elevated))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 56,
-                  fontWeight: 700,
-                  color: 'var(--accent-violet)',
-                  fontFamily: "'Playfair Display', serif",
-                }}
-              >
-                {event.title.charAt(0).toUpperCase()}
-              </span>
-            </div>
-          )}
-          {/* Price badge */}
-          <Tag
-            style={{
-              position: 'absolute',
-              top: 12,
-              right: 12,
-              background: 'var(--accent-violet)',
-              border: 'none',
-              color: 'var(--bg-page)',
-              borderRadius: 99,
-              fontWeight: 600,
-              fontSize: 12,
-              padding: '2px 10px',
-              backdropFilter: 'blur(8px)',
+    >
+      <div style={{ position: 'relative', height: 240, overflow: 'hidden' }}>
+        {event.imageUrl ? (
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            style={{ 
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'cover',
+            }}
+          />
+        ) : (
+          <div style={{ 
+            width: '100%', 
+            height: '100%', 
+            background: 'linear-gradient(135deg, var(--accent-violet-dark), var(--bg-surface))',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <CalendarOutlined style={{ fontSize: 48, color: 'rgba(255,255,255,0.1)' }} />
+          </div>
+        )}
+        
+        <div style={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          zIndex: 2,
+        }}>
+          <Tag 
+            style={{ 
+              borderRadius: 10, 
+              border: 'none', 
+              background: 'rgba(0,0,0,0.6)', 
+              backdropFilter: 'blur(10px)', 
+              WebkitBackdropFilter: 'blur(10px)',
+              color: '#fff', 
+              fontWeight: 700, 
+              padding: '4px 12px' 
             }}
           >
-            {priceLabel}
+            {event.category}
           </Tag>
         </div>
-      }
-    >
-      <Typography.Text
-        strong
-        style={{
-          color: 'var(--text-primary)',
-          fontSize: 15,
-          fontWeight: 600,
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          lineHeight: 1.4,
-          marginBottom: 10,
-        }}
-      >
-        {event.title}
-      </Typography.Text>
-
-      <div style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-        <CalendarOutlined style={{ color: 'var(--accent-gold)', fontSize: 13 }} />
-        <Typography.Text style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-          {formatEventDate(event.startDate)}
-        </Typography.Text>
       </div>
 
-      <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-        <EnvironmentOutlined style={{ color: 'var(--text-muted)', fontSize: 13 }} />
-        <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 13 }} ellipsis>
-          {event.venueName}, {event.venueCity}
-        </Typography.Text>
-      </div>
+      <div style={{ padding: 24, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12, lineHeight: 1.2 }}>
+          {event.title}
+        </h3>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+          <Space style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+            <CalendarOutlined style={{ color: 'var(--accent-rose)' }} />
+            {formatEventDate(event.startDate)}
+          </Space>
+          <Space style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+            <EnvironmentOutlined style={{ color: 'var(--accent-violet)' }} />
+            {event.venueCity || event.venue?.name}
+          </Space>
+        </div>
 
-      <Button
-        type="primary"
-        block
-        style={{ borderRadius: 10, fontWeight: 600, height: 38 }}
-        onClick={(e) => {
-          e.stopPropagation();
-          navigate(`/events/${event.slug}`);
-        }}
-      >
-        View Details
-      </Button>
-    </Card>
+        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 700 }}>Starting at</span>
+            <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--accent-violet)' }}>
+              {priceLabel}
+            </div>
+          </div>
+          <div style={{ 
+            width: 44, 
+            height: 44, 
+            borderRadius: 12, 
+            background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            fontSize: 20,
+            boxShadow: '0 8px 16px rgba(99, 102, 241, 0.3)'
+          }}>
+            <ArrowRightOutlined />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

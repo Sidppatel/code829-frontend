@@ -19,7 +19,7 @@ export default function CheckInPage() {
   const [cameraActive, setCameraActive] = useState(false);
   const { message } = App.useApp();
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     if (!eventId) return;
     try {
       const { data } = await checkInApi.getStats(eventId);
@@ -29,9 +29,9 @@ export default function CheckInPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [eventId, message]);
 
-  useEffect(() => { void loadStats(); }, [eventId]);
+  useEffect(() => { void loadStats(); }, [loadStats]);
 
   const handleScan = useCallback(async (value: string) => {
     if (!value.trim() || scanning) return;
@@ -51,7 +51,7 @@ export default function CheckInPage() {
     } finally {
       setScanning(false);
     }
-  }, [scanning, message]);
+  }, [scanning, message, loadStats]);
 
   if (loading) return <LoadingSpinner />;
 

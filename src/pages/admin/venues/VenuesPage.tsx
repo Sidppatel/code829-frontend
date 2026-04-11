@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Switch, App, Tooltip } from 'antd';
 import { PlusOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +16,7 @@ export default function VenuesPage() {
   const { message } = App.useApp();
   const navigate = useNavigate();
 
-  const loadVenues = async (p = page, ps = pageSize) => {
+  const loadVenues = useCallback(async (p = page, ps = pageSize) => {
     setLoading(true);
     try {
       const { data } = await adminVenuesApi.list(p, ps);
@@ -27,9 +27,9 @@ export default function VenuesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize, message]);
 
-  useEffect(() => { void loadVenues(); }, [page, pageSize]);
+  useEffect(() => { void loadVenues(); }, [loadVenues]);
 
   const handleToggleActive = async (record: Venue) => {
     try {

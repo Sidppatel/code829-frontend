@@ -7,13 +7,16 @@ function calcRemaining(expiresAt: string | null): number {
 }
 
 export function useHoldTimer(expiresAt: string | null): number {
-  // Initialize with the real value immediately so the first render is never 0
   const [secondsLeft, setSecondsLeft] = useState(() => calcRemaining(expiresAt));
+  const [prevExpiresAt, setPrevExpiresAt] = useState(expiresAt);
+
+  // Sync state when expiresAt prop changes during render
+  if (expiresAt !== prevExpiresAt) {
+    setPrevExpiresAt(expiresAt);
+    setSecondsLeft(calcRemaining(expiresAt));
+  }
 
   useEffect(() => {
-    // Sync immediately when expiresAt changes
-    setSecondsLeft(calcRemaining(expiresAt));
-
     if (!expiresAt) return;
 
     const interval = setInterval(() => {

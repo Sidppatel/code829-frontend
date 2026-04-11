@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, Input, Button, App, List } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import { developerApi } from '../../../services/api';
@@ -13,7 +13,7 @@ export default function SettingsPage() {
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const { message } = App.useApp();
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const { data } = await developerApi.getSettings();
       setSettings(data);
@@ -25,9 +25,9 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [message]);
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void load(); }, [load]);
 
   const handleSave = async (key: string) => {
     setSavingKey(key);

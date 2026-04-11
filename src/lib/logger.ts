@@ -23,12 +23,10 @@ function formatEntry(level: LogLevel, source: string, message: string, data?: un
   const prefix = `%c${ts} [${level}] ${source}`;
 
   if (data !== undefined) {
-    // eslint-disable-next-line no-console
     console[level === 'ERROR' ? 'error' : level === 'WARN' ? 'warn' : 'info'](
       prefix, LEVEL_COLORS[level], message, data,
     );
   } else {
-    // eslint-disable-next-line no-console
     console[level === 'ERROR' ? 'error' : level === 'WARN' ? 'warn' : 'info'](
       prefix, LEVEL_COLORS[level], message,
     );

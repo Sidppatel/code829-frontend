@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Form, Input, Button, Typography, App } from 'antd';
-import { MailOutlined, LoginOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { MailOutlined, LoginOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { AxiosError } from 'axios';
 import { authApi } from '../../services/api';
@@ -81,78 +81,110 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="hero-section" style={{ minHeight: 'calc(100vh - 60px)', padding: '40px 16px' }}>
-      <div className="orb orb-1" />
-      <div className="orb orb-2" />
-      <div className="orb orb-3" />
-
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 420 }}
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          width: '100%',
+          maxWidth: 460,
+          zIndex: 10,
+        }}
       >
-        <div
+        <div 
           className="glass-card"
           style={{
-            padding: '32px 24px',
-            borderRadius: 20,
-            position: 'relative',
+            padding: '60px 40px',
+            borderRadius: 36,
+            boxShadow: 'var(--card-shadow)',
+            position: 'relative'
           }}
         >
           {/* Theme toggle top-right */}
-          <div style={{ position: 'absolute', top: 12, right: 12 }}>
+          <div style={{ position: 'absolute', top: 24, right: 24 }}>
             <ThemeToggle size="small" />
           </div>
 
-          {/* Branding */}
-          <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <div style={{ fontSize: 32, color: 'var(--accent-violet)', marginBottom: 8 }}>✦</div>
-            <div className="text-display gradient-text" style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>
-              Code829
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <div style={{ 
+              width: 64, 
+              height: 64, 
+              borderRadius: 18, 
+              background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))', 
+              margin: '0 auto 24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontSize: 28,
+              boxShadow: '0 12px 24px rgba(99, 102, 241, 0.2)'
+            }}>
+              ✦
             </div>
-            <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 14 }}>
-              Your events, your way
+            <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 12, letterSpacing: '-1.5px' }}>
+              Welcome back
+            </h1>
+            <Typography.Text style={{ color: 'var(--text-secondary)', fontSize: 16, fontWeight: 500 }}>
+              Sign in to your premium account.
             </Typography.Text>
           </div>
 
           {magicLinkSent ? (
             <div style={{ textAlign: 'center', padding: '16px 0' }}>
-              <MailOutlined style={{ fontSize: 48, marginBottom: 16, color: 'var(--accent-violet)' }} />
-              <Typography.Title level={4} style={{ color: 'var(--text-primary)', margin: '0 0 8px' }}>
-                Check your email
-              </Typography.Title>
-              <Typography.Text style={{ color: 'var(--text-secondary)' }}>
-                We sent a login link to your email address.
-              </Typography.Text>
-              <br />
-              <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 8, display: 'inline-block' }}>
-                Don't see it? Check your spam or junk folder.
-              </Typography.Text>
-              <br />
+              <div style={{ 
+                width: 80, 
+                height: 80, 
+                borderRadius: '50%', 
+                background: 'rgba(99, 102, 241, 0.05)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                margin: '0 auto 24px' 
+              }}>
+                <MailOutlined style={{ fontSize: 32, color: 'var(--accent-violet)' }} />
+              </div>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>Check your mail</h2>
+              <Typography.Paragraph style={{ color: 'var(--text-secondary)', fontSize: 15, lineHeight: 1.6 }}>
+                We've sent a magic login link to your inbox. <br />
+                Please click the link to sign in securely.
+              </Typography.Paragraph>
               <Button
                 type="link"
                 onClick={() => setMagicLinkSent(false)}
-                style={{ marginTop: 16, color: 'var(--accent-violet)' }}
+                style={{ marginTop: 24, color: 'var(--accent-violet)', fontWeight: 700 }}
               >
-                Try a different email
+                Use a different email
               </Button>
             </div>
           ) : (
-            <Form form={form} layout="vertical" onFinish={handleMagicLink}>
+            <Form form={form} layout="vertical" onFinish={handleMagicLink} requiredMark={false}>
               <Form.Item
                 name="email"
-                label={<span style={{ color: 'var(--text-secondary)' }}>Email</span>}
                 rules={[
                   { required: true, message: 'Email is required' },
                   { type: 'email', message: 'Enter a valid email' },
                 ]}
               >
                 <Input
-                  prefix={<MailOutlined style={{ color: 'var(--text-muted)' }} />}
-                  placeholder="you@example.com"
+                  prefix={<MailOutlined style={{ color: 'var(--text-muted)', marginRight: 8 }} />}
+                  placeholder="Email address"
                   size="large"
-                  style={{ borderRadius: 10 }}
+                  style={{ 
+                    borderRadius: 16, 
+                    height: 56, 
+                    background: 'rgba(0,0,0,0.03)', 
+                    border: '1px solid var(--border)',
+                    fontSize: 16
+                  }}
                   disabled={cooldown > 0}
                 />
               </Form.Item>
@@ -164,66 +196,74 @@ export default function LoginPage() {
                   disabled={cooldown > 0}
                   block
                   size="large"
-                  icon={cooldown > 0 ? <ClockCircleOutlined /> : undefined}
                   style={{
-                    fontWeight: 600,
-                    height: 44,
-                    borderRadius: 99,
+                    height: 60,
+                    borderRadius: 16,
+                    fontSize: 17,
+                    fontWeight: 800,
                     background: cooldown > 0
                       ? 'var(--bg-elevated)'
-                      : 'linear-gradient(135deg, var(--accent-violet), var(--accent-violet-dark))',
+                      : 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
                     border: 'none',
-                    color: cooldown > 0 ? 'var(--text-muted)' : undefined,
+                    boxShadow: '0 10px 25px rgba(99, 102, 241, 0.3)',
+                    marginTop: 12,
                   }}
                 >
-                  {cooldown > 0 ? `Try again in ${formatCooldown(cooldown)}` : 'Send Magic Link'}
+                  {cooldown > 0 ? `Retry in ${formatCooldown(cooldown)}` : 'Continue with Email'}
                 </Button>
               </Form.Item>
             </Form>
           )}
         </div>
 
-        {/* Back to home */}
-        <div style={{ textAlign: 'center', marginTop: 20 }}>
-          <Button type="link" onClick={() => navigate('/')} style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-            ← Back to home
-          </Button>
+        <div style={{ textAlign: 'center', marginTop: 32 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14, fontWeight: 500 }}>
+            New to the platform? <Link to="/events" style={{ color: 'var(--accent-violet)', fontWeight: 700 }}>Explore experiences</Link>
+          </p>
         </div>
 
         {import.meta.env.DEV && (
           <div
             className="glass-card"
             style={{
-              marginTop: 16,
-              padding: '20px 24px',
-              borderRadius: 14,
+              marginTop: 24,
+              padding: '32px',
+              borderRadius: 24,
             }}
           >
-            <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
-              Dev Login
-            </Typography.Text>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <div style={{ width: 4, height: 16, background: 'var(--accent-rose)', borderRadius: 2 }} />
+              <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+                Developer Access
+              </Typography.Text>
+            </div>
             <Form form={devForm} layout="vertical" onFinish={handleDevLogin} style={{ marginTop: 12 }}>
               <Form.Item
                 name="email"
                 rules={[{ required: true, message: 'Email is required' }]}
-                style={{ marginBottom: 12 }}
+                style={{ marginBottom: 20 }}
               >
                 <Input
-                  prefix={<LoginOutlined style={{ color: 'var(--text-muted)' }} />}
+                  prefix={<LoginOutlined style={{ color: 'var(--text-muted)', marginRight: 8 }} />}
                   placeholder="admin@code829.com"
-                  size="middle"
-                  style={{ borderRadius: 10 }}
+                  size="large"
+                  style={{ borderRadius: 14, height: 50, background: 'rgba(0,0,0,0.02)' }}
                 />
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button htmlType="submit" loading={loading} block style={{ borderRadius: 10 }}>
-                  Dev Login
+                <Button 
+                  htmlType="submit" 
+                  loading={loading} 
+                  block 
+                  style={{ borderRadius: 14, height: 50, fontWeight: 700, border: '1px solid var(--border)', background: 'transparent' }}
+                >
+                  Bypass with Dev Login
                 </Button>
               </Form.Item>
             </Form>
           </div>
         )}
-      </motion.div>
-    </div>
+    </motion.div>
+  </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Table, Button, Switch, App, Tooltip, Modal, Form, Input, InputNumber, Select, ColorPicker } from 'antd';
 import { PlusOutlined, EditOutlined, TeamOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../../services/api';
@@ -17,7 +17,7 @@ export default function TableTypesPage() {
   const [form] = Form.useForm();
   const { message } = App.useApp();
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await adminLayoutApi.listTableTemplates();
@@ -27,9 +27,9 @@ export default function TableTypesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [message]);
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void load(); }, [load]);
 
   const openCreate = () => {
     setEditingId(null);

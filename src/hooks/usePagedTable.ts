@@ -49,11 +49,11 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
     } finally {
       setLoading(false);
     }
-  }, [fetcher, filters, page, pageSize, refreshKey]);
+  }, [fetcher, filters, page, pageSize]);
 
   useEffect(() => {
     void fetchData();
-  }, [fetchData]);
+  }, [fetchData, refreshKey]);
 
   const handleSetFilters = useCallback((newFilters: Partial<P>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));

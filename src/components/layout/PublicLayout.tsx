@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Button, Dropdown, Space, Typography, Drawer, Row, Col } from 'antd';
+import { Layout, Menu, Button, Dropdown, Typography, Drawer, Row, Col } from 'antd';
 import {
   HomeOutlined,
   CalendarOutlined,
@@ -13,35 +13,33 @@ import {
   ScanOutlined,
   QrcodeOutlined,
   MessageOutlined,
+  LoginOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
+import { Avatar, Grid } from 'antd';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from '../shared/ThemeToggle';
 
 const { Header, Content, Footer } = Layout;
+const { useBreakpoint } = Grid;
 
 export default function PublicLayout() {
   const { isAuthenticated, user, logout, hasRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    setDrawerOpen(false);
-  }, [location.pathname]);
-
-  const menuItems: MenuProps['items'] = [
-    { key: '/', label: <Link to="/">Home</Link>, icon: <HomeOutlined /> },
-    { key: '/events', label: <Link to="/events">Events</Link>, icon: <CalendarOutlined /> },
-    { key: '/feedback', label: <Link to="/feedback">Feedback</Link>, icon: <MessageOutlined /> },
+  const navLinks = [
+    { path: '/', label: 'Experience' },
+    { path: '/events', label: 'Events' },
+    { path: '/feedback', label: 'Feedback' },
   ];
+
+
+
+
 
   const userMenuItems: MenuProps['items'] = [
     { key: 'bookings', label: 'My Bookings', icon: <BookOutlined />, onClick: () => navigate('/bookings') },
@@ -70,75 +68,127 @@ export default function PublicLayout() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <Layout style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
+    <Layout style={{ minHeight: '100vh', background: 'transparent' }}>
+      {/* Nebula Background */}
+      <div className="nebula-bg">
+        <div className="nebula-mesh" />
+      </div>
       {/* Top Navbar */}
       <Header
         style={{
+          position: 'fixed',
+          top: 24,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 'calc(100% - 48px)',
+          maxWidth: 1440,
+          height: 72,
+          padding: '0 32px',
+          background: 'var(--nav-bg)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid var(--nav-border)',
+          borderRadius: 24,
           display: 'flex',
           alignItems: 'center',
-          padding: '0 16px',
-          background: scrolled ? 'var(--nav-bg)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(16px)' : 'none',
-          borderBottom: scrolled ? '1px solid var(--nav-border)' : '1px solid transparent',
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-          transition: 'background 0.3s ease, border-bottom 0.3s ease, backdrop-filter 0.3s ease',
-          height: 60,
-          lineHeight: '60px',
+          justifyContent: 'space-between',
+          zIndex: 1000,
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
         }}
       >
         {/* Logo */}
-        <Link to="/" style={{ marginRight: 24, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-          <span style={{ color: 'var(--accent-violet)', fontSize: 22, lineHeight: 1 }}>✦</span>
-          <Typography.Title
-            level={4}
-            className="text-display gradient-text"
-            style={{ margin: 0, fontSize: 22 }}
-          >
-            Code829
-          </Typography.Title>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 16px rgba(99, 102, 241, 0.3)',
+          }}>
+            <span style={{ color: '#fff', fontSize: 22, fontWeight: 800 }}>C</span>
+          </div>
+          <span style={{ 
+            fontSize: 24, 
+            fontWeight: 800, 
+            color: 'var(--text-primary)', 
+            letterSpacing: '-1px',
+            display: isMobile ? 'none' : 'flex'
+          }}>
+            Code<span style={{ color: 'var(--accent-rose)', fontWeight: 400 }}>829</span>
+          </span>
         </Link>
 
-        {/* Desktop nav */}
-        <div className="desktop-nav" style={{ flex: 1, alignItems: 'center' }}>
-          <Menu
-            mode="horizontal"
-            selectedKeys={[location.pathname]}
-            items={menuItems}
-            style={{ flex: 1, background: 'transparent', borderBottom: 'none' }}
-          />
-        </div>
-
-        <Space style={{ marginLeft: 'auto' }}>
-          <ThemeToggle />
-          {/* Desktop auth */}
-          <div className="desktop-nav" style={{ alignItems: 'center' }}>
-            {isAuthenticated ? (
-              <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-                <Button
-                  type="text"
-                  style={{
-                    color: 'var(--text-primary)',
-                    borderRadius: 8,
-                    border: '1px solid var(--border)',
-                    background: 'var(--bg-surface)',
-                  }}
-                >
-                  <UserOutlined /> {user?.firstName}
-                </Button>
-              </Dropdown>
-            ) : (
+        {!isMobile && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            {navLinks.map((link) => (
               <Button
-                type="primary"
-                onClick={() => navigate('/login')}
-                style={{ borderRadius: 99, fontWeight: 600 }}
+                key={link.path}
+                type="text"
+                onClick={() => navigate(link.path)}
+                style={{
+                  color: location.pathname === link.path ? 'var(--accent-violet)' : 'var(--text-secondary)',
+                  fontWeight: location.pathname === link.path ? 700 : 500,
+                  fontSize: 15,
+                  padding: '6px 16px',
+                  borderRadius: 10,
+                  background: location.pathname === link.path ? 'rgba(99, 102, 241, 0.08)' : 'transparent',
+                }}
               >
-                Sign In
+                {link.label}
               </Button>
-            )}
+            ))}
           </div>
-        </Space>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <ThemeToggle />
+          
+          {isAuthenticated ? (
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
+              <Avatar
+                src={user?.avatarUrl}
+                icon={<UserOutlined />}
+                style={{ 
+                  cursor: 'pointer', 
+                  backgroundColor: 'var(--accent-violet)',
+                  border: '2px solid var(--glass-border)',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                }}
+              >
+                {user?.firstName?.[0]}
+              </Avatar>
+            </Dropdown>
+          ) : (
+            <Button
+              type="primary"
+              icon={<LoginOutlined />}
+              onClick={() => navigate('/login')}
+              style={{
+                borderRadius: 12,
+                fontWeight: 600,
+                height: 42,
+                padding: '0 24px',
+                background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                border: 'none',
+                boxShadow: '0 8px 16px rgba(99, 102, 241, 0.25)',
+              }}
+            >
+              Sign In
+            </Button>
+          )}
+
+          {isMobile && (
+            <Button
+              type="text"
+              icon={<MenuOutlined />}
+              onClick={() => setDrawerOpen(true)}
+              style={{ color: 'var(--text-primary)', fontSize: 20 }}
+            />
+          )}
+        </div>
       </Header>
 
       {/* Mobile Drawer */}
@@ -153,9 +203,21 @@ export default function PublicLayout() {
           wrapper: { width: 'min(280px, 85vw)' }
         }}
         title={
-          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ color: 'var(--accent-violet)', fontSize: 20 }}>✦</span>
-            <span className="text-display gradient-text" style={{ fontSize: 20, fontWeight: 700 }}>Code829</span>
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{
+              background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+              width: 28,
+              height: 28,
+              borderRadius: 6,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <span style={{ color: '#fff', fontSize: 16, fontWeight: 800 }}>C</span>
+            </div>
+            <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
+              Code<span style={{ color: 'var(--accent-rose)', fontWeight: 400 }}>829</span>
+            </span>
           </Link>
         }
       >
@@ -163,6 +225,7 @@ export default function PublicLayout() {
           <Menu
             mode="inline"
             selectedKeys={[location.pathname]}
+            onSelect={() => setDrawerOpen(false)}
             items={[
               { key: '/', label: <Link to="/">Home</Link>, icon: <HomeOutlined /> },
               { key: '/events', label: <Link to="/events">Events</Link>, icon: <CalendarOutlined /> },
@@ -187,11 +250,26 @@ export default function PublicLayout() {
         <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <ThemeToggle />
           {isAuthenticated ? (
-            <Button type="text" icon={<LogoutOutlined />} onClick={logout} style={{ color: 'var(--text-secondary)' }}>
+            <Button 
+              type="text" 
+              icon={<LogoutOutlined />} 
+              onClick={() => {
+                logout();
+                setDrawerOpen(false);
+              }} 
+              style={{ color: 'var(--text-secondary)' }}
+            >
               Logout
             </Button>
           ) : (
-            <Button type="primary" onClick={() => navigate('/login')} style={{ borderRadius: 99 }}>
+            <Button 
+              type="primary" 
+              onClick={() => {
+                navigate('/login');
+                setDrawerOpen(false);
+              }} 
+              style={{ borderRadius: 99 }}
+            >
               Sign In
             </Button>
           )}
@@ -199,7 +277,7 @@ export default function PublicLayout() {
       </Drawer>
 
       {/* Content */}
-      <Content style={{ background: 'var(--bg-page)', padding: '16px 16px 72px', maxWidth: 1280, width: '100%', margin: '0 auto' }}>
+      <Content style={{ background: 'transparent', padding: '130px 16px 100px', maxWidth: 1440, width: '100%', margin: '0 auto' }}>
         <Outlet />
       </Content>
 
@@ -207,10 +285,11 @@ export default function PublicLayout() {
       <Footer
         className="desktop-nav"
         style={{
-          background: 'var(--nav-bg)',
-          borderTop: '1px solid var(--nav-border)',
-          padding: '48px 48px 24px',
+          background: 'transparent',
+          borderTop: '1px solid var(--border)',
+          padding: '80px 48px 40px',
           flexDirection: 'column',
+          marginTop: 100
         }}
       >
         <Row gutter={[48, 32]} style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>

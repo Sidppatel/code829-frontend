@@ -4,6 +4,8 @@ import ErrorBoundary from './components/shared/ErrorBoundary';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import PublicLayout from './components/layout/PublicLayout';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import AdminLayout from './components/layout/AdminLayout';
 import DeveloperLayout from './components/layout/DeveloperLayout';
 
@@ -42,77 +44,95 @@ const MyTicketsPage = lazy(() => import('./pages/tickets/MyTicketsPage'));
 const TicketClaimPage = lazy(() => import('./pages/tickets/TicketClaimPage'));
 const FeedbackPage = lazy(() => import('./pages/feedback/FeedbackPage'));
 
+function AppContent() {
+  const location = useLocation();
+  
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+      >
+        <Routes location={location} key={location.pathname}>
+          {/* Public */}
+          <Route element={<PublicLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="events" element={<EventsPage />} />
+            <Route path="events/:slug" element={<EventDetailPage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="auth/verify" element={<VerifyMagicLinkPage />} />
+            <Route path="onboarding" element={<OnboardingPage />} />
+            <Route path="tickets/claim" element={<TicketClaimPage />} />
+            <Route path="feedback" element={<FeedbackPage />} />
+          </Route>
+
+          {/* Authenticated Users */}
+          <Route element={<ProtectedRoute><PublicLayout /></ProtectedRoute>}>
+            <Route path="bookings" element={<MyBookingsPage />} />
+            <Route path="bookings/:bookingId" element={<BookingDetailPage />} />
+            <Route path="bookings/:bookingId/tickets" element={<BookingTicketsPage />} />
+            <Route path="tickets" element={<MyTicketsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
+
+          {/* Admin */}
+          <Route
+            path="/admin"
+            element={<ProtectedRoute minRole="Admin"><AdminLayout /></ProtectedRoute>}
+          >
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="events" element={<AdminEventsListPage />} />
+            <Route path="events/new" element={<EventWizardPage />} />
+            <Route path="events/:id/edit" element={<EventWizardPage />} />
+            <Route path="events/:id" element={<EventManagePage />} />
+            <Route path="venues" element={<VenuesPage />} />
+            <Route path="venues/new" element={<VenueFormPage />} />
+            <Route path="venues/:id" element={<VenueFormPage />} />
+            <Route path="bookings" element={<AdminBookingsPage />} />
+            <Route path="table-types" element={<TableTypesPage />} />
+            <Route path="layout/:eventId" element={<LayoutEditorPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+          </Route>
+
+          {/* Staff (Check-In) — accessible by Staff, Admin, Developer */}
+          <Route
+            path="/staff"
+            element={<ProtectedRoute minRole="Staff"><AdminLayout /></ProtectedRoute>}
+          >
+            <Route path="checkin/select" element={<CheckInSelectPage />} />
+            <Route path="checkin/:eventId" element={<CheckInPage />} />
+          </Route>
+
+          {/* Developer */}
+          <Route
+            path="/developer"
+            element={<ProtectedRoute minRole="Developer"><DeveloperLayout /></ProtectedRoute>}
+          >
+            <Route index element={<DevLogsPage />} />
+            <Route path="email-logs" element={<EmailLogsPage />} />
+            <Route path="system-logs" element={<SystemLogsPage />} />
+            <Route path="settings" element={<DevSettingsPage />} />
+            <Route path="users" element={<DevUsersPage />} />
+            <Route path="events" element={<DevEventsPage />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
         <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            {/* Public */}
-            <Route element={<PublicLayout />}>
-              <Route index element={<HomePage />} />
-              <Route path="events" element={<EventsPage />} />
-              <Route path="events/:slug" element={<EventDetailPage />} />
-              <Route path="login" element={<LoginPage />} />
-              <Route path="auth/verify" element={<VerifyMagicLinkPage />} />
-              <Route path="onboarding" element={<OnboardingPage />} />
-              <Route path="tickets/claim" element={<TicketClaimPage />} />
-              <Route path="feedback" element={<FeedbackPage />} />
-            </Route>
-
-            {/* Authenticated Users */}
-            <Route element={<ProtectedRoute><PublicLayout /></ProtectedRoute>}>
-              <Route path="bookings" element={<MyBookingsPage />} />
-              <Route path="bookings/:bookingId" element={<BookingDetailPage />} />
-              <Route path="bookings/:bookingId/tickets" element={<BookingTicketsPage />} />
-              <Route path="tickets" element={<MyTicketsPage />} />
-              <Route path="profile" element={<ProfilePage />} />
-            </Route>
-
-            {/* Admin */}
-            <Route
-              path="/admin"
-              element={<ProtectedRoute minRole="Admin"><AdminLayout /></ProtectedRoute>}
-            >
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="events" element={<AdminEventsListPage />} />
-              <Route path="events/new" element={<EventWizardPage />} />
-              <Route path="events/:id/edit" element={<EventWizardPage />} />
-              <Route path="events/:id" element={<EventManagePage />} />
-              <Route path="venues" element={<VenuesPage />} />
-              <Route path="venues/new" element={<VenueFormPage />} />
-              <Route path="venues/:id" element={<VenueFormPage />} />
-              <Route path="bookings" element={<AdminBookingsPage />} />
-              <Route path="table-types" element={<TableTypesPage />} />
-              <Route path="layout/:eventId" element={<LayoutEditorPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-              <Route path="analytics" element={<AnalyticsPage />} />
-            </Route>
-
-            {/* Staff (Check-In) — accessible by Staff, Admin, Developer */}
-            <Route
-              path="/staff"
-              element={<ProtectedRoute minRole="Staff"><AdminLayout /></ProtectedRoute>}
-            >
-              <Route path="checkin/select" element={<CheckInSelectPage />} />
-              <Route path="checkin/:eventId" element={<CheckInPage />} />
-            </Route>
-
-            {/* Developer */}
-            <Route
-              path="/developer"
-              element={<ProtectedRoute minRole="Developer"><DeveloperLayout /></ProtectedRoute>}
-            >
-              <Route index element={<DevLogsPage />} />
-              <Route path="email-logs" element={<EmailLogsPage />} />
-              <Route path="system-logs" element={<SystemLogsPage />} />
-              <Route path="settings" element={<DevSettingsPage />} />
-              <Route path="users" element={<DevUsersPage />} />
-              <Route path="events" element={<DevEventsPage />} />
-            </Route>
-
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <AppContent />
         </Suspense>
       </ErrorBoundary>
     </BrowserRouter>

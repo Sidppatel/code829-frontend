@@ -1,6 +1,6 @@
 import { SunOutlined, MoonOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 interface ThemeToggleProps {
   size?: 'small' | 'middle' | 'large';
@@ -8,6 +8,7 @@ interface ThemeToggleProps {
 
 export default function ThemeToggle({ size = 'middle' }: ThemeToggleProps) {
   const { isDark, toggleTheme } = useTheme();
+  
   return (
     <Tooltip title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
       <Button

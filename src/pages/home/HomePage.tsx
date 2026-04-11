@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Typography, Button, Row, Col } from 'antd';
-import { ArrowRightOutlined, DownOutlined } from '@ant-design/icons';
+import { Button, Row, Col } from 'antd';
+import { ArrowRightOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { eventsApi } from '../../services/api';
 import type { EventSummary } from '../../types/event';
 import EventCard from '../../components/events/EventCard';
-import LoadingSpinner from '../../components/shared/LoadingSpinner';
-import EmptyState from '../../components/shared/EmptyState';
+import { cubicBezier } from "framer-motion";
 
 export default function HomePage() {
   const [featured, setFeatured] = useState<EventSummary[]>([]);
@@ -33,162 +32,200 @@ export default function HomePage() {
     void load();
   }, []);
 
+  const containerVariants = {
+    initial: { opacity: 0 },
+    animate: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const itemVariants = {
+    initial: { opacity: 0, y: 30, scale: 0.98 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.8,
+        ease: cubicBezier(0.16, 1, 0.3, 1)
+      }
+    }
+  };
+
   return (
-    <>
+    <motion.div
+      initial="initial"
+      animate="animate"
+      variants={containerVariants}
+      style={{ minHeight: '100vh', position: 'relative' }}
+    >
       {/* Hero Section */}
-      <div className="hero-section">
-        <div className="orb orb-1" />
-        <div className="orb orb-2" />
-        <div className="orb orb-3" />
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          style={{ position: 'relative', zIndex: 1, maxWidth: 700 }}
-        >
-          <h1
-            className="text-display"
-            style={{
-              fontSize: 'clamp(2rem, 6vw, 4rem)',
-              color: 'var(--text-primary)',
-              lineHeight: 1.15,
-              marginBottom: 16,
+      <section className="hero-section">
+        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
+          <motion.div variants={itemVariants}>
+            <div style={{
+              display: 'inline-flex',
+              padding: '8px 20px',
+              borderRadius: 30,
+              background: 'rgba(99, 102, 241, 0.1)',
+              border: '1px solid rgba(99, 102, 241, 0.15)',
+              color: 'var(--accent-violet)',
+              fontSize: 12,
               fontWeight: 700,
-            }}
-          >
-            Discover Events<br />in Mobile, AL
-          </h1>
-          <Typography.Paragraph
-            style={{
-              fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
-              color: 'var(--text-secondary)',
-              maxWidth: 520,
-              margin: '0 auto 36px',
-            }}
-          >
-            Browse upcoming events, book your seats, and enjoy unforgettable experiences.
-          </Typography.Paragraph>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
-            <div className="hero-cta-row">
-              <Button
-                type="primary"
-                size="large"
-                icon={<ArrowRightOutlined />}
-                onClick={() => navigate('/events')}
-                style={{
-                  fontWeight: 600,
-                  padding: '0 32px',
-                  height: 52,
-                  borderRadius: 99,
-                  fontSize: 16,
-                }}
-              >
-                Browse Events
-              </Button>
-              <Button
-                size="large"
-                ghost
-                onClick={() => {
-                  const section = document.getElementById('upcoming-section');
-                  section?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                style={{
-                  fontWeight: 600,
-                  padding: '0 32px',
-                  height: 52,
-                  borderRadius: 99,
-                  fontSize: 16,
-                  borderColor: 'var(--border)',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                Learn More
-              </Button>
+              textTransform: 'uppercase',
+              letterSpacing: 2,
+              marginBottom: 32,
+              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.05)'
+            }}>
+              ✨ Experience the Unforgettable
             </div>
-          </div>
-
-          {/* Scroll indicator */}
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            style={{ marginTop: 48 }}
-          >
-            <DownOutlined style={{ fontSize: 20, color: 'var(--text-muted)' }} />
           </motion.div>
-        </motion.div>
-      </div>
 
-      {/* Featured & Upcoming Sections */}
-      {loading ? (
-        <div className="page-container">
-          <LoadingSpinner />
-        </div>
-      ) : (
-        <>
-          {featured.length > 0 && (
-            <motion.section
-              className="page-container"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div className="section-heading">
-                  <h2 style={{ margin: 0, fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', color: 'var(--text-primary)' }}>
-                    <span className="gradient-text">Featured</span> Events
-                  </h2>
-                </div>
-                <Button type="link" onClick={() => navigate('/events')} style={{ color: 'var(--accent-violet)' }}>
-                  View all
-                </Button>
-              </div>
-              <Row gutter={[20, 20]}>
-                {featured.map((event) => (
-                  <Col xs={24} sm={12} lg={6} key={event.id}>
-                    <div className="hover-lift">
-                      <EventCard event={event} />
-                    </div>
-                  </Col>
-                ))}
-              </Row>
-            </motion.section>
-          )}
-
-          <motion.section
-            id="upcoming-section"
-            className="page-container"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+          <motion.h1
+            variants={itemVariants}
+            style={{
+              fontSize: 'clamp(3rem, 10vw, 6.5rem)',
+              fontWeight: 900,
+              color: 'var(--text-primary)',
+              lineHeight: 1,
+              marginBottom: 32,
+              letterSpacing: '-0.06em'
+            }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div className="section-heading">
-                <h2 style={{ margin: 0, fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', color: 'var(--text-primary)' }}>
-                  Upcoming Events
-                </h2>
+            Create <span className="gradient-text">Infinite</span> <br />
+            Memories.
+          </motion.h1>
+
+          <motion.p
+            variants={itemVariants}
+            style={{
+              fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
+              color: 'var(--text-secondary)',
+              maxWidth: 700,
+              margin: '0 auto 56px',
+              lineHeight: 1.6,
+              fontWeight: 500
+            }}
+          >
+            Managing, discovering, and booking exclusive events has never felt this premium. Welcome to the Nebula future.
+          </motion.p>
+
+          <motion.div
+            variants={itemVariants}
+            style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}
+          >
+            <Button
+              type="primary"
+              size="large"
+              onClick={() => navigate('/events')}
+              style={{
+                height: 64,
+                padding: '0 48px',
+                borderRadius: 18,
+                fontSize: 18,
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                border: 'none',
+                boxShadow: '0 15px 35px rgba(99, 102, 241, 0.35)'
+              }}
+            >
+              Explore Events
+            </Button>
+            <Button
+              size="large"
+              className="glass-card"
+              onClick={() => navigate('/feedback')}
+              style={{
+                height: 64,
+                padding: '0 48px',
+                borderRadius: 18,
+                fontSize: 18,
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)'
+              }}
+            >
+              Request Access
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Featured Section */}
+      <div className="page-container" style={{ position: 'relative', zIndex: 10, marginTop: -40 }}>
+        {loading ? (
+          <Row gutter={[32, 32]}>
+            {[1, 2, 3].map((i) => (
+              <Col key={i} xs={24} md={12} lg={8}>
+                <div style={{ height: 400, borderRadius: 24, background: 'var(--bg-surface)', animation: 'pulse 2s infinite' }} />
+              </Col>
+            ))}
+          </Row>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 120, paddingBottom: 150 }}>
+            {featured.length > 0 && (
+              <section>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48 }}>
+                  <motion.div variants={itemVariants}>
+                    <div style={{ color: 'var(--accent-rose)', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: 2.5, marginBottom: 12 }}>
+                      The Collection
+                    </div>
+                    <h2 style={{ margin: 0, fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1.5px' }}>
+                      Featured Designs
+                    </h2>
+                  </motion.div>
+                  <motion.div variants={itemVariants}>
+                    <Button
+                      type="link"
+                      onClick={() => navigate('/events')}
+                      style={{ color: 'var(--accent-violet)', fontWeight: 700, fontSize: 16 }}
+                    >
+                      View All <ArrowRightOutlined />
+                    </Button>
+                  </motion.div>
+                </div>
+
+                <Row gutter={[32, 32]}>
+                  {featured.map((event) => (
+                    <Col xs={24} sm={12} lg={8} key={event.id}>
+                      <motion.div variants={itemVariants} style={{ height: '100%' }}>
+                        <EventCard event={event} />
+                      </motion.div>
+                    </Col>
+                  ))}
+                </Row>
+              </section>
+            )}
+
+            <section id="upcoming-section">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48 }}>
+                <motion.div variants={itemVariants}>
+                  <div style={{ color: 'var(--accent-violet)', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: 2.5, marginBottom: 12 }}>
+                    Upcoming
+                  </div>
+                  <h2 style={{ margin: 0, fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1.5px' }}>
+                    Latest Experiences
+                  </h2>
+                </motion.div>
               </div>
-              <Button type="link" onClick={() => navigate('/events')} style={{ color: 'var(--accent-violet)' }}>
-                View all
-              </Button>
-            </div>
-            {upcoming.length > 0 ? (
-              <Row gutter={[20, 20]}>
+
+              <Row gutter={[32, 64]}>
                 {upcoming.map((event) => (
                   <Col xs={24} sm={12} lg={8} key={event.id}>
-                    <div className="hover-lift">
+                    <motion.div variants={itemVariants} style={{ height: '100%' }}>
                       <EventCard event={event} />
-                    </div>
+                    </motion.div>
                   </Col>
                 ))}
               </Row>
-            ) : (
-              <EmptyState description="No upcoming events yet" />
-            )}
-          </motion.section>
-        </>
-      )}
-    </>
+            </section>
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 }
