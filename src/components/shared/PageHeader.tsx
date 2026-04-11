@@ -1,4 +1,4 @@
-import { Typography, Space } from 'antd';
+import React from 'react';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 
 interface Props {
@@ -11,34 +11,62 @@ interface Props {
 export default function PageHeader({ title, subtitle, extra, onBack }: Props) {
   return (
     <div style={{
-      marginBottom: 24,
+      marginBottom: 32,
       display: 'flex',
       flexWrap: 'wrap',
       justifyContent: 'space-between',
-      alignItems: 'center',
-      gap: 12,
+      alignItems: 'baseline',
+      gap: 16,
     }}>
-      <Space size={12} align="center" style={{ minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
         {onBack && (
-          <ArrowLeftOutlined
+          <div
             onClick={onBack}
+            className="hover-lift"
             style={{
-              fontSize: 18,
+              width: 40,
+              height: 40,
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'pointer',
               color: 'var(--text-secondary)',
-              transition: 'color 0.15s ease',
+              transition: 'all 0.2s ease',
               flexShrink: 0,
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-violet)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
-          />
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+          >
+            <ArrowLeftOutlined style={{ fontSize: 16 }} />
+          </div>
         )}
-        <Space orientation="vertical" size={0} style={{ minWidth: 0 }}>
-          <Typography.Title level={2} style={{ margin: 0, whiteSpace: 'nowrap' }}>{title}</Typography.Title>
-          {subtitle && <Typography.Text type="secondary">{subtitle}</Typography.Text>}
-        </Space>
-      </Space>
-      {extra && <div style={{ flexShrink: 0 }}>{extra}</div>}
+        <div style={{ minWidth: 0 }}>
+          <h1 style={{ 
+            margin: 0, 
+            fontSize: 'var(--h2-size, 32px)', 
+            fontWeight: 700, 
+            color: 'var(--text-primary)',
+            fontFamily: "'Playfair Display', serif",
+            letterSpacing: '-0.02em'
+          }}>
+            {title}
+          </h1>
+          {subtitle && (
+            <p style={{ 
+              margin: '4px 0 0 0', 
+              fontSize: 14, 
+              color: 'var(--text-secondary)',
+              fontWeight: 500,
+            }}>
+              {subtitle}
+            </p>
+          )}
+        </div>
+      </div>
+      {extra && <div style={{ flexShrink: 0 }} className="spring-up">{extra}</div>}
     </div>
   );
 }

@@ -19,19 +19,13 @@ import ThemeToggle from '../shared/ThemeToggle';
 const { Sider, Header, Content } = Layout;
 
 const navItems = [
-  { key: '/developer', shortLabel: 'Logs', label: 'Logs', icon: <CodeOutlined /> },
-  { key: '/developer/email-logs', shortLabel: 'Email', label: 'Email Logs', icon: <MailOutlined /> },
-  { key: '/developer/system-logs', shortLabel: 'System', label: 'System Logs', icon: <FileTextOutlined /> },
-  { key: '/developer/settings', shortLabel: 'Settings', label: 'Settings', icon: <SettingOutlined /> },
-  { key: '/developer/users', shortLabel: 'Users', label: 'Users', icon: <TeamOutlined /> },
+  { key: '/developer', shortLabel: 'Logs', label: 'App Logs', icon: <CodeOutlined /> },
+  { key: '/developer/email-logs', shortLabel: 'Email', label: 'Email Delivery', icon: <MailOutlined /> },
+  { key: '/developer/system-logs', shortLabel: 'System', label: 'System Health', icon: <FileTextOutlined /> },
+  { key: '/developer/settings', shortLabel: 'Settings', label: 'Global Settings', icon: <SettingOutlined /> },
+  { key: '/developer/users', shortLabel: 'Users', label: 'User Roles', icon: <TeamOutlined /> },
   { key: '/developer/events', shortLabel: 'Fees', label: 'Platform Fees', icon: <CalendarOutlined /> },
 ];
-
-const menuItems = navItems.map((item) => ({
-  key: item.key,
-  label: <Link to={item.key}>{item.label}</Link>,
-  icon: item.icon,
-}));
 
 type Breakpoint = 'mobile' | 'tablet' | 'desktop';
 
@@ -63,58 +57,120 @@ export default function DeveloperLayout() {
 
   const isMobile = bp === 'mobile';
   const isTablet = bp === 'tablet';
-  const siderWidth = isTablet ? 64 : 220;
+  const siderWidth = isTablet ? 80 : 260;
   const collapsed = isTablet;
 
   const userMenuItems: MenuProps['items'] = [
-    { key: 'admin', label: 'Admin Panel', icon: <SettingOutlined />, onClick: () => navigate('/admin') },
-    { key: 'home', label: 'Back to Site', icon: <UserOutlined />, onClick: () => navigate('/') },
+    { key: 'admin', label: 'Go to Admin', icon: <SettingOutlined />, onClick: () => navigate('/admin') },
+    { key: 'home', label: 'View Site', icon: <UserOutlined />, onClick: () => navigate('/') },
     { type: 'divider' as const },
     { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, onClick: logout },
   ];
 
-  const siderContent = (
-    <>
-      <div style={{ padding: collapsed ? '16px 8px' : '16px 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Link to="/developer" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ color: 'var(--accent-violet)', fontSize: collapsed ? 18 : 20, flexShrink: 0 }}>✦</span>
-          {!collapsed && (
-            <span className="text-display gradient-text" style={{ fontSize: 18, fontWeight: 700 }}>Code829</span>
-          )}
+  const menuItems = navItems.map((item) => {
+    const active = location.pathname === item.key || (item.key !== '/developer' && location.pathname.startsWith(item.key));
+    return {
+      key: item.key,
+      icon: (
+        <span style={{ 
+          fontSize: 18, 
+          color: active ? 'var(--primary)' : 'var(--text-secondary)',
+          transition: 'all 0.3s ease',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 24,
+          height: 24,
+          borderRadius: 'var(--radius-sm)',
+          background: active ? 'var(--primary-soft)' : 'transparent'
+        }}>
+          {item.icon}
+        </span>
+      ),
+      label: (
+        <Link 
+          to={item.key} 
+          style={{ 
+            fontWeight: active ? 600 : 500, 
+            color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
+            fontSize: 14,
+            paddingLeft: 4
+          }}
+        >
+          {item.label}
         </Link>
+      ),
+    };
+  });
+
+  const siderContent = (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '24px 12px' }}>
+      <div style={{ 
+        padding: collapsed ? '0' : '0 12px', 
+        marginBottom: 32, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: collapsed ? 'center' : 'flex-start',
+        gap: 10 
+      }}>
+        <div style={{ 
+          width: 32, 
+          height: 32, 
+          background: 'var(--primary)', 
+          borderRadius: 8, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          color: 'white',
+          fontSize: 18,
+          boxShadow: '0 4px 12px hsla(var(--p-h), var(--p-s), var(--p-l), 0.4)'
+        }}>
+          ✦
+        </div>
         {!collapsed && (
-          <Tag
-            style={{
-              background: 'rgba(245, 158, 11, 0.15)',
-              border: '1px solid rgba(245, 158, 11, 0.3)',
-              color: 'var(--accent-gold)',
-              borderRadius: 99,
-              fontSize: 10,
-              lineHeight: '18px',
-              padding: '0 8px',
-              marginLeft: 4,
-            }}
-          >
-            Dev
-          </Tag>
+          <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', fontFamily: "'Playfair Display', serif" }}>
+            DevCore
+          </span>
         )}
       </div>
-      <Menu
-        mode="inline"
-        selectedKeys={[location.pathname]}
-        items={menuItems}
-        inlineCollapsed={collapsed}
-        style={{ background: 'transparent', borderRight: 'none', flex: 1 }}
-      />
-      <div style={{ padding: collapsed ? '12px 8px' : '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+
+      <div style={{ flex: 1 }}>
+        <Menu
+          mode="inline"
+          selectedKeys={[location.pathname]}
+          items={menuItems}
+          inlineCollapsed={collapsed}
+          style={{ 
+            background: 'transparent', 
+            borderRight: 'none',
+          }}
+          className="human-side-menu"
+        />
+      </div>
+
+      <div style={{ 
+        marginTop: 'auto', 
+        padding: '16px 8px', 
+        background: 'var(--bg-soft)', 
+        borderRadius: 'var(--radius-md)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 12
+      }}>
         <ThemeToggle size="small" />
         {!collapsed && user && (
-          <Typography.Text ellipsis style={{ color: 'var(--text-muted)', fontSize: 12, maxWidth: '100%', textAlign: 'center' }}>
-            {user.firstName} {user.lastName}
-          </Typography.Text>
+          <div style={{ textAlign: 'center', width: '100%' }}>
+            <Typography.Text ellipsis style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, display: 'block' }}>
+              {user.firstName} {user.lastName}
+            </Typography.Text>
+            <Tag color="orange" style={{ fontSize: 10, margin: '4px 0 0 0', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Developer
+            </Tag>
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 
   return (
@@ -124,7 +180,7 @@ export default function DeveloperLayout() {
         <Sider
           width={siderWidth}
           collapsed={collapsed}
-          collapsedWidth={64}
+          collapsedWidth={80}
           style={{
             background: 'var(--nav-bg)',
             borderRight: '1px solid var(--nav-border)',
@@ -134,8 +190,7 @@ export default function DeveloperLayout() {
             left: 0,
             top: 0,
             bottom: 0,
-            display: 'flex',
-            flexDirection: 'column',
+            zIndex: 100,
           }}
         >
           {siderContent}
@@ -145,106 +200,127 @@ export default function DeveloperLayout() {
       {/* Mobile Bottom Nav */}
       {isMobile && (
         <nav className="mobile-bottom-nav">
-          {navItems.map((item) => {
+          {navItems.slice(0, 5).map((item) => {
             const active = location.pathname === item.key;
             return (
               <Link
                 key={item.key}
                 to={item.key}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: 2,
-                  padding: '4px 8px',
-                  color: active ? 'var(--accent-violet)' : 'var(--text-muted)',
+                  gap: 4,
+                  padding: '8px 4px',
+                  color: active ? 'var(--primary)' : 'var(--text-muted)',
                   fontSize: 10,
                   textDecoration: 'none',
                   position: 'relative',
+                  flex: 1
                 }}
               >
-                <span style={{ fontSize: 20 }}>{item.icon}</span>
-                <span>{item.shortLabel}</span>
-                {active && (
-                  <span style={{
-                    position: 'absolute',
-                    bottom: -2,
-                    width: 4,
-                    height: 4,
-                    borderRadius: '50%',
-                    background: 'var(--accent-violet)',
-                  }} />
-                )}
+                <span style={{ 
+                  fontSize: 20, 
+                  background: active ? 'var(--primary-soft)' : 'transparent',
+                  padding: '4px 12px',
+                  borderRadius: 12,
+                  transition: 'all 0.2s ease'
+                }}>
+                  {item.icon}
+                </span>
+                <span style={{ fontWeight: active ? 600 : 400 }}>{item.shortLabel}</span>
               </Link>
             );
           })}
         </nav>
       )}
 
-      <Layout style={{ marginLeft: isMobile ? 0 : siderWidth, background: 'var(--bg-page)', transition: 'margin-left 0.2s ease' }}>
+      <Layout style={{ marginLeft: isMobile ? 0 : siderWidth, background: 'var(--bg-page)', transition: 'margin-left 0.3s ease' }}>
         {/* Top Header */}
         <Header
           style={{
-            height: 60,
-            lineHeight: '60px',
+            height: 72,
+            lineHeight: '72px',
             background: 'var(--nav-bg)',
             borderBottom: '1px solid var(--nav-border)',
-            padding: '0 16px',
+            padding: '0 24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             position: 'sticky',
             top: 0,
             zIndex: 99,
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {isMobile && (
-              <Link to="/developer" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ color: 'var(--accent-violet)', fontSize: 18 }}>✦</span>
-                <span className="text-display gradient-text" style={{ fontSize: 16, fontWeight: 700 }}>Code829</span>
-                <Tag
-                  style={{
-                    background: 'rgba(245, 158, 11, 0.15)',
-                    border: '1px solid rgba(245, 158, 11, 0.3)',
-                    color: 'var(--accent-gold)',
-                    borderRadius: 99,
-                    fontSize: 10,
-                    lineHeight: '18px',
-                    padding: '0 8px',
-                    margin: 0,
-                  }}
-                >
-                  Dev
-                </Tag>
-              </Link>
+               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                 <div style={{ width: 24, height: 24, background: 'var(--primary)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14 }}>✦</div>
+                 <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', fontFamily: "'Playfair Display', serif" }}>DevCore</span>
+               </div>
             )}
+           {!isMobile && (
+             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+               <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+                  System Health: <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>Optimal</span>
+               </Typography.Text>
+               <div style={{ width: 4, height: 4, background: 'var(--border)', borderRadius: '50%' }} />
+               <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+                  Active Node: <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Production-Primary</span>
+               </Typography.Text>
+             </div>
+           )}
           </div>
-          <Space>
-            {!isMobile && <ThemeToggle size="small" />}
+          
+          <Space size={16}>
             <Button
               type="text"
-              icon={<BellOutlined style={{ fontSize: 18, color: 'var(--text-secondary)' }} />}
-              style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              icon={<BellOutlined style={{ fontSize: 20, color: 'var(--text-secondary)' }} />}
+              style={{ 
+                width: 44, 
+                height: 44, 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-surface)'
+              }}
+              className="hover-lift"
             />
-            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <Button
                 type="text"
                 style={{
-                  borderRadius: 8,
+                  borderRadius: 'var(--radius-md)',
                   border: '1px solid var(--border)',
                   background: 'var(--bg-surface)',
                   color: 'var(--text-primary)',
                   height: 44,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
+                  gap: 8,
+                  padding: '0 16px',
+                  fontWeight: 600
                 }}
+                className="hover-lift"
               >
-                <UserOutlined /> {user?.firstName}
+                <div style={{ 
+                  width: 24, 
+                  height: 24, 
+                  borderRadius: '50%', 
+                  background: 'var(--primary)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: 11
+                }}>
+                  {user?.firstName?.[0]}
+                </div>
+                {!isMobile && 'Dev Console'}
               </Button>
             </Dropdown>
           </Space>
@@ -252,9 +328,12 @@ export default function DeveloperLayout() {
 
         {/* Content */}
         <Content style={{
-          padding: isMobile ? 16 : isTablet ? 24 : 32,
-          paddingBottom: isMobile ? 80 : 32,
-          minHeight: 'calc(100vh - 60px)',
+          padding: isMobile ? '24px 16px' : isTablet ? 32 : 48,
+          paddingBottom: isMobile ? 100 : 48,
+          minHeight: 'calc(100vh - 72px)',
+          maxWidth: 1600,
+          margin: '0 auto',
+          width: '100%',
         }}>
           <Outlet />
         </Content>

@@ -1,19 +1,20 @@
 import { useState } from 'react';
-import { Table, Tag, Input, Select, Card, Pagination, Spin, Modal, Descriptions } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Table, Tag, Input, Select, Pagination, Spin, Modal, Descriptions, Button } from 'antd';
+import { SearchOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { developerApi } from '../../../services/api';
 import { usePagedTable } from '../../../hooks/usePagedTable';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import type { DevLogEntry, DevLogParams } from '../../../services/developerApi';
 import PageHeader from '../../../components/shared/PageHeader';
+import HumanCard from '../../../components/shared/HumanCard';
 import dayjs from 'dayjs';
 
 const severityColors: Record<string, string> = {
-  Info: 'blue',
-  Warning: 'gold',
-  Error: 'red',
-  Critical: 'magenta',
-  Debug: 'default',
+  Info: '#3B82F6',
+  Warning: '#F59E0B',
+  Error: '#EF4444',
+  Critical: '#8B5CF6',
+  Debug: '#9CA3AF',
 };
 
 function formatTs(ts: string) {
@@ -35,7 +36,7 @@ export default function DevLogsPage() {
   const { data, total, page, pageSize, loading, setPage, setPageSize, setFilters } =
     usePagedTable<FullDevLog, DevLogParams>({
       fetcher: developerApi.getDevLogs as Parameters<typeof usePagedTable<FullDevLog, DevLogParams>>[0]['fetcher'],
-      defaultPageSize: 25,
+      defaultPageSize: 20,
     });
 
   const columns = [
@@ -45,7 +46,7 @@ export default function DevLogsPage() {
       key: 'timestamp',
       width: 200,
       render: (d: string) => (
-        <span style={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'nowrap' }}>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
           {formatTs(d)}
         </span>
       ),
@@ -54,14 +55,30 @@ export default function DevLogsPage() {
       title: 'Severity',
       dataIndex: 'severity',
       key: 'severity',
-      width: 100,
-      render: (s: string) => <Tag color={severityColors[s] ?? 'default'}>{s}</Tag>,
+      width: 110,
+      render: (s: string) => (
+        <Tag 
+          color={severityColors[s] + '15'} 
+          style={{ 
+            color: severityColors[s], 
+            borderColor: severityColors[s] + '30',
+            fontWeight: 700,
+            borderRadius: 6,
+            textTransform: 'uppercase',
+            fontSize: 10,
+            letterSpacing: '0.05em'
+          }}
+        >
+          {s}
+        </Tag>
+      ),
     },
     {
       title: 'Message',
       dataIndex: 'message',
       key: 'message',
       ellipsis: true,
+      render: (v: string) => <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{v}</span>
     },
     {
       title: 'Path',
@@ -69,33 +86,52 @@ export default function DevLogsPage() {
       key: 'path',
       width: 200,
       ellipsis: true,
-      render: (v: string | undefined) => v ?? '—',
+      render: (v: string | undefined) => (
+        <span style={{ color: 'var(--text-muted)', fontSize: 12, fontFamily: 'monospace' }}>
+          {v ?? '—'}
+        </span>
+      ),
     },
-    { title: 'Method', dataIndex: 'method', key: 'method', width: 80 },
+    { 
+      title: 'Method', 
+      dataIndex: 'method', 
+      key: 'method', 
+      width: 80,
+      render: (v: string) => <Tag color="default" style={{ borderRadius: 4, fontSize: 11 }}>{v}</Tag>
+    },
     {
       title: 'Status',
       dataIndex: 'statusCode',
       key: 'statusCode',
       width: 70,
-      render: (v: number | undefined) => v ?? '—',
+      render: (v: number | undefined) => (
+        <span style={{ fontWeight: 700, color: (v && v >= 400) ? 'var(--accent-rose)' : 'var(--text-muted)' }}>
+          {v ?? '—'}
+        </span>
+      ),
     },
   ];
 
   return (
-    <div>
-      <PageHeader title="Dev Logs" subtitle="Application error logs — click a row for full details" />
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+    <div className="spring-up">
+      <PageHeader 
+        title="Application Logs" 
+        subtitle="Real-time system health and error tracking. Click a row for deep-dive analysis." 
+      />
+      
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 24, alignItems: 'center' }}>
         <Input
-          placeholder="Filter by path..."
-          prefix={<SearchOutlined />}
+          placeholder="Filter by endpoint path..."
+          prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
           allowClear
           onChange={(e) => setFilters({ path: e.target.value || undefined })}
-          style={{ flex: '1 1 200px', maxWidth: 300 }}
+          style={{ flex: '1 1 200px', maxWidth: 360, height: 44, borderRadius: 'var(--radius-md)' }}
         />
         <Select
-          placeholder="Severity"
+          placeholder="Select Severity"
           allowClear
-          style={{ flex: '0 0 140px' }}
+          style={{ flex: '0 0 160px', height: 44 }}
+          className="human-select"
           onChange={(val) => setFilters({ severity: val })}
           options={['Warning', 'Error', 'Critical'].map((s) => ({ label: s, value: s }))}
         />
@@ -103,41 +139,53 @@ export default function DevLogsPage() {
 
       {isMobile ? (
         <Spin spinning={loading}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {data.map((log) => (
-              <Card
+              <HumanCard
                 key={log.id}
-                size="small"
-                styles={{ body: { padding: 12 } }}
-                style={{ cursor: 'pointer' }}
                 onClick={() => setSelected(log)}
+                style={{ padding: 16 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <Tag color={severityColors[log.severity] ?? 'default'}>{log.severity}</Tag>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                    {log.method && <span style={{ marginRight: 6, fontWeight: 600 }}>{log.method}</span>}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <Tag 
+                     color={severityColors[log.severity] + '15'} 
+                     style={{ 
+                       color: severityColors[log.severity], 
+                       borderColor: severityColors[log.severity] + '30',
+                       fontWeight: 700,
+                       borderRadius: 6,
+                       textTransform: 'uppercase',
+                       fontSize: 10,
+                       letterSpacing: '0.05em'
+                     }}
+                  >
+                    {log.severity}
+                  </Tag>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: (log.statusCode && log.statusCode >= 400) ? 'var(--accent-rose)' : 'var(--text-muted)' }}>
+                    {log.method && <span style={{ marginRight: 6 }}>{log.method}</span>}
                     {log.statusCode ?? ''}
                   </span>
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--text-primary)', marginBottom: 4, wordBreak: 'break-word' }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8, lineHeight: 1.4 }}>
                   {log.message}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)' }}>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '50%', fontFamily: 'monospace' }}>
                     {log.path ?? ''}
                   </span>
                   <span>{formatTs(log.timestamp)}</span>
                 </div>
-              </Card>
+              </HumanCard>
             ))}
             {data.length === 0 && !loading && (
-              <div style={{ textAlign: 'center', padding: 32, color: 'var(--text-muted)' }}>No data</div>
+              <div style={{ textAlign: 'center', padding: 48 }}>No log entries found</div>
             )}
           </div>
-          <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
+          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
             <Pagination
               current={page} pageSize={pageSize} total={total} size="small"
               onChange={(p, ps) => { setPage(p); setPageSize(ps); }}
+              className="human-pagination"
             />
           </div>
         </Spin>
@@ -148,12 +196,13 @@ export default function DevLogsPage() {
             columns={columns}
             rowKey="id"
             loading={loading}
-            size="small"
-            scroll={{ x: 800 }}
+            size="middle"
+            scroll={{ x: 900 }}
             pagination={{
               current: page, pageSize, total,
               onChange: (p, ps) => { setPage(p); setPageSize(ps); },
               showSizeChanger: true,
+              className: 'human-pagination'
             }}
             onRow={(record) => ({ onClick: () => setSelected(record), style: { cursor: 'pointer' } })}
           />
@@ -164,106 +213,93 @@ export default function DevLogsPage() {
       <Modal
         open={!!selected}
         onCancel={() => setSelected(null)}
-        footer={null}
+        footer={[
+          <Button key="close" onClick={() => setSelected(null)} style={{ borderRadius: 8 }}>
+            Close
+          </Button>
+        ]}
         title={
-          <span>
-            <Tag color={severityColors[selected?.severity ?? ''] ?? 'default'} style={{ marginRight: 8 }}>
-              {selected?.severity}
-            </Tag>
-            {selected?.method && (
-              <Tag style={{ marginRight: 8 }}>{selected.method}</Tag>
-            )}
-            {selected?.path ?? 'Log Detail'}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ 
+              width: 32, height: 32, borderRadius: 8, background: (severityColors[selected?.severity ?? ''] || 'var(--primary)') + '15',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: severityColors[selected?.severity ?? ''] || 'var(--primary)'
+            }}>
+              <InfoCircleOutlined />
+            </div>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>Log Intelligence</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Correlation ID: {selected?.correlationId?.slice(0, 8)}...</div>
+            </div>
+          </div>
         }
-        width={780}
-        styles={{ body: { maxHeight: '75vh', overflowY: 'auto' } }}
+        width={840}
+        centered
+        styles={{ body: { maxHeight: '70vh', overflowY: 'auto', padding: '24px' } }}
       >
         {selected && (
-          <div>
-            <Descriptions column={2} size="small" bordered style={{ marginBottom: 16 }}>
-              <Descriptions.Item label="Timestamp" span={2}>
-                <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{formatTs(selected.timestamp)}</span>
-              </Descriptions.Item>
-              <Descriptions.Item label="Severity">
-                <Tag color={severityColors[selected.severity] ?? 'default'}>{selected.severity}</Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Status Code">{selected.statusCode ?? '—'}</Descriptions.Item>
-              <Descriptions.Item label="Method">{selected.method ?? '—'}</Descriptions.Item>
-              <Descriptions.Item label="Path">
-                <span style={{ fontFamily: 'monospace', fontSize: 12, wordBreak: 'break-all' }}>
-                  {selected.path ?? '—'}
-                </span>
-              </Descriptions.Item>
-              <Descriptions.Item label="Exception Type" span={2}>
-                {selected.exceptionType ?? '—'}
-              </Descriptions.Item>
-              <Descriptions.Item label="User ID">
-                <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{selected.userId ?? '—'}</span>
-              </Descriptions.Item>
-              <Descriptions.Item label="IP Address">
-                <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{selected.ipAddress ?? '—'}</span>
-              </Descriptions.Item>
-              <Descriptions.Item label="Correlation ID" span={2}>
-                <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{selected.correlationId ?? '—'}</span>
-              </Descriptions.Item>
-            </Descriptions>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <Descriptions column={isMobile ? 1 : 2} size="small" bordered items={[
+              { label: 'Timestamp', span: 2, children: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{formatTs(selected.timestamp)}</span> },
+              { label: 'Level', children: <Tag color={severityColors[selected.severity] + '15'} style={{ color: severityColors[selected.severity], borderColor: severityColors[selected.severity] + '30', fontWeight: 700 }}>{selected.severity}</Tag> },
+              { label: 'HTTP Status', children: <span style={{ fontWeight: 700, color: (selected.statusCode && selected.statusCode >= 400) ? 'var(--accent-rose)' : 'inherit' }}>{selected.statusCode ?? 'N/A'}</span> },
+              { label: 'API Endpoint', span: 2, children: <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--primary)', wordBreak: 'break-all' }}>({selected.method}) {selected.path ?? 'System Internal'}</span> },
+              { label: 'Origin IP', children: selected.ipAddress ?? 'Hidden' },
+              { label: 'Execution User', children: selected.userId ? <span style={{ fontFamily: 'monospace' }}>{selected.userId}</span> : 'Anonymous' },
+            ]} />
 
-            {/* Message */}
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Message</div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>Primary Message</div>
               <div style={{
-                background: 'var(--bg-elevated, rgba(0,0,0,0.2))',
-                borderRadius: 8,
-                padding: '10px 12px',
-                fontSize: 13,
+                background: 'var(--bg-soft)',
+                borderRadius: 12,
+                padding: '16px',
+                fontSize: 14,
                 color: 'var(--text-primary)',
-                wordBreak: 'break-word',
-                border: '1px solid var(--border, rgba(255,255,255,0.08))',
+                lineHeight: 1.6,
+                border: '1px solid var(--border)',
               }}>
                 {selected.message}
               </div>
             </div>
 
-            {/* Stack Trace */}
             {selected.stackTrace && (
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Stack Trace</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent-rose)', marginBottom: 8 }}>Trace Investigation</div>
                 <pre style={{
-                  background: 'var(--bg-elevated, rgba(0,0,0,0.2))',
-                  borderRadius: 8,
-                  padding: '10px 12px',
-                  fontSize: 11,
+                  background: 'rgba(239, 68, 68, 0.03)',
+                  borderRadius: 12,
+                  padding: '16px',
+                  fontSize: 12,
+                  fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
                   overflowX: 'auto',
-                  maxHeight: 300,
+                  maxHeight: 400,
                   margin: 0,
-                  color: '#ff7875',
-                  border: '1px solid rgba(255,120,120,0.15)',
+                  color: '#EF4444',
+                  border: '1px dashed rgba(239, 68, 68, 0.2)',
                   whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
                 }}>
                   {selected.stackTrace}
                 </pre>
               </div>
             )}
 
-            {/* Metadata */}
             {selected.metadataJson && (() => {
               let pretty = selected.metadataJson;
               try { pretty = JSON.stringify(JSON.parse(selected.metadataJson), null, 2); } catch { /* leave */ }
               return (
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Metadata</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>Environment Metadata</div>
                   <pre style={{
-                    background: 'var(--bg-elevated, rgba(0,0,0,0.2))',
-                    borderRadius: 8,
-                    padding: '10px 12px',
+                    background: 'var(--bg-soft)',
+                    borderRadius: 12,
+                    padding: '16px',
                     fontSize: 12,
+                    fontFamily: "'JetBrains Mono', monospace",
                     overflowX: 'auto',
-                    maxHeight: 200,
+                    maxHeight: 250,
                     margin: 0,
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border, rgba(255,255,255,0.08))',
+                    color: 'var(--text-secondary)',
+                    border: '1px solid var(--border)',
                   }}>
                     {pretty}
                   </pre>
