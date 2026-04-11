@@ -31,6 +31,8 @@ export interface EventDetail extends EventSummary {
   pricePerPersonCents?: number;
   gridRows?: number;
   gridCols?: number;
+  soldCount?: number;
+  checkInCount?: number;
   createdAt: string;
 }
 

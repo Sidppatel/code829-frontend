@@ -1,4 +1,3 @@
-import React from 'react';
 
 interface HumanSkeletonProps {
   width?: string | number;
@@ -6,6 +5,8 @@ interface HumanSkeletonProps {
   circle?: boolean;
   className?: string;
   count?: number;
+  direction?: 'ltr' | 'rtl' | 'ttb' | 'btt';
+  subline?: string;
 }
 
 export default function HumanSkeleton({

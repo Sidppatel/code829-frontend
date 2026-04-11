@@ -88,7 +88,7 @@ export default function EventCard({ event }: Props) {
           </Space>
           <Space style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
             <EnvironmentOutlined style={{ color: 'var(--accent-violet)' }} />
-            {event.venueCity || event.venue?.name}
+            {event.venueCity ? `${event.venueCity}, ${event.venueName}` : event.venueName}
           </Space>
           {event.layoutMode === 'Grid' && (
             <Space style={{ color: 'var(--text-secondary)', fontSize: 13 }}>

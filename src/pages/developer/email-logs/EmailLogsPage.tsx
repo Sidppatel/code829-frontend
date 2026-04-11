@@ -7,6 +7,8 @@ import { formatEventDate } from '../../../utils/date';
 import type { EmailLogEntry } from '../../../services/developerApi';
 import PageHeader from '../../../components/shared/PageHeader';
 import HumanCard from '../../../components/shared/HumanCard';
+import EmptyState from '../../../components/shared/EmptyState';
+import PulseIndicator from '../../../components/shared/PulseIndicator';
 
 const statusColors: Record<string, string> = {
   Sent: '#10B981',
@@ -93,7 +95,7 @@ export default function EmailLogsPage() {
         <HumanCard className="human-noise" style={{ padding: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Delivery Rate</div>
-            <PulseIndicator status="live" size={6} />
+            <PulseIndicator status="success" size={6} />
           </div>
           <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>98.4<span style={{ fontSize: 14, fontWeight: 500 }}>%</span></div>
           <div style={{ fontSize: 12, color: 'var(--accent-green)', fontWeight: 600 }}>Optimal Performance</div>

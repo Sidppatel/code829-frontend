@@ -10,6 +10,7 @@ export interface Venue {
   phone?: string;
   email?: string;
   website?: string;
+  totalSeats?: number | string;
   isActive: boolean;
   createdAt: string;
 }
