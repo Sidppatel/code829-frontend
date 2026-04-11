@@ -15,7 +15,6 @@ import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import HumanCard from '../../../components/shared/HumanCard';
 import PulseIndicator from '../../../components/shared/PulseIndicator';
-import AttendanceChart from '../../../components/dashboard/AttendanceChart';
 
 
 
@@ -52,7 +51,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="spring-up">
       <PageHeader
-        title="Your Space"
+        title="Dashboard"
         subtitle={[
           "Here’s how your events are performing this week.",
           "4 events are nearing capacity. Consider adding more tickets.",
@@ -64,9 +63,9 @@ export default function AdminDashboardPage() {
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => navigate('/admin/events/new')}
-            style={{ 
-              borderRadius: 'var(--radius-full)', 
-              height: 48, 
+            style={{
+              borderRadius: 'var(--radius-full)',
+              height: 48,
               padding: '0 32px',
               fontWeight: 700,
               boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
@@ -80,7 +79,7 @@ export default function AdminDashboardPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
         {nextEvent && (
           <section>
-             <HumanCard
+            <HumanCard
               onClick={() => navigate(`/admin/events/${nextEvent.eventId}`)}
               className="human-noise"
               style={{
@@ -92,15 +91,15 @@ export default function AdminDashboardPage() {
             >
               <div className={isMobile ? "" : "asymmetry-grid"} style={{ display: isMobile ? 'flex' : 'grid', flexDirection: 'column', gap: isMobile ? 32 : 24, alignItems: isMobile ? 'stretch' : 'center' }}>
                 <div>
-                  <div style={{ 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
-                    gap: 8, 
-                    padding: '6px 16px', 
-                    borderRadius: 99, 
-                    background: 'rgba(255,255,255,0.15)', 
-                    color: 'white', 
-                    fontSize: 12, 
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '6px 16px',
+                    borderRadius: 99,
+                    background: 'rgba(255,255,255,0.15)',
+                    color: 'white',
+                    fontSize: 12,
                     fontWeight: 800,
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
@@ -110,10 +109,10 @@ export default function AdminDashboardPage() {
                     Next Big Thing
                   </div>
 
-                  <h2 style={{ 
-                    fontSize: 'clamp(32px, 5vw, 48px)', 
-                    fontFamily: "'Playfair Display', serif", 
-                    fontWeight: 700, 
+                  <h2 style={{
+                    fontSize: 'clamp(32px, 5vw, 48px)',
+                    fontFamily: "'Playfair Display', serif",
+                    fontWeight: 700,
                     margin: '0 0 16px 0',
                     color: 'white',
                     lineHeight: 1.1
@@ -131,10 +130,10 @@ export default function AdminDashboardPage() {
                       {nextEvent.venueName}
                     </div>
                   </div>
-                  
-                  <Button 
-                    ghost 
-                    size="large" 
+
+                  <Button
+                    ghost
+                    size="large"
                     style={{ borderRadius: 'var(--radius-full)', fontWeight: 700, width: isMobile ? '100%' : 'auto', padding: isMobile ? '0 24px' : '0 32px' }}
                     onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${nextEvent.eventId}`); }}
                   >
@@ -142,10 +141,10 @@ export default function AdminDashboardPage() {
                   </Button>
                 </div>
 
-                <div style={{ 
-                  background: 'rgba(0,0,0,0.2)', 
-                  padding: isMobile ? 24 : 32, 
-                  borderRadius: 'var(--radius-lg)', 
+                <div style={{
+                  background: 'rgba(0,0,0,0.2)',
+                  padding: isMobile ? 24 : 32,
+                  borderRadius: 'var(--radius-lg)',
                   backdropFilter: 'blur(12px)',
                   border: '1px solid rgba(255,255,255,0.1)'
                 }}>
@@ -155,8 +154,8 @@ export default function AdminDashboardPage() {
                       {nextEvent.soldCount} / {nextEvent.totalCapacity}
                     </span>
                   </div>
-                  <Progress 
-                    percent={(nextEvent.soldCount / nextEvent.totalCapacity) * 100} 
+                  <Progress
+                    percent={(nextEvent.soldCount / nextEvent.totalCapacity) * 100}
                     showInfo={false}
                     strokeColor="#FBBF24"
                     trailColor="rgba(255,255,255,0.1)"
@@ -171,24 +170,17 @@ export default function AdminDashboardPage() {
           </section>
         )}
 
-         {stats && (
+        {stats && (
           <section>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 2fr) minmax(0, 1fr)', 
-              gap: 24 
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 2fr) minmax(0, 1fr)',
+              gap: 24
             }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                <HumanCard 
-                  title="This Week at a Glance" 
-                  subtitle="Attendee trends vs. venue capacity"
-                  style={{ minHeight: 400 }}
-                >
-                  <AttendanceChart height={320} />
-                </HumanCard>
-                
-                <HumanCard 
-                  title="Guest Experience Signals" 
+
+                <HumanCard
+                  title="Guest Experience Signals"
                   subtitle="Latest feedback and NPS snapshots"
                 >
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
@@ -209,17 +201,17 @@ export default function AdminDashboardPage() {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                <HumanCard 
-                  title="Operational Alerts" 
+                <HumanCard
+                  title="Operational Alerts"
                   subtitle="Critical issues needing resolution"
                   className="human-noise"
                   style={{ borderLeft: '4px solid var(--accent-gold)' }}
                 >
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    <div style={{ 
-                      padding: 12, 
-                      borderRadius: 'var(--radius-sm)', 
-                      background: 'var(--bg-soft)', 
+                    <div style={{
+                      padding: 12,
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-soft)',
                       border: '1px solid var(--border)',
                       display: 'flex',
                       gap: 12,
@@ -231,10 +223,10 @@ export default function AdminDashboardPage() {
                         <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Check-in tablet at Midtown Loft.</div>
                       </div>
                     </div>
-                    <div style={{ 
-                      padding: 12, 
-                      borderRadius: 'var(--radius-sm)', 
-                      background: 'var(--bg-soft)', 
+                    <div style={{
+                      padding: 12,
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-soft)',
                       border: '1px solid var(--border)',
                       display: 'flex',
                       gap: 12,

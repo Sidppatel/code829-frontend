@@ -413,7 +413,7 @@ export default function EventDetailPage() {
       style={{ paddingBottom: 150, minHeight: '100vh', position: 'relative' }}
     >
       {/* Immersive Event Header */}
-      <section style={{ position: 'relative', width: '100%', height: '65vh', minHeight: 450, overflow: 'hidden' }}>
+      <section style={{ position: 'relative', width: '100%', height: isMobile ? '55vh' : '65vh', minHeight: isMobile ? 380 : 450, overflow: 'hidden' }}>
         {event.imageUrl ? (
           <img
             src={event.imageUrl}
@@ -441,24 +441,24 @@ export default function EventDetailPage() {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',
-          paddingBottom: 80,
+          paddingBottom: isMobile ? 40 : 80,
         }}>
           <div className="page-container">
             <motion.div variants={itemVariants}>
-              <Button
-                type="text"
-                icon={<ArrowLeftOutlined />}
-                onClick={() => navigate('/events')}
-                style={{
-                  marginBottom: 32,
-                  color: 'rgba(255,255,255,0.8)',
-                  fontWeight: 600,
-                  fontSize: 15,
-                  padding: 0
-                }}
-              >
-                Back to Collection
-              </Button>
+                <Button
+                  type="text"
+                  icon={<ArrowLeftOutlined />}
+                  onClick={() => navigate('/events')}
+                  style={{
+                    marginBottom: isMobile ? 24 : 32,
+                    color: 'rgba(255,255,255,0.8)',
+                    fontWeight: 600,
+                    fontSize: isMobile ? 14 : 15,
+                    padding: 0
+                  }}
+                >
+                  {isMobile ? 'Back' : 'Back to Collection'}
+                </Button>
 
               <Space style={{ marginBottom: 20 }}>
                 <Tag style={{ borderRadius: 10, border: 'none', background: 'var(--accent-violet)', color: '#fff', fontWeight: 800, padding: '4px 18px' }}>
@@ -472,17 +472,17 @@ export default function EventDetailPage() {
               </Space>
 
               <h1 style={{
-                fontSize: isMobile ? 'clamp(2.5rem, 12vw, 4rem)' : 'clamp(2.5rem, 8vw, 6rem)',
+                fontSize: isMobile ? 'clamp(1.8rem, 10vw, 3rem)' : 'clamp(2.5rem, 8vw, 6rem)',
                 fontWeight: 900,
                 color: '#fff',
-                marginBottom: 24,
+                marginBottom: isMobile ? 16 : 24,
                 letterSpacing: '-0.06em',
-                lineHeight: 0.9
+                lineHeight: 1
               }}>
                 {event.title}
               </h1>
 
-              <Space size={40} style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16, fontWeight: 600 }}>
+              <Space direction={isMobile ? 'vertical' : 'horizontal'} size={isMobile ? 8 : 40} style={{ color: 'rgba(255,255,255,0.9)', fontSize: isMobile ? 14 : 16, fontWeight: 600 }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <CalendarOutlined style={{ color: 'var(--accent-rose)' }} />
                   {formatDateRange(event.startDate, event.endDate)}
@@ -508,11 +508,11 @@ export default function EventDetailPage() {
                   About the Experience
                 </h3>
                 <div style={{
-                  fontSize: 18,
+                  fontSize: isMobile ? 16 : 18,
                   lineHeight: 1.8,
                   color: 'var(--text-secondary)',
                   background: 'var(--bg-surface)',
-                  padding: 40,
+                  padding: isMobile ? 24 : 40,
                   borderRadius: 32,
                   border: '1px solid var(--border)',
                   boxShadow: 'var(--card-shadow)'
@@ -526,7 +526,7 @@ export default function EventDetailPage() {
                   <div style={{ width: 6, height: 32, background: 'var(--accent-rose)', borderRadius: 10 }} />
                   Venue & Details
                 </h3>
-                <div className="glass-card" style={{ padding: 40, borderRadius: 32 }}>
+                <div className="glass-card" style={{ padding: isMobile ? 24 : 40, borderRadius: 32 }}>
                   <Row gutter={[32, 32]}>
                     <Col xs={24} md={12}>
                       <Typography.Text style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 800, fontSize: 11, display: 'block', marginBottom: 8 }}>Venue</Typography.Text>
@@ -618,6 +618,57 @@ export default function EventDetailPage() {
           </Col>
         </Row>
       </div>
+
+      {/* Mobile Sticky CTA */}
+      {isMobile && !isSoldOut && step === 'info' && (
+        <div style={{
+          position: 'fixed',
+          bottom: 'calc(var(--bottom-nav-height, 65px) + 12px)',
+          left: 16,
+          right: 16,
+          zIndex: 1000,
+        }}>
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200, delay: 0.5 }}
+            className="glass-card"
+            style={{
+              padding: '12px 20px',
+              borderRadius: 24,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+              border: '1px solid var(--primary-soft)',
+              background: 'var(--nav-bg)',
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>From</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)' }}>
+                {event.pricePerPersonCents ? centsToUSD(event.pricePerPersonCents) : 'Free'}
+              </div>
+            </div>
+            <Button
+              type="primary"
+              onClick={handleBookNow}
+              style={{
+                height: 48,
+                padding: '0 32px',
+                borderRadius: 14,
+                fontWeight: 800,
+                fontSize: 16,
+                background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                border: 'none',
+                boxShadow: '0 8px 20px rgba(99, 102, 241, 0.3)'
+              }}
+            >
+              Reserve
+            </Button>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   );
 }

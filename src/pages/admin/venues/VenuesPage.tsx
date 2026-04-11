@@ -45,8 +45,8 @@ export default function VenuesPage() {
 
   return (
     <div className="spring-up">
-      <PageHeader 
-        title="Venue Collection" 
+      <PageHeader
+        title="Venue"
         subtitle={[
           "Explore the beautiful spaces where your events come to life.",
           "Manage capacity, layouts, and availability across your portfolio.",
@@ -54,14 +54,14 @@ export default function VenuesPage() {
         ]}
         rotateSubtitle
         extra={
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />} 
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
             onClick={() => navigate('/admin/venues/new')}
-            style={{ 
-              borderRadius: 'var(--radius-full)', 
-              height: 48, 
-              padding: '0 32px', 
+            style={{
+              borderRadius: 'var(--radius-full)',
+              height: 48,
+              padding: '0 32px',
               fontWeight: 700,
               boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
             }}
@@ -75,17 +75,17 @@ export default function VenuesPage() {
         <LoadingSpinner skeleton="card" />
       ) : venues.length > 0 ? (
         <>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
             gap: 24,
-            marginBottom: 40 
+            marginBottom: 40
           }}>
             {venues.map((v) => (
               <HumanCard
                 key={v.id}
                 className="human-noise"
-                style={{ 
+                style={{
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
@@ -94,13 +94,13 @@ export default function VenuesPage() {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-                  <div style={{ 
-                    width: 48, 
-                    height: 48, 
-                    borderRadius: 12, 
-                    background: v.isActive ? 'var(--primary-soft)' : 'var(--bg-soft)', 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                  <div style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 12,
+                    background: v.isActive ? 'var(--primary-soft)' : 'var(--bg-soft)',
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 20,
                     flexShrink: 0,
@@ -120,10 +120,10 @@ export default function VenuesPage() {
                   </div>
                 </div>
 
-                <h3 style={{ 
-                  fontSize: 22, 
-                  fontWeight: 700, 
-                  margin: '0 0 8px 0', 
+                <h3 style={{
+                  fontSize: 22,
+                  fontWeight: 700,
+                  margin: '0 0 8px 0',
                   color: 'var(--text-primary)',
                   fontFamily: "'Playfair Display', serif",
                 }}>
@@ -135,9 +135,9 @@ export default function VenuesPage() {
                   {v.city}, {v.state}
                 </div>
 
-                <div style={{ 
-                  background: 'var(--bg-soft)', 
-                  padding: '16px', 
+                <div style={{
+                  background: 'var(--bg-soft)',
+                  padding: '16px',
                   borderRadius: 'var(--radius-md)',
                   marginBottom: 24,
                   display: 'grid',
@@ -157,7 +157,7 @@ export default function VenuesPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div style={{ marginTop: 'auto' }}>
                   <Button
                     type="primary"

@@ -51,13 +51,16 @@ export default function AdminBookingsPage() {
     { title: 'Booking #', dataIndex: 'bookingNumber', key: 'bookingNumber' },
     { title: 'Event', dataIndex: 'eventTitle', key: 'eventTitle' },
     { title: 'Customer', dataIndex: 'userName', key: 'userName' },
-    { title: 'Status', dataIndex: 'status', key: 'status',
+    {
+      title: 'Status', dataIndex: 'status', key: 'status',
       render: (status: BookingStatus) => <BookingStatusTag status={status} />,
     },
-    { title: 'Total', dataIndex: 'totalCents', key: 'totalCents',
+    {
+      title: 'Total', dataIndex: 'totalCents', key: 'totalCents',
       render: (cents: number) => centsToUSD(cents),
     },
-    { title: 'Date', dataIndex: 'createdAt', key: 'createdAt',
+    {
+      title: 'Date', dataIndex: 'createdAt', key: 'createdAt',
       render: (d: string) => formatEventDate(d),
     },
     {
@@ -78,8 +81,8 @@ export default function AdminBookingsPage() {
 
   return (
     <div className="spring-up">
-      <PageHeader 
-        title="Sales Pipeline" 
+      <PageHeader
+        title="Sales"
         subtitle={[
           "Track and manage every guest booking with ease.",
           "Process refunds and oversee entry status in real-time.",
@@ -88,15 +91,15 @@ export default function AdminBookingsPage() {
         rotateSubtitle
         extra={
           <div style={{ display: 'flex', gap: 12 }}>
-            <Button 
-              icon={<DownloadOutlined />} 
+            <Button
+              icon={<DownloadOutlined />}
               onClick={() => handleExport('csv')}
               style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
             >
               CSV
             </Button>
-            <Button 
-              icon={<DownloadOutlined />} 
+            <Button
+              icon={<DownloadOutlined />}
               onClick={() => handleExport('xlsx')}
               style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
             >
@@ -107,11 +110,11 @@ export default function AdminBookingsPage() {
       />
 
       {/* Filters */}
-      <div style={{ 
-        display: 'flex', 
-        gap: 16, 
-        marginBottom: 32, 
-        flexWrap: 'wrap', 
+      <div style={{
+        display: 'flex',
+        gap: 16,
+        marginBottom: 32,
+        flexWrap: 'wrap',
         alignItems: 'center',
         background: 'var(--bg-surface)',
         padding: '16px 24px',
@@ -128,7 +131,7 @@ export default function AdminBookingsPage() {
         />
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           {['Pending', 'Paid', 'CheckedIn', 'Refunded'].map(status => (
-            <div 
+            <div
               key={status}
               onClick={() => setFilters({ status: status as BookingStatus })}
               style={{
@@ -177,10 +180,10 @@ export default function AdminBookingsPage() {
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 40 }}>
               {data.map((booking) => (
-                <HumanCard 
-                  key={booking.id} 
+                <HumanCard
+                  key={booking.id}
                   className="human-noise"
-                  onClick={() => {}} // Optional: navigate to booking details
+                  onClick={() => { }} // Optional: navigate to booking details
                   style={{ borderLeft: `4px solid ${booking.status === 'Paid' ? 'var(--accent-green)' : 'var(--border)'}` }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
