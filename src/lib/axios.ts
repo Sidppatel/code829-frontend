@@ -8,7 +8,7 @@ const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 2000;
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'https://code829-backend.onrender.com',
+  baseURL: import.meta.env.VITE_API_URL ?? '/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
 });

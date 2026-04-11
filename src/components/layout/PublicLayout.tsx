@@ -146,11 +146,11 @@ export default function PublicLayout() {
         placement="left"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        width="min(280px, 85vw)"
         closeIcon={<CloseOutlined style={{ color: 'var(--text-primary)' }} />}
         styles={{
           header: { background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)' },
           body: { background: 'var(--bg-surface)', padding: 0, display: 'flex', flexDirection: 'column' },
+          wrapper: { width: 'min(280px, 85vw)' }
         }}
         title={
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
