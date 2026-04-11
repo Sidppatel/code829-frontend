@@ -50,7 +50,7 @@ export default function LoginPage() {
   const handleMagicLink = async (values: { email: string }) => {
     setLoading(true);
     try {
-      await authApi.requestMagicLink(values.email, returnUrl ?? undefined);
+      await authApi.requestMagicLink(values.email, returnUrl ?? undefined, window.location.origin);
       setMagicLinkSent(true);
       message.success('Check your email for the login link');
     } catch (err) {
