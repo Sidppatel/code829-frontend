@@ -7,8 +7,21 @@ const log = createLogger('HTTP');
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 2000;
 
+// Determine base URL dynamically to handle Cloudflare proxying and CORS
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  const hostname = window.location.hostname;
+  
+  // Force proxy for Cloudflare Pages or if specifically requested via env
+  if (hostname.endsWith('pages.dev') || envUrl === '/api') {
+    return '/api';
+  }
+  
+  return envUrl || '/api';
+};
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '/api',
+  baseURL: getBaseURL(),
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
 });
@@ -16,6 +29,13 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  
+  // Ensure relative URLs don't bypass the /api proxy
+  // If baseline is '/api' and url is '/events', make it 'events' so it becomes '/api/events'
+  if (config.baseURL === '/api' && config.url?.startsWith('/')) {
+    config.url = config.url.substring(1);
+  }
+  
   return config;
 });
 
