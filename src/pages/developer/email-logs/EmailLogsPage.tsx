@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import DOMPurify from 'dompurify';
 import { Table, Tag, Input, Pagination, Spin, Modal, Descriptions, App, Button } from 'antd';
 import { SearchOutlined, MailOutlined } from '@ant-design/icons';
 import { developerApi } from '../../../services/api';
@@ -260,7 +261,7 @@ export default function EmailLogsPage() {
                   lineHeight: 1.7,
                   fontFamily: "'Inter', sans-serif"
                 }}
-                dangerouslySetInnerHTML={{ __html: selected.body }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selected.body) }}
               />
             </div>
           </div>

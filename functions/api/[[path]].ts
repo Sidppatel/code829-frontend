@@ -1,6 +1,10 @@
 /// <reference types="@cloudflare/workers-types" />
 
-export const onRequest: PagesFunction<any> = async (context) => {
+export interface Env {
+  VITE_API_URL?: string;
+}
+
+export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, params } = context;
   const url = new URL(request.url);
   
@@ -10,7 +14,7 @@ export const onRequest: PagesFunction<any> = async (context) => {
   const targetPath = pathSegments ? pathSegments.join('/') : '';
   
   // Use environment variable for backend URL
-  const backendBaseUrl = (context.env as any).VITE_API_URL;
+  const backendBaseUrl = context.env.VITE_API_URL;
   
   if (!backendBaseUrl) {
     return new Response(JSON.stringify({ 
@@ -69,7 +73,7 @@ export const onRequest: PagesFunction<any> = async (context) => {
 };
 
 // Handle OPTIONS requests (preflight)
-export const onRequestOptions: PagesFunction<any> = async () => {
+export const onRequestOptions: PagesFunction<Env> = async () => {
   return new Response(null, {
     status: 204,
     headers: {
