@@ -10,12 +10,12 @@ export const onRequest: PagesFunction<any> = async (context) => {
   const targetPath = pathSegments ? pathSegments.join('/') : '';
   
   // Use environment variable for backend URL
-  const backendBaseUrl = (context.env as any).BACKEND_URL;
+  const backendBaseUrl = (context.env as any).VITE_API_URL;
   
   if (!backendBaseUrl) {
     return new Response(JSON.stringify({ 
       error: 'Configuration Error', 
-      message: 'BACKEND_URL is not defined in Cloudflare Pages environment variables.' 
+      message: 'VITE_API_URL is not defined in Cloudflare Pages environment variables.' 
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -31,7 +31,7 @@ export const onRequest: PagesFunction<any> = async (context) => {
   } catch (err) {
     return new Response(JSON.stringify({ 
       error: 'Invalid Configuration', 
-      message: 'Failed to construct the target URL. Please check your BACKEND_URL.',
+      message: 'Failed to construct the target URL. Please check your VITE_API_URL.',
       details: err instanceof Error ? err.message : String(err)
     }), {
       status: 500,
