@@ -1,11 +1,11 @@
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Row, Col, Typography } from 'antd';
 import type { EventDetail } from '../../../types/event';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 
 interface EventAboutProps {
   event: EventDetail;
-  itemVariants: any;
+  itemVariants: Variants;
 }
 
 export default function EventAbout({ event, itemVariants }: EventAboutProps) {

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Space, Tag, Button } from 'antd';
 import { ArrowLeftOutlined, CalendarOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +9,7 @@ import { useIsMobile } from '../../../hooks/useIsMobile';
 
 interface EventHeroProps {
   event: EventDetail;
-  itemVariants: any;
+  itemVariants: Variants;
 }
 
 export default function EventHero({ event, itemVariants }: EventHeroProps) {

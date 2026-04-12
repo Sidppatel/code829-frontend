@@ -1,6 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, Typography, Button } from 'antd';
 import { LogoutOutlined } from '@ant-design/icons';
+import BrandLogo from '../shared/BrandLogo';
+import type { UserProfile } from '../../types/auth';
 
 interface NavGroup {
   title: string;
@@ -10,8 +12,7 @@ interface NavGroup {
 interface SidebarNavProps {
   collapsed: boolean;
   navGroups: NavGroup[];
-  title: string;
-  user: any;
+  user: UserProfile | null;
   userSecondaryRole?: string;
   userSecondaryLink?: string;
   userSecondaryLinkLabel?: string;
@@ -22,7 +23,6 @@ interface SidebarNavProps {
 export default function SidebarNav({
   collapsed,
   navGroups,
-  title,
   user,
   userSecondaryRole,
   userSecondaryLink,
@@ -40,27 +40,12 @@ export default function SidebarNav({
         display: 'flex',
         alignItems: 'center',
         justifyContent: collapsed ? 'center' : 'flex-start',
-        gap: 10
       }}>
-        <div style={{
-          width: 32,
-          height: 32,
-          background: 'var(--primary)',
-          borderRadius: 8,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontSize: 18,
-          boxShadow: '0 4px 12px hsla(var(--p-h), var(--p-s), var(--p-l), 0.4)'
-        }}>
-          ✦
-        </div>
-        {!collapsed && (
-          <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', fontFamily: "'Playfair Display', serif" }}>
-            {title}
-          </span>
-        )}
+        <BrandLogo 
+          size="md" 
+          showText={!collapsed} 
+          collapsed={collapsed} 
+        />
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', margin: '0 -4px', padding: '0 4px' }}>

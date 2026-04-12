@@ -112,25 +112,39 @@ export default function DeveloperLayout() {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: 4,
-                  padding: '8px 4px',
+                  gap: 3,
+                  padding: '6px 2px',
                   color: active ? 'var(--primary)' : 'var(--text-muted)',
-                  fontSize: 10,
+                  fontSize: 9.5,
                   textDecoration: 'none',
                   position: 'relative',
-                  flex: 1
+                  flex: 1,
+                  minWidth: 0,
+                  overflow: 'hidden'
                 }}
               >
-                <span style={{
-                  fontSize: 20,
+                <span style={{ 
+                  fontSize: 18, 
                   background: active ? 'var(--primary-soft)' : 'transparent',
-                  padding: '4px 12px',
+                  padding: '4px 10px',
                   borderRadius: 12,
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}>
                   {item.icon}
                 </span>
-                <span style={{ fontWeight: active ? 600 : 400 }}>{item.shortLabel}</span>
+                <span style={{ 
+                  fontWeight: active ? 700 : 500,
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  width: '100%',
+                  textAlign: 'center'
+                }}>
+                  {item.shortLabel}
+                </span>
               </Link>
             );
           })}

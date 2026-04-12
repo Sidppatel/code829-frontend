@@ -2,13 +2,14 @@ import { useNavigate } from 'react-router-dom';
 import { Typography, Button, Dropdown, Space } from 'antd';
 import { RocketOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import ThemeToggle from '../shared/ThemeToggle';
 import PulseIndicator from '../shared/PulseIndicator';
+import BrandLogo from '../shared/BrandLogo';
+import type { UserProfile } from '../../types/auth';
 
 interface TopHeaderProps {
   isMobile: boolean;
   title: string;
-  user: any;
+  user: UserProfile | null;
   userMenuItems: MenuProps['items'];
   showMetrics?: boolean;
 }
@@ -20,10 +21,7 @@ export default function TopHeader({ isMobile, title, user, userMenuItems, showMe
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {isMobile && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 24, height: 24, background: 'var(--primary)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14 }}>✦</div>
-            <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', fontFamily: "'Playfair Display', serif" }}>{title}</span>
-          </div>
+          <BrandLogo size="sm" />
         )}
         {!isMobile && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>

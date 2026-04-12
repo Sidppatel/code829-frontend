@@ -19,6 +19,7 @@ import type { MenuProps } from 'antd';
 import { Avatar, Grid } from 'antd';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from '../shared/ThemeToggle';
+import BrandLogo from '../shared/BrandLogo';
 
 const { Header, Content, Footer } = Layout;
 const { useBreakpoint } = Grid;
@@ -97,29 +98,7 @@ export default function PublicLayout() {
         }}
       >
         {/* Logo */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-          <div style={{
-            background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 8px 16px rgba(99, 102, 241, 0.3)',
-          }}>
-            <span style={{ color: '#fff', fontSize: 22, fontWeight: 800 }}>C</span>
-          </div>
-          <span style={{ 
-            fontSize: 24, 
-            fontWeight: 800, 
-            color: 'var(--text-primary)', 
-            letterSpacing: '-1px',
-            display: isMobile ? 'none' : 'flex'
-          }}>
-            Code<span style={{ color: 'var(--accent-rose)', fontWeight: 400 }}>829</span>
-          </span>
-        </Link>
+        <BrandLogo size="lg" showText={!isMobile} />
 
         {!isMobile && (
           <div style={{ display: 'flex', gap: 8 }}>
@@ -203,22 +182,7 @@ export default function PublicLayout() {
           wrapper: { width: 'min(280px, 85vw)' }
         }}
         title={
-          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
-              width: 28,
-              height: 28,
-              borderRadius: 6,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <span style={{ color: '#fff', fontSize: 16, fontWeight: 800 }}>C</span>
-            </div>
-            <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
-              Code<span style={{ color: 'var(--accent-rose)', fontWeight: 400 }}>829</span>
-            </span>
-          </Link>
+          <BrandLogo size="sm" />
         }
       >
         <div style={{ flex: 1, padding: '12px 0' }}>
@@ -294,9 +258,8 @@ export default function PublicLayout() {
       >
         <Row gutter={[48, 32]} style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
           <Col xs={24} md={8}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-              <span style={{ color: 'var(--accent-violet)', fontSize: 20 }}>✦</span>
-              <span className="text-display gradient-text" style={{ fontSize: 20, fontWeight: 700 }}>Code829</span>
+            <div style={{ marginBottom: 16 }}>
+              <BrandLogo size="md" />
             </div>
             <Typography.Text style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
               Your premier event booking platform in Mobile, Alabama. Discover, book, and enjoy unforgettable experiences.

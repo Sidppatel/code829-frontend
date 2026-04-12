@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Typography, Button, Space } from 'antd';
 import { ShareAltOutlined, MessageOutlined } from '@ant-design/icons';
 import type { EventDetail } from '../../../types/event';
@@ -10,7 +10,7 @@ interface EventSidebarProps {
   isSoldOut: boolean;
   remaining: number;
   handleBookNow: () => void;
-  itemVariants: any;
+  itemVariants: Variants;
 }
 
 export default function EventSidebar({ event, isSoldOut, remaining, handleBookNow, itemVariants }: EventSidebarProps) {
