@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { EventSummary } from '../../types/event';
 import { centsToUSD } from '../../utils/currency';
 import { formatEventDate } from '../../utils/date';
+import EventImageFallback from './EventImageFallback';
 
 interface Props {
   event: EventSummary;
@@ -42,16 +43,7 @@ export default function EventCard({ event }: Props) {
             }}
           />
         ) : (
-          <div style={{ 
-            width: '100%', 
-            height: '100%', 
-            background: 'linear-gradient(135deg, var(--accent-violet-dark), var(--bg-surface))',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <CalendarOutlined style={{ fontSize: 48, color: 'rgba(255,255,255,0.1)' }} />
-          </div>
+          <EventImageFallback category={event.category} title={event.title} />
         )}
         
         <div style={{

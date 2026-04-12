@@ -36,6 +36,7 @@ import { centsToUSD } from '../../utils/currency';
 import { formatDateRange } from '../../utils/date';
 import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import EventImageFallback from '../../components/events/EventImageFallback';
 import TableSelectionCanvas from '../../components/booking/TableSelectionCanvas';
 import CheckoutPanel from '../../components/booking/CheckoutPanel';
 import CapacityBookingForm from '../../components/booking/CapacityBookingForm';
@@ -421,16 +422,11 @@ export default function EventDetailPage() {
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
-          <div style={{
-            width: '100%',
-            height: '100%',
-            background: 'linear-gradient(135deg, var(--accent-violet-dark), var(--bg-elevated))',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <CalendarOutlined style={{ fontSize: 120, color: 'rgba(255,255,255,0.05)' }} />
-          </div>
+          <EventImageFallback 
+            category={event.category} 
+            title={event.title}
+            fontSize={isMobile ? "6rem" : "10rem"} 
+          />
         )}
 
         {/* Overlay for Header */}
