@@ -31,6 +31,7 @@ export default function ProfilePage() {
           state: data.state ?? '',
           zipCode: data.zipCode ?? '',
           optInLocationEmail: data.optInLocationEmail,
+          email: data.email,
         });
       } catch {
         message.error('Failed to load profile');
@@ -43,7 +44,7 @@ export default function ProfilePage() {
 
   const handleSubmit = async () => {
     try {
-      const values = await form.validateFields();
+      const { email, ...values } = await form.validateFields();
       setSaving(true);
       await authApi.updateProfile(values);
       const { data } = await authApi.getMe();
@@ -100,6 +101,9 @@ export default function ProfilePage() {
               </Form.Item>
             </Col>
           </Row>
+          <Form.Item name="email" label="Email Address">
+            <Input disabled />
+          </Form.Item>
           <Form.Item name="phone" label="Phone">
             <Input />
           </Form.Item>
