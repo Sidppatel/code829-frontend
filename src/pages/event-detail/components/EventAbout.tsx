@@ -1,4 +1,4 @@
-import { motion, Variants } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { Row, Col, Typography } from 'antd';
 import type { EventDetail } from '../../../types/event';
 import { useIsMobile } from '../../../hooks/useIsMobile';

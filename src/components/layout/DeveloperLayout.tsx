@@ -88,7 +88,6 @@ export default function DeveloperLayout() {
           <SidebarNav
             collapsed={collapsed}
             navGroups={navGroups}
-            title="Developer"
             user={user}
             userSecondaryRole="Developer"
             userSecondaryLink="/admin"

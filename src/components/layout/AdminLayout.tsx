@@ -97,7 +97,6 @@ export default function AdminLayout() {
           <SidebarNav
             collapsed={collapsed}
             navGroups={navGroups}
-            title="EventFlow"
             user={user}
             userSecondaryRole="Owner"
             userSecondaryLink="/staff/checkin/select"

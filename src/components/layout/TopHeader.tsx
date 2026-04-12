@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Typography, Button, Dropdown, Space } from 'antd';
 import { RocketOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
+import ThemeToggle from '../shared/ThemeToggle';
 import PulseIndicator from '../shared/PulseIndicator';
 import BrandLogo from '../shared/BrandLogo';
 import type { UserProfile } from '../../types/auth';

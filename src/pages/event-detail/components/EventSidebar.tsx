@@ -1,4 +1,4 @@
-import { motion, Variants } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { Typography, Button, Space } from 'antd';
 import { ShareAltOutlined, MessageOutlined } from '@ant-design/icons';
 import type { EventDetail } from '../../../types/event';
