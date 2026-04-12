@@ -584,7 +584,7 @@ export default function EventDetailPage() {
                     letterSpacing: '-1px',
                     lineHeight: 1.1
                   }}>
-                    {event.pricePerPersonCents ? centsToUSD(event.pricePerPersonCents) : 'Complimentary'}
+                    {(event.minPricePerTableCents ?? event.pricePerPersonCents) ? centsToUSD(event.minPricePerTableCents ?? event.pricePerPersonCents!) : 'Complimentary'}
                   </div>
                 </div>
 
@@ -673,7 +673,7 @@ export default function EventDetailPage() {
             <div>
               <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>From</div>
               <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)' }}>
-                {event.pricePerPersonCents ? centsToUSD(event.pricePerPersonCents) : 'Free'}
+                {(event.minPricePerTableCents ?? event.pricePerPersonCents) ? centsToUSD(event.minPricePerTableCents ?? event.pricePerPersonCents!) : 'Free'}
               </div>
             </div>
             <Button
