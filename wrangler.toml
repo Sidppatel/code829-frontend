@@ -1,0 +1,6 @@
+name = "code829-test"
+pages_build_output_dir = "dist"
+
+[vars]
+# This value is injected dynamically by the GitHub Action during deployment
+BACKEND_URL = "__BACKEND_URL__"
