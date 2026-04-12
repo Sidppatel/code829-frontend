@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button, Switch, App, Pagination } from 'antd';
-import { PlusOutlined, EditOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, EnvironmentOutlined, TableOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { adminVenuesApi } from '../../../services/api';
 import type { Venue } from '../../../types/venue';
@@ -54,20 +54,37 @@ export default function VenuesPage() {
         ]}
         rotateSubtitle
         extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => navigate('/admin/venues/new')}
-            style={{
-              borderRadius: 'var(--radius-full)',
-              height: 48,
-              padding: '0 32px',
-              fontWeight: 700,
-              boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
-            }}
-          >
-            Add Venue
-          </Button>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Button
+              icon={<TableOutlined />}
+              onClick={() => navigate('/admin/table-types')}
+              style={{
+                borderRadius: 'var(--radius-full)',
+                height: 48,
+                padding: '0 24px',
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-surface)'
+              }}
+            >
+              Table Templates
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => navigate('/admin/venues/new')}
+              style={{
+                borderRadius: 'var(--radius-full)',
+                height: 48,
+                padding: '0 32px',
+                fontWeight: 700,
+                boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
+              }}
+            >
+              Add Venue
+            </Button>
+          </div>
         }
       />
 

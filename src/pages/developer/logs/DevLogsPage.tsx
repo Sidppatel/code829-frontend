@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Table, Tag, Input, Pagination, Spin, Modal, Descriptions, Button } from 'antd';
-import { SearchOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { SearchOutlined, InfoCircleOutlined, RedoOutlined } from '@ant-design/icons';
 import { developerApi } from '../../../services/api';
 import { usePagedTable } from '../../../hooks/usePagedTable';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import type { DevLogEntry, DevLogParams } from '../../../services/developerApi';
-import PageHeader from '../../../components/shared/PageHeader';
 import HumanCard from '../../../components/shared/HumanCard';
 import EmptyState from '../../../components/shared/EmptyState';
+import PageHeader from '../../../components/shared/PageHeader';
 import dayjs from 'dayjs';
 
 const severityColors: Record<string, string> = {
@@ -33,10 +32,9 @@ interface FullDevLog extends DevLogEntry {
 }
 
 export default function DevLogsPage() {
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selected, setSelected] = useState<FullDevLog | null>(null);
-  const { data, total, page, pageSize, loading, setPage, setPageSize, setFilters } =
+  const { data, total, page, pageSize, loading, setPage, setPageSize, setFilters, filters, refresh } =
     usePagedTable<FullDevLog, DevLogParams>({
       fetcher: developerApi.getDevLogs as Parameters<typeof usePagedTable<FullDevLog, DevLogParams>>[0]['fetcher'],
       defaultPageSize: 20,
@@ -117,51 +115,26 @@ export default function DevLogsPage() {
 
   return (
     <div className="spring-up">
-      <PageHeader 
-        title="Error Logs" 
+      <PageHeader
+        title="Error Logs"
         subtitle={[
           "Real-time application health and error tracking.",
           "Analyzing request throughput and endpoint latency.",
           "Monitoring exception patterns across the cluster."
         ]}
         rotateSubtitle
-        extra={
-          <div style={{ display: 'flex', gap: 12 }}>
-            <Button 
-              icon={<SearchOutlined />} 
-              onClick={() => setFilters({})}
-              style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
-            >
-              Reset Filters
-            </Button>
-            <Button 
-              type="primary" 
-              icon={<InfoCircleOutlined />} 
-              onClick={() => navigate('/developer/system-logs')}
-              style={{ 
-                borderRadius: 'var(--radius-full)', 
-                fontWeight: 700,
-                background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
-                border: 'none',
-                boxShadow: '0 4px 12px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
-              }}
-            >
-              System Health
-            </Button>
-          </div>
-        }
       />
-      
+
       <div style={{ 
         display: 'flex', 
-        gap: 16, 
-        marginBottom: 32, 
+        gap: 12, 
+        marginBottom: 20, 
         flexWrap: 'wrap', 
         alignItems: 'center',
-        background: 'var(--bg-surface)',
-        padding: '12px 20px',
-        borderRadius: 'var(--radius-full)',
+        padding: '12px',
+        borderRadius: 'var(--radius-lg)',
         border: '1px solid var(--border)',
+        background: 'var(--bg-soft)',
         boxShadow: 'var(--shadow-sm)'
       }}>
         <Input
@@ -170,47 +143,77 @@ export default function DevLogsPage() {
           variant="borderless"
           allowClear
           onChange={(e) => setFilters({ path: e.target.value || undefined })}
-          style={{ flex: 1, minWidth: 260, height: 32, fontSize: 13 }}
+          style={{ flex: 1, minWidth: 200, height: 40, fontSize: 14, background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)' }}
         />
-        <div style={{ width: 1, height: 24, background: 'var(--border)', margin: '0 8px' }} />
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {['Info', 'Warning', 'Error', 'Critical'].map(level => (
-            <div 
-              key={level}
-              onClick={() => setFilters({ severity: level as DevLogParams['severity'] })}
-              style={{
-                padding: '6px 14px',
-                borderRadius: 'var(--radius-full)',
-                background: 'var(--bg-soft)',
-                border: '1px solid var(--border)',
-                fontSize: 12,
-                fontWeight: 600,
-                color: level === 'Error' || level === 'Critical' ? 'var(--accent-rose)' : 'var(--text-secondary)',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-              className="hover-lift press-state"
-            >
-              {level}
-            </div>
-          ))}
+          {['Info', 'Warning', 'Error', 'Critical'].map(level => {
+            const isActive = filters.severity === level;
+            const color = severityColors[level];
+            return (
+              <div 
+                key={level}
+                onClick={() => setFilters({ severity: isActive ? undefined : level as DevLogParams['severity'] })}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '12px',
+                  background: isActive ? `${color}15` : 'var(--bg-surface)',
+                  border: '1px solid',
+                  borderColor: isActive ? color : 'var(--border)',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: isActive ? color : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: isActive ? `0 4px 12px ${color}20` : 'var(--shadow-sm)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+                className="hover-lift press-state"
+              >
+                <div style={{ 
+                  width: 6, 
+                  height: 6, 
+                  borderRadius: '50%', 
+                  background: color,
+                  opacity: isActive ? 1 : 0.5 
+                }} />
+                {level}
+              </div>
+            );
+          })}
+          <div style={{ width: 1, height: 24, background: 'var(--border)', margin: '0 4px' }} />
+          <Button 
+            type="text" 
+            icon={<RedoOutlined className={loading ? 'ant-spin' : ''} />} 
+            onClick={refresh}
+            style={{ 
+              height: 38, 
+              borderRadius: '12px', 
+              fontWeight: 600,
+              color: 'var(--text-secondary)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)'
+            }}
+          >
+            Refresh
+          </Button>
         </div>
       </div>
 
       {isMobile ? (
         <Spin spinning={loading}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {data.map((log) => (
               <HumanCard
                 key={log.id}
-                className="human-noise"
                 onClick={() => setSelected(log)}
                 style={{ 
                   padding: 16,
                   borderLeft: `4px solid ${severityColors[log.severity]}`
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                   <div style={{ 
                     fontSize: 10, 
                     fontWeight: 800, 
@@ -220,9 +223,9 @@ export default function DevLogsPage() {
                   }}>
                     {log.severity}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     {log.method && (
-                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', background: 'var(--bg-soft)', padding: '2px 6px', borderRadius: 4 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', background: 'var(--bg-soft)', padding: '2px 6px', borderRadius: 4 }}>
                         {log.method}
                       </span>
                     )}
@@ -233,7 +236,7 @@ export default function DevLogsPage() {
                     )}
                   </div>
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, fontFamily: 'monospace', lineHeight: 1.4 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, fontFamily: 'monospace', lineHeight: 1.4, wordBreak: 'break-word' }}>
                   {log.message}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>
@@ -264,7 +267,7 @@ export default function DevLogsPage() {
             rowKey="id"
             loading={loading}
             size="middle"
-            scroll={{ x: 900 }}
+            scroll={{ x: 'max-content' }}
             pagination={{
               current: page, pageSize, total,
               onChange: (p, ps) => { setPage(p); setPageSize(ps); },
@@ -301,10 +304,10 @@ export default function DevLogsPage() {
         }
         width={840}
         centered
-        styles={{ body: { maxHeight: '70vh', overflowY: 'auto', padding: '24px' } }}
+        styles={{ body: { maxHeight: '70vh', overflowY: 'auto', padding: isMobile ? '16px' : '24px' } }}
       >
         {selected && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <Descriptions column={isMobile ? 1 : 2} size="small" bordered items={[
               { label: 'Timestamp', span: isMobile ? 1 : 2, children: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{formatTs(selected.timestamp)}</span> },
               { label: 'Level', children: <Tag color={severityColors[selected.severity] + '15'} style={{ color: severityColors[selected.severity], borderColor: severityColors[selected.severity] + '30', fontWeight: 700 }}>{selected.severity}</Tag> },
@@ -324,6 +327,7 @@ export default function DevLogsPage() {
                 color: 'var(--text-primary)',
                 lineHeight: 1.6,
                 border: '1px solid var(--border)',
+                wordBreak: 'break-word'
               }}>
                 {selected.message}
               </div>

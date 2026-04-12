@@ -128,7 +128,7 @@ export default function AdminDashboardPage() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 15 }}>
                       <EnvironmentOutlined style={{ color: 'rgba(255,255,255,0.8)' }} />
-                      {nextEvent.venueName}
+                      {nextEvent.venueName || 'Virtual'}
                     </div>
                   </div>
 
@@ -159,8 +159,8 @@ export default function AdminDashboardPage() {
                     percent={(nextEvent.soldCount / nextEvent.totalCapacity) * 100}
                     showInfo={false}
                     strokeColor="#FBBF24"
-                    trailColor="rgba(255,255,255,0.1)"
-                    strokeWidth={12}
+                    railColor="rgba(255,255,255,0.1)"
+                    size={12}
                   />
                   <div style={{ marginTop: 24, fontSize: 13, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
                     “Ticket sales are up 12% compared to your last rooftop event.”

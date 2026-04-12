@@ -138,7 +138,8 @@ export default function EventManagePage() {
           <Col xs={24} sm={12}>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>VENUE</div>
             <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-              {event.venueName}, {event.venueCity}
+              {event.venueName || event.venue?.name || 'Virtual'}
+              { (event.venueCity || event.venue?.city) ? `, ${event.venueCity || event.venue?.city}` : '' }
             </div>
           </Col>
           <Col xs={24} sm={12}>

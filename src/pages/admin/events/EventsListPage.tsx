@@ -1,4 +1,4 @@
-import { Button, Input, Tooltip, Pagination } from 'antd';
+import { Button, Input, Tooltip, Tag } from 'antd';
 import {
   PlusOutlined,
   SearchOutlined,
@@ -13,8 +13,7 @@ import type { EventDetail } from '../../../types/event';
 import type { AdminEventListParams } from '../../../services/adminEventsApi';
 import PageHeader from '../../../components/shared/PageHeader';
 import HumanCard from '../../../components/shared/HumanCard';
-import LoadingSpinner from '../../../components/shared/LoadingSpinner';
-import EmptyState from '../../../components/shared/EmptyState';
+import SharedEventTable from '../../../components/events/SharedEventTable';
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   Draft: { label: 'Draft', color: '#9CA3AF' },
@@ -66,6 +65,54 @@ export default function EventsListPage() {
     fetcher: adminEventsApi.list,
     defaultPageSize: 12,
   });
+
+  const columns = [
+    { title: 'Title', dataIndex: 'title', key: 'title', ellipsis: true },
+    {
+      title: 'Date', dataIndex: 'startDate', key: 'startDate', width: 180,
+      render: (d: string) => formatEventDate(d),
+    },
+    {
+      title: 'Venue', dataIndex: 'venueName', key: 'venueName', width: 200, ellipsis: true,
+      render: (v: string, record: EventDetail) => v || record.venue?.name || 'Virtual',
+    },
+    {
+      title: 'Type', dataIndex: 'layoutMode', key: 'layoutMode', width: 100,
+      render: (m: string) => <Tag color={m === 'Open' ? 'blue' : 'purple'}>{m}</Tag>,
+    },
+    {
+      title: 'Status', dataIndex: 'status', key: 'status', width: 130,
+      render: (s: string) => <StatusBadge status={s} />,
+    },
+    {
+      title: 'Sales', key: 'sales', width: 100,
+      render: (_: unknown, r: EventDetail) => `${r.soldCount || 0} / ${r.totalCapacity || '∞'}`,
+    },
+    {
+      title: 'Check-ins', dataIndex: 'checkInCount', key: 'checkInCount', width: 100,
+      render: (c: number) => c || 0,
+    },
+    {
+      title: '', key: 'action', width: 120,
+      render: (_: unknown, record: EventDetail) => (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'flex-end' }}>
+          <Button 
+            size="small" 
+            onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${record.id}`); }}
+          >
+            View
+          </Button>
+          <Tooltip title="More options">
+            <Button
+              size="small"
+              icon={<MoreOutlined />}
+              onClick={(e) => { e.stopPropagation(); }}
+            />
+          </Tooltip>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="spring-up">
@@ -138,124 +185,107 @@ export default function EventsListPage() {
         </div>
       </div>
 
-      {loading ? (
-        <LoadingSpinner skeleton="card" />
-      ) : data.length > 0 ? (
-        <>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-            gap: 24,
-            marginBottom: 40
-          }}>
-            {data.map((record) => (
-              <HumanCard
-                key={record.id}
-                onClick={() => navigate(`/admin/events/${record.id}`)}
-                className="human-noise"
-                style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+      <SharedEventTable
+        dataSource={data}
+        loading={loading}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={(p, ps) => {
+          setPage(p);
+          if (ps !== pageSize) setPageSize(ps);
+        }}
+        columns={columns}
+        onRowClick={(record) => navigate(`/admin/events/${record.id}`)}
+        renderMobileCard={(record) => (
+          <HumanCard
+            className="human-noise"
+            style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+              <StatusBadge status={record.status} />
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: 12,
+                color: 'var(--text-muted)',
+                fontWeight: 600
+              }}>
+                <EnvironmentOutlined />
+                {record.venueName || record.venue?.name || 'Virtual'}
+              </div>
+            </div>
+
+            <h3 style={{
+              fontSize: 22,
+              fontWeight: 700,
+              fontFamily: "'Playfair Display', serif",
+              color: 'var(--text-primary)',
+              margin: '0 0 16px 0',
+              lineHeight: 1.2,
+              minHeight: 52,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}>
+              {record.title}
+            </h3>
+
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500, marginBottom: 20 }}>
+              {formatEventDate(record.startDate)}
+            </div>
+
+            <div style={{
+              background: 'var(--bg-soft)',
+              padding: '16px',
+              borderRadius: 'var(--radius-md)',
+              marginBottom: 20,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 12
+            }}>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Sales</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {record.soldCount || 0} / {record.totalCapacity || '∞'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Check-ins</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {record.checkInCount || 0}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 'auto', display: 'flex', gap: 12, paddingTop: 8 }}>
+              <Button
+                type="primary"
+                block
+                style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
+                onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${record.id}`); }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                  <StatusBadge status={record.status} />
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 12,
-                    color: 'var(--text-muted)',
-                    fontWeight: 600
-                  }}>
-                    <EnvironmentOutlined />
-                    {record.venueName || 'Virtual'}
-                  </div>
-                </div>
-
-                <h3 style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  fontFamily: "'Playfair Display', serif",
-                  color: 'var(--text-primary)',
-                  margin: '0 0 16px 0',
-                  lineHeight: 1.2,
-                  minHeight: 52,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden'
-                }}>
-                  {record.title}
-                </h3>
-
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500, marginBottom: 20 }}>
-                  {formatEventDate(record.startDate)}
-                </div>
-
-                <div style={{
-                  background: 'var(--bg-soft)',
-                  padding: '16px',
-                  borderRadius: 'var(--radius-md)',
-                  marginBottom: 20,
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: 12
-                }}>
-                  <div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Sales</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {record.soldCount || 0} / {record.totalCapacity || '∞'}
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Check-ins</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {record.checkInCount || 0}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ marginTop: 'auto', display: 'flex', gap: 12, paddingTop: 8 }}>
-                  <Button
-                    type="primary"
-                    block
-                    style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
-                    onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${record.id}`); }}
-                  >
-                    View Details
-                  </Button>
-                  <Tooltip title="More options">
-                    <Button
-                      icon={<MoreOutlined />}
-                      style={{ borderRadius: 'var(--radius-full)', width: 40 }}
-                      onClick={(e) => { e.stopPropagation(); }}
-                    />
-                  </Tooltip>
-                </div>
-              </HumanCard>
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 40 }}>
-            <Pagination
-              current={page}
-              pageSize={pageSize}
-              total={total}
-              onChange={(p, ps) => {
-                setPage(p);
-                setPageSize(ps);
-              }}
-              showSizeChanger
-              className="human-pagination"
-            />
-          </div>
-        </>
-      ) : (
-        <EmptyState
-          title="No events yet"
-          description="It looks like you haven't created any events matching these criteria. Time to start something new?"
-          actionLabel="Create Event"
-          onAction={() => navigate('/admin/events/new')}
-        />
-      )}
+                View Details
+              </Button>
+              <Tooltip title="More options">
+                <Button
+                  icon={<MoreOutlined />}
+                  style={{ borderRadius: 'var(--radius-full)', width: 40 }}
+                  onClick={(e) => { e.stopPropagation(); }}
+                />
+              </Tooltip>
+            </div>
+          </HumanCard>
+        )}
+        emptyProps={{
+          title: "No events yet",
+          description: "It looks like you haven't created any events matching these criteria. Time to start something new?",
+          actionLabel: "Create Event",
+          onAction: () => navigate('/admin/events/new')
+        }}
+      />
     </div>
   );
 }

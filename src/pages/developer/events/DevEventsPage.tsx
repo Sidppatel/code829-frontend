@@ -1,15 +1,15 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Tag, Card, InputNumber, Button, Spin, App, Pagination, Modal, Typography, Divider, Input } from 'antd';
+import { Tag, Button, App, Input } from 'antd';
 import { DollarOutlined, UndoOutlined, SearchOutlined } from '@ant-design/icons';
 import { developerApi } from '../../../services/api';
-import { useIsMobile } from '../../../hooks/useIsMobile';
 import { centsToUSD } from '../../../utils/currency';
 import { formatEventDate } from '../../../utils/date';
 import type { DevEventListItem, EventFeeInfo } from '../../../services/developerApi';
 import type { PagedResponse } from '../../../types/shared';
 import PageHeader from '../../../components/shared/PageHeader';
 import HumanCard from '../../../components/shared/HumanCard';
-import EmptyState from '../../../components/shared/EmptyState';
+import SharedEventTable from '../../../components/events/SharedEventTable';
+import { Modal, Typography, Card, InputNumber, Divider, Spin } from 'antd';
 
 function getStatusColor(status: string): string {
   switch (status) {
@@ -22,10 +22,10 @@ function getStatusColor(status: string): string {
 }
 
 export default function DevEventsPage() {
-  const isMobile = useIsMobile();
   const [events, setEvents] = useState<DevEventListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export default function DevEventsPage() {
   const loadEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await developerApi.getEvents({ page, pageSize: 20, search: search || undefined });
+      const { data } = await developerApi.getEvents({ page, pageSize, search: search || undefined });
       const paged = data as PagedResponse<DevEventListItem>;
       setEvents(paged.items);
       setTotal(paged.totalCount);
@@ -43,7 +43,7 @@ export default function DevEventsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, message]);
+  }, [page, pageSize, search, message]);
 
   useEffect(() => { void loadEvents(); }, [loadEvents]);
 
@@ -72,7 +72,7 @@ export default function DevEventsPage() {
     {
       title: '', key: 'action', width: 80,
       render: (_: unknown, record: DevEventListItem) => (
-        <Button size="small" icon={<DollarOutlined />} onClick={() => setSelectedEventId(record.id)}>
+        <Button size="small" icon={<DollarOutlined />} onClick={(e) => { e.stopPropagation(); setSelectedEventId(record.id); }}>
           Edit
         </Button>
       ),
@@ -118,68 +118,54 @@ export default function DevEventsPage() {
         </div>
       </div>
 
-      {isMobile ? (
-        <Spin spinning={loading}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {events.map((ev) => (
-              <HumanCard
-                key={ev.id}
-                className="human-noise"
-                onClick={() => setSelectedEventId(ev.id)}
-                style={{ cursor: 'pointer', padding: 16 }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{ev.title}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>{formatEventDate(ev.startDate)}</div>
-                  </div>
-                  <Tag color={getStatusColor(ev.status)} style={{ margin: 0, borderRadius: 6, fontWeight: 700, fontSize: 10, textTransform: 'uppercase' }}>
-                    {ev.status}
-                  </Tag>
+      <SharedEventTable
+        dataSource={events}
+        loading={loading}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={(p, ps) => {
+          setPage(p);
+          if (ps !== pageSize) setPageSize(ps);
+        }}
+        columns={columns}
+        onRowClick={(record) => setSelectedEventId(record.id)}
+        renderMobileCard={(ev) => (
+          <HumanCard
+            className="human-noise hover-lift"
+            style={{ cursor: 'pointer', padding: 16 }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{ev.title}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>{formatEventDate(ev.startDate)}</div>
+              </div>
+              <Tag color={getStatusColor(ev.status)} style={{ margin: 0, borderRadius: 6, fontWeight: 700, fontSize: 10, textTransform: 'uppercase' }}>
+                {ev.status}
+              </Tag>
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-soft)', padding: 12, borderRadius: 12, border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Tag color={ev.layoutMode === 'Open' ? 'blue' : 'purple'} style={{ margin: 0, borderRadius: 4, fontWeight: 700, fontSize: 10 }}>{ev.layoutMode}</Tag>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>Mode</span>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fee</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: ev.platformFeeCents !== null ? 'var(--primary)' : 'var(--text-muted)' }}>
+                  {ev.platformFeeCents !== null ? centsToUSD(ev.platformFeeCents) : 'Auto'}
                 </div>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-soft)', padding: 12, borderRadius: 12, border: '1px solid var(--border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Tag color={ev.layoutMode === 'Open' ? 'blue' : 'purple'} style={{ margin: 0, borderRadius: 4, fontWeight: 700, fontSize: 10 }}>{ev.layoutMode}</Tag>
-                    <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>Mode</span>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fee</div>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: ev.platformFeeCents !== null ? 'var(--primary)' : 'var(--text-muted)' }}>
-                      {ev.platformFeeCents !== null ? centsToUSD(ev.platformFeeCents) : 'Auto'}
-                    </div>
-                  </div>
-                </div>
-              </HumanCard>
-            ))}
-            {events.length === 0 && !loading && (
-              <EmptyState title="No events found" description="Application event stream is quiet." actionLabel="Clear Search" onAction={() => { setSearch(''); setPage(1); }} />
-            )}
-          </div>
-          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
-            <Pagination current={page} pageSize={20} total={total} size="small" onChange={setPage} className="human-pagination" />
-          </div>
-        </Spin>
-      ) : (
-        <HumanCard>
-          <div className="responsive-table">
-            <Table
-              dataSource={events}
-              columns={columns}
-              rowKey="id"
-              loading={loading}
-              size="middle"
-              scroll={{ x: 700 }}
-              pagination={{
-                current: page, pageSize: 20, total,
-                onChange: setPage,
-                className: 'human-pagination'
-              }}
-              onRow={(record) => ({ onClick: () => setSelectedEventId(record.id), style: { cursor: 'pointer' } })}
-            />
-          </div>
-        </HumanCard>
-      )}
+              </div>
+            </div>
+          </HumanCard>
+        )}
+        emptyProps={{
+          title: "No events found",
+          description: "Application event stream is quiet.",
+          actionLabel: "Clear Search",
+          onAction: () => { setSearch(''); setPage(1); }
+        }}
+      />
 
       {selectedEventId && (
         <FeeEditorModal

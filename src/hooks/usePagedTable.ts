@@ -18,6 +18,7 @@ interface UsePagedTableResult<T, P> {
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
   setFilters: (filters: Partial<P>) => void;
+  filters: Partial<P>;
   refresh: () => void;
 }
 
@@ -70,6 +71,7 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
     setPage,
     setPageSize,
     setFilters: handleSetFilters,
+    filters,
     refresh: () => setRefreshKey((k) => k + 1),
   };
 }

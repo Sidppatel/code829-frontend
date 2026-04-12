@@ -2,10 +2,10 @@ import { useEffect, useState, useCallback } from 'react';
 import { Table, Select, Tag, Spin, Modal, Descriptions, App } from 'antd';
 import { developerApi } from '../../../services/api';
 import { useIsMobile } from '../../../hooks/useIsMobile';
-import PageHeader from '../../../components/shared/PageHeader';
 import HumanCard from '../../../components/shared/HumanCard';
 import EmptyState from '../../../components/shared/EmptyState';
 import PulseIndicator from '../../../components/shared/PulseIndicator';
+import PageHeader from '../../../components/shared/PageHeader';
 import dayjs from 'dayjs';
 
 interface SystemLog {
@@ -133,29 +133,29 @@ export default function SystemLogsPage() {
         rotateSubtitle
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 32 }}>
-        <HumanCard className="human-noise" style={{ padding: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 24 }}>
+        <HumanCard className="human-noise" style={{ padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>API Node</div>
             <PulseIndicator status="success" size={6} />
           </div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>99.9<span style={{ fontSize: 14, fontWeight: 500 }}>%</span></div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)' }}>99.9<span style={{ fontSize: 14, fontWeight: 500 }}>%</span></div>
           <div style={{ fontSize: 12, color: 'var(--accent-green)', fontWeight: 600 }}>Up for 12d 4h</div>
         </HumanCard>
-        <HumanCard className="human-noise" style={{ padding: 20 }}>
+        <HumanCard className="human-noise" style={{ padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Worker Queue</div>
             <PulseIndicator status="calm" size={6} />
           </div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>0<span style={{ fontSize: 14, fontWeight: 500 }}> ms</span></div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)' }}>0<span style={{ fontSize: 14, fontWeight: 500 }}> ms</span></div>
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>Processing normally</div>
         </HumanCard>
-        <HumanCard className="human-noise" style={{ padding: 20 }}>
+        <HumanCard className="human-noise" style={{ padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Memory</div>
             <PulseIndicator status="warning" size={6} />
           </div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>74<span style={{ fontSize: 14, fontWeight: 500 }}>%</span></div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)' }}>74<span style={{ fontSize: 14, fontWeight: 500 }}>%</span></div>
           <div style={{ fontSize: 12, color: 'var(--accent-gold)', fontWeight: 600 }}>Spiking in Node-02</div>
         </HumanCard>
       </div>
@@ -163,11 +163,11 @@ export default function SystemLogsPage() {
       <div style={{
         display: 'flex',
         gap: 16,
-        marginBottom: 32,
+        marginBottom: 24,
         flexWrap: 'wrap',
         alignItems: 'center',
-        background: 'var(--bg-surface)',
-        padding: '16px 24px',
+        background: 'var(--bg-soft)',
+        padding: '12px 16px',
         borderRadius: 'var(--radius-lg)',
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-sm)'
@@ -177,7 +177,7 @@ export default function SystemLogsPage() {
             placeholder="All Categories"
             allowClear
             variant="borderless"
-            style={{ minWidth: 160, background: 'var(--bg-soft)', borderRadius: 'var(--radius-full)', padding: '4px 12px' }}
+            style={{ minWidth: 160, background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}
             onChange={setCategory}
             options={['EntityChange', 'BackgroundWorker', 'Cache', 'MockService', 'Migration'].map((s) => ({ label: s, value: s }))}
           />
@@ -185,12 +185,12 @@ export default function SystemLogsPage() {
             placeholder="All Entities"
             allowClear
             variant="borderless"
-            style={{ minWidth: 160, background: 'var(--bg-soft)', borderRadius: 'var(--radius-full)', padding: '4px 12px' }}
+            style={{ minWidth: 160, background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}
             onChange={setEntityType}
             options={['Event', 'Booking', 'User', 'Venue', 'Payment', 'Image'].map((s) => ({ label: s, value: s }))}
           />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-green)' }} />
           <span>{loading ? 'Polling...' : 'System Nominal'}</span>
         </div>
@@ -202,7 +202,6 @@ export default function SystemLogsPage() {
             {logs.map((log) => (
               <HumanCard
                 key={log.id}
-                className="human-noise"
                 onClick={() => setSelected(log)}
                 style={{ padding: '16px', borderLeft: `4px solid ${log.category === 'BackgroundWorker' ? 'var(--accent-rose)' : 'var(--border)'}` }}
               >
@@ -220,7 +219,7 @@ export default function SystemLogsPage() {
                   </div>
                   <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{log.entityType}</span>
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, fontFamily: 'monospace' }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8, fontFamily: 'monospace', wordBreak: 'break-word' }}>
                   {log.action}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -246,7 +245,7 @@ export default function SystemLogsPage() {
             rowKey="id"
             loading={loading}
             size="small"
-            scroll={{ x: 800 }}
+            scroll={{ x: 'max-content' }}
             pagination={{ pageSize: 50, showSizeChanger: true }}
             onRow={(record) => ({ onClick: () => setSelected(record), style: { cursor: 'pointer' } })}
           />
@@ -266,11 +265,11 @@ export default function SystemLogsPage() {
           </span>
         }
         width={isMobile ? '95vw' : 700}
-        styles={{ body: { maxHeight: '70vh', overflowY: 'auto' } }}
+        styles={{ body: { maxHeight: '70vh', overflowY: 'auto', padding: isMobile ? '16px' : '24px' } }}
       >
         {selected && (
-          <div>
-            <Descriptions column={isMobile ? 1 : 2} size="small" bordered style={{ marginBottom: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Descriptions column={isMobile ? 1 : 2} size="small" bordered>
               <Descriptions.Item label="Timestamp" span={isMobile ? 1 : 2}>
                 <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{formatTs(selected.timestamp)}</span>
               </Descriptions.Item>

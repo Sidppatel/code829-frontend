@@ -5,10 +5,10 @@ import { developerApi } from '../../../services/api';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import { formatEventDate } from '../../../utils/date';
 import type { EmailLogEntry } from '../../../services/developerApi';
-import PageHeader from '../../../components/shared/PageHeader';
 import HumanCard from '../../../components/shared/HumanCard';
 import EmptyState from '../../../components/shared/EmptyState';
 import PulseIndicator from '../../../components/shared/PulseIndicator';
+import PageHeader from '../../../components/shared/PageHeader';
 
 const statusColors: Record<string, string> = {
   Sent: '#10B981',
@@ -91,29 +91,29 @@ export default function EmailLogsPage() {
         rotateSubtitle
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 32 }}>
-        <HumanCard className="human-noise" style={{ padding: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 24 }}>
+        <HumanCard className="human-noise" style={{ padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Delivery Rate</div>
             <PulseIndicator status="success" size={6} />
           </div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>98.4<span style={{ fontSize: 14, fontWeight: 500 }}>%</span></div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)' }}>98.4<span style={{ fontSize: 14, fontWeight: 500 }}>%</span></div>
           <div style={{ fontSize: 12, color: 'var(--accent-green)', fontWeight: 600 }}>Optimal Performance</div>
         </HumanCard>
-        <HumanCard className="human-noise" style={{ padding: 20 }}>
+        <HumanCard className="human-noise" style={{ padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Avg. Latency</div>
             <PulseIndicator status="calm" size={6} />
           </div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>1.2<span style={{ fontSize: 14, fontWeight: 500 }}> s</span></div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)' }}>1.2<span style={{ fontSize: 14, fontWeight: 500 }}> s</span></div>
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>SMTP Node Response</div>
         </HumanCard>
-        <HumanCard className="human-noise" style={{ padding: 20 }}>
+        <HumanCard className="human-noise" style={{ padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Failures</div>
             <PulseIndicator status="success" size={6} />
           </div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>0</div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)' }}>0</div>
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>Last 24 hours</div>
         </HumanCard>
       </div>
@@ -121,11 +121,11 @@ export default function EmailLogsPage() {
       <div style={{
         display: 'flex',
         gap: 16,
-        marginBottom: 32,
+        marginBottom: 24,
         flexWrap: 'wrap',
         alignItems: 'center',
-        background: 'var(--bg-surface)',
-        padding: '16px 24px',
+        background: 'var(--bg-soft)',
+        padding: '12px 16px',
         borderRadius: 'var(--radius-lg)',
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-sm)'
@@ -135,9 +135,9 @@ export default function EmailLogsPage() {
           prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
           allowClear
           onChange={(e) => { setRecipient(e.target.value || undefined); setPage(1); }}
-          style={{ flex: 1, minWidth: 260, height: 44, borderRadius: 'var(--radius-full)', border: '1px solid var(--border)', paddingLeft: 16 }}
+          style={{ flex: 1, minWidth: 220, height: 40, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', paddingLeft: 12 }}
         />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)' }} />
           <span>{loading ? 'Polling Dispatcher...' : 'Pipeline Live'}</span>
         </div>
@@ -149,7 +149,6 @@ export default function EmailLogsPage() {
             {logs.map((log) => (
               <HumanCard
                 key={log.id}
-                className="human-noise"
                 onClick={() => setSelected(log)}
                 style={{
                   padding: 16,
@@ -185,7 +184,7 @@ export default function EmailLogsPage() {
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 40 }}>
             <Pagination
-              current={page} pageSize={pageSize} total={total}
+              current={page} pageSize={pageSize} total={total} size="small"
               onChange={(p, ps) => { setPage(p); setPageSize(ps); }}
               className="human-pagination"
             />
@@ -199,7 +198,7 @@ export default function EmailLogsPage() {
             rowKey="id"
             loading={loading}
             size="middle"
-            scroll={{ x: 700 }}
+            scroll={{ x: 'max-content' }}
             pagination={{
               current: page, pageSize, total,
               onChange: (p, ps) => { setPage(p); setPageSize(ps); },
@@ -235,10 +234,10 @@ export default function EmailLogsPage() {
         }
         width={isMobile ? '95vw' : 760}
         centered
-        styles={{ body: { maxHeight: '75vh', overflowY: 'auto', padding: '24px' } }}
+        styles={{ body: { maxHeight: '75vh', overflowY: 'auto', padding: isMobile ? '16px' : '24px' } }}
       >
         {selected && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <Descriptions column={isMobile ? 1 : 2} size="small" bordered items={[
               { label: 'To', span: isMobile ? 1 : 2, children: <span style={{ fontWeight: 600 }}>{selected.recipient}</span> },
               { label: 'Subject', span: isMobile ? 1 : 2, children: selected.subject },

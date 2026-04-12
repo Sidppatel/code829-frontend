@@ -7,6 +7,7 @@ import type { TableTemplate } from '../../../types/layout';
 import type { CreateTableTemplatePayload } from '../../../services/adminLayoutApi';
 import PageHeader from '../../../components/shared/PageHeader';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
+import HumanCard from '../../../components/shared/HumanCard';
 
 export default function TableTypesPage() {
   const [types, setTypes] = useState<TableTemplate[]>([]);
@@ -102,12 +103,25 @@ export default function TableTypesPage() {
       title: 'Template',
       key: 'type',
       render: (_: unknown, record: TableTemplate) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div
-            className="tt-swatch"
-            style={{ background: record.defaultColor || '#7C3AED' }}
+            className="tt-swatch human-noise"
+            style={{ 
+              background: record.defaultColor || 'var(--primary)',
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}
           />
-          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{record.name}</span>
+          <div>
+            <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 16, fontFamily: "'Playfair Display', serif" }}>
+              {record.name}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              {record.defaultShape}
+            </div>
+          </div>
         </div>
       ),
     },
@@ -115,135 +129,205 @@ export default function TableTypesPage() {
       title: 'Capacity',
       dataIndex: 'defaultCapacity',
       key: 'defaultCapacity',
-      width: 100,
+      width: 120,
       render: (v: number) => (
-        <span style={{ color: 'var(--text-secondary)' }}>
-          <TeamOutlined style={{ marginRight: 4 }} />{v}
+        <span style={{ 
+          color: 'var(--text-secondary)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          fontWeight: 600
+        }}>
+          <TeamOutlined style={{ color: 'var(--primary)' }} />{v} seats
         </span>
       ),
     },
     {
-      title: 'Price',
+      title: 'Default Price',
       dataIndex: 'defaultPriceCents',
       key: 'defaultPriceCents',
-      width: 110,
+      width: 140,
       render: (v: number) => (
-        <span style={{ color: 'var(--accent-gold)', fontWeight: 600 }}>{centsToUSD(v)}</span>
+        <span style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: 15 }}>{centsToUSD(v)}</span>
       ),
     },
     {
       title: 'Status',
       key: 'isActive',
-      width: 100,
+      width: 120,
       render: (_: unknown, record: TableTemplate) => (
-        <Switch
-          checked={record.isActive}
-          onChange={() => handleToggleActive(record)}
-          checkedChildren="On"
-          unCheckedChildren="Off"
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ 
+            fontSize: 11, 
+            fontWeight: 700, 
+            color: record.isActive ? 'var(--accent-green)' : 'var(--text-muted)',
+            textTransform: 'uppercase'
+          }}>
+            {record.isActive ? 'Active' : 'Off'}
+          </span>
+          <Switch
+            checked={record.isActive}
+            onChange={() => handleToggleActive(record)}
+            size="small"
+          />
+        </div>
       ),
     },
     {
       title: 'Actions',
       key: 'actions',
-      width: 80,
+      width: 100,
       render: (_: unknown, record: TableTemplate) => (
-        <Tooltip title="Edit">
-          <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(record)} style={{ borderRadius: 8 }} />
+        <Tooltip title="Edit Template">
+          <Button 
+            shape="circle" 
+            icon={<EditOutlined />} 
+            onClick={() => openEdit(record)} 
+            style={{ 
+              border: '1px solid var(--border)',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+            }} 
+          />
         </Tooltip>
       ),
     },
   ];
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <LoadingSpinner skeleton="card" />;
 
   return (
-    <div>
-      <PageHeader title="Table Templates" subtitle="Define reusable table configurations"
-        extra={<Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Add Template</Button>}
+    <div className="spring-up">
+      <PageHeader 
+        title="Table Templates" 
+        subtitle={[
+          "Define reusable configurations for your event layouts.",
+          "Standardize seating, pricing, and visual styles across venues.",
+          "Consistency is the bedrock of premium guest experiences."
+        ]}
+        rotateSubtitle
+        extra={
+          <Button 
+            type="primary" 
+            icon={<PlusOutlined />} 
+            onClick={openCreate}
+            style={{
+              borderRadius: 'var(--radius-full)',
+              height: 48,
+              padding: '0 32px',
+              fontWeight: 700,
+              boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
+            }}
+          >
+            Add Template
+          </Button>
+        }
       />
 
-      {/* Mobile card grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}
-           className="mobile-card-list">
-        {types.map((tt) => (
-          <div
-            key={tt.id}
-            className={`admin-section${tt.isActive ? '' : ' inactive'}`}
-            style={{ padding: 14, cursor: 'pointer', position: 'relative' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <div className="tt-swatch" style={{ background: tt.defaultColor || '#7C3AED', width: 32, height: 32 }} />
-              <Switch checked={tt.isActive} onChange={() => handleToggleActive(tt)} size="small" />
-            </div>
-
-            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', marginBottom: 4,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {tt.name}
-            </div>
-
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 10 }}>
-              <TeamOutlined style={{ marginRight: 3 }} />{tt.defaultCapacity} seats
-              <span style={{ marginLeft: 8, color: 'var(--accent-gold)', fontWeight: 600 }}>
-                {centsToUSD(tt.defaultPriceCents)}
-              </span>
-            </div>
-
-            <Button
-              size="small"
-              block
-              icon={<EditOutlined />}
-              onClick={() => openEdit(tt)}
-              style={{ borderRadius: 8 }}
+      {/* Mobile view using HumanCards */}
+      <div className="mobile-only-block" style={{ marginBottom: 40 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
+          {types.map((tt) => (
+            <HumanCard
+              key={tt.id}
+              className="human-noise"
+              style={{
+                opacity: tt.isActive ? 1 : 0.7,
+                border: tt.isActive ? '1px solid var(--border)' : '1px dashed var(--border)',
+              }}
+              title={tt.name}
+              subtitle={`${tt.defaultShape} • ${tt.defaultCapacity} seats`}
+              extra={<Switch checked={tt.isActive} onChange={() => handleToggleActive(tt)} size="small" />}
             >
-              Edit
-            </Button>
-          </div>
-        ))}
-      </div>
-
-      {/* Desktop table */}
-      <div className="desktop-table">
-        <div className="responsive-table">
-          <Table dataSource={types} columns={columns} rowKey="id" pagination={false} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div className="tt-swatch" style={{ background: tt.defaultColor || 'var(--primary)', width: 24, height: 24, borderRadius: 6 }} />
+                  <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>
+                    {centsToUSD(tt.defaultPriceCents)}
+                  </span>
+                </div>
+                <Button 
+                  size="small"
+                  icon={<EditOutlined />} 
+                  onClick={() => openEdit(tt)}
+                  style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
+                >
+                  Edit
+                </Button>
+              </div>
+            </HumanCard>
+          ))}
         </div>
       </div>
 
-      <Modal title={editingId ? 'Edit Template' : 'Add Template'} open={modalOpen}
-        onCancel={() => setModalOpen(false)} onOk={handleSave} confirmLoading={saving}
+      {/* Desktop view using responsive table */}
+      <div className="desktop-only-block" style={{ marginBottom: 40 }}>
+        <div className="glass-card" style={{ padding: '0px', overflow: 'hidden' }}>
+          <div className="responsive-table">
+            <Table 
+              dataSource={types} 
+              columns={columns} 
+              rowKey="id" 
+              pagination={false}
+              style={{ background: 'transparent' }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <Modal 
+        title={editingId ? 'Edit Table Template' : 'Create New Template'} 
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)} 
+        onOk={handleSave} 
+        confirmLoading={saving}
         width="100%"
         style={{ top: 16, maxWidth: 520 }}
+        okText="Save Configuration"
+        cancelText="Discard"
+        className="human-modal"
+        okButtonProps={{
+          style: { borderRadius: 'var(--radius-full)', fontWeight: 700, padding: '0 24px' }
+        }}
+        cancelButtonProps={{
+          style: { borderRadius: 'var(--radius-full)', fontWeight: 600 }
+        }}
       >
-        <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="defaultCapacity" label="Default Capacity" rules={[{ required: true }]}>
-            <InputNumber min={1} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="defaultShape" label="Shape" rules={[{ required: true }]}>
-            <Select options={['Round', 'Rectangle', 'Square', 'Cocktail'].map((s) => ({ label: s, value: s }))} />
-          </Form.Item>
-          <Form.Item name="defaultColor" label="Color">
-            <ColorPicker
-              format="hex"
-              onChange={(color) => form.setFieldValue('defaultColor', color.toHexString())}
-              showText
-              presets={[
-                {
-                  label: 'Recommended',
-                  colors: [
-                    '#7C3AED', '#5B21B6', '#2563EB', '#0EA5E9',
-                    '#10B981', '#F59E0B', '#EF4444', '#EC4899',
-                    '#6366F1', '#14B8A6', '#F97316', '#8B5CF6',
-                  ],
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item name="defaultPriceCents" label="Price (USD)">
-            <InputNumber min={0} step={0.01} precision={2} placeholder="0.00" prefix="$" style={{ width: '100%' }} />
-          </Form.Item>
-        </Form>
+        <div style={{ padding: '8px 0' }}>
+          <Form form={form} layout="vertical" requiredMark={false}>
+            <Form.Item name="name" label="Template Name" rules={[{ required: true }]}><Input placeholder="e.g. VIP Circular" /></Form.Item>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <Form.Item name="defaultCapacity" label="Guest Capacity" rules={[{ required: true }]}>
+                <InputNumber min={1} style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item name="defaultShape" label="Table Shape" rules={[{ required: true }]}>
+                <Select options={['Round', 'Rectangle', 'Square', 'Cocktail'].map((s) => ({ label: s, value: s }))} />
+              </Form.Item>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <Form.Item name="defaultPriceCents" label="Default Price (USD)">
+                <InputNumber min={0} step={0.01} precision={2} placeholder="0.00" prefix="$" style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item name="defaultColor" label="Visual Marker">
+                <ColorPicker
+                  format="hex"
+                  onChange={(color) => form.setFieldValue('defaultColor', color.toHexString())}
+                  showText
+                  presets={[
+                    {
+                      label: 'Theme Colors',
+                      colors: [
+                        '#7C3AED', '#2563EB', '#10B981', '#F59E0B', 
+                        '#EF4444', '#EC4899', '#6366F1', '#14B8A6'
+                      ],
+                    },
+                  ]}
+                />
+              </Form.Item>
+            </div>
+          </Form>
+        </div>
       </Modal>
     </div>
   );

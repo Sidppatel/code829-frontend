@@ -127,7 +127,7 @@ export default function CheckInSelectPage() {
                     
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 16px', fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500, marginBottom: 20 }}>
                       <span><CalendarOutlined style={{ marginRight: 6, color: 'var(--accent-gold)' }} />{formatEventDate(ev.startDate)}</span>
-                      <span><EnvironmentOutlined style={{ marginRight: 6, color: 'var(--primary)' }} />{ev.venueName}</span>
+                      <span><EnvironmentOutlined style={{ marginRight: 6, color: 'var(--primary)' }} />{ev.venueName || ev.venue?.name || 'Virtual'}</span>
                     </div>
 
                     {s && (

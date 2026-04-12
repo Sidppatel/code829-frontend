@@ -17,6 +17,7 @@ export interface EventSummary {
   totalSold: number;
   noOfAvailableTables: number;
   minPricePerTableCents?: number;
+  venue?: VenueBasic;
 }
 
 export interface EventDetail extends EventSummary {
