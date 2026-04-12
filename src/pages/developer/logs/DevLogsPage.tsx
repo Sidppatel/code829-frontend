@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Table, Tag, Input, Pagination, Spin, Modal, Descriptions, Button } from 'antd';
 import { SearchOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { developerApi } from '../../../services/api';
@@ -32,6 +33,7 @@ interface FullDevLog extends DevLogEntry {
 }
 
 export default function DevLogsPage() {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selected, setSelected] = useState<FullDevLog | null>(null);
   const { data, total, page, pageSize, loading, setPage, setPageSize, setFilters } =
@@ -116,13 +118,38 @@ export default function DevLogsPage() {
   return (
     <div className="spring-up">
       <PageHeader 
-        title="DevCore: App Stream" 
+        title="Error Logs" 
         subtitle={[
           "Real-time application health and error tracking.",
           "Analyzing request throughput and endpoint latency.",
           "Monitoring exception patterns across the cluster."
         ]}
         rotateSubtitle
+        extra={
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Button 
+              icon={<SearchOutlined />} 
+              onClick={() => setFilters({})}
+              style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
+            >
+              Reset Filters
+            </Button>
+            <Button 
+              type="primary" 
+              icon={<InfoCircleOutlined />} 
+              onClick={() => navigate('/developer/system-logs')}
+              style={{ 
+                borderRadius: 'var(--radius-full)', 
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+                border: 'none',
+                boxShadow: '0 4px 12px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
+              }}
+            >
+              System Health
+            </Button>
+          </div>
+        }
       />
       
       <div style={{ 
@@ -132,29 +159,31 @@ export default function DevLogsPage() {
         flexWrap: 'wrap', 
         alignItems: 'center',
         background: 'var(--bg-surface)',
-        padding: '16px 24px',
-        borderRadius: 'var(--radius-lg)',
+        padding: '12px 20px',
+        borderRadius: 'var(--radius-full)',
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-sm)'
       }}>
         <Input
           placeholder="Filter by endpoint path (e.g. /api/events)..."
           prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
+          variant="borderless"
           allowClear
           onChange={(e) => setFilters({ path: e.target.value || undefined })}
-          style={{ flex: 1, minWidth: 260, height: 44, borderRadius: 'var(--radius-full)', border: '1px solid var(--border)', paddingLeft: 16 }}
+          style={{ flex: 1, minWidth: 260, height: 32, fontSize: 13 }}
         />
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ width: 1, height: 24, background: 'var(--border)', margin: '0 8px' }} />
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {['Info', 'Warning', 'Error', 'Critical'].map(level => (
             <div 
               key={level}
               onClick={() => setFilters({ severity: level as DevLogParams['severity'] })}
               style={{
-                padding: '8px 20px',
+                padding: '6px 14px',
                 borderRadius: 'var(--radius-full)',
                 background: 'var(--bg-soft)',
                 border: '1px solid var(--border)',
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: 600,
                 color: level === 'Error' || level === 'Critical' ? 'var(--accent-rose)' : 'var(--text-secondary)',
                 cursor: 'pointer',
@@ -277,10 +306,10 @@ export default function DevLogsPage() {
         {selected && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <Descriptions column={isMobile ? 1 : 2} size="small" bordered items={[
-              { label: 'Timestamp', span: 2, children: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{formatTs(selected.timestamp)}</span> },
+              { label: 'Timestamp', span: isMobile ? 1 : 2, children: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{formatTs(selected.timestamp)}</span> },
               { label: 'Level', children: <Tag color={severityColors[selected.severity] + '15'} style={{ color: severityColors[selected.severity], borderColor: severityColors[selected.severity] + '30', fontWeight: 700 }}>{selected.severity}</Tag> },
               { label: 'HTTP Status', children: <span style={{ fontWeight: 700, color: (selected.statusCode && selected.statusCode >= 400) ? 'var(--accent-rose)' : 'inherit' }}>{selected.statusCode ?? 'N/A'}</span> },
-              { label: 'API Endpoint', span: 2, children: <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--primary)', wordBreak: 'break-all' }}>({selected.method}) {selected.path ?? 'System Internal'}</span> },
+              { label: 'API Endpoint', span: isMobile ? 1 : 2, children: <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--primary)', wordBreak: 'break-all' }}>({selected.method}) {selected.path ?? 'System Internal'}</span> },
               { label: 'Origin IP', children: selected.ipAddress ?? 'Hidden' },
               { label: 'Execution User', children: selected.userId ? <span style={{ fontFamily: 'monospace' }}>{selected.userId}</span> : 'Anonymous' },
             ]} />

@@ -6,8 +6,7 @@ import {
   BgColorsOutlined, 
   CoffeeOutlined, 
   BankOutlined, 
-  TrophyOutlined, 
-  AppstoreOutlined,
+  TrophyOutlined,
   CalendarOutlined
 } from '@ant-design/icons';
 

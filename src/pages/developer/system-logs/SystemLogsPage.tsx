@@ -123,8 +123,8 @@ export default function SystemLogsPage() {
 
   return (
     <div className="spring-up">
-      <PageHeader 
-        title="DevCore: System Pulse" 
+      <PageHeader
+        title="System Update"
         subtitle={[
           "Audit trail and system events across all nodes.",
           "Monitoring API latency and background worker health.",
@@ -160,11 +160,11 @@ export default function SystemLogsPage() {
         </HumanCard>
       </div>
 
-      <div style={{ 
-        display: 'flex', 
-        gap: 16, 
-        marginBottom: 32, 
-        flexWrap: 'wrap', 
+      <div style={{
+        display: 'flex',
+        gap: 16,
+        marginBottom: 32,
+        flexWrap: 'wrap',
         alignItems: 'center',
         background: 'var(--bg-surface)',
         padding: '16px 24px',
@@ -207,11 +207,11 @@ export default function SystemLogsPage() {
                 style={{ padding: '16px', borderLeft: `4px solid ${log.category === 'BackgroundWorker' ? 'var(--accent-rose)' : 'var(--border)'}` }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                  <div style={{ 
-                    padding: '2px 8px', 
-                    borderRadius: 4, 
-                    background: 'var(--bg-soft)', 
-                    fontSize: 10, 
+                  <div style={{
+                    padding: '2px 8px',
+                    borderRadius: 4,
+                    background: 'var(--bg-soft)',
+                    fontSize: 10,
                     fontWeight: 700,
                     color: 'var(--text-muted)',
                     textTransform: 'uppercase'

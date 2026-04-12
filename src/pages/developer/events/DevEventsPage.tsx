@@ -8,6 +8,8 @@ import { formatEventDate } from '../../../utils/date';
 import type { DevEventListItem, EventFeeInfo } from '../../../services/developerApi';
 import type { PagedResponse } from '../../../types/shared';
 import PageHeader from '../../../components/shared/PageHeader';
+import HumanCard from '../../../components/shared/HumanCard';
+import EmptyState from '../../../components/shared/EmptyState';
 
 function getStatusColor(status: string): string {
   switch (status) {
@@ -78,68 +80,105 @@ export default function DevEventsPage() {
   ];
 
   return (
-    <div>
-      <PageHeader title="Platform Fees" subtitle="Manage per-event platform fees" />
-
-      <Input
-        placeholder="Search events..."
-        prefix={<SearchOutlined />}
-        allowClear
-        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-        style={{ maxWidth: 300, width: '100%', marginBottom: 16 }}
+    <div className="spring-up">
+      <PageHeader 
+        title="Revenue & Fees" 
+        subtitle={[
+          "Per-event platform commission and table surcharges.",
+          "Overriding global defaults for special venue partnerships.",
+          "Analyzing fee absorption across high-velocity events."
+        ]}
+        rotateSubtitle
       />
+
+      <div style={{ 
+        display: 'flex', 
+        gap: 16, 
+        marginBottom: 32, 
+        flexWrap: 'wrap', 
+        alignItems: 'center',
+        background: 'var(--bg-surface)',
+        padding: '12px 20px',
+        borderRadius: 'var(--radius-full)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <Input
+          placeholder="Search events by title..."
+          prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
+          variant="borderless"
+          allowClear
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          style={{ flex: 1, minWidth: 260, height: 32, fontSize: 13 }}
+        />
+        <div style={{ width: 1, height: 24, background: 'var(--border)', margin: '0 8px' }} />
+        <div style={{ display: 'flex', gap: 8 }}>
+            <Tag color="purple" style={{ borderRadius: 6, fontWeight: 700, margin: 0 }}>All Events</Tag>
+            <Tag color="default" style={{ borderRadius: 6, fontWeight: 700, margin: 0 }}>Has Custom Fee</Tag>
+        </div>
+      </div>
 
       {isMobile ? (
         <Spin spinning={loading}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {events.map((ev) => (
-              <Card
+              <HumanCard
                 key={ev.id}
-                size="small"
-                styles={{ body: { padding: 12 } }}
-                style={{ cursor: 'pointer' }}
+                className="human-noise"
                 onClick={() => setSelectedEventId(ev.id)}
+                style={{ cursor: 'pointer', padding: 16 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 8 }}>
-                    {ev.title}
-                  </span>
-                  <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-                    <Tag color={getStatusColor(ev.status)} style={{ margin: 0 }}>{ev.status}</Tag>
-                    <Tag color={ev.layoutMode === 'Open' ? 'blue' : 'purple'} style={{ margin: 0 }}>{ev.layoutMode}</Tag>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{ev.title}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>{formatEventDate(ev.startDate)}</div>
+                  </div>
+                  <Tag color={getStatusColor(ev.status)} style={{ margin: 0, borderRadius: 6, fontWeight: 700, fontSize: 10, textTransform: 'uppercase' }}>
+                    {ev.status}
+                  </Tag>
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-soft)', padding: 12, borderRadius: 12, border: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Tag color={ev.layoutMode === 'Open' ? 'blue' : 'purple'} style={{ margin: 0, borderRadius: 4, fontWeight: 700, fontSize: 10 }}>{ev.layoutMode}</Tag>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>Mode</span>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fee</div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: ev.platformFeeCents !== null ? 'var(--primary)' : 'var(--text-muted)' }}>
+                      {ev.platformFeeCents !== null ? centsToUSD(ev.platformFeeCents) : 'Auto'}
+                    </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)' }}>
-                  <span>{formatEventDate(ev.startDate)}</span>
-                  <span style={{ fontWeight: 500, color: ev.platformFeeCents !== null ? 'var(--text-primary)' : 'var(--text-muted)' }}>
-                    {ev.platformFeeCents !== null ? centsToUSD(ev.platformFeeCents) : 'Default'}
-                  </span>
-                </div>
-              </Card>
+              </HumanCard>
             ))}
             {events.length === 0 && !loading && (
-              <div style={{ textAlign: 'center', padding: 32, color: 'var(--text-muted)' }}>No events</div>
+              <EmptyState title="No events found" description="Application event stream is quiet." actionLabel="Clear Search" onAction={() => { setSearch(''); setPage(1); }} />
             )}
           </div>
-          <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
-            <Pagination current={page} pageSize={20} total={total} size="small" onChange={setPage} />
+          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
+            <Pagination current={page} pageSize={20} total={total} size="small" onChange={setPage} className="human-pagination" />
           </div>
         </Spin>
       ) : (
-        <div className="responsive-table">
-          <Table
-            dataSource={events}
-            columns={columns}
-            rowKey="id"
-            loading={loading}
-            size="small"
-            scroll={{ x: 700 }}
-            pagination={{
-              current: page, pageSize: 20, total,
-              onChange: setPage,
-            }}
-          />
-        </div>
+        <HumanCard>
+          <div className="responsive-table">
+            <Table
+              dataSource={events}
+              columns={columns}
+              rowKey="id"
+              loading={loading}
+              size="middle"
+              scroll={{ x: 700 }}
+              pagination={{
+                current: page, pageSize: 20, total,
+                onChange: setPage,
+                className: 'human-pagination'
+              }}
+              onRow={(record) => ({ onClick: () => setSelectedEventId(record.id), style: { cursor: 'pointer' } })}
+            />
+          </div>
+        </HumanCard>
       )}
 
       {selectedEventId && (

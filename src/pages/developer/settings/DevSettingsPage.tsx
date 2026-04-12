@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Card, List, Input, Button, App } from 'antd';
+import { List, Input, Button, App, Tag } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import { developerApi, imagesApi } from '../../../services/api';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import type { AppSetting } from '../../../services/developerApi';
 import PageHeader from '../../../components/shared/PageHeader';
+import HumanCard from '../../../components/shared/HumanCard';
+import PulseIndicator from '../../../components/shared/PulseIndicator';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import AvatarUpload from '../../../components/shared/AvatarUpload';
 
@@ -82,75 +84,151 @@ export default function DevSettingsPage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div>
-      <PageHeader title="Developer Settings" subtitle="Application configuration" />
-      <Card style={{ marginBottom: 16 }}>
-        <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 12 }}>Company Logo</div>
-        <AvatarUpload
-          currentUrl={logoUrl}
-          size={80}
-          shape="square"
-          onUpload={async (file) => {
-            const { data } = await imagesApi.uploadLogo(file);
-            setLogoUrl(data.url);
-            return data.url;
-          }}
-        />
-        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-          Used in emails, public pages, and branding. Only developers can change this.
-        </div>
-      </Card>
+    <div className="spring-up">
+      <PageHeader 
+        title="Global Settings" 
+        subtitle={[
+          "Global application configuration and security protocols.",
+          "Changes propagate across all environment nodes immediately.",
+          "Security alert: Ensure API keys are rotated every 90 days."
+        ]}
+        rotateSubtitle
+      />
+      
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(400px, 1fr))', gap: 24, marginBottom: 48 }}>
+        <HumanCard 
+          title="Branding Context" 
+          subtitle="Platform identification and assets"
+          className="human-noise"
+        >
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: isMobile ? 'flex-start' : 'center', 
+            gap: 24, 
+            marginBottom: 16 
+          }}>
+            <AvatarUpload
+              currentUrl={logoUrl}
+              size={isMobile ? 120 : 100}
+              shape="square"
+              onUpload={async (file) => {
+                const { data } = await imagesApi.uploadLogo(file);
+                setLogoUrl(data.url);
+                return data.url;
+              }}
+            />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>Platform Logo</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                Updating this asset will refresh the branding on all emails, public booking routes, and the developer console.
+              </div>
+            </div>
+          </div>
+        </HumanCard>
 
-      <Card styles={isMobile ? { body: { padding: '8px 12px' } } : undefined}>
+        <HumanCard 
+          title="Infrastructure Security" 
+          subtitle="Real-time connectivity and secrets"
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-soft)', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <PulseIndicator status="success" size={6} />
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>JWT Middleware</span>
+              </div>
+              <Tag color="success" style={{ margin: 0, borderRadius: 6, fontWeight: 700, fontSize: 10, textTransform: 'uppercase' }}>Active</Tag>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-soft)', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <PulseIndicator status="success" size={6} />
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Stripe Gateway</span>
+              </div>
+              <Tag color="success" style={{ margin: 0, borderRadius: 6, fontWeight: 700, fontSize: 10, textTransform: 'uppercase' }}>Verified</Tag>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-soft)', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <PulseIndicator status="warning" size={6} />
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>SMTP Node</span>
+              </div>
+              <Tag color="warning" style={{ margin: 0, borderRadius: 6, fontWeight: 700, fontSize: 10, textTransform: 'uppercase' }}>Sandbox</Tag>
+            </div>
+          </div>
+        </HumanCard>
+      </div>
+
+      <HumanCard title="System Variables" subtitle="Application state registry">
         <List
           className="responsive-list"
           dataSource={settings}
           renderItem={(item) => {
             const isSensitive = SENSITIVE_KEYS.has(item.key);
             return (
-              <List.Item style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, padding: '12px 0' }}>
-                <div>
-                  <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{item.key}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    {item.description ?? 'No description'}
-                    {isSensitive && item.value && item.value !== 'MOCK_DEV' && (
-                      <span style={{ marginLeft: 8, fontFamily: 'monospace' }}>Current: {item.value}</span>
-                    )}
+              <List.Item style={{ flexDirection: 'column', alignItems: 'stretch', gap: 16, padding: '24px 0', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--text-primary)', wordBreak: 'break-all', fontFamily: 'monospace', letterSpacing: '-0.02em' }}>{item.key}</div>
+                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
+                      {item.description ?? 'System-generated environment variable.'}
+                    </div>
                   </div>
+                  {isSensitive && (
+                     <Tag color="gold" style={{ borderRadius: 6, fontSize: 10, fontWeight: 800, textTransform: 'uppercase', margin: 0 }}>Protected</Tag>
+                  )}
                 </div>
-                <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+                
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: 12, 
+                  width: '100%', 
+                  alignItems: isMobile ? 'stretch' : 'center' 
+                }}>
                   {isSensitive ? (
                     <Input.Password
                       value={editValues[item.key] ?? ''}
-                      placeholder="Enter new value"
-                      size="middle"
-                      style={{ flex: 1 }}
+                      placeholder="Input new secret value..."
+                      size="large"
+                      style={{ flex: 1, borderRadius: 12, background: 'var(--bg-soft)' }}
                       onChange={(e) => handleChange(item.key, e.target.value)}
                     />
                   ) : (
                     <Input
                       value={editValues[item.key] ?? ''}
-                      size="middle"
-                      style={{ flex: 1 }}
+                      size="large"
+                      style={{ flex: 1, borderRadius: 12, background: 'var(--bg-soft)' }}
                       onChange={(e) => handleChange(item.key, e.target.value)}
                     />
                   )}
                   <Button
                     type="primary"
-                    size="small"
                     icon={<SaveOutlined />}
                     loading={savingKey === item.key}
                     onClick={() => handleSave(item.key)}
                     disabled={!dirty[item.key] || !editValues[item.key]}
+                    style={{ 
+                      borderRadius: 12, 
+                      height: 44, 
+                      padding: '0 24px', 
+                      fontWeight: 700,
+                      background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+                      border: 'none',
+                      width: isMobile ? '100%' : 'auto'
+                    }}
                   >
-                    Save
+                    Update
                   </Button>
                 </div>
+                {isSensitive && item.value && item.value !== 'MOCK_DEV' && (
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', background: 'var(--bg-soft)', padding: '6px 16px', borderRadius: 8, display: 'inline-block', border: '1px solid var(--border)', fontWeight: 600 }}>
+                    Active Mask: <span style={{ fontFamily: 'monospace', color: 'var(--text-primary)' }}>{item.value}</span>
+                  </div>
+                )}
               </List.Item>
             );
           }}
         />
-      </Card>
+      </HumanCard>
     </div>
   );
 }

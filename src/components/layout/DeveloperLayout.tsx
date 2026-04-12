@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Layout, Menu, Typography, Button, Dropdown, Space, Tag } from 'antd';
+import { Layout, Menu, Typography, Button, Dropdown, Space } from 'antd';
 import {
   CodeOutlined,
   MailOutlined,
@@ -9,10 +9,9 @@ import {
   TeamOutlined,
   CalendarOutlined,
   LogoutOutlined,
-  GlobalOutlined,
-  ThunderboltOutlined,
   RocketOutlined,
   EyeOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '../../hooks/useAuth';
@@ -21,14 +20,31 @@ import PulseIndicator from '../shared/PulseIndicator';
 
 const { Sider, Header, Content } = Layout;
 
-const navItems = [
-  { key: '/developer', shortLabel: 'Logs', label: 'App Logs', icon: <CodeOutlined /> },
-  { key: '/developer/email-logs', shortLabel: 'Email', label: 'Email Delivery', icon: <MailOutlined /> },
-  { key: '/developer/system-logs', shortLabel: 'System', label: 'System Health', icon: <FileTextOutlined /> },
-  { key: '/developer/settings', shortLabel: 'Settings', label: 'Global Settings', icon: <SettingOutlined /> },
-  { key: '/developer/users', shortLabel: 'Users', label: 'User Roles', icon: <TeamOutlined /> },
-  { key: '/developer/events', shortLabel: 'Fees', label: 'Platform Fees', icon: <CalendarOutlined /> },
+const navGroups = [
+  {
+    title: 'Monitoring',
+    items: [
+      { key: '/developer', shortLabel: 'Logs', label: 'Error Logs', icon: <CodeOutlined /> },
+      { key: '/developer/email-logs', shortLabel: 'Email', label: 'Email Delivery', icon: <MailOutlined /> },
+      { key: '/developer/system-logs', shortLabel: 'System', label: 'System Health', icon: <FileTextOutlined /> },
+    ]
+  },
+  {
+    title: 'Governance',
+    items: [
+      { key: '/developer/users', shortLabel: 'Users', label: 'User Roles', icon: <TeamOutlined /> },
+      { key: '/developer/events', shortLabel: 'Fees', label: 'Platform Fees', icon: <CalendarOutlined /> },
+    ]
+  },
+  {
+    title: 'Configuration',
+    items: [
+      { key: '/developer/settings', shortLabel: 'Settings', label: 'Global Settings', icon: <SettingOutlined /> },
+    ]
+  }
 ];
+
+const navItems = navGroups.flatMap(g => g.items);
 
 type Breakpoint = 'mobile' | 'tablet' | 'desktop';
 
@@ -67,62 +83,28 @@ export default function DeveloperLayout() {
     { key: 'home', label: 'View Site', icon: <EyeOutlined />, onClick: () => navigate('/') },
     { key: 'admin', label: 'Admin Panel', icon: <SettingOutlined />, onClick: () => navigate('/admin') },
     { type: 'divider' as const },
+    { key: 'profile', label: 'Profile', icon: <UserOutlined />, onClick: () => navigate('/profile') },
+    { type: 'divider' as const },
     { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, onClick: logout },
   ];
 
-  const menuItems = navItems.map((item) => {
-    const active = location.pathname === item.key || (item.key !== '/developer' && location.pathname.startsWith(item.key));
-    return {
-      key: item.key,
-      icon: (
-        <span style={{ 
-          fontSize: 18, 
-          color: active ? 'var(--primary)' : 'var(--text-secondary)',
-          transition: 'all 0.3s ease',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 24,
-          height: 24,
-          borderRadius: 'var(--radius-sm)',
-          background: active ? 'var(--primary-soft)' : 'transparent'
-        }}>
-          {item.icon}
-        </span>
-      ),
-      label: (
-        <Link 
-          to={item.key} 
-          style={{ 
-            fontWeight: active ? 600 : 500, 
-            color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
-            fontSize: 14,
-            paddingLeft: 4
-          }}
-        >
-          {item.label}
-        </Link>
-      ),
-    };
-  });
-
   const siderContent = (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '24px 12px' }}>
-      <div style={{ 
-        padding: collapsed ? '0' : '0 12px', 
-        marginBottom: 32, 
-        display: 'flex', 
-        alignItems: 'center', 
+      <div style={{
+        padding: collapsed ? '0' : '0 12px',
+        marginBottom: 32,
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: collapsed ? 'center' : 'flex-start',
-        gap: 10 
+        gap: 10
       }}>
-        <div style={{ 
-          width: 32, 
-          height: 32, 
-          background: 'var(--primary)', 
-          borderRadius: 8, 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          width: 32,
+          height: 32,
+          background: 'var(--primary)',
+          borderRadius: 8,
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'center',
           color: 'white',
           fontSize: 18,
@@ -132,45 +114,119 @@ export default function DeveloperLayout() {
         </div>
         {!collapsed && (
           <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', fontFamily: "'Playfair Display', serif" }}>
-            DevCore
+            Developer
           </span>
         )}
       </div>
 
-      <div style={{ flex: 1 }}>
-        <Menu
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          items={menuItems}
-          inlineCollapsed={collapsed}
-          style={{ 
-            background: 'transparent', 
-            borderRight: 'none',
-          }}
-          className="human-side-menu"
-        />
+      <div style={{ flex: 1, overflowY: 'auto', margin: '0 -4px', padding: '0 4px' }}>
+        {navGroups.map((group, idx) => (
+          <div key={group.title} style={{ marginBottom: idx === navGroups.length - 1 ? 0 : 24 }}>
+            {!collapsed && (
+              <div style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                padding: '0 16px',
+                marginBottom: 12
+              }}>
+                {group.title}
+              </div>
+            )}
+            <Menu
+              mode="inline"
+              selectedKeys={[location.pathname]}
+              items={group.items.map(item => {
+                const active = location.pathname === item.key || (item.key !== '/developer' && location.pathname.startsWith(item.key));
+                return {
+                  key: item.key,
+                  icon: (
+                    <span style={{
+                      fontSize: 18,
+                      color: active ? 'var(--primary)' : 'var(--text-secondary)',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 24,
+                      height: 24,
+                      borderRadius: 'var(--radius-sm)',
+                      background: active ? 'var(--primary-soft)' : 'transparent'
+                    }}>
+                      {item.icon}
+                    </span>
+                  ),
+                  label: (
+                    <Link
+                      to={item.key}
+                      style={{
+                        fontWeight: active ? 600 : 500,
+                        color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
+                        fontSize: 14,
+                        paddingLeft: 4
+                      }}
+                    >
+                      {item.label}
+                    </Link>
+                  ),
+                };
+              })}
+              inlineCollapsed={collapsed}
+              style={{
+                background: 'transparent',
+                borderRight: 'none',
+              }}
+              className="human-side-menu"
+            />
+          </div>
+        ))}
       </div>
 
-      <div style={{ 
-        marginTop: 'auto', 
-        padding: '16px 8px', 
-        background: 'var(--bg-soft)', 
+      <div style={{
+        marginTop: 'auto',
+        padding: '12px',
+        background: 'var(--bg-soft)',
         borderRadius: 'var(--radius-md)',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        gap: 12
+        gap: 16,
+        border: '1px solid var(--border)'
       }}>
         {!collapsed && user && (
-          <div style={{ textAlign: 'center', width: '100%' }}>
-            <Typography.Text ellipsis style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, display: 'block' }}>
-              {user.firstName} {user.lastName}
-            </Typography.Text>
-            <Tag color="orange" style={{ fontSize: 10, margin: '4px 0 0 0', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Developer
-            </Tag>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px' }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: '50%', background: 'var(--primary)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700
+            }}>
+              {user.firstName?.[0]}
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <Typography.Text ellipsis style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 700, display: 'block', lineHeight: 1.2 }}>
+                {user.firstName} {user.lastName}
+              </Typography.Text>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>Developer</span>
+                <div style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--border)' }} />
+                <Link to="/admin" style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 600 }}>
+                  Admin View
+                </Link>
+              </div>
+            </div>
           </div>
         )}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: collapsed ? '0' : '0 4px' }}>
+          {!collapsed && (
+            <Button
+              type="text"
+              size="small"
+              icon={<LogoutOutlined />}
+              onClick={logout}
+              style={{ color: 'var(--text-muted)' }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -202,7 +258,7 @@ export default function DeveloperLayout() {
       {/* Mobile Bottom Nav */}
       {isMobile && (
         <nav className="mobile-bottom-nav">
-          {navItems.slice(0, 5).map((item) => {
+          {navItems.slice(0, 6).map((item) => {
             const active = location.pathname === item.key;
             return (
               <Link
@@ -221,8 +277,8 @@ export default function DeveloperLayout() {
                   flex: 1
                 }}
               >
-                <span style={{ 
-                  fontSize: 20, 
+                <span style={{
+                  fontSize: 20,
                   background: active ? 'var(--primary-soft)' : 'transparent',
                   padding: '4px 12px',
                   borderRadius: 12,
@@ -258,66 +314,42 @@ export default function DeveloperLayout() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {isMobile && (
-               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                 <div style={{ width: 24, height: 24, background: 'var(--primary)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14 }}>✦</div>
-                 <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', fontFamily: "'Playfair Display', serif" }}>DevCore</span>
-               </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 24, height: 24, background: 'var(--primary)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14 }}>✦</div>
+                <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', fontFamily: "'Playfair Display', serif" }}>Developer</span>
+              </div>
             )}
-           {!isMobile && (
-             <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                   <PulseIndicator status="success" size={6} />
-                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>API</span>
-                 </div>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                   <PulseIndicator status="success" size={6} />
-                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Worker</span>
-                 </div>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                   <PulseIndicator status="success" size={6} />
-                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Email</span>
-                 </div>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                   <PulseIndicator status="warning" size={6} />
-                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Storage</span>
-                 </div>
-               </div>
-               
-               <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
-               
-               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                 <div style={{ 
-                   padding: '4px 12px', 
-                   background: 'var(--bg-soft)', 
-                   borderRadius: 99, 
-                   border: '1px solid var(--border)',
-                   display: 'flex',
-                   alignItems: 'center',
-                   gap: 8,
-                   cursor: 'pointer'
-                 }}>
-                   <GlobalOutlined style={{ fontSize: 14, color: 'var(--primary)' }} />
-                   <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>Production</span>
-                 </div>
-                 <div style={{ 
-                   padding: '4px 12px', 
-                   background: 'var(--bg-surface)', 
-                   borderRadius: 99, 
-                   border: '1px solid var(--border)',
-                   display: 'flex',
-                   alignItems: 'center',
-                   gap: 8,
-                   cursor: 'pointer'
-                 }}>
-                   <ThunderboltOutlined style={{ fontSize: 14, color: 'var(--accent-gold)' }} />
-                   <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Last 24h</span>
-                 </div>
-               </div>
-             </div>
-           )}
+            {!isMobile && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <Typography.Text style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 700, lineHeight: 1.2 }}>
+                    Welcome back, {user?.firstName}
+                  </Typography.Text>
+                  <Typography.Text style={{ color: 'var(--text-secondary)', fontSize: 12, fontWeight: 500 }}>
+                    Developer Console is ready. System load optimal.
+                  </Typography.Text>
+                </div>
+
+                <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <PulseIndicator status="success" size={6} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>API</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <PulseIndicator status="success" size={6} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>Worker</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <PulseIndicator status="warning" size={6} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>Storage</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          
+
           <Space size={16}>
             {!isMobile && (
               <Button
@@ -341,7 +373,7 @@ export default function DeveloperLayout() {
                 Live Experience
               </Button>
             )}
-            <ThemeToggle 
+            <ThemeToggle
               className="hover-lift"
               style={{
                 border: '1px solid var(--border)',
@@ -365,13 +397,13 @@ export default function DeveloperLayout() {
                 }}
                 className="hover-lift"
               >
-                <div style={{ 
-                  width: 24, 
-                  height: 24, 
-                  borderRadius: '50%', 
-                  background: 'var(--primary)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <div style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  background: 'var(--primary)',
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
                   fontSize: 11

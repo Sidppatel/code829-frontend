@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Select, Input, Card, Tag, Pagination, Spin, App } from 'antd';
+import { Table, Select, Input, Tag, Pagination, Spin, App } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { developerApi } from '../../../services/api';
 import { useIsMobile } from '../../../hooks/useIsMobile';
@@ -7,6 +7,8 @@ import { useAuth } from '../../../hooks/useAuth';
 import { formatEventDate } from '../../../utils/date';
 import type { DevUser } from '../../../services/developerApi';
 import PageHeader from '../../../components/shared/PageHeader';
+import HumanCard from '../../../components/shared/HumanCard';
+import EmptyState from '../../../components/shared/EmptyState';
 
 const allRoles = ['User', 'Staff', 'Admin', 'Developer'];
 
@@ -91,33 +93,74 @@ export default function DevUsersPage() {
   ];
 
   return (
-    <div>
-      <PageHeader title="Users" subtitle={`${total} registered users`} />
-
-      <Input
-        placeholder="Search by name or email..."
-        prefix={<SearchOutlined />}
-        allowClear
-        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-        style={{ maxWidth: 300, width: '100%', marginBottom: 16 }}
+    <div className="spring-up">
+      <PageHeader
+        title="User Management"
+        subtitle={[
+          `${total} authenticated users across all environments.`,
+          "Review and adjust permission scopes below.",
+          "High volume of new sign-ups detected this morning."
+        ]}
+        rotateSubtitle
       />
+
+      <div style={{
+        display: 'flex',
+        gap: 16,
+        marginBottom: 32,
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        background: 'var(--bg-surface)',
+        padding: '12px 20px',
+        borderRadius: 'var(--radius-full)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <Input
+          placeholder="Search by name or email..."
+          prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
+          variant="borderless"
+          allowClear
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          style={{ flex: 1, minWidth: 260, height: 32, fontSize: 13 }}
+        />
+        <div style={{ width: 1, height: 24, background: 'var(--border)', margin: '0 8px' }} />
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Tag color="blue" style={{ borderRadius: 6, fontWeight: 700, margin: 0 }}>All Roles</Tag>
+          <Tag color="default" style={{ borderRadius: 6, fontWeight: 700, margin: 0 }}>Active Only</Tag>
+        </div>
+      </div>
 
       {isMobile ? (
         <Spin spinning={loading}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {users.map((u) => (
-              <Card key={u.id} size="small" styles={{ body: { padding: 12 } }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>
-                    {u.firstName} {u.lastName}
-                  </span>
-                  <Tag color={getRoleColor(u.role)} style={{ margin: 0 }}>{u.role}</Tag>
+              <HumanCard key={u.id} className="human-noise" style={{ padding: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: '50%', background: 'var(--primary-soft)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 700, fontSize: 12
+                    }}>
+                      {u.firstName?.[0]}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {u.firstName} {u.lastName}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>{u.email}</div>
+                    </div>
+                  </div>
+                  <Tag color={getRoleColor(u.role)} style={{ margin: 0, borderRadius: 6, fontWeight: 700, fontSize: 10, textTransform: 'uppercase' }}>
+                    {u.role}
+                  </Tag>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {u.email}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatEventDate(u.createdAt)}</span>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-soft)', padding: 12, borderRadius: 12, border: '1px solid var(--border)' }}>
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 2 }}>Joined</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>{formatEventDate(u.createdAt)}</div>
+                  </div>
                   {u.role !== 'Developer' && (
                     <Select
                       value={u.role}
@@ -129,35 +172,39 @@ export default function DevUsersPage() {
                     />
                   )}
                 </div>
-              </Card>
+              </HumanCard>
             ))}
             {users.length === 0 && !loading && (
-              <div style={{ textAlign: 'center', padding: 32, color: 'var(--text-muted)' }}>No users found</div>
+              <EmptyState title="No users found" description="Try refining your search terms." actionLabel="Reset Search" onAction={() => { setSearch(''); setPage(1); }} />
             )}
           </div>
-          <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
+          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
             <Pagination
               current={page} pageSize={pageSize} total={total} size="small"
               onChange={(p, ps) => { setPage(p); setPageSize(ps); }}
+              className="human-pagination"
             />
           </div>
         </Spin>
       ) : (
-        <div className="responsive-table">
-          <Table
-            dataSource={users}
-            columns={columns}
-            rowKey="id"
-            loading={loading}
-            size="small"
-            scroll={{ x: 600 }}
-            pagination={{
-              current: page, pageSize, total,
-              onChange: (p, ps) => { setPage(p); setPageSize(ps); },
-              showSizeChanger: true,
-            }}
-          />
-        </div>
+        <HumanCard>
+          <div className="responsive-table">
+            <Table
+              dataSource={users}
+              columns={columns}
+              rowKey="id"
+              loading={loading}
+              size="middle"
+              scroll={{ x: 600 }}
+              pagination={{
+                current: page, pageSize, total,
+                onChange: (p, ps) => { setPage(p); setPageSize(ps); },
+                showSizeChanger: true,
+                className: 'human-pagination'
+              }}
+            />
+          </div>
+        </HumanCard>
       )}
     </div>
   );

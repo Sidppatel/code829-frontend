@@ -44,9 +44,9 @@ export default function EmailLogsPage() {
   useEffect(() => { void load(); }, [load]);
 
   const columns = [
-    { 
-      title: 'Recipient', 
-      dataIndex: 'recipient', 
+    {
+      title: 'Recipient',
+      dataIndex: 'recipient',
       key: 'recipient',
       render: (v: string) => <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{v}</span>
     },
@@ -54,10 +54,10 @@ export default function EmailLogsPage() {
     {
       title: 'Status', dataIndex: 'status', key: 'status',
       render: (s: string) => (
-        <Tag 
-          color={statusColors[s] + '15'} 
-          style={{ 
-            color: statusColors[s], 
+        <Tag
+          color={statusColors[s] + '15'}
+          style={{
+            color: statusColors[s],
             borderColor: statusColors[s] + '30',
             fontWeight: 700,
             borderRadius: 6,
@@ -81,8 +81,8 @@ export default function EmailLogsPage() {
 
   return (
     <div className="spring-up">
-      <PageHeader 
-        title="DevCore: Dispatch Pipeline" 
+      <PageHeader
+        title="Email Logs"
         subtitle={[
           "Comprehensive audit trail for platform notifications.",
           "Monitoring email deliverability and latency in real-time.",
@@ -117,12 +117,12 @@ export default function EmailLogsPage() {
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>Last 24 hours</div>
         </HumanCard>
       </div>
-      
-      <div style={{ 
-        display: 'flex', 
-        gap: 16, 
-        marginBottom: 32, 
-        flexWrap: 'wrap', 
+
+      <div style={{
+        display: 'flex',
+        gap: 16,
+        marginBottom: 32,
+        flexWrap: 'wrap',
         alignItems: 'center',
         background: 'var(--bg-surface)',
         padding: '16px 24px',
@@ -151,7 +151,7 @@ export default function EmailLogsPage() {
                 key={log.id}
                 className="human-noise"
                 onClick={() => setSelected(log)}
-                style={{ 
+                style={{
                   padding: 16,
                   borderLeft: `4px solid ${statusColors[log.status]}`
                 }}
@@ -160,9 +160,9 @@ export default function EmailLogsPage() {
                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '65%' }}>
                     {log.recipient}
                   </span>
-                  <div style={{ 
-                    fontSize: 10, 
-                    fontWeight: 800, 
+                  <div style={{
+                    fontSize: 10,
+                    fontWeight: 800,
                     color: statusColors[log.status],
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em'
@@ -221,7 +221,7 @@ export default function EmailLogsPage() {
         ]}
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ 
+            <div style={{
               width: 32, height: 32, borderRadius: 8, background: (statusColors[selected?.status ?? ''] || 'var(--primary)') + '15',
               display: 'flex', alignItems: 'center', justifyContent: 'center', color: statusColors[selected?.status ?? ''] || 'var(--primary)'
             }}>
@@ -240,12 +240,12 @@ export default function EmailLogsPage() {
         {selected && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <Descriptions column={isMobile ? 1 : 2} size="small" bordered items={[
-              { label: 'To', span: 2, children: <span style={{ fontWeight: 600 }}>{selected.recipient}</span> },
-              { label: 'Subject', span: 2, children: selected.subject },
+              { label: 'To', span: isMobile ? 1 : 2, children: <span style={{ fontWeight: 600 }}>{selected.recipient}</span> },
+              { label: 'Subject', span: isMobile ? 1 : 2, children: selected.subject },
               { label: 'Delivery Status', children: <Tag color={statusColors[selected.status] + '15'} style={{ color: statusColors[selected.status], borderColor: statusColors[selected.status] + '30', fontWeight: 700 }}>{selected.status}</Tag> },
               { label: 'Timestamp', children: <span style={{ fontFamily: 'monospace' }}>{formatEventDate(selected.timestamp)}</span> },
             ]} />
-            
+
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Message Content</div>
               <div
