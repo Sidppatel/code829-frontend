@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Setup Node
-        uses: actions/setup-node@60edb5dd545a775178f3f1a0216797a65b26945f # v4.0.2
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: 22
           cache: npm
@@ -31,7 +31,7 @@ jobs:
           VITE_DEFAULT_THEME: system
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@302f3ee42a8b98f24458f237552554e207d57077 # v3.6.0
+        uses: cloudflare/wrangler-action@65240351f77618cc4d505904856f15ede9e531ef # v3.6.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
