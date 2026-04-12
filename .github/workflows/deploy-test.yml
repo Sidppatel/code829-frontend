@@ -19,6 +19,11 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_APP_NAME: Code829-Test
           VITE_DEFAULT_THEME: system
+
+      # --- ADD THIS STEP BELOW ---
+      - name: Copy Cloudflare Redirects
+        run: cp _redirects dist/ 
+
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
