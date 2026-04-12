@@ -9,16 +9,35 @@ export const onRequest: PagesFunction<any> = async (context) => {
   const pathSegments = params.path as string[];
   const targetPath = pathSegments ? pathSegments.join('/') : '';
   
-  // Use environment variable for backend URL to avoid hardcoding
+  // Use environment variable for backend URL
   const backendBaseUrl = (context.env as any).BACKEND_URL;
+  
   if (!backendBaseUrl) {
-    return new Response(JSON.stringify({ error: 'BACKEND_URL environment variable is not set in Cloudflare' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Configuration Error', 
+      message: 'BACKEND_URL is not defined in Cloudflare Pages environment variables.' 
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
   }
+
+  // Ensure backendBaseUrl has a trailing slash for reliable concatenation
+  const normalizedBase = backendBaseUrl.endsWith('/') ? backendBaseUrl : `${backendBaseUrl}/`;
   
-  const targetUrl = new URL(`${backendBaseUrl}${targetPath}${url.search}`);
+  let targetUrl: URL;
+  try {
+    targetUrl = new URL(`${normalizedBase}${targetPath}${url.search}`);
+  } catch (err) {
+    return new Response(JSON.stringify({ 
+      error: 'Invalid Configuration', 
+      message: 'Failed to construct the target URL. Please check your BACKEND_URL.',
+      details: err instanceof Error ? err.message : String(err)
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
   // Prepare the forwarded request
   const newRequest = new Request(targetUrl.toString(), {
