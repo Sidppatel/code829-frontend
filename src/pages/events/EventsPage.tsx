@@ -24,8 +24,8 @@ export default function EventsPage() {
     setLoading(true);
     try {
       const { data } = await eventsApi.list({ ...filters, page, pageSize });
-      setEvents(data.items);
-      setTotal(data.totalCount);
+      setEvents(data?.items ?? []);
+      setTotal(data?.totalCount ?? 0);
     } catch {
       message.error('Failed to load events');
     } finally {
@@ -111,7 +111,7 @@ export default function EventsPage() {
           />
         </motion.div>
 
-        {!loading && events.length > 0 && (
+        {!loading && (events?.length ?? 0) > 0 && (
           <motion.div variants={itemVariants} style={{ marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 40, height: 1, background: 'var(--border)' }} />
             <span style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
@@ -133,7 +133,7 @@ export default function EventsPage() {
               </Col>
             ))}
           </Row>
-        ) : events.length === 0 ? (
+        ) : (events?.length ?? 0) === 0 ? (
           <div style={{ padding: '100px 0' }}>
             <EmptyState description="No events found matching your current filters" />
           </div>

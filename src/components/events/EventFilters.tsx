@@ -32,7 +32,7 @@ export default function EventFilters({ facets, values, onChange }: Props) {
         onChange={(val) => onChange({ ...values, category: val })}
         allowClear
         style={{ width: '100%', maxWidth: 160 }}
-        options={facets?.categories.map((c) => ({ label: c, value: c })) ?? []}
+        options={facets?.categories?.map((c) => ({ label: c, value: c })) ?? []}
       />
       <Select
         placeholder="City"
@@ -40,7 +40,7 @@ export default function EventFilters({ facets, values, onChange }: Props) {
         onChange={(val) => onChange({ ...values, city: val })}
         allowClear
         style={{ width: '100%', maxWidth: 160 }}
-        options={facets?.cities.map((c) => ({ label: c, value: c })) ?? []}
+        options={facets?.cities?.map((c) => ({ label: c, value: c })) ?? []}
       />
       <Select
         placeholder="Date"
