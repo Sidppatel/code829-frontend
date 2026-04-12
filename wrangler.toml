@@ -3,6 +3,10 @@ compatibility_date = "2024-04-12"
 compatibility_flags = ["nodejs_compat"]
 pages_build_config = { build_command = "npm run build", destination_dir = "dist" }
 
+[assets]
+directory = "./dist"
+
+
 [vars]
 # Note: VITE_API_URL should be set as a Secret in the Cloudflare Dashboard
 # to ensure it is available for both the build process and Functions.
