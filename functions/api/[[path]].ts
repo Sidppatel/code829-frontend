@@ -59,7 +59,20 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     
     // Add CORS headers to the response from the proxy
     // This ensures the browser is happy even if the backend's CORS is strict
-    newResponse.headers.set('Access-Control-Allow-Origin', '*');
+    const origin = request.headers.get('Origin');
+    const allowedOrigins = [
+      'https://code829.com',
+      'https://www.code829.com',
+      'http://localhost:5173',
+      'http://127.0.0.1:5173'
+    ];
+    
+    let corsOrigin = 'https://code829.com';
+    if (origin && (allowedOrigins.includes(origin) || origin.endsWith('.code829.pages.dev'))) {
+      corsOrigin = origin;
+    }
+
+    newResponse.headers.set('Access-Control-Allow-Origin', corsOrigin);
     newResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     newResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -73,11 +86,24 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 };
 
 // Handle OPTIONS requests (preflight)
-export const onRequestOptions: PagesFunction<Env> = async () => {
+export const onRequestOptions: PagesFunction<Env> = async (context) => {
+  const origin = context.request.headers.get('Origin');
+  const allowedOrigins = [
+    'https://code829.com',
+    'https://www.code829.com',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+  ];
+  
+  let corsOrigin = 'https://code829.com';
+  if (origin && (allowedOrigins.includes(origin) || origin.endsWith('.code829.pages.dev'))) {
+    corsOrigin = origin;
+  }
+
   return new Response(null, {
     status: 204,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': corsOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',

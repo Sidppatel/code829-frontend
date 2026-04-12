@@ -248,20 +248,18 @@ export default function EmailLogsPage() {
 
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Message Content</div>
-              <div
+              <iframe
+                title="Email Content"
+                sandbox=""
+                srcDoc={DOMPurify.sanitize(selected.body)}
                 style={{
-                  background: 'var(--bg-soft)',
-                  borderRadius: 12,
-                  padding: '20px',
-                  fontSize: 14,
-                  overflowX: 'auto',
-                  maxHeight: 400,
-                  color: 'var(--text-primary)',
-                  border: '1px solid var(--border)',
-                  lineHeight: 1.7,
-                  fontFamily: "'Inter', sans-serif"
+                  width: '100%',
+                  height: '400px',
+                  border: 'none',
+                  background: 'white',
+                  borderRadius: '12px',
+                  padding: '4px'
                 }}
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selected.body) }}
               />
             </div>
           </div>
