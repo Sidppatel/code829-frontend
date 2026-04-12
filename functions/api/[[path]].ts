@@ -8,7 +8,17 @@ export const onRequest: PagesFunction<any> = async (context) => {
   // context.params.path is an array of path segments after /api/
   const pathSegments = params.path as string[];
   const targetPath = pathSegments ? pathSegments.join('/') : '';
-  const targetUrl = new URL(`https://code829-backend.onrender.com/${targetPath}${url.search}`);
+  
+  // Use environment variable for backend URL to avoid hardcoding
+  const backendBaseUrl = (context.env as any).BACKEND_URL;
+  if (!backendBaseUrl) {
+    return new Response(JSON.stringify({ error: 'BACKEND_URL environment variable is not set in Cloudflare' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  
+  const targetUrl = new URL(`${backendBaseUrl}${targetPath}${url.search}`);
 
   // Prepare the forwarded request
   const newRequest = new Request(targetUrl.toString(), {
