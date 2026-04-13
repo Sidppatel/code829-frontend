@@ -55,20 +55,20 @@
 
 /* Light Mode (Priority) */
 :root, html.light {
-  --bg-page:        #FDFDFE; /* Very slightly warm */
-  --bg-surface:     #FFFFFF;
-  --bg-elevated:    #FFFFFF;
-  --bg-soft:        #F8F9FB;
+  --bg-page:        #1A1A1A; /* DarkGray per request */
+  --bg-surface:     #242424;
+  --bg-elevated:    #2D2D2D;
+  --bg-soft:        #333333;
   
-  --border:         rgba(0, 0, 0, 0.06);
-  --border-strong:  rgba(0, 0, 0, 0.12);
+  --border:         rgba(255, 255, 255, 0.1);
+  --border-strong:  rgba(255, 255, 255, 0.2);
   
-  --text-primary:   #1A1D23;
-  --text-secondary: #4B5563;
-  --text-muted:     #9CA3AF;
+  --text-primary:   #FFFFFF;
+  --text-secondary: #A1A1AA;
+  --text-muted:     #71717A;
   
-  --nav-bg:         rgba(255, 255, 255, 0.85);
-  --nav-border:     rgba(0, 0, 0, 0.04);
+  --nav-bg:         rgba(26, 26, 26, 0.9);
+  --nav-border:     rgba(255, 255, 255, 0.1);
   
   --card-shadow:    var(--shadow-premium);
   --glass-bg:       rgba(255, 255, 255, 0.7);
@@ -81,10 +81,10 @@
 
 /* Dark Mode (Elegant refinement) */
 html.dark {
-  --bg-page:        #09090B;
-  --bg-surface:     #121215;
-  --bg-elevated:    #18181B;
-  --bg-soft:        #1E1E22;
+  --bg-page:        #121212;
+  --bg-surface:     #1A1A1A;
+  --bg-elevated:    #242424;
+  --bg-soft:        #2D2D2D;
   
   --border:         rgba(255, 255, 255, 0.08);
   --border-strong:  rgba(255, 255, 255, 0.15);
@@ -124,6 +124,10 @@ html, body {
   height: 100%;
   z-index: -1;
   background-color: var(--bg-page);
+  background-image: linear-gradient(to bottom, rgba(26, 26, 26, 0.8), rgba(26, 26, 26, 0.9)), url('/site-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   overflow: hidden;
   pointer-events: none;
 }
