@@ -34,20 +34,25 @@ export default function EventPricingTiersTable({ tiers, loading, layoutMode }: E
       ),
     },
     {
-      title: layoutMode === 'Grid' ? 'Capacity / Count' : 'SoldCount / Capacity',
+      title: layoutMode === 'Grid' ? 'Max Capacity' : 'Sold / Capacity',
       key: 'capacity',
-      width: 180,
+      width: 200,
       render: (_, record) => {
         if (layoutMode === 'Grid') {
           return (
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-              <strong>{record.capacity || 0}</strong> seats × <strong>{record.count}</strong> tables
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
+                {record.totalCapacity ?? 0} <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}>people</span>
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                {record.capacity || 0} seats × {record.count} tables
+              </div>
             </div>
           );
         }
         return (
           <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-            <strong>{record.soldCount || 0}</strong> / {record.capacity && record.capacity > 0 ? record.capacity : '∞'}
+            <strong>{record.soldCount || 0}</strong> / {record.totalCapacity != null && record.totalCapacity > 0 ? record.totalCapacity : '∞'}
           </div>
         );
       },

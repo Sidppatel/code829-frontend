@@ -80,6 +80,7 @@ export interface EventPricingTier {
   capacity?: number;
   count: number;
   soldCount: number;
+  totalCapacity?: number;
 }
 
 export interface EventTableTypeInfo {

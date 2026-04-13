@@ -21,17 +21,13 @@ import {
   CloseOutlined,
   LockOutlined,
   AppstoreOutlined,
-  TeamOutlined,
   DollarOutlined,
   BorderOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import { adminEventsApi } from '../../services/adminEventsApi';
-import { adminLayoutApi } from '../../services/api';
-import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatDateRange } from '@code829/shared/utils/date';
 import type { EventDetail } from '@code829/shared/types/event';
-import type { LayoutStatsResponse } from '@code829/shared/types/layout';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import EventPricingTiersTable from '../../components/events/EventPricingTiersTable';
 import HumanCard from '@code829/shared/components/shared/HumanCard';

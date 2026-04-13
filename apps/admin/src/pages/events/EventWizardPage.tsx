@@ -19,11 +19,10 @@ import {
   AppstoreOutlined,
   InfoCircleOutlined,
   TeamOutlined,
-  DollarOutlined,
   PlusOutlined,
   MinusCircleOutlined,
 } from '@ant-design/icons';
-import { Typography, Space } from 'antd';
+import { Typography } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 import {
