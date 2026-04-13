@@ -149,7 +149,8 @@ export default function EventWizardPage() {
         isFeatured: values.isFeatured ?? false,
         layoutMode,
         ticketTypes: layoutMode === 'Open' ? values.ticketTypes?.map((tt: any) => ({
-          name: tt.name,
+          id: tt.id,
+          name: Array.isArray(tt.name) ? tt.name[0] : tt.name,
           priceCents: Math.round(Number(tt.price) * 100),
           capacity: Number(tt.capacity),
           description: tt.description
