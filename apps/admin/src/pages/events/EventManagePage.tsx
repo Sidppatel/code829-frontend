@@ -23,6 +23,8 @@ import {
   AppstoreOutlined,
   TeamOutlined,
   DollarOutlined,
+  BorderOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import { adminEventsApi } from '../../services/adminEventsApi';
 import { adminLayoutApi } from '../../services/api';
@@ -31,6 +33,8 @@ import { formatDateRange } from '@code829/shared/utils/date';
 import type { EventDetail } from '@code829/shared/types/event';
 import type { LayoutStatsResponse } from '@code829/shared/types/layout';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
+import EventPricingTiersTable from '../../components/events/EventPricingTiersTable';
+import HumanCard from '@code829/shared/components/shared/HumanCard';
 
 const STATUS_MAP: Record<string, { className: string; label: string }> = {
   Draft:     { className: 'status-pill status-draft',     label: 'Draft' },
@@ -55,7 +59,6 @@ export default function EventManagePage() {
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [layoutLocked, setLayoutLocked] = useState(false);
-  const [layoutStats, setLayoutStats] = useState<LayoutStatsResponse | null>(null);
   const { message } = App.useApp();
   const navigate = useNavigate();
 
@@ -66,14 +69,10 @@ export default function EventManagePage() {
         const { data } = await adminEventsApi.getById(id);
         setEvent(data);
 
-        // Load layout lock status and stats for Grid events
+        // Load layout lock status for Grid events
         if (data.layoutMode === 'Grid') {
-          const [lockedRes, statsRes] = await Promise.all([
-            adminEventsApi.checkLayoutLocked(id),
-            adminLayoutApi.getLayoutStats(id),
-          ]);
+          const lockedRes = await adminEventsApi.checkLayoutLocked(id);
           setLayoutLocked(lockedRes.data.locked);
-          setLayoutStats(statsRes.data);
         }
       } catch {
         message.error('Failed to load event');
@@ -152,61 +151,108 @@ export default function EventManagePage() {
       </div>
 
       {/* Section 3 -- Seating & Pricing */}
-      <div className="admin-section">
-        <div className="admin-section-title"><AppstoreOutlined /> Seating & Pricing</div>
-
-        <div style={{ marginBottom: 12 }}>
-          <Tag
-            color={isGrid ? 'purple' : 'blue'}
-            style={{ fontSize: 14, padding: '4px 12px', borderRadius: 8 }}
-          >
-            {isGrid && <><AppstoreOutlined style={{ marginRight: 6 }} />Table Seating (Grid)</>}
-            {isOpen && <><TeamOutlined style={{ marginRight: 6 }} />Open Seating</>}
-          </Tag>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
+          <div style={{ 
+            width: 32, 
+            height: 32, 
+            borderRadius: 8, 
+            background: 'var(--primary-soft)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            color: 'var(--primary)'
+          }}>
+            <AppstoreOutlined />
+          </div>
+          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Seating & Pricing</h3>
         </div>
 
-        {isGrid && (
-          <Row gutter={[16, 12]}>
-            <Col xs={12} sm={8}>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>TABLES</div>
-              <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 18 }}>
-                {layoutStats?.totalTables ?? 0}
-              </div>
-            </Col>
-            <Col xs={12} sm={8}>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>TOTAL CAPACITY</div>
-              <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 18 }}>
-                {layoutStats?.totalCapacity ?? 0}
-              </div>
-            </Col>
-            <Col xs={24} sm={8}>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>POTENTIAL REVENUE</div>
-              <div style={{ fontWeight: 600, color: 'var(--accent-gold)', fontSize: 18 }}>
-                {centsToUSD(layoutStats?.totalPotentialRevenueCents ?? 0)}
-              </div>
-            </Col>
-          </Row>
-        )}
+        <HumanCard 
+          className="human-noise" 
+          style={{ padding: 24, border: '1px solid var(--border-soft)' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+            <Tag 
+              color="blue" 
+              icon={isOpen ? <UserOutlined /> : <BorderOutlined />}
+              style={{ borderRadius: 6, padding: '2px 10px', fontWeight: 600 }}
+            >
+              {isOpen ? 'Open Seating' : 'Table Seating (Grid)'}
+            </Tag>
+            {!isOpen && (
+              <Tag color="purple" style={{ borderRadius: 6, fontWeight: 600 }}>
+                {event.gridRows} × {event.gridCols} Layout
+              </Tag>
+            )}
+          </div>
 
-        {isOpen && (
-          <Row gutter={[16, 12]}>
-            <Col xs={12} sm={8}>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>MAX CAPACITY</div>
-              <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 18 }}>
-                {event.maxCapacity ?? 'N/A'}
+          <Row gutter={[24, 24]}>
+            <Col xs={24} sm={8}>
+              <div style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
+                Max Capacity
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
+                {event.maxCapacity || 'Unlimited'}
               </div>
             </Col>
-            <Col xs={12} sm={8}>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>PRICE PER PERSON</div>
-              <div style={{ fontWeight: 600, color: 'var(--accent-gold)', fontSize: 18 }}>
-                {event.pricePerPersonCents != null
-                  ? centsToUSD(event.pricePerPersonCents)
-                  : 'N/A'}
+            
+            {!isOpen && (
+              <Col xs={24} sm={8}>
+                <div style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
+                  Available Tables
+                </div>
+                <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
+                  {event.noOfAvailableTables}
+                </div>
+              </Col>
+            )}
+
+            <Col xs={24} sm={8}>
+              <div style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
+                Total Sold / Booked
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
+                {event.totalSold}
               </div>
             </Col>
           </Row>
-        )}
-      </div>
+                  {/* Pricing Tiers Breakdown */}
+                  {event.pricingTiers && event.pricingTiers.length > 0 && (
+                    <div style={{ marginTop: 32 }}>
+                      <div style={{ 
+                        color: 'var(--text-muted)', 
+                        fontSize: 11, 
+                        fontWeight: 700, 
+                        textTransform: 'uppercase', 
+                        letterSpacing: 1, 
+                        marginBottom: 16 
+                      }}>
+                        Detailed Pricing Breakdown
+                      </div>
+                      <EventPricingTiersTable 
+                        tiers={event.pricingTiers} 
+                        layoutMode={isOpen ? 'Open' : 'Grid'} 
+                      />
+                    </div>
+                  )}
+
+                  {(!event.pricingTiers || event.pricingTiers.length === 0) && (
+                    <div style={{ 
+                      marginTop: 24, 
+                      padding: '24px', 
+                      borderRadius: 12, 
+                      background: 'var(--bg-soft)', 
+                      border: '1px dashed var(--border-soft)',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+                        No pricing tiers defined. Edit event to add ticket types or place tables on the layout.
+                      </div>
+                    </div>
+                  )}
+                </HumanCard>
+              </div>
 
       {/* Layout lock warning */}
       {isGrid && layoutLocked && (

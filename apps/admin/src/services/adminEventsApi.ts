@@ -1,5 +1,5 @@
 import apiClient from '@code829/shared/lib/axios';
-import type { EventDetail } from '@code829/shared/types/event';
+import type { EventDetail, EventTicketType } from '@code829/shared/types/event';
 import type { PagedResponse } from '@code829/shared/types/shared';
 
 export interface AdminEventListParams extends Record<string, unknown> {
@@ -22,6 +22,7 @@ export interface CreateEventPayload {
   maxCapacity?: number;
   bannerImageUrl?: string;
   pricePerPersonCents?: number;
+  ticketTypes?: EventTicketType[];
 }
 
 export interface UpdateEventPayload extends Partial<CreateEventPayload> {

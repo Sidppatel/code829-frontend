@@ -20,7 +20,10 @@ import {
   InfoCircleOutlined,
   TeamOutlined,
   DollarOutlined,
+  PlusOutlined,
+  MinusCircleOutlined,
 } from '@ant-design/icons';
+import { Typography, Space } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 import {
@@ -56,6 +59,7 @@ export default function EventWizardPage() {
   const [images, setImages] = useState<ImageDto[]>([]);
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const ticketTypes = Form.useWatch('ticketTypes', form) || [];
 
   useEffect(() => {
     const loadVenues = async () => {
@@ -110,6 +114,10 @@ export default function EventWizardPage() {
           pricePerPerson: data.pricePerPersonCents != null
             ? data.pricePerPersonCents / 100
             : undefined,
+          ticketTypes: data.ticketTypes?.map(tt => ({
+            ...tt,
+            price: tt.priceCents / 100
+          })) || []
         });
       } catch {
         message.error('Failed to load event for editing');
@@ -141,13 +149,21 @@ export default function EventWizardPage() {
         venueId: values.venueId,
         isFeatured: values.isFeatured ?? false,
         layoutMode,
-        maxCapacity: layoutMode === 'Open' && values.maxCapacity
-          ? Number(values.maxCapacity)
-          : undefined,
-        pricePerPersonCents: layoutMode === 'Open' && values.pricePerPerson != null
-          ? Math.round(Number(values.pricePerPerson) * 100)
-          : undefined,
+        ticketTypes: layoutMode === 'Open' ? values.ticketTypes?.map((tt: any) => ({
+          name: tt.name,
+          priceCents: Math.round(Number(tt.price) * 100),
+          capacity: Number(tt.capacity),
+          description: tt.description
+        })) : undefined
       };
+      
+      // For Open mode, max capacity is sum of ticket types
+      if (layoutMode === 'Open' && payload.ticketTypes) {
+        payload.maxCapacity = payload.ticketTypes.reduce((acc, curr) => acc + (curr.capacity || 0), 0);
+      } else if (layoutMode === 'Open') {
+        payload.maxCapacity = Number(values.maxCapacity);
+        payload.pricePerPersonCents = Math.round(Number(values.pricePerPerson) * 100);
+      }
       if (isEditMode && id) {
         await adminEventsApi.update(id, payload);
         message.success('Event updated');
@@ -378,38 +394,141 @@ export default function EventWizardPage() {
             )}
 
             {layoutMode === 'Open' && (
-              <Row gutter={16}>
-                <Col xs={24} sm={12}>
-                  <Form.Item
-                    name="maxCapacity"
-                    label="Max Capacity"
-                    rules={[{ required: true, message: 'Required for open seating' }]}
-                  >
-                    <InputNumber
-                      min={1}
-                      style={{ width: '100%' }}
-                      placeholder="Total number of people"
-                      prefix={<TeamOutlined />}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <Form.Item
-                    name="pricePerPerson"
-                    label="Price Per Person ($)"
-                    rules={[{ required: true, message: 'Required for open seating' }]}
-                  >
-                    <InputNumber
-                      min={0}
-                      step={0.01}
-                      precision={2}
-                      style={{ width: '100%' }}
-                      placeholder="0.00"
-                      prefix={<DollarOutlined />}
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
+              <div style={{ marginTop: 24 }}>
+                <Typography.Text strong style={{ display: 'block', marginBottom: 16, fontSize: 14 }}>
+                  Ticket Tiers
+                </Typography.Text>
+                
+                <Form.List name="ticketTypes">
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map(({ key, name, ...restField }) => (
+                        <Card 
+                          key={key} 
+                          size="small" 
+                          style={{ marginBottom: 16, background: 'var(--bg-soft)', border: '1px solid var(--border)' }}
+                          extra={
+                            <Button 
+                              type="text" 
+                              danger 
+                              icon={<MinusCircleOutlined />} 
+                              onClick={() => remove(name)}
+                            >
+                              Remove
+                            </Button>
+                          }
+                        >
+                          <Row gutter={16}>
+                            <Col xs={24} sm={12}>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'name']}
+                                label="Tier Name"
+                                rules={[
+                                  { required: true, message: 'Missing tier name' },
+                                  () => ({
+                                    validator(_, value) {
+                                      const nameVal = Array.isArray(value) ? value[0] : value;
+                                      if (!nameVal) return Promise.resolve();
+                                      const count = ticketTypes.filter((t: any) => 
+                                        (Array.isArray(t?.name) ? t.name[0] : t?.name) === nameVal
+                                      ).length;
+                                      if (count > 1) {
+                                        return Promise.reject(new Error('This tier name is already used'));
+                                      }
+                                      return Promise.resolve();
+                                    },
+                                  }),
+                                ]}
+                              >
+                                <Select
+                                  showSearch
+                                  placeholder="Select or type..."
+                                  options={[
+                                    { value: 'General', label: 'General' },
+                                    { value: 'VIP', label: 'VIP' },
+                                  ].map(opt => ({
+                                    ...opt,
+                                    disabled: ticketTypes.some((t: any) => 
+                                      (Array.isArray(t?.name) ? t.name[0] : t?.name) === opt.value && 
+                                      (Array.isArray(ticketTypes[name]?.name) ? ticketTypes[name].name[0] : ticketTypes[name]?.name) !== opt.value
+                                    )
+                                  }))}
+                                  // This allows custom text entry in Ant Design Select
+                                  mode="tags"
+                                  maxCount={1}
+                                  onSelect={() => {
+                                    // Force dropdown to close after selection
+                                    setTimeout(() => {
+                                      (document.activeElement as HTMLElement)?.blur();
+                                    }, 0);
+                                  }}
+                                />
+                              </Form.Item>
+                            </Col>
+                            <Col xs={12} sm={6}>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'price']}
+                                label="Price ($)"
+                                rules={[{ required: true, message: 'Price required' }]}
+                              >
+                                <InputNumber
+                                  min={0}
+                                  precision={2}
+                                  style={{ width: '100%' }}
+                                  placeholder="0.00"
+                                />
+                              </Form.Item>
+                            </Col>
+                            <Col xs={12} sm={6}>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'capacity']}
+                                label="Capacity"
+                                rules={[{ required: true, message: 'Qty required' }]}
+                              >
+                                <InputNumber
+                                  min={1}
+                                  style={{ width: '100%' }}
+                                  placeholder="100"
+                                />
+                              </Form.Item>
+                            </Col>
+                            <Col xs={24}>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'description']}
+                                label="Description (Optional)"
+                                style={{ marginBottom: 0 }}
+                              >
+                                <Input placeholder="e.g. Includes one free drink" />
+                              </Form.Item>
+                            </Col>
+                          </Row>
+                        </Card>
+                      ))}
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
+                        icon={<PlusOutlined />}
+                        style={{ height: 44, borderRadius: 10 }}
+                      >
+                        Add Ticket Tier
+                      </Button>
+                    </>
+                  )}
+                </Form.List>
+
+                {/* Legacy Fallback / Single Price support if needed */}
+                <div style={{ marginTop: 24, padding: '16px', background: 'var(--bg-elevated)', borderRadius: 10, border: '1px solid var(--border-light)' }}>
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    <InfoCircleOutlined style={{ marginRight: 6 }} />
+                    Total capacity is automatically calculated as the sum of all ticket tiers.
+                  </Typography.Text>
+                </div>
+              </div>
             )}
           </div>
 

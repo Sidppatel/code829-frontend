@@ -18,6 +18,7 @@ export interface EventSummary {
   noOfAvailableTables: number;
   minPricePerTableCents?: number;
   venue?: VenueBasic;
+  ticketTypes?: EventTicketType[];
 }
 
 export interface EventDetail extends EventSummary {
@@ -30,6 +31,7 @@ export interface EventDetail extends EventSummary {
   venue: VenueBasic;
   organizerId?: string;
   organizerName?: string;
+  pricingTiers?: EventPricingTier[];
   pricePerPersonCents?: number;
   gridRows?: number;
   gridCols?: number;
@@ -37,6 +39,7 @@ export interface EventDetail extends EventSummary {
   checkInCount?: number;
   createdAt: string;
   minPricePerTableCents?: number;
+  ticketTypes?: EventTicketType[];
 }
 
 export interface VenueBasic {
@@ -60,6 +63,15 @@ export interface EventFacets {
   cities: string[];
   venues: { venueId: string; name: string }[];
   priceRange: { min: number; max: number };
+}
+
+export interface EventTicketType {
+  id?: string;
+  name: string;
+  priceCents: number;
+  capacity?: number;
+  description?: string;
+  soldCount?: number;
 }
 
 export interface EventTableTypeInfo {
