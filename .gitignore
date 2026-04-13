@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 .pnpm-store/
+# Monorepo specific (if pnpm is used, consider repo-root lockfile as truth)
+package-lock.json
+yarn.lock
 
 # Build outputs
 dist/
