@@ -74,6 +74,14 @@ export interface EventTicketType {
   soldCount?: number;
 }
 
+export interface EventPricingTier {
+  name: string;
+  priceCents: number;
+  capacity?: number;
+  count: number;
+  soldCount: number;
+}
+
 export interface EventTableTypeInfo {
   id: string;
   label: string;
