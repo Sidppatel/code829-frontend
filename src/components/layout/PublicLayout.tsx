@@ -46,15 +46,6 @@ export default function PublicLayout() {
     { key: 'bookings', label: 'My Bookings', icon: <BookOutlined />, onClick: () => navigate('/bookings') },
     { key: 'tickets', label: 'My Tickets', icon: <QrcodeOutlined />, onClick: () => navigate('/tickets') },
     { key: 'profile', label: 'Profile', icon: <UserOutlined />, onClick: () => navigate('/profile') },
-    ...(hasRole('Staff') ? [
-      { key: 'checkin', label: 'Staff Check-In', icon: <ScanOutlined />, onClick: () => navigate('/staff/checkin/select') },
-    ] : []),
-    ...(hasRole('Admin') ? [
-      { key: 'admin', label: 'Admin Panel', icon: <SettingOutlined />, onClick: () => navigate('/admin') },
-    ] : []),
-    ...(hasRole('Developer') ? [
-      { key: 'developer', label: 'Developer Panel', icon: <SettingOutlined />, onClick: () => navigate('/developer') },
-    ] : []),
     { type: 'divider' as const },
     { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, onClick: logout },
   ];
@@ -197,15 +188,6 @@ export default function PublicLayout() {
               ...(isAuthenticated ? [
                 { key: '/bookings', label: <Link to="/bookings">My Bookings</Link>, icon: <BookOutlined /> },
                 { key: '/profile', label: <Link to="/profile">Profile</Link>, icon: <UserOutlined /> },
-              ] : []),
-              ...(hasRole('Staff') ? [
-                { key: '/staff', label: <Link to="/staff/checkin/select">Staff Check-In</Link>, icon: <ScanOutlined /> },
-              ] : []),
-              ...(hasRole('Admin') ? [
-                { key: '/admin', label: <Link to="/admin">Admin Panel</Link>, icon: <SettingOutlined /> },
-              ] : []),
-              ...(hasRole('Developer') ? [
-                { key: '/developer', label: <Link to="/developer">Developer Panel</Link>, icon: <SettingOutlined /> },
               ] : []),
             ]}
             style={{ background: 'transparent', borderRight: 'none' }}
