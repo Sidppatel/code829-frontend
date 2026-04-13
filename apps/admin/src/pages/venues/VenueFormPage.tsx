@@ -61,7 +61,7 @@ export default function VenueFormPage() {
         await adminVenuesApi.create(payload);
         message.success('Venue created');
       }
-      navigate('/admin/venues');
+      navigate('/venues');
     } catch {
       message.error('Failed to save venue');
     } finally {
@@ -127,7 +127,7 @@ export default function VenueFormPage() {
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" loading={saving}>{isEdit ? 'Update' : 'Create'}</Button>
-              <Button onClick={() => navigate('/admin/venues')}>Cancel</Button>
+              <Button onClick={() => navigate('/venues')}>Cancel</Button>
             </Space>
           </Form.Item>
         </Form>

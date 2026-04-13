@@ -66,7 +66,7 @@ export default function CheckInPage() {
           "Keep the camera steady for fastest scanning."
         ]}
         rotateSubtitle
-        onBack={() => navigate('/staff/checkin/select')} 
+        onBack={() => navigate('/checkin/select')}
       />
 
       {stats && (

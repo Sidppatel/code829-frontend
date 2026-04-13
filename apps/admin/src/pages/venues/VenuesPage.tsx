@@ -57,7 +57,7 @@ export default function VenuesPage() {
           <div style={{ display: 'flex', gap: 12 }}>
             <Button
               icon={<TableOutlined />}
-              onClick={() => navigate('/admin/table-types')}
+              onClick={() => navigate('/table-types')}
               style={{
                 borderRadius: 'var(--radius-full)',
                 height: 48,
@@ -73,7 +73,7 @@ export default function VenuesPage() {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => navigate('/admin/venues/new')}
+              onClick={() => navigate('/venues/new')}
               style={{
                 borderRadius: 'var(--radius-full)',
                 height: 48,
@@ -180,7 +180,7 @@ export default function VenuesPage() {
                     type="primary"
                     block
                     icon={<EditOutlined />}
-                    onClick={() => navigate(`/admin/venues/${v.id}`)}
+                    onClick={() => navigate(`/venues/${v.id}`)}
                     style={{ borderRadius: 'var(--radius-full)', fontWeight: 600, height: 40 }}
                   >
                     Manage Venue
@@ -209,7 +209,7 @@ export default function VenuesPage() {
           title="No spaces yet"
           description="Your venue collection is empty. Add your first space to start hosting events."
           actionLabel="Add My First Venue"
-          onAction={() => navigate('/admin/venues/new')}
+          onAction={() => navigate('/venues/new')}
         />
       )}
     </div>

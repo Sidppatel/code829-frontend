@@ -98,7 +98,7 @@ export default function EventsListPage() {
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'flex-end' }}>
           <Button 
             size="small" 
-            onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${record.id}`); }}
+            onClick={(e) => { e.stopPropagation(); navigate(`/events/${record.id}`); }}
           >
             View
           </Button>
@@ -128,7 +128,7 @@ export default function EventsListPage() {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/admin/events/new')}
+            onClick={() => navigate('/events/new')}
             style={{
               borderRadius: 'var(--radius-full)',
               height: 48,
@@ -196,7 +196,7 @@ export default function EventsListPage() {
           if (ps !== pageSize) setPageSize(ps);
         }}
         columns={columns}
-        onRowClick={(record) => navigate(`/admin/events/${record.id}`)}
+        onRowClick={(record) => navigate(`/events/${record.id}`)}
         renderMobileCard={(record) => (
           <HumanCard
             className="human-noise"
@@ -265,7 +265,7 @@ export default function EventsListPage() {
                 type="primary"
                 block
                 style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
-                onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${record.id}`); }}
+                onClick={(e) => { e.stopPropagation(); navigate(`/events/${record.id}`); }}
               >
                 View Details
               </Button>
@@ -283,7 +283,7 @@ export default function EventsListPage() {
           title: "No events yet",
           description: "It looks like you haven't created any events matching these criteria. Time to start something new?",
           actionLabel: "Create Event",
-          onAction: () => navigate('/admin/events/new')
+          onAction: () => navigate('/events/new')
         }}
       />
     </div>

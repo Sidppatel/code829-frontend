@@ -116,7 +116,7 @@ export default function EventManagePage() {
               type="primary"
               icon={<EditOutlined />}
               size="small"
-              onClick={() => navigate(`/admin/events/${id}/edit`)}
+              onClick={() => navigate(`/events/${id}/edit`)}
               style={{ borderRadius: 8 }}
             >
               Edit
@@ -266,7 +266,7 @@ export default function EventManagePage() {
         <Button
           block
           icon={<LayoutOutlined />}
-          onClick={() => navigate(`/admin/layout/${id}`)}
+          onClick={() => navigate(`/layout/${id}`)}
           style={{ borderRadius: 10, marginBottom: 8 }}
         >
           {layoutLocked ? 'View Layout (Locked)' : 'Manage Seating Layout'}
@@ -275,7 +275,7 @@ export default function EventManagePage() {
       <Button
         block
         icon={<CheckCircleOutlined />}
-        onClick={() => navigate(`/staff/checkin/${id}`)}
+        onClick={() => navigate(`/checkin/${id}`)}
         style={{ borderRadius: 10, marginBottom: 8 }}
       >
         Check-In

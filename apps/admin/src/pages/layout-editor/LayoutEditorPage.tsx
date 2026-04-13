@@ -269,7 +269,7 @@ export default function LayoutEditorPage() {
   }, [selectedTableId, isTableLocked, updateTables, message]);
 
   const handleBack = useCallback(() => {
-    const goBack = () => navigate(`/admin/events/${eventId}`);
+    const goBack = () => navigate(`/events/${eventId}`);
     if (isDirty) {
       modal.confirm({
         title: 'Unsaved changes',

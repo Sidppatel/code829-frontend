@@ -77,7 +77,7 @@ export default function EventWizardPage() {
         const { data } = await adminEventsApi.getById(id);
         if (data.status !== 'Draft' && data.status !== 'Published') {
           message.warning('Only Draft and Published events can be edited');
-          navigate(`/admin/events/${id}`);
+          navigate(`/events/${id}`);
           return;
         }
         const mode = data.layoutMode === 'Open' ? 'Open' : 'Grid';
@@ -151,11 +151,11 @@ export default function EventWizardPage() {
       if (isEditMode && id) {
         await adminEventsApi.update(id, payload);
         message.success('Event updated');
-        navigate(`/admin/events/${id}`);
+        navigate(`/events/${id}`);
       } else {
         const { data } = await adminEventsApi.create(payload);
         message.success('Event created');
-        navigate(`/admin/events/${data.id}`);
+        navigate(`/events/${data.id}`);
       }
     } catch {
       message.error(isEditMode ? 'Failed to update event' : 'Failed to create event');
@@ -179,7 +179,7 @@ export default function EventWizardPage() {
           <span>Editing: <strong>{form.getFieldValue('title') || 'Event'}</strong></span>
           <Button
             size="small"
-            onClick={() => navigate(`/admin/events/${id}`)}
+            onClick={() => navigate(`/events/${id}`)}
             style={{ marginLeft: 'auto', borderRadius: 8 }}
           >
             Cancel
@@ -424,7 +424,7 @@ export default function EventWizardPage() {
                 {isEditMode ? 'Save Changes' : 'Create Event'}
               </Button>
               <Button
-                onClick={() => navigate(isEditMode ? `/admin/events/${id}` : '/admin/events')}
+                onClick={() => navigate(isEditMode ? `/events/${id}` : '/events')}
                 style={{ borderRadius: 10, height: 44 }}
               >
                 Cancel

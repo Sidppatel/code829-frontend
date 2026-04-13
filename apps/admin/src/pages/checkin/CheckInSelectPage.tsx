@@ -107,7 +107,7 @@ export default function CheckInSelectPage() {
               <HumanCard
                 key={ev.id}
                 className="human-noise"
-                onClick={() => navigate(`/staff/checkin/${ev.id}`)}
+                onClick={() => navigate(`/checkin/${ev.id}`)}
                 style={{ cursor: 'pointer' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

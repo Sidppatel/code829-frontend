@@ -63,7 +63,7 @@ export default function AdminDashboardPage() {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/admin/events/new')}
+            onClick={() => navigate('/events/new')}
             style={{
               borderRadius: 'var(--radius-full)',
               height: 48,
@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
         {nextEvent && (
           <section>
             <HumanCard
-              onClick={() => navigate(`/admin/events/${nextEvent.eventId}`)}
+              onClick={() => navigate(`/events/${nextEvent.eventId}`)}
               className="human-noise"
               style={{
                 background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
@@ -136,7 +136,7 @@ export default function AdminDashboardPage() {
                     ghost
                     size="large"
                     style={{ borderRadius: 'var(--radius-full)', fontWeight: 700, width: isMobile ? '100%' : 'auto', padding: isMobile ? '0 24px' : '0 32px' }}
-                    onClick={(e) => { e.stopPropagation(); navigate(`/admin/events/${nextEvent.eventId}`); }}
+                    onClick={(e) => { e.stopPropagation(); navigate(`/events/${nextEvent.eventId}`); }}
                   >
                     Prepare staff brief
                   </Button>
@@ -280,7 +280,7 @@ export default function AdminDashboardPage() {
             title="Your journey begins"
             description="Host your first event and see live insights transform this space. Ready to design an unforgettable night?"
             actionLabel="Create my first event"
-            onAction={() => navigate('/admin/events/new')}
+            onAction={() => navigate('/events/new')}
           />
         )}
       </div>
