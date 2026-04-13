@@ -16,7 +16,7 @@ export default function BrandLogo({
   collapsed = false,
   className,
   style,
-  logoUrl
+  logoUrl = '/logo.jpg'
 }: BrandLogoProps) {
   const isSm = size === 'sm';
   const isLg = size === 'lg';
@@ -39,18 +39,19 @@ export default function BrandLogo({
       }}
     >
       <div style={{
-        background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+        background: logoUrl ? 'transparent' : 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
         width: iconSize,
         height: iconSize,
         borderRadius: isLg ? 12 : 8,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        boxShadow: isLg ? '0 8px 16px rgba(99, 102, 241, 0.3)' : '0 4px 12px rgba(99, 102, 241, 0.2)',
-        flexShrink: 0
+        boxShadow: logoUrl ? 'none' : (isLg ? '0 8px 16px rgba(99, 102, 241, 0.3)' : '0 4px 12px rgba(99, 102, 241, 0.2)'),
+        flexShrink: 0,
+        overflow: 'hidden'
       }}>
         {logoUrl ? (
-          <img src={logoUrl} alt="Logo" style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
+          <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         ) : (
           <span style={{ color: '#fff', fontSize: fontSize, fontWeight: 800 }}>C</span>
         )}
