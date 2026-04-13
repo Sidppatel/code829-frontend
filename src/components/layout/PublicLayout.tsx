@@ -7,10 +7,8 @@ import {
   UserOutlined,
   LogoutOutlined,
   BookOutlined,
-  SettingOutlined,
   MenuOutlined,
   CloseOutlined,
-  ScanOutlined,
   QrcodeOutlined,
   MessageOutlined,
   LoginOutlined,
@@ -25,7 +23,7 @@ const { Header, Content, Footer } = Layout;
 const { useBreakpoint } = Grid;
 
 export default function PublicLayout() {
-  const { isAuthenticated, user, logout, hasRole } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
