@@ -1,4 +1,4 @@
-import { Table, Tag } from 'antd';
+import { Table, Tag, Grid } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { centsToUSD } from '@code829/shared/utils/currency';
 
@@ -18,7 +18,66 @@ interface EventPricingTiersTableProps {
   defaultPlatformFeeCents?: number;
 }
 
+const { useBreakpoint } = Grid;
+
+function MobileCard({ row, defaultFee }: { row: PricingRow; defaultFee: number }) {
+  const fee = row.platformFeeCents ?? defaultFee;
+  const total = row.priceCents + fee;
+  const cap = row.capacity != null && row.capacity > 0 ? row.capacity : '∞';
+
+  return (
+    <div style={{
+      padding: 16,
+      borderRadius: 12,
+      border: '1px solid var(--border-soft)',
+      background: 'var(--bg-card)',
+      marginBottom: 10,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>{row.name}</div>
+          {row.description && (
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.description}</div>
+          )}
+        </div>
+        <Tag color="gold" style={{ fontWeight: 700, borderRadius: 6, fontSize: 13, marginLeft: 8, flexShrink: 0 }}>
+          {centsToUSD(total)}
+        </Tag>
+      </div>
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Price</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{centsToUSD(row.priceCents)}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Fee</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>{fee > 0 ? centsToUSD(fee) : '—'}</div>
+        </div>
+        <div style={{ marginLeft: 'auto' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Sold</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>
+            <strong>{row.soldCount}</strong> / {cap}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EventPricingTiersTable({ tiers, loading, defaultPlatformFeeCents = 0 }: EventPricingTiersTableProps) {
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+
+  if (isMobile) {
+    return (
+      <div>
+        {tiers.map((row, i) => (
+          <MobileCard key={row.id || `${row.name}-${i}`} row={row} defaultFee={defaultPlatformFeeCents} />
+        ))}
+      </div>
+    );
+  }
+
   const columns: ColumnsType<PricingRow> = [
     {
       title: 'Ticket Tier',
