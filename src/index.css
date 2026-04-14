@@ -119,9 +119,9 @@ html, body {
   pointer-events: none;
 }
 
-/* Main Layout Container fix */
+/* Main Layout Container fix — transparent so hero bg image shows */
 #root > div > div > div {
-  background-color: var(--bg-page) !important;
+  background-color: transparent !important;
 }
 
 .nebula-mesh {
