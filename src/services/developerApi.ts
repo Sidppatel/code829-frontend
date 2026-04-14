@@ -50,13 +50,20 @@ export interface EventFeeInfo {
   layoutMode: 'Open' | 'Grid';
   pricePerPersonCents: number | null;
   maxCapacity: number | null;
-  platformFeeCents: number | null;
   defaultFeeCents: number;
   tableTypes: Array<{
     id: string;
     label: string;
     priceCents: number;
     platformFeeCents: number | null;
+    isLocked: boolean;
+  }>;
+  ticketTypes: Array<{
+    id: string;
+    label: string;
+    priceCents: number;
+    platformFeeCents: number | null;
+    isLocked: boolean;
   }>;
 }
 
@@ -66,7 +73,6 @@ export interface DevEventListItem {
   status: string;
   startDate: string;
   layoutMode: string;
-  platformFeeCents: number | null;
 }
 
 export const developerApi = {
@@ -97,9 +103,9 @@ export const developerApi = {
   getEventFees: (eventId: string) =>
     apiClient.get<EventFeeInfo>(`/developer/events/${eventId}/fees`),
 
-  updateEventFee: (eventId: string, platformFeeCents: number | null) =>
-    apiClient.put(`/developer/events/${eventId}/fees`, { platformFeeCents }),
-
   updateTableTypeFees: (eventId: string, tableTypeFees: Record<string, number | null>) =>
     apiClient.put(`/developer/events/${eventId}/table-fees`, { tableTypeFees }),
+
+  updateTicketTypeFees: (eventId: string, ticketTypeFees: Record<string, number | null>) =>
+    apiClient.put(`/developer/events/${eventId}/ticket-type-fees`, { ticketTypeFees }),
 };

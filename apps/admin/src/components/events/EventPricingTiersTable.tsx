@@ -1,8 +1,7 @@
-import { Table, Progress, Tag } from 'antd';
+import { Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import type { EventPricingTier } from '@code829/shared/types/event';
-import HumanCard from '@code829/shared/components/shared/HumanCard';
 
 interface EventPricingTiersTableProps {
   tiers: EventPricingTier[];

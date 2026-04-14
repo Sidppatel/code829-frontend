@@ -9,7 +9,7 @@ import type { PagedResponse } from '@code829/shared/types/shared';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import SharedEventTable from '../../components/events/SharedEventTable';
-import { Modal, Typography, Card, InputNumber, Divider, Spin } from 'antd';
+import { Modal, Typography, Card, InputNumber, Spin } from 'antd';
 
 function getStatusColor(status: string): string {
   switch (status) {
@@ -60,14 +60,6 @@ export default function DevEventsPage() {
     {
       title: 'Status', dataIndex: 'status', key: 'status', width: 110,
       render: (s: string) => <Tag color={getStatusColor(s)}>{s}</Tag>,
-    },
-    {
-      title: 'Fee', key: 'fee', width: 120,
-      render: (_: unknown, record: DevEventListItem) => (
-        <span style={{ color: record.platformFeeCents !== null ? 'var(--text-primary)' : 'var(--text-muted)' }}>
-          {record.platformFeeCents !== null ? centsToUSD(record.platformFeeCents) : 'Default'}
-        </span>
-      ),
     },
     {
       title: '', key: 'action', width: 80,
@@ -150,12 +142,6 @@ export default function DevEventsPage() {
                 <Tag color={ev.layoutMode === 'Open' ? 'blue' : 'purple'} style={{ margin: 0, borderRadius: 4, fontWeight: 700, fontSize: 10 }}>{ev.layoutMode}</Tag>
                 <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>Mode</span>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fee</div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: ev.platformFeeCents !== null ? 'var(--primary)' : 'var(--text-muted)' }}>
-                  {ev.platformFeeCents !== null ? centsToUSD(ev.platformFeeCents) : 'Auto'}
-                </div>
-              </div>
             </div>
           </HumanCard>
         )}
@@ -181,8 +167,8 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
   const [feeInfo, setFeeInfo] = useState<EventFeeInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [eventFee, setEventFee] = useState<number | null>(null);
   const [tableFees, setTableFees] = useState<Record<string, number | null>>({});
+  const [ticketFees, setTicketFees] = useState<Record<string, number | null>>({});
   const { message } = App.useApp();
 
   useEffect(() => {
@@ -191,10 +177,12 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
       try {
         const { data } = await developerApi.getEventFees(eventId);
         setFeeInfo(data);
-        setEventFee(data.platformFeeCents);
         const tf: Record<string, number | null> = {};
         data.tableTypes.forEach((tt) => { tf[tt.id] = tt.platformFeeCents; });
         setTableFees(tf);
+        const tkf: Record<string, number | null> = {};
+        data.ticketTypes.forEach((tt) => { tkf[tt.id] = tt.platformFeeCents; });
+        setTicketFees(tkf);
       } catch {
         message.error('Failed to load fee info');
       } finally {
@@ -208,11 +196,10 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
     if (!feeInfo) return;
     setSaving(true);
     try {
-      if (feeInfo.layoutMode === 'Open') {
-        await developerApi.updateEventFee(eventId, eventFee);
-      } else {
-        await developerApi.updateEventFee(eventId, eventFee);
+      if (feeInfo.layoutMode === 'Grid') {
         await developerApi.updateTableTypeFees(eventId, tableFees);
+      } else {
+        await developerApi.updateTicketTypeFees(eventId, ticketFees);
       }
       message.success('Platform fees updated');
       onClose();
@@ -245,58 +232,79 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
             <Typography.Text type="secondary" style={{ marginLeft: 8 }}>{defaultLabel}</Typography.Text>
           </div>
 
-          {/* Open seating: show read-only pricing info */}
+          {/* Open seating: show read-only pricing info + ticket type fees */}
           {feeInfo.layoutMode === 'Open' && (
-            <Card size="small" styles={{ body: { padding: '8px 12px' } }} style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                <Typography.Text type="secondary" style={{ fontSize: 12 }}>Ticket Price (set by admin)</Typography.Text>
-                <Tag style={{ margin: 0 }}>{feeInfo.pricePerPersonCents ? centsToUSD(feeInfo.pricePerPersonCents) : '—'} / person</Tag>
-              </div>
-              {feeInfo.maxCapacity && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>Max Capacity</Typography.Text>
-                  <Typography.Text style={{ fontSize: 12 }}>{feeInfo.maxCapacity}</Typography.Text>
+            <>
+              <Card size="small" styles={{ body: { padding: '8px 12px' } }} style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>Ticket Price (set by admin)</Typography.Text>
+                  <Tag style={{ margin: 0 }}>{feeInfo.pricePerPersonCents ? centsToUSD(feeInfo.pricePerPersonCents) : '—'} / person</Tag>
                 </div>
-              )}
-            </Card>
-          )}
+                {feeInfo.maxCapacity && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>Max Capacity</Typography.Text>
+                    <Typography.Text style={{ fontSize: 12 }}>{feeInfo.maxCapacity}</Typography.Text>
+                  </div>
+                )}
+              </Card>
 
-          {/* Event-level fee */}
-          <div style={{ marginBottom: 16 }}>
-            <Typography.Text strong style={{ display: 'block', marginBottom: 4 }}>
-              {feeInfo.layoutMode === 'Open' ? 'Platform Fee' : 'Default Event Fee'}
-            </Typography.Text>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <InputNumber
-                value={eventFee !== null ? eventFee / 100 : null}
-                onChange={(v: number | null) => setEventFee(v !== null ? Math.round(v * 100) : null)}
-                prefix="$"
-                min={0}
-                step={0.01}
-                precision={2}
-                placeholder={centsToUSD(feeInfo.defaultFeeCents)}
-                style={{ flex: 1 }}
-              />
-              <Button
-                icon={<UndoOutlined />}
-                size="small"
-                onClick={() => setEventFee(null)}
-                disabled={eventFee === null}
-              >
-                Reset
-              </Button>
-            </div>
-            {eventFee === null && (
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                Using global default: {centsToUSD(feeInfo.defaultFeeCents)}
-              </Typography.Text>
-            )}
-          </div>
+              {feeInfo.ticketTypes.length > 0 && (
+                <>
+                  <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>
+                    Per Ticket Type Fees
+                  </Typography.Text>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {feeInfo.ticketTypes.map((tt) => (
+                      <Card key={tt.id} size="small" styles={{ body: { padding: '8px 12px' } }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Typography.Text strong style={{ fontSize: 13 }}>{tt.label}</Typography.Text>
+                            {tt.isLocked && <Tag color="red" style={{ margin: 0, fontSize: 10 }}>Locked</Tag>}
+                          </div>
+                          <Tag style={{ margin: 0 }}>Price: {centsToUSD(tt.priceCents)}</Tag>
+                        </div>
+                        <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
+                          Platform Fee
+                        </Typography.Text>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          <InputNumber
+                            value={ticketFees[tt.id] !== null && ticketFees[tt.id] !== undefined ? ticketFees[tt.id]! / 100 : null}
+                            onChange={(v: number | null) => setTicketFees((prev) => ({
+                              ...prev,
+                              [tt.id]: v !== null ? Math.round(v * 100) : null,
+                            }))}
+                            prefix="$"
+                            min={0}
+                            step={0.01}
+                            precision={2}
+                            placeholder={centsToUSD(feeInfo.defaultFeeCents)}
+                            style={{ flex: 1 }}
+                            disabled={tt.isLocked}
+                          />
+                          <Button
+                            icon={<UndoOutlined />}
+                            size="small"
+                            onClick={() => setTicketFees((prev) => ({ ...prev, [tt.id]: null }))}
+                            disabled={tt.isLocked || ticketFees[tt.id] === null || ticketFees[tt.id] === undefined}
+                          >
+                            Reset
+                          </Button>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {feeInfo.ticketTypes.length === 0 && (
+                <Typography.Text type="secondary">No ticket types configured for this event.</Typography.Text>
+              )}
+            </>
+          )}
 
           {/* Table type fees (Grid only) */}
           {feeInfo.layoutMode === 'Grid' && feeInfo.tableTypes.length > 0 && (
             <>
-              <Divider style={{ margin: '12px 0' }} />
               <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>
                 Per Table Type Fees
               </Typography.Text>
@@ -304,7 +312,10 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
                 {feeInfo.tableTypes.map((tt) => (
                   <Card key={tt.id} size="small" styles={{ body: { padding: '8px 12px' } }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <Typography.Text strong style={{ fontSize: 13 }}>{tt.label}</Typography.Text>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Typography.Text strong style={{ fontSize: 13 }}>{tt.label}</Typography.Text>
+                        {tt.isLocked && <Tag color="red" style={{ margin: 0, fontSize: 10 }}>Locked</Tag>}
+                      </div>
                       <Tag style={{ margin: 0 }}>Table Price: {centsToUSD(tt.priceCents)}</Tag>
                     </div>
                     <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
@@ -321,14 +332,15 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
                         min={0}
                         step={0.01}
                         precision={2}
-                        placeholder={centsToUSD(eventFee ?? feeInfo.defaultFeeCents)}
+                        placeholder={centsToUSD(feeInfo.defaultFeeCents)}
                         style={{ flex: 1 }}
+                        disabled={tt.isLocked}
                       />
                       <Button
                         icon={<UndoOutlined />}
                         size="small"
                         onClick={() => setTableFees((prev) => ({ ...prev, [tt.id]: null }))}
-                        disabled={tableFees[tt.id] === null || tableFees[tt.id] === undefined}
+                        disabled={tt.isLocked || tableFees[tt.id] === null || tableFees[tt.id] === undefined}
                       >
                         Reset
                       </Button>

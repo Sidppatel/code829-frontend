@@ -278,7 +278,6 @@ export default function EventDetailPage() {
   if (loading) return <LoadingSpinner />;
   if (!event) return null;
 
-  const feeCents = event.platformFeeCents ?? 1500;
   const lockedTableFromGrid = tablesData?.tables.find((t) => t.isLockedByYou) ?? null;
 
   if (step === 'select-table' && tablesData) {
@@ -315,7 +314,6 @@ export default function EventDetailPage() {
             <CheckoutPanel
               mode="grid"
               tableLock={tableLock}
-              platformFeeCents={tableLock.platformFeeCents}
               confirming={confirming}
               setConfirming={setConfirming}
               error={checkoutError}
@@ -344,7 +342,6 @@ export default function EventDetailPage() {
               maxCapacity={event.maxCapacity ?? 0}
               totalSold={event.totalSold}
               pricePerPersonCents={event.pricePerPersonCents ?? 0}
-              platformFeeCents={feeCents}
               onProceed={handleCapacityProceed}
             />
           </Col>
@@ -366,7 +363,6 @@ export default function EventDetailPage() {
               mode="open"
               seatCount={seatCount}
               pricePerPersonCents={event.pricePerPersonCents ?? 0}
-              platformFeeCents={feeCents}
               confirming={confirming}
               setConfirming={setConfirming}
               error={checkoutError}

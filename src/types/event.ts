@@ -23,8 +23,6 @@ export interface EventSummary {
 export interface EventDetail extends EventSummary {
   description?: string;
   maxCapacity?: number;
-  platformFeePercent?: number;
-  platformFeeCents?: number;
   publishedAt?: string;
   venueId: string;
   venue: VenueBasic;
