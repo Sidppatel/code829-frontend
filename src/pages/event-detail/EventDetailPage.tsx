@@ -164,6 +164,10 @@ export default function EventDetailPage() {
     }
   };
 
+  const capacity = event?.layoutMode === 'Open' ? (event.totalCapacity || event.maxCapacity || 0) : 0;
+  const remaining = capacity - (event?.totalSold ?? 0);
+  const isSoldOut = event?.layoutMode === 'Open' ? remaining <= 0 : (event?.noOfAvailableTables ?? 0) <= 0;
+
   const handleLockTable = async (table: EventTableDto) => {
     if (!event) return;
     setLockingTableId(table.id);
@@ -339,7 +343,7 @@ export default function EventDetailPage() {
         <Row gutter={[24, 24]} justify="center">
           <Col xs={24} sm={16} md={12} lg={8}>
             <CapacityBookingForm
-              maxCapacity={event.maxCapacity ?? 0}
+              maxCapacity={capacity}
               totalSold={event.totalSold}
               pricePerPersonCents={event.pricePerPersonCents ?? 0}
               onProceed={handleCapacityProceed}
@@ -377,9 +381,6 @@ export default function EventDetailPage() {
     );
   }
 
-  const capacity = event.layoutMode === 'Open' ? ((event.totalCapacity && event.totalCapacity > 0) ? event.totalCapacity : (event.maxCapacity ?? 0)) : 0;
-  const remaining = capacity - (event.totalSold ?? 0);
-  const isSoldOut = event.layoutMode === 'Open' && remaining <= 0;
 
   return (
     <motion.div
