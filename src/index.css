@@ -53,52 +53,30 @@
   --duration-slow: 400ms;
 }
 
-/* Light Mode (Priority) */
-:root, html.light {
-  --bg-page:        #1A1A1A; /* DarkGray per request */
-  --bg-surface:     #242424;
-  --bg-elevated:    #2D2D2D;
-  --bg-soft:        #333333;
-  
-  --border:         rgba(255, 255, 255, 0.1);
-  --border-strong:  rgba(255, 255, 255, 0.2);
-  
-  --text-primary:   #FFFFFF;
-  --text-secondary: #A1A1AA;
-  --text-muted:     #71717A;
-  
-  --nav-bg:         rgba(26, 26, 26, 0.9);
-  --nav-border:     rgba(255, 255, 255, 0.1);
-  
-  --card-shadow:    var(--shadow-premium);
-  --glass-bg:       rgba(255, 255, 255, 0.7);
-  --glass-border:   rgba(255, 255, 255, 0.5);
-  
+/* Single Theme — Dark Gray */
+:root {
+  --bg-page:        #A9A9A9;
+  --bg-surface:     #B8B8B8;
+  --bg-elevated:    #C4C4C4;
+  --bg-soft:        #9A9A9A;
+
+  --border:         rgba(0, 0, 0, 0.12);
+  --border-strong:  rgba(0, 0, 0, 0.22);
+
+  --text-primary:   #1A1A1A;
+  --text-secondary: #3A3A3A;
+  --text-muted:     #5A5A5A;
+
+  --nav-bg:         rgba(169, 169, 169, 0.92);
+  --nav-border:     rgba(0, 0, 0, 0.10);
+
+  --card-shadow:    0 4px 16px rgba(0, 0, 0, 0.12);
+  --glass-bg:       rgba(190, 190, 190, 0.7);
+  --glass-border:   rgba(0, 0, 0, 0.08);
+
   --accent-violet:  var(--primary);
   --accent-violet-light: var(--primary-light);
   --accent-violet-dark: var(--primary-dark);
-}
-
-/* Dark Mode (Elegant refinement) */
-html.dark {
-  --bg-page:        #121212;
-  --bg-surface:     #1A1A1A;
-  --bg-elevated:    #242424;
-  --bg-soft:        #2D2D2D;
-  
-  --border:         rgba(255, 255, 255, 0.08);
-  --border-strong:  rgba(255, 255, 255, 0.15);
-  
-  --text-primary:   #FAFAFA;
-  --text-secondary: #A1A1AA;
-  --text-muted:     #52525B;
-  
-  --nav-bg:         rgba(9, 9, 11, 0.85);
-  --nav-border:     rgba(255, 255, 255, 0.08);
-  
-  --card-shadow:    0 20px 50px rgba(0, 0, 0, 0.4);
-  --glass-bg:       rgba(18, 18, 21, 0.75);
-  --glass-border:   rgba(255, 255, 255, 0.08);
 }
 
 html, body {
@@ -150,7 +128,6 @@ html, body {
   animation: meshFlow 25s ease-in-out infinite alternate;
 }
 
-[data-theme='dark'] .nebula-mesh { opacity: 0.12; }
 
 @keyframes meshFlow {
   0% { transform: scale(1) translate(0, 0) rotate(0deg); }
@@ -173,7 +150,6 @@ html, body {
   background-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PScwIDAgMjAwIDIwMCcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJz4KICA8ZmlsdGVyIGlkPSduJz4KICAgIDxmZVR1cmJ1bGVuY2UgdHlwZT0nZnJhY3RhbE5vaXNlJyBiYXNlRnJlcXVlbmN5PScwLjY1JyBudW1PY3RhdmVzPSczJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+CiAgPC9maWx0ZXI+CiAgPHJlY3Qgd2lkdGg9JzEwMCUnIGhlaWdodD0nMTAwJScgZmlsdGVyPSd1cmwoI24pJyBvcGFjaXR5PScwLjA1Jy8+Cjwvc3ZnPg==");
   background-repeat: repeat;
 }
-[data-theme='dark'] .human-noise::before { opacity: 0.15; }
 
 /* Navigation & Menu */
 .human-side-menu.ant-menu-inline {

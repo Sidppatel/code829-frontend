@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { AxiosError } from 'axios';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
-import ThemeToggle from '@code829/shared/components/shared/ThemeToggle';
+
 
 export default function LoginPage() {
   const [form] = Form.useForm();
@@ -109,11 +109,6 @@ export default function LoginPage() {
             position: 'relative'
           }}
         >
-          {/* Theme toggle top-right */}
-          <div style={{ position: 'absolute', top: 24, right: 24 }}>
-            <ThemeToggle size="small" />
-          </div>
-
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <div style={{ 
               width: 64, 

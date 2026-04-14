@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { Typography, Button, Dropdown, Space } from 'antd';
 import { RocketOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import ThemeToggle from '../shared/ThemeToggle';
 import PulseIndicator from '../shared/PulseIndicator';
 import BrandLogo from '../shared/BrandLogo';
 import type { UserProfile, AdminUserProfile } from '../../types/auth';
@@ -81,13 +80,6 @@ export default function TopHeader({ isMobile, title, user, userMenuItems, showMe
             Live Experience
           </Button>
         )}
-        <ThemeToggle
-          className="hover-lift"
-          style={{
-            border: '1px solid var(--border)',
-            background: 'var(--bg-surface)'
-          }}
-        />
         <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
           <Button
             type="text"

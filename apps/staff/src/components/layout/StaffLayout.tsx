@@ -1,17 +1,14 @@
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Layout, Button, Space, Typography } from 'antd';
 import { LogoutOutlined } from '@ant-design/icons';
-import ThemeToggle from '@code829/shared/components/shared/ThemeToggle';
 import BrandLogo from '@code829/shared/components/shared/BrandLogo';
 import { useAuthStore } from '@code829/shared/stores/authStore';
-import { useTheme } from '@code829/shared/hooks/useTheme';
 
 const { Header, Content } = Layout;
 
 export default function StaffLayout() {
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
-  useTheme();
 
   const handleLogout = () => {
     logout();
@@ -54,12 +51,6 @@ export default function StaffLayout() {
         </div>
 
         <Space size={12}>
-          <ThemeToggle
-            style={{
-              border: '1px solid var(--border)',
-              background: 'var(--bg-surface)',
-            }}
-          />
           <Button
             type="text"
             icon={<LogoutOutlined />}

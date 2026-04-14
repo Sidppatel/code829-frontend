@@ -16,7 +16,6 @@ import {
 import type { MenuProps } from 'antd';
 import { Avatar, Grid } from 'antd';
 import { useAuth } from '@code829/shared/hooks/useAuth';
-import ThemeToggle from '@code829/shared/components/shared/ThemeToggle';
 import BrandLogo from '@code829/shared/components/shared/BrandLogo';
 
 const { Header, Content, Footer } = Layout;
@@ -112,8 +111,6 @@ export default function PublicLayout() {
         )}
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <ThemeToggle />
-          
           {isAuthenticated ? (
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <Avatar
@@ -192,15 +189,14 @@ export default function PublicLayout() {
           />
         </div>
         <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <ThemeToggle />
           {isAuthenticated ? (
-            <Button 
-              type="text" 
-              icon={<LogoutOutlined />} 
+            <Button
+              type="text"
+              icon={<LogoutOutlined />}
               onClick={() => {
                 logout();
                 setDrawerOpen(false);
-              }} 
+              }}
               style={{ color: 'var(--text-secondary)' }}
             >
               Logout
