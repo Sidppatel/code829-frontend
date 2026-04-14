@@ -115,7 +115,8 @@ export default function EventWizardPage() {
             : undefined,
           ticketTypes: data.ticketTypes?.map(tt => ({
             ...tt,
-            price: tt.priceCents / 100
+            name: (tt as any).label,
+            price: (tt as any).priceCents / 100
           })) || []
         });
       } catch {
