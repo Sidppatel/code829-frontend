@@ -53,26 +53,26 @@
   --duration-slow: 400ms;
 }
 
-/* Single Theme — Dark Gray */
+/* Single Theme — Dark Gray Background */
 :root {
   --bg-page:        #A9A9A9;
-  --bg-surface:     #B8B8B8;
-  --bg-elevated:    #C4C4C4;
-  --bg-soft:        #9A9A9A;
+  --bg-surface:     #FFFFFF;
+  --bg-elevated:    #F5F5F5;
+  --bg-soft:        #E8E8E8;
 
-  --border:         rgba(0, 0, 0, 0.12);
-  --border-strong:  rgba(0, 0, 0, 0.22);
+  --border:         rgba(0, 0, 0, 0.10);
+  --border-strong:  rgba(0, 0, 0, 0.20);
 
   --text-primary:   #1A1A1A;
-  --text-secondary: #3A3A3A;
-  --text-muted:     #5A5A5A;
+  --text-secondary: #4B4B4B;
+  --text-muted:     #787878;
 
-  --nav-bg:         rgba(169, 169, 169, 0.92);
-  --nav-border:     rgba(0, 0, 0, 0.10);
+  --nav-bg:         rgba(35, 35, 35, 0.92);
+  --nav-border:     rgba(255, 255, 255, 0.08);
 
-  --card-shadow:    0 4px 16px rgba(0, 0, 0, 0.12);
-  --glass-bg:       rgba(190, 190, 190, 0.7);
-  --glass-border:   rgba(0, 0, 0, 0.08);
+  --card-shadow:    0 4px 20px rgba(0, 0, 0, 0.15);
+  --glass-bg:       rgba(255, 255, 255, 0.85);
+  --glass-border:   rgba(0, 0, 0, 0.06);
 
   --accent-violet:  var(--primary);
   --accent-violet-light: var(--primary-light);

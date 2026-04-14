@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 // Centralized brand name — change here to update everywhere
-export const BRAND_NAME = 'North Mobile';
+export const BRAND_NAME = 'Code829';
 export const BRAND_TAGLINE = '';
 
 interface BrandLogoProps {
@@ -11,6 +11,7 @@ interface BrandLogoProps {
   collapsed?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  textColor?: string;
 }
 
 export default function BrandLogo({
@@ -19,6 +20,7 @@ export default function BrandLogo({
   collapsed = false,
   className,
   style,
+  textColor = 'var(--text-primary)',
 }: BrandLogoProps) {
   const isSm = size === 'sm';
   const isLg = size === 'lg';
@@ -58,7 +60,7 @@ export default function BrandLogo({
         <span style={{
           fontSize: textFontSize,
           fontWeight: 700,
-          color: 'var(--text-primary)',
+          color: textColor,
           letterSpacing: '-0.5px',
           fontFamily: "'Playfair Display', serif",
         }}>

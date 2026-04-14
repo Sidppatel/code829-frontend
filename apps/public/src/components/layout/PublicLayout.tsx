@@ -86,7 +86,7 @@ export default function PublicLayout() {
         }}
       >
         {/* Logo */}
-        <BrandLogo size="lg" showText={!isMobile} />
+        <BrandLogo size="lg" showText={!isMobile} textColor="#FFFFFF" />
 
         {!isMobile && (
           <div style={{ display: 'flex', gap: 8 }}>
@@ -96,12 +96,12 @@ export default function PublicLayout() {
                 type="text"
                 onClick={() => navigate(link.path)}
                 style={{
-                  color: location.pathname === link.path ? 'var(--accent-violet)' : 'var(--text-secondary)',
+                  color: location.pathname === link.path ? '#C4B5FD' : 'rgba(255,255,255,0.7)',
                   fontWeight: location.pathname === link.path ? 700 : 500,
                   fontSize: 15,
                   padding: '6px 16px',
                   borderRadius: 10,
-                  background: location.pathname === link.path ? 'rgba(99, 102, 241, 0.08)' : 'transparent',
+                  background: location.pathname === link.path ? 'rgba(124, 58, 237, 0.15)' : 'transparent',
                 }}
               >
                 {link.label}
