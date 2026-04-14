@@ -150,7 +150,7 @@ export default function PublicLayout() {
               type="text"
               icon={<MenuOutlined />}
               onClick={() => setDrawerOpen(true)}
-              style={{ color: 'var(--text-primary)', fontSize: 20 }}
+              style={{ color: '#FFFFFF', fontSize: 20 }}
             />
           )}
         </div>
@@ -291,7 +291,7 @@ export default function PublicLayout() {
                 alignItems: 'center',
                 gap: 2,
                 padding: '4px 12px',
-                color: active || isMenuOpen ? 'var(--accent-violet)' : 'var(--text-muted)',
+                color: active || isMenuOpen ? '#C4B5FD' : 'rgba(255,255,255,0.55)',
                 fontSize: 10,
                 fontFamily: "'Inter', sans-serif",
                 position: 'relative',
@@ -306,7 +306,7 @@ export default function PublicLayout() {
                   width: 4,
                   height: 4,
                   borderRadius: '50%',
-                  background: 'var(--accent-violet)',
+                  background: '#C4B5FD',
                 }} />
               )}
             </button>

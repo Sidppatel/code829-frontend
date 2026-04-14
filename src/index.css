@@ -43,8 +43,8 @@
     0 10px 20px rgba(0,0,0,0.04),
     0 20px 40px rgba(0,0,0,0.06);
   --shadow-hover:
-    0 20px 40px hsla(var(--p-h), var(--p-s), 10%, 0.1),
-    0 2px 4px hsla(var(--p-h), var(--p-s), 10%, 0.02);
+    0 16px 40px hsla(var(--p-h), var(--p-s), 30%, 0.18),
+    0 4px 12px hsla(var(--p-h), var(--p-s), 20%, 0.08);
 
   /* Motion Tokens */
   --ease-human: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -53,26 +53,37 @@
   --duration-slow: 400ms;
 }
 
-/* Single Theme — Dark Gray Background */
+/* Single Theme — Dark Gray with Premium Depth */
 :root {
+  /* Page: dark gray canvas */
   --bg-page:        #A9A9A9;
-  --bg-surface:     #FFFFFF;
-  --bg-elevated:    #F5F5F5;
-  --bg-soft:        #E8E8E8;
+  /* Cards: frosted white with subtle warmth */
+  --bg-surface:     rgba(255, 255, 255, 0.92);
+  /* Elevated: slightly brighter for popovers, dropdowns */
+  --bg-elevated:    #FFFFFF;
+  /* Soft: used for hover states, subtle fills */
+  --bg-soft:        rgba(124, 58, 237, 0.06);
 
-  --border:         rgba(0, 0, 0, 0.10);
-  --border-strong:  rgba(0, 0, 0, 0.20);
+  /* Borders with subtle violet tint */
+  --border:         rgba(80, 60, 120, 0.12);
+  --border-strong:  rgba(80, 60, 120, 0.22);
 
-  --text-primary:   #1A1A1A;
-  --text-secondary: #4B4B4B;
-  --text-muted:     #787878;
+  /* Text: high-contrast on white surfaces */
+  --text-primary:   #1B1225;
+  --text-secondary: #4A3F5C;
+  --text-muted:     #8A8198;
 
-  --nav-bg:         rgba(35, 35, 35, 0.92);
-  --nav-border:     rgba(255, 255, 255, 0.08);
+  /* Nav: rich dark with glass effect */
+  --nav-bg:         rgba(22, 15, 35, 0.88);
+  --nav-border:     rgba(124, 58, 237, 0.15);
 
-  --card-shadow:    0 4px 20px rgba(0, 0, 0, 0.15);
-  --glass-bg:       rgba(255, 255, 255, 0.85);
-  --glass-border:   rgba(0, 0, 0, 0.06);
+  /* Card shadow: layered depth with violet tint */
+  --card-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(80, 60, 120, 0.08),
+    0 12px 32px rgba(80, 60, 120, 0.06);
+  --glass-bg:       rgba(255, 255, 255, 0.75);
+  --glass-border:   rgba(124, 58, 237, 0.08);
 
   --accent-violet:  var(--primary);
   --accent-violet-light: var(--primary-light);
@@ -124,7 +135,7 @@ html, body {
     radial-gradient(circle at 80% 70%, var(--accent-rose), transparent 45%),
     radial-gradient(circle at 50% 50%, var(--accent-violet-dark), transparent 70%);
   filter: blur(100px);
-  opacity: 0.05;
+  opacity: 0.15;
   animation: meshFlow 25s ease-in-out infinite alternate;
 }
 
@@ -204,7 +215,15 @@ html, body {
   border: 1px solid var(--border);
   box-shadow: var(--card-shadow);
   border-radius: var(--radius-lg);
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: var(--glass-border);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(80, 60, 120, 0.12),
+    0 20px 48px rgba(124, 58, 237, 0.08);
 }
 
 .hover-lift {
@@ -212,8 +231,10 @@ html, body {
 }
 
 .hover-lift:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: var(--shadow-hover);
+  transform: translateY(-6px) scale(1.015);
+  box-shadow:
+    0 12px 32px rgba(124, 58, 237, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.06);
 }
 
 .press-state:active {
@@ -287,9 +308,9 @@ html, body {
   animation: float-orb ease-in-out infinite;
   pointer-events: none;
 }
-.orb-1 { width: 400px; height: 400px; background: rgba(99,102,241,0.25); top: -100px; left: -100px; animation-duration: 15s; }
-.orb-2 { width: 350px; height: 350px; background: rgba(244,63,94,0.15); bottom: -50px; right: -50px; animation-duration: 18s; animation-delay: 2s; }
-.orb-3 { width: 250px; height: 250px; background: rgba(99,102,241,0.15); top: 40%; left: 60%; animation-duration: 22s; animation-delay: 4s; }
+.orb-1 { width: 400px; height: 400px; background: rgba(124,58,237,0.20); top: -100px; left: -100px; animation-duration: 15s; }
+.orb-2 { width: 350px; height: 350px; background: rgba(244,63,94,0.12); bottom: -50px; right: -50px; animation-duration: 18s; animation-delay: 2s; }
+.orb-3 { width: 250px; height: 250px; background: rgba(124,58,237,0.10); top: 40%; left: 60%; animation-duration: 22s; animation-delay: 4s; }
 
 /* Hero section */
 .hero-section {
@@ -299,8 +320,8 @@ html, body {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background: 
-    linear-gradient(to bottom, rgba(26, 26, 26, 0.5), rgba(26, 26, 26, 0.7)),
+  background:
+    linear-gradient(160deg, rgba(22, 15, 35, 0.85) 0%, rgba(60, 30, 90, 0.7) 40%, rgba(124, 58, 237, 0.3) 100%),
     url('/site-bg.jpg') center / cover no-repeat;
   padding: 80px 20px 60px;
   text-align: center;
@@ -543,7 +564,7 @@ html, body {
   border-radius: 12px;
   border: 1px solid var(--border);
 }
-html.light .next-event-stat {
+.next-event-stat {
   background: rgba(124,58,237,0.04);
 }
 .next-event-stat-value {
