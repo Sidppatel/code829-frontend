@@ -321,10 +321,16 @@ html, body {
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(160deg, rgba(22, 15, 35, 0.45) 0%, rgba(30, 15, 50, 0.35) 50%, rgba(0, 0, 0, 0.25) 100%),
+    linear-gradient(160deg, rgba(22, 15, 35, 0.3) 0%, rgba(20, 10, 40, 0.2) 50%, rgba(0, 0, 0, 0.15) 100%),
     url('/site-bg.jpg') center / cover no-repeat;
   padding: 80px 20px 60px;
   text-align: center;
+  /* Break out of parent padding to go full-width */
+  margin-left: -16px;
+  margin-right: -16px;
+  width: calc(100% + 32px);
+  margin-top: -130px;
+  padding-top: 160px;
 }
 
 /* Mobile-first page padding */
