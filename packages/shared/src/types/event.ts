@@ -29,7 +29,6 @@ export interface EventDetail extends EventSummary {
   venue: VenueBasic;
   organizerId?: string;
   organizerName?: string;
-  pricingTiers?: EventPricingTier[];
   pricePerPersonCents?: number;
   gridRows?: number;
   gridCols?: number;

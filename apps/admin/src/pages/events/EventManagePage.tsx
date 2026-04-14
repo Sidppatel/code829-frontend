@@ -97,8 +97,16 @@ export default function EventManagePage() {
   const isGrid = event.layoutMode === 'Grid';
   const isOpen = event.layoutMode === 'Open';
 
-  const pricingTiers = event.pricingTiers || [];
-  const calculatedMaxCapacity = isOpen 
+  const pricingTiers = (event.ticketTypes || []).map((tt: any) => ({
+    name: (tt as any).label || tt.name,
+    priceCents: tt.priceCents,
+    capacity: tt.capacity,
+    count: tt.capacity || 0,
+    soldCount: tt.soldCount || 0,
+    totalCapacity: tt.capacity,
+    description: tt.description,
+  }));
+  const calculatedMaxCapacity = isOpen
     ? (event.maxCapacity || pricingTiers.reduce((acc, t) => acc + (t.totalCapacity || t.capacity || 0), 0))
     : (event.maxCapacity || 0);
 
@@ -224,7 +232,7 @@ export default function EventManagePage() {
             </Col>
           </Row>
                   {/* Pricing Tiers Breakdown */}
-                  {event.pricingTiers && event.pricingTiers.length > 0 && (
+                  {pricingTiers && pricingTiers.length > 0 && (
                     <div style={{ marginTop: 32 }}>
                       <div style={{ 
                         color: 'var(--text-muted)', 
@@ -237,13 +245,13 @@ export default function EventManagePage() {
                         Detailed Pricing Breakdown
                       </div>
                       <EventPricingTiersTable 
-                        tiers={event.pricingTiers} 
+                        tiers={pricingTiers} 
                         layoutMode={isOpen ? 'Open' : 'Grid'} 
                       />
                     </div>
                   )}
 
-                  {(!event.pricingTiers || event.pricingTiers.length === 0) && (
+                  {(!pricingTiers || pricingTiers.length === 0) && (
                     <div style={{ 
                       marginTop: 24, 
                       padding: '24px', 
