@@ -51,9 +51,6 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
         return (
           <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
             {fee > 0 ? centsToUSD(fee) : '—'}
-            {record.platformFeeCents != null && (
-              <Tag color="blue" style={{ marginLeft: 6, fontSize: 10, borderRadius: 4, padding: '0 4px' }}>Custom</Tag>
-            )}
           </span>
         );
       },
