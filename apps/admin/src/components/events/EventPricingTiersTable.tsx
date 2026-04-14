@@ -57,52 +57,6 @@ export default function EventPricingTiersTable({ tiers, loading, layoutMode }: E
         );
       },
     },
-    {
-      title: 'Sales Status',
-      key: 'progress',
-      width: 250,
-      render: (_, record) => {
-        const sold = record.soldCount || 0;
-        const total = record.capacity || 0;
-        
-        if (layoutMode === 'Open') {
-          const percent = total > 0 ? Math.round((sold / total) * 100) : 0;
-          return (
-            <div style={{ minWidth: 160 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 11, fontWeight: 600 }}>
-                <span style={{ color: 'var(--text-muted)' }}>Progress</span>
-                <span style={{ color: percent >= 100 ? 'var(--accent-red)' : 'var(--text-secondary)' }}>{percent}%</span>
-              </div>
-              <Progress 
-                percent={percent} 
-                size="small" 
-                strokeColor={percent >= 100 ? 'var(--accent-red)' : 'var(--primary)'} 
-                trailColor="var(--bg-elevated)"
-                showInfo={false}
-              />
-            </div>
-          );
-        }
-
-        // For Grid events, "sold" means booked tables
-        const percent = record.count > 0 ? Math.round((sold / record.count) * 100) : 0;
-        return (
-          <div style={{ minWidth: 160 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 11, fontWeight: 600 }}>
-              <span style={{ color: 'var(--text-muted)' }}>Inventory</span>
-              <span style={{ color: percent >= 100 ? 'var(--accent-red)' : 'var(--text-secondary)' }}>{percent}% booked</span>
-            </div>
-            <Progress 
-              percent={percent} 
-              size="small" 
-              strokeColor={percent >= 100 ? 'var(--accent-red)' : 'var(--primary)'} 
-              trailColor="var(--bg-elevated)"
-              showInfo={false}
-            />
-          </div>
-        );
-      },
-    },
   ];
 
   return (
@@ -110,7 +64,8 @@ export default function EventPricingTiersTable({ tiers, loading, layoutMode }: E
       borderRadius: 12, 
       overflow: 'hidden', 
       border: '1px solid var(--border-soft)',
-      background: 'rgba(255,255,255,0.02)'
+      background: 'rgba(255,255,255,0.02)',
+      padding: '12px'
     }}>
       <Table
         dataSource={tiers}
