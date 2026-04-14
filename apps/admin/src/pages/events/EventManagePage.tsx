@@ -97,17 +97,20 @@ export default function EventManagePage() {
   const isGrid = event.layoutMode === 'Grid';
   const isOpen = event.layoutMode === 'Open';
 
-  const pricingTiers = (event.ticketTypes || []).map((tt: any) => ({
-    name: (tt as any).label || tt.name,
+  const ticketTypes = (event.ticketTypes || []) as any[];
+  const pricingRows = ticketTypes.map((tt: any) => ({
+    id: tt.id,
+    name: tt.label || tt.name,
     priceCents: tt.priceCents,
-    capacity: tt.capacity,
-    count: tt.capacity || 0,
+    platformFeeCents: tt.platformFeeCents ?? null,
     soldCount: tt.soldCount || 0,
-    totalCapacity: tt.capacity,
+    capacity: tt.maxQuantity ?? tt.capacity ?? null,
     description: tt.description,
   }));
+  const totalCapacity = pricingRows.reduce((acc, t) => acc + (t.capacity || 0), 0);
+  const totalSold = pricingRows.reduce((acc, t) => acc + t.soldCount, 0);
   const calculatedMaxCapacity = isOpen
-    ? (event.maxCapacity || pricingTiers.reduce((acc, t) => acc + (t.totalCapacity || t.capacity || 0), 0))
+    ? (event.maxCapacity || totalCapacity)
     : (event.maxCapacity || 0);
 
   return (
@@ -201,7 +204,7 @@ export default function EventManagePage() {
             )}
           </div>
 
-          <Row gutter={[32, 32]} style={{ marginBottom: pricingTiers.length > 0 ? 32 : 0 }}>
+          <Row gutter={[32, 32]} style={{ marginBottom: pricingRows.length > 0 ? 32 : 0 }}>
             <Col xs={24} sm={8}>
               <div style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 }}>
                 Max Capacity
@@ -210,7 +213,7 @@ export default function EventManagePage() {
                 {calculatedMaxCapacity > 0 ? calculatedMaxCapacity : 'Unlimited'}
               </div>
             </Col>
-            
+
             {!isOpen && (
               <Col xs={24} sm={8}>
                 <div style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 }}>
@@ -224,39 +227,36 @@ export default function EventManagePage() {
 
             <Col xs={24} sm={8}>
               <div style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 }}>
-                Total Sold / Booked
+                Sold / Capacity
               </div>
               <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--accent-violet)', letterSpacing: '-1px' }}>
-                {event.totalSold || 0}
+                {totalSold} <span style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-muted)' }}>/ {calculatedMaxCapacity > 0 ? calculatedMaxCapacity : '∞'}</span>
               </div>
             </Col>
           </Row>
                   {/* Pricing Tiers Breakdown */}
-                  {pricingTiers && pricingTiers.length > 0 && (
+                  {pricingRows.length > 0 && (
                     <div style={{ marginTop: 32 }}>
-                      <div style={{ 
-                        color: 'var(--text-muted)', 
-                        fontSize: 11, 
-                        fontWeight: 700, 
-                        textTransform: 'uppercase', 
-                        letterSpacing: 1, 
-                        marginBottom: 16 
+                      <div style={{
+                        color: 'var(--text-muted)',
+                        fontSize: 11,
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: 1,
+                        marginBottom: 16
                       }}>
-                        Detailed Pricing Breakdown
+                        Pricing Breakdown
                       </div>
-                      <EventPricingTiersTable 
-                        tiers={pricingTiers} 
-                        layoutMode={isOpen ? 'Open' : 'Grid'} 
-                      />
+                      <EventPricingTiersTable tiers={pricingRows} />
                     </div>
                   )}
 
-                  {(!pricingTiers || pricingTiers.length === 0) && (
-                    <div style={{ 
-                      marginTop: 24, 
-                      padding: '24px', 
-                      borderRadius: 12, 
-                      background: 'var(--bg-soft)', 
+                  {pricingRows.length === 0 && (
+                    <div style={{
+                      marginTop: 24,
+                      padding: '24px',
+                      borderRadius: 12,
+                      background: 'var(--bg-soft)',
                       border: '1px dashed var(--border-soft)',
                       textAlign: 'center'
                     }}>

@@ -1,23 +1,35 @@
 import { Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { centsToUSD } from '@code829/shared/utils/currency';
-import type { EventPricingTier } from '@code829/shared/types/event';
 
-interface EventPricingTiersTableProps {
-  tiers: EventPricingTier[];
-  loading?: boolean;
-  layoutMode: 'Grid' | 'Open';
+export interface PricingRow {
+  id?: string;
+  name: string;
+  priceCents: number;
+  platformFeeCents?: number | null;
+  soldCount: number;
+  capacity: number | null;
+  description?: string;
 }
 
-export default function EventPricingTiersTable({ tiers, loading, layoutMode }: EventPricingTiersTableProps) {
-  const columns: ColumnsType<EventPricingTier> = [
+interface EventPricingTiersTableProps {
+  tiers: PricingRow[];
+  loading?: boolean;
+  defaultPlatformFeeCents?: number;
+}
+
+export default function EventPricingTiersTable({ tiers, loading, defaultPlatformFeeCents = 0 }: EventPricingTiersTableProps) {
+  const columns: ColumnsType<PricingRow> = [
     {
-      title: layoutMode === 'Grid' ? 'Table Type' : 'Ticket Tier',
+      title: 'Ticket Tier',
       dataIndex: 'name',
       key: 'name',
-      render: (name: string) => (
-        <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-          {name}
+      render: (name: string, record: PricingRow) => (
+        <div>
+          <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{name}</div>
+          {record.description && (
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{record.description}</div>
+          )}
         </div>
       ),
     },
@@ -25,43 +37,57 @@ export default function EventPricingTiersTable({ tiers, loading, layoutMode }: E
       title: 'Price',
       dataIndex: 'priceCents',
       key: 'price',
-      width: 120,
+      width: 110,
       render: (price: number) => (
-        <Tag color="gold" style={{ fontWeight: 600, borderRadius: 6 }}>
-          {centsToUSD(price)}
-        </Tag>
+        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{centsToUSD(price)}</span>
       ),
     },
     {
-      title: layoutMode === 'Grid' ? 'Max Capacity' : 'Sold / Capacity',
-      key: 'capacity',
-      width: 200,
-      render: (_, record) => {
-        if (layoutMode === 'Grid') {
-          return (
-            <div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
-                {record.totalCapacity ?? 0} <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}>people</span>
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                {record.capacity || 0} seats × {record.count} tables
-              </div>
-            </div>
-          );
-        }
+      title: 'Platform Fee',
+      key: 'fee',
+      width: 120,
+      render: (_: unknown, record: PricingRow) => {
+        const fee = record.platformFeeCents ?? defaultPlatformFeeCents;
         return (
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-            <strong>{record.soldCount || 0}</strong> / {record.totalCapacity != null && record.totalCapacity > 0 ? record.totalCapacity : '∞'}
-          </div>
+          <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
+            {fee > 0 ? centsToUSD(fee) : '—'}
+            {record.platformFeeCents != null && (
+              <Tag color="blue" style={{ marginLeft: 6, fontSize: 10, borderRadius: 4, padding: '0 4px' }}>Custom</Tag>
+            )}
+          </span>
         );
       },
+    },
+    {
+      title: 'Total',
+      key: 'total',
+      width: 120,
+      render: (_: unknown, record: PricingRow) => {
+        const fee = record.platformFeeCents ?? defaultPlatformFeeCents;
+        const total = record.priceCents + fee;
+        return (
+          <Tag color="gold" style={{ fontWeight: 700, borderRadius: 6, fontSize: 13 }}>
+            {centsToUSD(total)}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: 'Sold / Capacity',
+      key: 'capacity',
+      width: 140,
+      render: (_: unknown, record: PricingRow) => (
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+          <strong>{record.soldCount}</strong> / {record.capacity != null && record.capacity > 0 ? record.capacity : '∞'}
+        </div>
+      ),
     },
   ];
 
   return (
-    <div style={{ 
-      borderRadius: 12, 
-      overflow: 'hidden', 
+    <div style={{
+      borderRadius: 12,
+      overflow: 'hidden',
       border: '1px solid var(--border-soft)',
       background: 'rgba(255,255,255,0.02)',
       padding: '12px'
