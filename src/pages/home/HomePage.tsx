@@ -71,15 +71,15 @@ export default function HomePage() {
               display: 'inline-flex',
               padding: '8px 20px',
               borderRadius: 30,
-              background: 'rgba(99, 102, 241, 0.1)',
-              border: '1px solid rgba(99, 102, 241, 0.15)',
-              color: 'var(--accent-violet)',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              color: '#C4B5FD',
               fontSize: 12,
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: 2,
               marginBottom: 32,
-              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.05)'
+              backdropFilter: 'blur(12px)',
             }}>
               ✨ Experience the Unforgettable
             </div>
@@ -90,7 +90,7 @@ export default function HomePage() {
             style={{
               fontSize: 'clamp(3rem, 10vw, 6.5rem)',
               fontWeight: 900,
-              color: 'var(--text-primary)',
+              color: '#FFFFFF',
               lineHeight: 1,
               marginBottom: 32,
               letterSpacing: '-0.06em'
@@ -104,7 +104,7 @@ export default function HomePage() {
             variants={itemVariants}
             style={{
               fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
-              color: 'var(--text-secondary)',
+              color: 'rgba(255, 255, 255, 0.75)',
               maxWidth: 700,
               margin: '0 auto 56px',
               lineHeight: 1.6,
@@ -145,8 +145,10 @@ export default function HomePage() {
                 borderRadius: 18,
                 fontSize: 18,
                 fontWeight: 600,
-                color: 'var(--text-primary)',
-                border: '1px solid var(--border)'
+                color: '#FFFFFF',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
+                background: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(12px)',
               }}
             >
               Request Access
