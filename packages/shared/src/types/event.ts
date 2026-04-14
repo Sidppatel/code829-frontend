@@ -75,6 +75,7 @@ export interface EventTicketType {
 }
 
 export interface EventPricingTier {
+  id?: string;
   name: string;
   priceCents: number;
   capacity?: number;

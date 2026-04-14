@@ -115,8 +115,9 @@ export default function EventWizardPage() {
             : undefined,
           ticketTypes: data.ticketTypes?.map(tt => ({
             ...tt,
-            name: (tt as any).label,
-            price: (tt as any).priceCents / 100
+            name: (tt as any).label ? [(tt as any).label] : [],
+            price: (tt as any).priceCents / 100,
+            capacity: (tt as any).maxQuantity
           })) || []
         });
       } catch {
@@ -159,11 +160,13 @@ export default function EventWizardPage() {
       };
       
       // For Open mode, max capacity is sum of ticket types
-      if (layoutMode === 'Open' && payload.ticketTypes) {
+      if (layoutMode === 'Open' && payload.ticketTypes && payload.ticketTypes.length > 0) {
         payload.maxCapacity = payload.ticketTypes.reduce((acc, curr) => acc + (curr.capacity || 0), 0);
+        // If the sum is 0, set to null to avoid DB constraint violation (CK_events_MaxCapacity > 0)
+        if (payload.maxCapacity === 0) payload.maxCapacity = undefined;
       } else if (layoutMode === 'Open') {
-        payload.maxCapacity = Number(values.maxCapacity);
-        payload.pricePerPersonCents = Math.round(Number(values.pricePerPerson) * 100);
+        payload.maxCapacity = values.maxCapacity ? Number(values.maxCapacity) : undefined;
+        payload.pricePerPersonCents = values.pricePerPerson ? Math.round(Number(values.pricePerPerson) * 100) : undefined;
       }
       if (isEditMode && id) {
         await adminEventsApi.update(id, payload);
@@ -419,6 +422,9 @@ export default function EventWizardPage() {
                             </Button>
                           }
                         >
+                          <Form.Item {...restField} name={[name, 'id']} hidden>
+                            <Input />
+                          </Form.Item>
                           <Row gutter={16}>
                             <Col xs={24} sm={12}>
                               <Form.Item

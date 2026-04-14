@@ -60,7 +60,7 @@ export default function EventPricingTiersTable({ tiers, loading, layoutMode }: E
     {
       title: 'Sales Status',
       key: 'progress',
-      width: 200,
+      width: 250,
       render: (_, record) => {
         const sold = record.soldCount || 0;
         const total = record.capacity || 0;
@@ -68,13 +68,17 @@ export default function EventPricingTiersTable({ tiers, loading, layoutMode }: E
         if (layoutMode === 'Open') {
           const percent = total > 0 ? Math.round((sold / total) * 100) : 0;
           return (
-            <div style={{ minWidth: 120 }}>
+            <div style={{ minWidth: 160 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 11, fontWeight: 600 }}>
+                <span style={{ color: 'var(--text-muted)' }}>Progress</span>
+                <span style={{ color: percent >= 100 ? 'var(--accent-red)' : 'var(--text-secondary)' }}>{percent}%</span>
+              </div>
               <Progress 
                 percent={percent} 
                 size="small" 
-                strokeColor="var(--primary)" 
-                trailColor="var(--bg-soft)"
-                format={(p) => <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{p}%</span>}
+                strokeColor={percent >= 100 ? 'var(--accent-red)' : 'var(--primary)'} 
+                trailColor="var(--bg-elevated)"
+                showInfo={false}
               />
             </div>
           );
@@ -83,13 +87,17 @@ export default function EventPricingTiersTable({ tiers, loading, layoutMode }: E
         // For Grid events, "sold" means booked tables
         const percent = record.count > 0 ? Math.round((sold / record.count) * 100) : 0;
         return (
-          <div style={{ minWidth: 120 }}>
+          <div style={{ minWidth: 160 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 11, fontWeight: 600 }}>
+              <span style={{ color: 'var(--text-muted)' }}>Inventory</span>
+              <span style={{ color: percent >= 100 ? 'var(--accent-red)' : 'var(--text-secondary)' }}>{percent}% booked</span>
+            </div>
             <Progress 
               percent={percent} 
               size="small" 
-              strokeColor="var(--primary)" 
-              trailColor="var(--bg-soft)"
-              format={(p) => <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{p}% booked</span>}
+              strokeColor={percent >= 100 ? 'var(--accent-red)' : 'var(--primary)'} 
+              trailColor="var(--bg-elevated)"
+              showInfo={false}
             />
           </div>
         );
@@ -98,17 +106,22 @@ export default function EventPricingTiersTable({ tiers, loading, layoutMode }: E
   ];
 
   return (
-    <HumanCard className="human-noise" style={{ padding: 0, overflow: 'hidden' }}>
+    <div style={{ 
+      borderRadius: 12, 
+      overflow: 'hidden', 
+      border: '1px solid var(--border-soft)',
+      background: 'rgba(255,255,255,0.02)'
+    }}>
       <Table
         dataSource={tiers}
         columns={columns}
-        rowKey={(record) => record.name}
+        rowKey={(record, index) => record.id || `${record.name}-${index}`}
         loading={loading}
         pagination={false}
         size="middle"
         style={{ background: 'transparent' }}
-        className="human-table"
+        className="human-table-compact"
       />
-    </HumanCard>
+    </div>
   );
 }

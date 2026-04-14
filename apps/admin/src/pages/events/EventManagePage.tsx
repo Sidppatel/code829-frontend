@@ -97,13 +97,18 @@ export default function EventManagePage() {
   const isGrid = event.layoutMode === 'Grid';
   const isOpen = event.layoutMode === 'Open';
 
+  const pricingTiers = event.pricingTiers || [];
+  const calculatedMaxCapacity = isOpen 
+    ? (event.maxCapacity || pricingTiers.reduce((acc, t) => acc + (t.totalCapacity || t.capacity || 0), 0))
+    : (event.maxCapacity || 0);
+
   return (
     <div>
       {/* Section 1 -- Event Status Banner */}
-      <div className="edit-mode-banner" style={{ marginBottom: 16 }}>
+      <div className="edit-mode-banner" style={{ marginBottom: 24 }}>
         <StatusPill status={event.status} />
-        <span>
-          <strong>{event.title}</strong> · {event.category}
+        <span style={{ fontSize: 15 }}>
+          <strong>{event.title}</strong> · <span style={{ color: 'var(--text-muted)' }}>{event.category}</span>
         </span>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
           {(event.status === 'Draft' || event.status === 'Published') && (
@@ -112,104 +117,109 @@ export default function EventManagePage() {
               icon={<EditOutlined />}
               size="small"
               onClick={() => navigate(`/events/${id}/edit`)}
-              style={{ borderRadius: 8 }}
+              style={{ borderRadius: 8, height: 32, padding: '0 16px', fontWeight: 600 }}
             >
-              Edit
+              Edit Details
             </Button>
           )}
         </div>
       </div>
 
       {/* Section 2 -- Event Overview Details */}
-      <div className="admin-section">
-        <div className="admin-section-title"><InfoCircleOutlined /> Overview</div>
-        <Row gutter={[16, 12]}>
-          <Col xs={24} sm={12}>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>DATE & TIME</div>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+      <HumanCard style={{ marginBottom: 24, padding: 24, border: '1px solid var(--border-soft)' }}>
+        <div className="admin-section-title" style={{ marginBottom: 20 }}>
+          <InfoCircleOutlined style={{ color: 'var(--primary)' }} /> Overview
+        </div>
+        <Row gutter={[32, 20]}>
+          <Col xs={24} sm={8}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date & Time</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
               {formatDateRange(event.startDate, event.endDate)}
             </div>
           </Col>
-          <Col xs={24} sm={12}>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>VENUE</div>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+          <Col xs={24} sm={8}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Venue</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
               {event.venueName || event.venue?.name || 'Virtual'}
               { (event.venueCity || event.venue?.city) ? `, ${event.venueCity || event.venue?.city}` : '' }
             </div>
           </Col>
-          <Col xs={24} sm={12}>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>FEATURED</div>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-              {event.isFeatured ? 'Yes' : 'No'}
+          <Col xs={24} sm={8}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Featured</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+              <Tag color={event.isFeatured ? 'gold' : 'default'} style={{ borderRadius: 4, fontWeight: 700, margin: 0 }}>
+                {event.isFeatured ? 'FEATURED' : 'NO'}
+              </Tag>
             </div>
           </Col>
         </Row>
-      </div>
+      </HumanCard>
 
       {/* Section 3 -- Seating & Pricing */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
           <div style={{ 
-            width: 32, 
-            height: 32, 
-            borderRadius: 8, 
+            width: 36, 
+            height: 36, 
+            borderRadius: 10, 
             background: 'var(--primary-soft)', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            color: 'var(--primary)'
+            color: 'var(--primary)',
+            fontSize: 18
           }}>
             <AppstoreOutlined />
           </div>
-          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Seating & Pricing</h3>
+          <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '-0.3px' }}>Seating & Pricing</h3>
         </div>
 
         <HumanCard 
           className="human-noise" 
-          style={{ padding: 24, border: '1px solid var(--border-soft)' }}
+          style={{ padding: 28, border: '1px solid var(--border-soft)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
             <Tag 
               color="blue" 
               icon={isOpen ? <UserOutlined /> : <BorderOutlined />}
-              style={{ borderRadius: 6, padding: '2px 10px', fontWeight: 600 }}
+              style={{ borderRadius: 6, padding: '4px 12px', fontWeight: 700, fontSize: 12, border: 'none' }}
             >
-              {isOpen ? 'Open Seating' : 'Table Seating (Grid)'}
+              {isOpen ? 'OPEN SEATING' : 'TABLE SEATING (GRID)'}
             </Tag>
             {!isOpen && (
-              <Tag color="purple" style={{ borderRadius: 6, fontWeight: 600 }}>
-                {event.gridRows} × {event.gridCols} Layout
+              <Tag color="purple" style={{ borderRadius: 6, padding: '4px 12px', fontWeight: 700, fontSize: 12, border: 'none' }}>
+                {event.gridRows} × {event.gridCols} LAYOUT
               </Tag>
             )}
           </div>
 
-          <Row gutter={[24, 24]}>
+          <Row gutter={[32, 32]} style={{ marginBottom: pricingTiers.length > 0 ? 32 : 0 }}>
             <Col xs={24} sm={8}>
-              <div style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
+              <div style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 }}>
                 Max Capacity
               </div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
-                {event.maxCapacity || 'Unlimited'}
+              <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1px' }}>
+                {calculatedMaxCapacity > 0 ? calculatedMaxCapacity : 'Unlimited'}
               </div>
             </Col>
             
             {!isOpen && (
               <Col xs={24} sm={8}>
-                <div style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
+                <div style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 }}>
                   Available Tables
                 </div>
-                <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
+                <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1px' }}>
                   {event.noOfAvailableTables}
                 </div>
               </Col>
             )}
 
             <Col xs={24} sm={8}>
-              <div style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
+              <div style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 }}>
                 Total Sold / Booked
               </div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
-                {event.totalSold}
+              <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--accent-violet)', letterSpacing: '-1px' }}>
+                {event.totalSold || 0}
               </div>
             </Col>
           </Row>
