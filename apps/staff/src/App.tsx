@@ -7,6 +7,8 @@ import StaffLayout from './components/layout/StaffLayout';
 
 const StaffLoginPage = lazy(() => import('./pages/login/StaffLoginPage'));
 const StaffSignupPage = lazy(() => import('./pages/signup/StaffSignupPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/forgot-password/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/reset-password/ResetPasswordPage'));
 const CheckInSelectPage = lazy(() => import('./pages/checkin/CheckInSelectPage'));
 const CheckInPage = lazy(() => import('./pages/checkin/CheckInPage'));
 
@@ -18,6 +20,8 @@ export default function App() {
           <Routes>
             <Route path="login" element={<StaffLoginPage />} />
             <Route path="signup" element={<StaffSignupPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="reset-password" element={<ResetPasswordPage />} />
             <Route element={<ProtectedRoute minRole="Staff"><StaffLayout /></ProtectedRoute>}>
               <Route index element={<Navigate to="checkin/select" replace />} />
               <Route path="checkin/select" element={<CheckInSelectPage />} />

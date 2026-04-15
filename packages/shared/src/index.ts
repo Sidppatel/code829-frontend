@@ -47,6 +47,8 @@ export { ThemedApp } from './components/ThemedApp';
 export { default as ProtectedRoute } from './components/auth/ProtectedRoute';
 export { default as AdminLoginForm } from './components/auth/AdminLoginForm';
 export { default as InvitationSignupForm } from './components/auth/InvitationSignupForm';
+export { default as ForgotPasswordForm } from './components/auth/ForgotPasswordForm';
+export { default as ResetPasswordForm } from './components/auth/ResetPasswordForm';
 
 // Types (re-export for convenience)
 export type {

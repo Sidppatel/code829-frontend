@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Form, Input, Button, Typography, Card, App } from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { adminAuthApi } from '../../services/adminAuthApi';
 import BrandLogo from '../shared/BrandLogo';
 
 interface AdminLoginFormProps {
   title?: string;
+  forgotPasswordPath?: string;
 }
 
-export default function AdminLoginForm({ title = 'Sign In' }: AdminLoginFormProps) {
+export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath = '/forgot-password' }: AdminLoginFormProps) {
   const [loading, setLoading] = useState(false);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
@@ -52,6 +53,9 @@ export default function AdminLoginForm({ title = 'Sign In' }: AdminLoginFormProp
           <Form.Item name="password" rules={[{ required: true, message: 'Please enter your password' }]}>
             <Input.Password prefix={<LockOutlined />} placeholder="Password" size="large" />
           </Form.Item>
+          <div style={{ textAlign: 'right', marginBottom: 16, marginTop: -8 }}>
+            <Link to={forgotPasswordPath} style={{ fontSize: 13 }}>Forgot password?</Link>
+          </div>
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} block size="large">
               Sign In

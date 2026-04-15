@@ -49,4 +49,10 @@ export const adminAuthApi = {
 
   logout: () =>
     apiClient.post('/admin/auth/logout'),
+
+  requestPasswordReset: (email: string) =>
+    apiClient.post('/admin/auth/forgot-password', { email }),
+
+  resetPassword: (token: string, newPassword: string) =>
+    apiClient.post('/admin/auth/reset-password', { token, newPassword }),
 };

@@ -6,6 +6,8 @@ import ProtectedRoute from '@code829/shared/components/auth/ProtectedRoute';
 import DeveloperLayout from './components/layout/DeveloperLayout';
 
 const DevLoginPage = lazy(() => import('./pages/login/DevLoginPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/forgot-password/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/reset-password/ResetPasswordPage'));
 const DevLogsPage = lazy(() => import('./pages/logs/DevLogsPage'));
 const EmailLogsPage = lazy(() => import('./pages/email-logs/EmailLogsPage'));
 const SystemLogsPage = lazy(() => import('./pages/system-logs/SystemLogsPage'));
@@ -23,6 +25,8 @@ export default function App() {
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path="login" element={<DevLoginPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="reset-password" element={<ResetPasswordPage />} />
             <Route element={<ProtectedRoute minRole="Developer"><DeveloperLayout /></ProtectedRoute>}>
               <Route index element={<DevLogsPage />} />
               <Route path="email-logs" element={<EmailLogsPage />} />

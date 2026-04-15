@@ -7,6 +7,8 @@ import AdminLayout from './components/layout/AdminLayout';
 
 const AdminLoginPage = lazy(() => import('./pages/login/AdminLoginPage'));
 const AdminSignupPage = lazy(() => import('./pages/signup/AdminSignupPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/forgot-password/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/reset-password/ResetPasswordPage'));
 const AdminDashboardPage = lazy(() => import('./pages/dashboard/AdminDashboardPage'));
 const AdminEventsListPage = lazy(() => import('./pages/events/EventsListPage'));
 const EventWizardPage = lazy(() => import('./pages/events/EventWizardPage'));
@@ -31,6 +33,8 @@ export default function App() {
           <Routes>
             <Route path="login" element={<AdminLoginPage />} />
             <Route path="signup" element={<AdminSignupPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="reset-password" element={<ResetPasswordPage />} />
             <Route element={<ProtectedRoute minRole="Admin"><AdminLayout /></ProtectedRoute>}>
               <Route index element={<AdminDashboardPage />} />
               <Route path="events" element={<AdminEventsListPage />} />
