@@ -15,12 +15,15 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, minRole = 'User' }: Props) {
-  const { token, user } = useAuthStore();
+  const { token, user, logout } = useAuthStore();
   const location = useLocation();
   if (!token || !user) {
     const returnUrl = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?returnUrl=${returnUrl}`} replace />;
   }
-  if (ROLE_LEVEL[user.role] < ROLE_LEVEL[minRole]) return <Navigate to="/" replace />;
+  if (ROLE_LEVEL[user.role] < ROLE_LEVEL[minRole]) {
+    logout();
+    return <Navigate to="/login?error=insufficient_role" replace />;
+  }
   return <>{children}</>;
 }

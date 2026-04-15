@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Input, Button, Typography, App } from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
@@ -17,6 +17,14 @@ export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath =
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { message } = App.useApp();
+
+  // Show error message if redirected due to insufficient role
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error === 'insufficient_role') {
+      message.error('Access denied — your account does not have permission for this portal');
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);
