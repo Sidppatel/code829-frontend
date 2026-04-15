@@ -176,28 +176,24 @@ export default function BookingDetailPage() {
         {booking.ticketCount > 0 && infoRow(<SendOutlined />, 'Tickets', `${booking.ticketCount} ticket${booking.ticketCount !== 1 ? 's' : ''}`)}
       </Card>
 
-      {/* Price Breakdown */}
+      {/* Price */}
       <Card size="small" style={{ marginBottom: 12, borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
-        {sectionTitle('Price Breakdown')}
-        {priceRow('Subtotal', booking.subtotalCents)}
-        {priceRow('Service Fee', booking.feeCents)}
+        {sectionTitle('Price')}
+        {priceRow('Subtotal', booking.totalCents)}
+        {booking.transaction?.taxAmountCents ? priceRow('Tax', booking.transaction.taxAmountCents) : null}
         <Divider style={{ margin: '8px 0' }} />
-        {priceRow('Total', booking.totalCents, true)}
+        {priceRow('Total', booking.transaction?.totalChargedCents ?? booking.totalCents, true)}
       </Card>
 
       {/* Payment Info */}
-      {booking.payment && (
+      {booking.transaction && (
         <Card size="small" style={{ marginBottom: 12, borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
           {sectionTitle('Payment')}
           {infoRow(<CreditCardOutlined />, 'Payment Status', (
-            <Tag color={paymentStatusColor(booking.payment.status)}>{booking.payment.status}</Tag>
+            <Tag color={paymentStatusColor(booking.transaction.status)}>{booking.transaction.status}</Tag>
           ))}
-          {infoRow(<TagOutlined />, 'Amount Charged', centsToUSD(booking.payment.amountCents))}
-          {booking.payment.paidAt && infoRow(<CheckCircleOutlined />, 'Paid At', formatEventDate(booking.payment.paidAt))}
-          {booking.payment.refundedAt && infoRow(<CloseCircleOutlined />, 'Refunded At', formatEventDate(booking.payment.refundedAt))}
-          {booking.payment.paymentIntentId && infoRow(<NumberOutlined />, 'Transaction ID', (
-            <span style={{ fontSize: 12, fontFamily: 'monospace', wordBreak: 'break-all' }}>{booking.payment.paymentIntentId}</span>
-          ))}
+          {booking.transaction.paidAt && infoRow(<CheckCircleOutlined />, 'Paid At', formatEventDate(booking.transaction.paidAt))}
+          {booking.transaction.refundedAt && infoRow(<CloseCircleOutlined />, 'Refunded At', formatEventDate(booking.transaction.refundedAt))}
         </Card>
       )}
 

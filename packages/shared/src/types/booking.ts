@@ -20,17 +20,21 @@ export interface Booking {
   tableLabel?: string;
   seatsReserved?: number;
   ticketCount: number;
-  payment?: PaymentInfo;
+  transaction?: StripeTransactionInfo;
   createdAt: string;
   clientSecret?: string;
 }
 export type BookingStatus = 'Pending' | 'Paid' | 'CheckedIn' | 'Cancelled' | 'Refunded' | 'Expired';
 
-export interface PaymentInfo {
+export interface StripeTransactionInfo {
   id: string;
-  paymentIntentId?: string;
+  paymentIntentId: string;
   status: string;
   amountCents: number;
+  totalChargedCents?: number;
+  taxAmountCents?: number;
+  stripeFeesCents?: number;
+  transferAmountCents?: number;
   paidAt?: string;
   refundedAt?: string;
 }
