@@ -15,15 +15,16 @@ import PageHeader from '@code829/shared/components/shared/PageHeader';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import SharedEventTable from '../../components/events/SharedEventTable';
 import { createLogger } from '@code829/shared/lib/logger';
+import { EVENT_STATUS_COLORS } from '@code829/shared/theme/statusColors';
 
 const log = createLogger('Admin/EventsListPage');
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  Draft: { label: 'Draft', color: '#9CA3AF' },
-  Published: { label: 'Published', color: '#10B981' },
-  SoldOut: { label: 'Sold Out', color: '#F59E0B' },
-  Cancelled: { label: 'Cancelled', color: '#EF4444' },
-  Completed: { label: 'Completed', color: 'var(--primary)' },
+  Draft: { label: 'Draft', color: EVENT_STATUS_COLORS.Draft },
+  Published: { label: 'Published', color: EVENT_STATUS_COLORS.Published },
+  SoldOut: { label: 'Sold Out', color: EVENT_STATUS_COLORS.SoldOut },
+  Cancelled: { label: 'Cancelled', color: EVENT_STATUS_COLORS.Cancelled },
+  Completed: { label: 'Completed', color: EVENT_STATUS_COLORS.Completed },
 };
 
 function StatusBadge({ status }: { status: string }) {

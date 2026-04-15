@@ -11,15 +11,11 @@ import EmptyState from '@code829/shared/components/shared/EmptyState';
 import PulseIndicator from '@code829/shared/components/shared/PulseIndicator';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import { createLogger } from '@code829/shared/lib/logger';
+import { EMAIL_STATUS_COLORS } from '@code829/shared/theme/statusColors';
 
 const log = createLogger('Developer/EmailLogsPage');
 
-const statusColors: Record<string, string> = {
-  Sent: '#10B981',
-  Failed: '#EF4444',
-  Pending: '#F59E0B',
-  Queued: '#3B82F6',
-};
+const statusColors = EMAIL_STATUS_COLORS;
 
 export default function EmailLogsPage() {
   const isMobile = useIsMobile();
@@ -253,19 +249,21 @@ export default function EmailLogsPage() {
 
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Message Content</div>
-              <iframe
-                title="Email Content"
-                sandbox=""
-                srcDoc={DOMPurify.sanitize(selected.body)}
-                style={{
-                  width: '100%',
-                  height: '400px',
-                  border: 'none',
-                  background: 'white',
-                  borderRadius: '12px',
-                  padding: '4px'
-                }}
-              />
+              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 8 }}>
+                <iframe
+                  title="Email Content"
+                  sandbox=""
+                  srcDoc={DOMPurify.sanitize(selected.body)}
+                  style={{
+                    width: '100%',
+                    height: '400px',
+                    border: '1px solid var(--border)',
+                    background: 'white',
+                    borderRadius: 10,
+                    padding: '4px'
+                  }}
+                />
+              </div>
             </div>
           </div>
         )}

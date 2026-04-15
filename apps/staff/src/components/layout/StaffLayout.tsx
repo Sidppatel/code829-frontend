@@ -16,7 +16,7 @@ export default function StaffLayout() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
       <Header
         style={{
           display: 'flex',

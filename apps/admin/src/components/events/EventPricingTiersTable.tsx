@@ -29,8 +29,8 @@ function MobileCard({ row, defaultFee }: { row: PricingRow; defaultFee: number }
     <div style={{
       padding: 16,
       borderRadius: 12,
-      border: '1px solid var(--border-soft)',
-      background: 'var(--bg-card)',
+      border: '1px solid var(--border)',
+      background: 'var(--bg-surface)',
       marginBottom: 10,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
@@ -40,7 +40,7 @@ function MobileCard({ row, defaultFee }: { row: PricingRow; defaultFee: number }
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.description}</div>
           )}
         </div>
-        <Tag color="gold" style={{ fontWeight: 700, borderRadius: 6, fontSize: 13, marginLeft: 8, flexShrink: 0 }}>
+        <Tag style={{ color: 'var(--accent-gold)', background: 'color-mix(in srgb, var(--accent-gold) 14%, transparent)', borderColor: 'color-mix(in srgb, var(--accent-gold) 24%, transparent)', fontWeight: 700, borderRadius: 6, fontSize: 13, marginLeft: 8, flexShrink: 0 }}>
           {centsToUSD(total)}
         </Tag>
       </div>
@@ -122,7 +122,7 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
         const fee = record.platformFeeCents ?? defaultPlatformFeeCents;
         const total = record.priceCents + fee;
         return (
-          <Tag color="gold" style={{ fontWeight: 700, borderRadius: 6, fontSize: 13 }}>
+          <Tag style={{ color: 'var(--accent-gold)', background: 'color-mix(in srgb, var(--accent-gold) 14%, transparent)', borderColor: 'color-mix(in srgb, var(--accent-gold) 24%, transparent)', fontWeight: 700, borderRadius: 6, fontSize: 13 }}>
             {centsToUSD(total)}
           </Tag>
         );
@@ -144,8 +144,8 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
     <div style={{
       borderRadius: 12,
       overflow: 'hidden',
-      border: '1px solid var(--border-soft)',
-      background: 'rgba(255,255,255,0.02)',
+      border: '1px solid var(--border)',
+      background: 'var(--bg-surface)',
       padding: '12px'
     }}>
       <Table

@@ -10,16 +10,11 @@ import EmptyState from '@code829/shared/components/shared/EmptyState';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import dayjs from 'dayjs';
 import { createLogger } from '@code829/shared/lib/logger';
+import { LOG_SEVERITY_COLORS } from '@code829/shared/theme/statusColors';
 
 const log = createLogger('Developer/LogsPage');
 
-const severityColors: Record<string, string> = {
-  Info: '#3B82F6',
-  Warning: '#F59E0B',
-  Error: '#EF4444',
-  Critical: '#8B5CF6',
-  Debug: '#9CA3AF',
-};
+const severityColors = LOG_SEVERITY_COLORS;
 
 function formatTs(ts: string) {
   return dayjs(ts).format('MMM D, YYYY h:mm:ss A');
@@ -101,7 +96,7 @@ export default function DevLogsPage() {
       dataIndex: 'method', 
       key: 'method', 
       width: 80,
-      render: (v: string) => <Tag color="default" style={{ borderRadius: 4, fontSize: 11 }}>{v}</Tag>
+      render: (v: string) => <Tag style={{ color: 'var(--text-secondary)', background: 'var(--bg-soft)', borderColor: 'var(--border)', borderRadius: 4, fontSize: 11 }}>{v}</Tag>
     },
     {
       title: 'Status',
@@ -340,7 +335,7 @@ export default function DevLogsPage() {
               <div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent-rose)', marginBottom: 8 }}>Trace Investigation</div>
                 <pre style={{
-                  background: 'rgba(239, 68, 68, 0.03)',
+                  background: 'color-mix(in srgb, var(--accent-rose) 8%, var(--bg-surface))',
                   borderRadius: 12,
                   padding: '16px',
                   fontSize: 12,
@@ -348,8 +343,8 @@ export default function DevLogsPage() {
                   overflowX: 'auto',
                   maxHeight: 400,
                   margin: 0,
-                  color: '#EF4444',
-                  border: '1px dashed rgba(239, 68, 68, 0.2)',
+                  color: 'var(--accent-rose)',
+                  border: '1px dashed color-mix(in srgb, var(--accent-rose) 24%, transparent)',
                   whiteSpace: 'pre-wrap',
                 }}>
                   {selected.stackTrace}

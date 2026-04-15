@@ -27,6 +27,12 @@
   --accent-gold:    #FBBF24;
   --accent-rose:    #FB7185;
   --accent-green:   #10B981;
+
+  /* Status Colors */
+  --status-info:    #3B82F6;
+  --status-warning: #F59E0B;
+  --status-danger:  #EF4444;
+  --status-neutral: #9CA3AF;
   
   /* Shared Radius & Shadows */
   --radius-sm: 8px;
@@ -81,6 +87,20 @@
   --accent-violet-light: #9B82FF;
   --accent-violet-dark: #5A3CD6;
   --accent-rose:    #F46DB2;
+}
+
+.human-table-shell {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.human-soft-panel {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 html, body {

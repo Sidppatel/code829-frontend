@@ -27,7 +27,7 @@ export default function EventTicketTypesTable({ ticketTypes, loading }: EventTic
       key: 'price',
       width: 120,
       render: (price: number) => (
-        <Tag color="gold" style={{ fontWeight: 600, borderRadius: 6 }}>
+        <Tag style={{ color: 'var(--accent-gold)', background: 'color-mix(in srgb, var(--accent-gold) 14%, transparent)', borderColor: 'color-mix(in srgb, var(--accent-gold) 24%, transparent)', fontWeight: 600, borderRadius: 6 }}>
           {centsToUSD(price)}
         </Tag>
       ),

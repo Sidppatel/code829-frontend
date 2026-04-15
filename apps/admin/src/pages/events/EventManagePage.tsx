@@ -144,7 +144,7 @@ export default function EventManagePage() {
       </div>
 
       {/* Section 2 -- Event Overview Details */}
-      <HumanCard style={{ marginBottom: 24, padding: 24, border: '1px solid var(--border-soft)' }}>
+      <HumanCard style={{ marginBottom: 24, padding: 24, border: '1px solid var(--border)' }}>
         <div className="admin-section-title" style={{ marginBottom: 20 }}>
           <InfoCircleOutlined style={{ color: 'var(--primary)' }} /> Overview
         </div>
@@ -165,7 +165,7 @@ export default function EventManagePage() {
           <Col xs={24} sm={8}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Featured</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
-              <Tag color={event.isFeatured ? 'gold' : 'default'} style={{ borderRadius: 4, fontWeight: 700, margin: 0 }}>
+              <Tag style={{ color: event.isFeatured ? 'var(--accent-gold)' : 'var(--text-secondary)', background: event.isFeatured ? 'color-mix(in srgb, var(--accent-gold) 14%, transparent)' : 'var(--bg-soft)', borderColor: event.isFeatured ? 'color-mix(in srgb, var(--accent-gold) 24%, transparent)' : 'var(--border)', borderRadius: 4, fontWeight: 700, margin: 0 }}>
                 {event.isFeatured ? 'FEATURED' : 'NO'}
               </Tag>
             </div>
@@ -194,7 +194,7 @@ export default function EventManagePage() {
 
         <HumanCard 
           className="human-noise" 
-          style={{ padding: 28, border: '1px solid var(--border-soft)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+          style={{ padding: 28, border: '1px solid var(--border)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
             <Tag 
@@ -264,7 +264,7 @@ export default function EventManagePage() {
                       padding: '24px',
                       borderRadius: 12,
                       background: 'var(--bg-soft)',
-                      border: '1px dashed var(--border-soft)',
+                      border: '1px dashed var(--border)',
                       textAlign: 'center'
                     }}>
                       <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
