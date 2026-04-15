@@ -368,13 +368,45 @@ html, body {
 }
 
 @media (max-width: 768px) {
+  /* Option C — Overlapping Fade */
   .hero-section {
-    min-height: 90vh;
-    padding: 40px 16px 60px;
+    min-height: auto;
+    padding: 0 0 40px;
+    align-items: flex-start;
+    background: #120F1A;
   }
+  /* Image: top half, full width, no crop */
   .hero-section::after {
-    background: url('/site-bg.jpg') center 30% / contain no-repeat;
-    opacity: 0.55;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 55%;
+    bottom: auto;
+    background: url('/site-bg.jpg') center center / contain no-repeat;
+    opacity: 0.6;
+  }
+  /* Fade: dissolve image bottom into page */
+  .hero-section::before {
+    background:
+      linear-gradient(to bottom,
+        transparent 0%,
+        transparent 25%,
+        rgba(18, 15, 26, 0.5) 38%,
+        rgba(18, 15, 26, 0.85) 48%,
+        #120F1A 55%,
+        #120F1A 100%),
+      linear-gradient(to right,
+        rgba(18, 15, 26, 0.4) 0%,
+        transparent 15%,
+        transparent 85%,
+        rgba(18, 15, 26, 0.4) 100%);
+  }
+  /* Push content down so text overlaps dissolving image edge */
+  .hero-section > .page-container {
+    padding-top: calc(28% + 80px);
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }
 
