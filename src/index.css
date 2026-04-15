@@ -314,68 +314,77 @@ html, body {
 
 /* Hero section */
 .hero-section {
-  min-height: 100vh;
+  min-height: 80vh;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background:
-    url('/site-bg.jpg') center center / cover no-repeat,
-    #1a1a1a;
-  padding: 0 20px 100px;
+  background: transparent;
+  padding: 60px 20px 80px;
   text-align: center;
-  /* Break out of parent padding to go full-width */
-  margin-left: -16px;
-  margin-right: -16px;
-  width: calc(100% + 32px);
-  margin-top: -130px;
-  padding-top: 160px;
 }
 
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  .hero-section {
-    background:
-      url('/site-bg.jpg') center center / cover no-repeat,
-      #1a1a1a;
-    min-height: 100vh;
-    padding-bottom: 60px;
-  }
-}
-
-/* Blending overlays — seamless bottom fade into page bg */
-.hero-section::before {
+/* The image layer — fades into page bg on ALL sides */
+.hero-section::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 0;
+  background: url('/site-bg.jpg') center center / cover no-repeat;
+  /* Mask: radial fade so all edges dissolve into transparent (showing page bg) */
+  -webkit-mask-image:
+    radial-gradient(ellipse 80% 70% at center center,
+      rgba(0,0,0,1) 20%,
+      rgba(0,0,0,0.85) 40%,
+      rgba(0,0,0,0.5) 65%,
+      rgba(0,0,0,0) 100%);
+  mask-image:
+    radial-gradient(ellipse 80% 70% at center center,
+      rgba(0,0,0,1) 20%,
+      rgba(0,0,0,0.85) 40%,
+      rgba(0,0,0,0.5) 65%,
+      rgba(0,0,0,0) 100%);
+}
+
+/* Dark overlay on image for text readability */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   background:
-    /* Bottom fade — long smooth dissolve into page gray */
-    linear-gradient(to bottom,
-      transparent 0%,
-      transparent 40%,
-      rgba(169, 169, 169, 0.08) 55%,
-      rgba(169, 169, 169, 0.25) 68%,
-      rgba(169, 169, 169, 0.55) 78%,
-      rgba(169, 169, 169, 0.85) 88%,
-      #A9A9A9 96%,
-      #A9A9A9 100%),
-    /* Subtle dark overlay for text contrast at bottom */
-    linear-gradient(to bottom,
-      transparent 0%,
-      transparent 50%,
-      rgba(0, 0, 0, 0.35) 100%),
-    /* Side vignette */
-    radial-gradient(ellipse at center,
-      transparent 40%,
-      rgba(10, 5, 20, 0.2) 100%);
+    radial-gradient(ellipse 80% 70% at center center,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(0, 0, 0, 0.2) 50%,
+      transparent 100%);
   pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 70vh;
+    padding: 40px 16px 60px;
+  }
+  .hero-section::after {
+    -webkit-mask-image:
+      radial-gradient(ellipse 90% 65% at center center,
+        rgba(0,0,0,1) 15%,
+        rgba(0,0,0,0.8) 35%,
+        rgba(0,0,0,0.4) 60%,
+        rgba(0,0,0,0) 100%);
+    mask-image:
+      radial-gradient(ellipse 90% 65% at center center,
+        rgba(0,0,0,1) 15%,
+        rgba(0,0,0,0.8) 35%,
+        rgba(0,0,0,0.4) 60%,
+        rgba(0,0,0,0) 100%);
+  }
 }
 
 .hero-section > * {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 /* Mobile-first page padding */
