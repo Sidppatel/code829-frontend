@@ -14,6 +14,9 @@ import type { AdminEventListParams } from '@code829/shared/services/adminEventsA
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import SharedEventTable from '../../components/events/SharedEventTable';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Admin/EventsListPage');
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   Draft: { label: 'Draft', color: '#9CA3AF' },
@@ -158,14 +161,18 @@ export default function EventsListPage() {
           placeholder="Search by title..."
           prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
           allowClear
-          onChange={(e) => setFilters({ search: e.target.value || undefined })}
+          onChange={(e) => {
+            const search = e.target.value || undefined;
+            setFilters({ search });
+            if (search) log.info('Search events', { search });
+          }}
           style={{ flex: 1, minWidth: 260, height: 44, borderRadius: 'var(--radius-full)', border: '1px solid var(--border)', paddingLeft: 16 }}
         />
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           {['Draft', 'Published', 'SoldOut', 'Completed'].map(status => (
             <div
               key={status}
-              onClick={() => setFilters({ status: status as EventDetail['status'] })}
+              onClick={() => { log.info('Filter by status', { status }); setFilters({ status: status as EventDetail['status'] }); }}
               style={{
                 padding: '8px 20px',
                 borderRadius: 'var(--radius-full)',

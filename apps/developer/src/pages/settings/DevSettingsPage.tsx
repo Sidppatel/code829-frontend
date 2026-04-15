@@ -9,6 +9,9 @@ import HumanCard from '@code829/shared/components/shared/HumanCard';
 import PulseIndicator from '@code829/shared/components/shared/PulseIndicator';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import AvatarUpload from '@code829/shared/components/shared/AvatarUpload';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Developer/SettingsPage');
 
 const SENSITIVE_KEYS = new Set([
   'jwt_secret',
@@ -40,12 +43,14 @@ export default function DevSettingsPage() {
           vals[s.key] = SENSITIVE_KEYS.has(s.key) ? '' : s.value;
         });
         setEditValues(vals);
+        log.info('Settings loaded', { count: data.length });
         // Load company logo
         try {
           const { data: logo } = await imagesApi.getLogo();
           setLogoUrl(logo.url);
-        } catch { /* no logo yet */ }
-      } catch {
+        } catch (err) { log.error('Failed to load company logo', err); }
+      } catch (err) {
+        log.error('Failed to load settings', err);
         message.error('Failed to load settings');
       } finally {
         setLoading(false);
@@ -60,6 +65,7 @@ export default function DevSettingsPage() {
     setSavingKey(key);
     try {
       await developerApi.updateSetting(key, value);
+      log.info('Setting updated', { key });
       message.success(`Setting "${key}" updated`);
       const updated = settings.map((s) =>
         s.key === key ? { ...s, value: SENSITIVE_KEYS.has(key) ? maskValue(value) : value } : s,
@@ -69,7 +75,8 @@ export default function DevSettingsPage() {
         setEditValues((prev) => ({ ...prev, [key]: '' }));
       }
       setDirty((prev) => ({ ...prev, [key]: false }));
-    } catch {
+    } catch (err) {
+      log.error('Failed to update setting', err);
       message.error('Failed to update setting');
     } finally {
       setSavingKey(null);

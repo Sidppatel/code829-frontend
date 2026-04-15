@@ -32,6 +32,9 @@ import type { ImageDto } from '@code829/shared/types/image';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import ImageUpload from '@code829/shared/components/shared/ImageUpload';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Admin/EventWizardPage');
 
 const categories = [
   'Music',
@@ -62,7 +65,9 @@ export default function EventWizardPage() {
       try {
         const { data } = await adminVenuesApi.list(1, 100);
         setVenues(data.items);
-      } catch {
+        log.info('Venues loaded for picker', { count: data.items.length });
+      } catch (err) {
+        log.error('Failed to load venues', err);
         message.error('Failed to load venues');
       }
     };
@@ -87,15 +92,16 @@ export default function EventWizardPage() {
         try {
           const { data: lockData } = await adminEventsApi.checkLayoutLocked(id);
           setLayoutLocked(lockData.locked);
-        } catch {
-          // If check fails, default to unlocked
+        } catch (err) {
+          log.error('Failed to check layout lock status', err);
         }
 
         try {
           const { data: imgs } = await imagesApi.getByEntity('event', id);
           setImages(imgs);
-        } catch { /* images may not exist yet */ }
+        } catch (err) { log.error('Failed to load event images', err); }
 
+        log.info('Event loaded for editing', { id, status: data.status, layoutMode: mode });
         form.setFieldsValue({
           title: data.title,
           description: data.description,
@@ -117,7 +123,8 @@ export default function EventWizardPage() {
             capacity: (tt as any).maxQuantity
           })) || []
         });
-      } catch {
+      } catch (err) {
+        log.error('Failed to load event for editing', err);
         message.error('Failed to load event for editing');
       } finally {
         setLoading(false);
@@ -167,14 +174,17 @@ export default function EventWizardPage() {
       }
       if (isEditMode && id) {
         await adminEventsApi.update(id, payload);
+        log.info('Event updated', { id });
         message.success('Event updated');
         navigate(`/events/${id}`);
       } else {
         const { data } = await adminEventsApi.create(payload);
+        log.info('Event created', { id: data.id, title: payload.title });
         message.success('Event created');
         navigate(`/events/${data.id}`);
       }
-    } catch {
+    } catch (err) {
+      log.error('Failed to save event', err);
       message.error(isEditMode ? 'Failed to update event' : 'Failed to create event');
     } finally {
       setSaving(false);

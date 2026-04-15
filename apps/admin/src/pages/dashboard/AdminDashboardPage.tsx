@@ -16,8 +16,9 @@ import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import PulseIndicator from '@code829/shared/components/shared/PulseIndicator';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
+import { createLogger } from '@code829/shared/lib/logger';
 
-
+const log = createLogger('Admin/DashboardPage');
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -38,7 +39,9 @@ export default function AdminDashboardPage() {
         if (nextRes.data.hasUpcoming && nextRes.data.data) {
           setNextEvent(nextRes.data.data);
         }
-      } catch {
+        log.info('Dashboard loaded', { hasUpcoming: nextRes.data.hasUpcoming });
+      } catch (err) {
+        log.error('Failed to load dashboard data', err);
         message.error('Failed to load your space');
       } finally {
         setLoading(false);

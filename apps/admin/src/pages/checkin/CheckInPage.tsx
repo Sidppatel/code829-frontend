@@ -9,6 +9,9 @@ import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import QrCameraScanner from '../../components/checkin/QrCameraScanner';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Admin/CheckInPage');
 
 export default function CheckInPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -25,7 +28,9 @@ export default function CheckInPage() {
     try {
       const { data } = await checkInApi.getStats(eventId);
       setStats(data);
-    } catch {
+      log.info('Check-in stats loaded', { eventId, checkedIn: data.checkedIn, total: data.totalTicketsSold });
+    } catch (err) {
+      log.error('Failed to load check-in stats', err);
       message.error('Failed to load check-in stats');
     } finally {
       setLoading(false);
@@ -42,12 +47,15 @@ export default function CheckInPage() {
       const { data } = await checkInApi.scan(value.trim());
       setScanResult(data);
       if (data.success) {
+        log.info('Guest checked in', { userName: data.userName, itemCount: data.itemCount });
         message.success(data.message);
         void loadStats();
       } else {
+        log.info('Scan rejected', { message: data.message });
         message.error(data.message);
       }
-    } catch {
+    } catch (err) {
+      log.error('Scan failed', err);
       message.error('Scan failed');
     } finally {
       setScanning(false);

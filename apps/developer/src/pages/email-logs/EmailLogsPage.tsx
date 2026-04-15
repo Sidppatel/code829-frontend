@@ -10,6 +10,9 @@ import HumanCard from '@code829/shared/components/shared/HumanCard';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
 import PulseIndicator from '@code829/shared/components/shared/PulseIndicator';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Developer/EmailLogsPage');
 
 const statusColors: Record<string, string> = {
   Sent: '#10B981',
@@ -35,7 +38,9 @@ export default function EmailLogsPage() {
       const { data } = await developerApi.getEmailLogs({ page, pageSize, recipient });
       setLogs(data.items);
       setTotal(data.totalCount);
-    } catch {
+      log.info('Email logs loaded', { count: data.items.length, total: data.totalCount });
+    } catch (err) {
+      log.error('Failed to load email logs', err);
       message.error('Failed to load email logs');
     } finally {
       setLoading(false);

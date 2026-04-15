@@ -31,6 +31,9 @@ import type { EventDetail } from '@code829/shared/types/event';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import EventPricingTiersTable from '../../components/events/EventPricingTiersTable';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Admin/EventManagePage');
 
 const STATUS_MAP: Record<string, { className: string; label: string }> = {
   Draft:     { className: 'status-pill status-draft',     label: 'Draft' },
@@ -70,7 +73,9 @@ export default function EventManagePage() {
           const lockedRes = await adminEventsApi.checkLayoutLocked(id);
           setLayoutLocked(lockedRes.data.locked);
         }
-      } catch {
+        log.info('Event loaded', { id, status: data.status, layoutMode: data.layoutMode });
+      } catch (err) {
+        log.error('Failed to load event', err);
         message.error('Failed to load event');
       } finally {
         setLoading(false);
@@ -83,10 +88,12 @@ export default function EventManagePage() {
     if (!id) return;
     try {
       await adminEventsApi.changeStatus(id, status);
+      log.info('Event status changed', { id, status });
       message.success(`Status changed to ${status}`);
       const { data } = await adminEventsApi.getById(id);
       setEvent(data);
-    } catch {
+    } catch (err) {
+      log.error('Failed to change event status', err);
       message.error('Failed to change status');
     }
   };

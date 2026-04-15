@@ -9,6 +9,9 @@ import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import ControlsPanel from './components/ControlsPanel';
 import FloorPlanCanvas from './components/FloorPlanCanvas';
 import LayoutStatsBar from './components/LayoutStatsBar';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Admin/LayoutEditorPage');
 
 export interface LayoutTable {
   id: string;
@@ -97,7 +100,9 @@ export default function LayoutEditorPage() {
       setTemplates(templatesRes.data ?? []);
       setEventTables(eventTablesRes.data ?? []);
       setStats(statsRes.data);
-    } catch {
+      log.info('Layout loaded', { eventId, tableCount: (layoutData.tables ?? []).length, gridRows: layoutData.gridRows, gridCols: layoutData.gridCols });
+    } catch (err) {
+      log.error('Failed to load layout', err);
       message.error('Failed to load layout');
     } finally {
       setLoading(false);
@@ -160,10 +165,12 @@ export default function LayoutEditorPage() {
         })),
       });
       setIsDirty(false);
+      log.info('Layout saved', { eventId, tableCount: tables.length });
       message.success('Layout saved');
       const statsRes = await adminLayoutApi.getLayoutStats(eventId);
       setStats(statsRes.data);
     } catch (err: unknown) {
+      log.error('Failed to save layout', err);
       const axiosErr = err as { response?: { data?: { message?: string } } };
       const errMsg = axiosErr?.response?.data?.message ?? (err instanceof Error ? err.message : 'Unknown error');
       message.error(`Failed to save layout: ${errMsg}`);
@@ -205,7 +212,8 @@ export default function LayoutEditorPage() {
         setEventTables((prev) => prev.map((x) => x.id === selectedEventTableId ? savedEt : x));
         setSelectedEventTableId(savedEt.id);
         et = savedEt;
-      } catch {
+      } catch (err) {
+        log.error('Failed to persist pending event table type', err);
         message.error('Failed to save table type');
         return;
       }

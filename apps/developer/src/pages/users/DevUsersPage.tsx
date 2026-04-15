@@ -9,6 +9,9 @@ import type { DevUser } from '@code829/shared/services/developerApi';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Developer/UsersPage');
 
 const allRoles = ['User', 'Staff', 'Admin', 'Developer'];
 
@@ -41,7 +44,9 @@ export default function DevUsersPage() {
       const { data } = await developerApi.getUsers({ page, pageSize, search: search || undefined });
       setUsers(data.items);
       setTotal(data.totalCount);
-    } catch {
+      log.info('Users loaded', { count: data.items.length, total: data.totalCount });
+    } catch (err) {
+      log.error('Failed to load users', err);
       message.error('Failed to load users');
     } finally {
       setLoading(false);
@@ -54,9 +59,11 @@ export default function DevUsersPage() {
     setUpdatingId(userId);
     try {
       await developerApi.updateUserRole(userId, role);
+      log.info('User role updated', { userId, role });
       message.success('Role updated');
       setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role } : u));
-    } catch {
+    } catch (err) {
+      log.error('Failed to update user role', err);
       message.error('Failed to update role');
     } finally {
       setUpdatingId(null);

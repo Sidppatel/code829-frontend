@@ -9,6 +9,9 @@ import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import AddressAutocomplete from '@code829/shared/components/shared/AddressAutocomplete';
 import type { AddressParts } from '@code829/shared/components/shared/AddressAutocomplete';
 import ImageUpload from '@code829/shared/components/shared/ImageUpload';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Admin/VenueFormPage');
 
 export default function VenueFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -29,8 +32,10 @@ export default function VenueFormPage() {
         try {
           const { data: imgs } = await imagesApi.getByEntity('venue', id);
           setImages(imgs);
-        } catch { /* images may not exist yet */ }
-      } catch {
+        } catch (err) { log.error('Failed to load venue images', err); }
+        log.info('Venue loaded for editing', { id, name: data.name });
+      } catch (err) {
+        log.error('Failed to load venue', err);
         message.error('Failed to load venue');
       } finally {
         setLoading(false);
@@ -56,13 +61,16 @@ export default function VenueFormPage() {
       };
       if (isEdit && id) {
         await adminVenuesApi.update(id, payload);
+        log.info('Venue updated', { id });
         message.success('Venue updated');
       } else {
         await adminVenuesApi.create(payload);
+        log.info('Venue created', { name: payload.name });
         message.success('Venue created');
       }
       navigate('/venues');
-    } catch {
+    } catch (err) {
+      log.error('Failed to save venue', err);
       message.error('Failed to save venue');
     } finally {
       setSaving(false);

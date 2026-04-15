@@ -9,6 +9,9 @@ import HumanCard from '@code829/shared/components/shared/HumanCard';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import dayjs from 'dayjs';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Developer/LogsPage');
 
 const severityColors: Record<string, string> = {
   Info: '#3B82F6',
@@ -274,7 +277,7 @@ export default function DevLogsPage() {
               showSizeChanger: true,
               className: 'human-pagination'
             }}
-            onRow={(record) => ({ onClick: () => setSelected(record), style: { cursor: 'pointer' } })}
+            onRow={(record) => ({ onClick: () => { log.info('Viewing log detail', { id: record.id, severity: record.severity }); setSelected(record); }, style: { cursor: 'pointer' } })}
           />
         </div>
       )}
@@ -356,7 +359,7 @@ export default function DevLogsPage() {
 
             {selected.metadataJson && (() => {
               let pretty = selected.metadataJson;
-              try { pretty = JSON.stringify(JSON.parse(selected.metadataJson), null, 2); } catch { /* leave */ }
+              try { pretty = JSON.stringify(JSON.parse(selected.metadataJson), null, 2); } catch (err) { log.error('Failed to parse metadata JSON', err); }
               return (
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>Environment Metadata</div>

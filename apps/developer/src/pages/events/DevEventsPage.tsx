@@ -10,6 +10,9 @@ import PageHeader from '@code829/shared/components/shared/PageHeader';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import SharedEventTable from '../../components/events/SharedEventTable';
 import { Modal, Typography, Card, InputNumber, Spin } from 'antd';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Developer/EventsPage');
 
 function getStatusColor(status: string): string {
   switch (status) {
@@ -38,7 +41,9 @@ export default function DevEventsPage() {
       const paged = data as PagedResponse<DevEventListItem>;
       setEvents(paged.items);
       setTotal(paged.totalCount);
-    } catch {
+      log.info('Events loaded', { count: paged.items.length, total: paged.totalCount });
+    } catch (err) {
+      log.error('Failed to load events', err);
       message.error('Failed to load events');
     } finally {
       setLoading(false);
@@ -183,7 +188,9 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
         const tkf: Record<string, number | null> = {};
         data.ticketTypes.forEach((tt) => { tkf[tt.id] = tt.platformFeeCents; });
         setTicketFees(tkf);
-      } catch {
+        log.info('Event fees loaded', { eventId, layoutMode: data.layoutMode });
+      } catch (err) {
+        log.error('Failed to load event fees', err);
         message.error('Failed to load fee info');
       } finally {
         setLoading(false);
@@ -201,9 +208,11 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
       } else {
         await developerApi.updateTicketTypeFees(eventId, ticketFees);
       }
+      log.info('Platform fees saved', { eventId, layoutMode: feeInfo.layoutMode });
       message.success('Platform fees updated');
       onClose();
-    } catch {
+    } catch (err) {
+      log.error('Failed to save platform fees', err);
       message.error('Failed to update fees');
     } finally {
       setSaving(false);

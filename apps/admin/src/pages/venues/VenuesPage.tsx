@@ -8,6 +8,9 @@ import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Admin/VenuesPage');
 
 export default function VenuesPage() {
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -24,7 +27,9 @@ export default function VenuesPage() {
       const { data } = await adminVenuesApi.list(p, ps);
       setVenues(data.items);
       setTotal(data.totalCount);
-    } catch {
+      log.info('Venues loaded', { count: data.items.length, total: data.totalCount });
+    } catch (err) {
+      log.error('Failed to load venues', err);
       message.error('Failed to load venues');
     } finally {
       setLoading(false);
@@ -36,9 +41,11 @@ export default function VenuesPage() {
   const handleToggleActive = async (record: Venue) => {
     try {
       await adminVenuesApi.update(record.id, { isActive: !record.isActive });
+      log.info('Venue toggled', { id: record.id, isActive: !record.isActive });
       message.success(`Venue ${record.isActive ? 'disabled' : 'activated'}`);
       void loadVenues();
-    } catch {
+    } catch (err) {
+      log.error('Failed to toggle venue status', err);
       message.error('Failed to update venue status');
     }
   };

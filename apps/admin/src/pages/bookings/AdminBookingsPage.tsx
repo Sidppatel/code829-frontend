@@ -11,6 +11,9 @@ import PageHeader from '@code829/shared/components/shared/PageHeader';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Admin/BookingsPage');
 
 export default function AdminBookingsPage() {
   const { message } = App.useApp();
@@ -23,9 +26,11 @@ export default function AdminBookingsPage() {
   const handleRefund = async (id: string) => {
     try {
       await adminBookingsApi.refund(id);
+      log.info('Booking refunded', { bookingId: id });
       message.success('Booking refunded');
       refresh();
-    } catch {
+    } catch (err) {
+      log.error('Failed to refund booking', err);
       message.error('Failed to refund booking');
     }
   };
@@ -39,7 +44,9 @@ export default function AdminBookingsPage() {
       link.download = `bookings.${format}`;
       link.click();
       window.URL.revokeObjectURL(url);
-    } catch {
+      log.info('Bookings exported', { format });
+    } catch (err) {
+      log.error('Failed to export bookings', err);
       message.error('Export failed');
     }
   };

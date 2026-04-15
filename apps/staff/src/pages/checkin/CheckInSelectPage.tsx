@@ -12,6 +12,9 @@ import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import PulseIndicator from '@code829/shared/components/shared/PulseIndicator';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Staff/CheckInSelectPage');
 
 export default function CheckInSelectPage() {
   const [events, setEvents] = useState<EventSummary[]>([]);
@@ -39,7 +42,9 @@ export default function CheckInSelectPage() {
           }
         });
         setStatsMap(map);
-      } catch {
+        log.info('Events and stats loaded', { eventCount: data.items.length, statsCount: Object.keys(map).length });
+      } catch (err) {
+        log.error('Failed to load events', err);
         message.error('Failed to load events');
       } finally {
         setLoading(false);
