@@ -91,55 +91,122 @@ export default function EventsPage() {
       style={{ minHeight: '100vh', paddingBottom: 100 }}
     >
       {/* Page Header with hero background */}
-      <section className="hero-section">
-        <div
-          className="page-container"
-          style={{ position: 'relative', zIndex: 2, paddingTop: 140, paddingBottom: 60 }}
-        >
+      <section className="hero-section" style={{ minHeight: 'auto', padding: '120px 20px 60px' }}>
+        <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>
           <motion.div variants={itemVariants}>
-            <div
-              style={{
-                color: 'var(--accent-rose)',
-                fontWeight: 800,
-                fontSize: 13,
-                textTransform: 'uppercase',
-                letterSpacing: 2,
-                marginBottom: 16,
-              }}
-            >
+            <div style={{ color: 'var(--accent-rose)', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 16 }}>
               The Collection
             </div>
-            <h1
-              style={{
-                fontSize: 'clamp(2.5rem, 8vw, 4.5rem)',
-                fontWeight: 900,
-                color: 'var(--text-primary)',
-                marginBottom: 20,
-                letterSpacing: '-2.5px',
-              }}
-            >
+            <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: 900, color: 'var(--text-primary)', marginBottom: 20, letterSpacing: '-2.5px' }}>
               Explore <span className="gradient-text">Experiences</span>
             </h1>
-            <p
-              style={{
-                color: 'var(--text-secondary)',
-                fontSize: 18,
-                maxWidth: 600,
-                margin: '0 auto',
-                fontWeight: 500,
-                lineHeight: 1.6,
-              }}
-            >
-              Discover an exclusive selection of upcoming events. Secure your spot in the
-              future of entertainment.
+            <p style={{ color: 'var(--text-secondary)', fontSize: 18, maxWidth: 600, margin: '0 auto', fontWeight: 500, lineHeight: 1.6 }}>
+              Discover an exclusive selection of upcoming events. Secure your spot in the future of entertainment.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* rest of the page stays the same */}
       <div className="page-container">
-        {/* filters, list, pagination ... */}
+        <motion.div variants={itemVariants} style={{ marginBottom: 48 }}>
+          <EventFilters
+            facets={facets}
+            values={filters}
+            onChange={handleFilterChange}
+          />
+        </motion.div>
+
+        {!loading && (events?.length ?? 0) > 0 && (
+          <motion.div variants={itemVariants} style={{ marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 40, height: 1, background: 'var(--border)' }} />
+            <span style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+              {total} results found
+            </span>
+          </motion.div>
+        )}
+
+        {loading ? (
+          <Row gutter={[32, 32]}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Col xs={24} sm={12} md={8} key={i}>
+                <div className="glass-card" style={{ height: 480, borderRadius: 24, padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  {/* Image Placeholder */}
+                  <div style={{ position: 'relative', height: 240, background: 'var(--bg-soft)', overflow: 'hidden' }}>
+                    <div className="ant-skeleton ant-skeleton-active" style={{ height: '100%', width: '100%' }}>
+                      <div className="ant-skeleton-content" style={{ height: '100%' }}>
+                        <div className="ant-skeleton-title" style={{ width: '100%', height: '100%', margin: 0, borderRadius: 0 }} />
+                      </div>
+                    </div>
+                    {/* Status/Category Tag on Right */}
+                    <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 2 }}>
+                      <Skeleton.Button active size="small" shape="round" style={{ width: 80, height: 28 }} />
+                    </div>
+                  </div>
+
+                  <div style={{ padding: 24, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    {/* Title */}
+                    <div style={{ marginBottom: 16 }}>
+                      <Skeleton.Button active size="small" style={{ width: '80%', height: 24 }} />
+                    </div>
+
+                    {/* Details */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                         <Skeleton.Avatar active size="small" shape="square" />
+                         <Skeleton.Input active size="small" style={{ width: 140 }} />
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                         <Skeleton.Avatar active size="small" shape="square" />
+                         <Skeleton.Input active size="small" style={{ width: 180 }} />
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <div style={{ height: 12, width: 60, background: 'var(--bg-soft)', borderRadius: 4 }} className="ant-skeleton-active" />
+                        <Skeleton.Button active size="small" style={{ width: 80, height: 28 }} />
+                      </div>
+                      <Skeleton.Avatar active shape="square" size={44} style={{ borderRadius: 12 }} />
+                    </div>
+                  </div>
+                </div>
+              </Col>
+            ))}
+          </Row>
+        ) : (events?.length ?? 0) === 0 ? (
+          <div style={{ padding: '100px 0' }}>
+            <EmptyState description="No events found matching your current filters" />
+          </div>
+        ) : (
+          <>
+            <motion.div variants={containerVariants}>
+              <Row gutter={[32, 48]}>
+                {events.map((event) => (
+                  <Col xs={24} sm={12} md={8} key={event.id}>
+                    <motion.div
+                      variants={itemVariants}
+                      style={{ height: '100%' }}
+                    >
+                      <EventCard event={event} />
+                    </motion.div>
+                  </Col>
+                ))}
+              </Row>
+            </motion.div>
+
+            <motion.div variants={itemVariants} style={{ textAlign: 'center', marginTop: 80 }}>
+              <Pagination
+                current={page}
+                pageSize={pageSize}
+                total={total}
+                onChange={handlePageChange}
+                showSizeChanger={false}
+                className="custom-pagination"
+              />
+            </motion.div>
+          </>
+        )}
       </div>
     </motion.div>
   );

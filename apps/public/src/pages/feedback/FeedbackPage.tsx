@@ -208,14 +208,12 @@ export default function FeedbackPage() {
       style={{ paddingBottom: 150 }}
     >
       {/* Immersive Page Header */}
-      <section style={{ 
-        padding: '160px 0 80px',
-        background: 'radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 40%)',
+      <section className="hero-section" style={{
+        minHeight: 'auto',
+        padding: '160px 20px 80px',
         marginBottom: 60,
-        position: 'relative',
-        overflow: 'hidden'
       }}>
-        <div className="page-container">
+        <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>
           <motion.div variants={itemVariants}>
             <div style={{ color: 'var(--accent-rose)', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: 2.5, marginBottom: 20 }}>
               Curating Perfection
