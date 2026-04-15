@@ -80,7 +80,8 @@ export default function HomePage() {
               letterSpacing: '-0.04em'
             }}
           >
-            <span className="gradient-text">THE CODE</span> <br />
+            {/* <span className="gradient-text">THE CODE</span> <br /> */}
+            <span>THE CODE</span> <br />
           </motion.h1>
 
           <motion.p
