@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Card, Form, Input, Switch, Button, App, Row, Col } from 'antd';
+import { createLogger } from '@code829/shared/lib/logger';
 import { authApi, imagesApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
+
+const log = createLogger('Public/ProfilePage');
 import type { UserProfile } from '@code829/shared/types/auth';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
@@ -33,7 +36,8 @@ export default function ProfilePage() {
           optInLocationEmail: data.optInLocationEmail,
           email: data.email,
         });
-      } catch {
+      } catch (err) {
+        log.error('Failed to load profile', err);
         message.error('Failed to load profile');
       } finally {
         setLoading(false);
@@ -49,8 +53,10 @@ export default function ProfilePage() {
       await authApi.updateProfile(values);
       const { data } = await authApi.getMe();
       setUser(data as UserProfile);
+      log.info('Profile updated');
       message.success('Profile updated');
-    } catch {
+    } catch (err) {
+      log.error('Failed to update profile', err);
       message.error('Failed to update profile');
     } finally {
       setSaving(false);

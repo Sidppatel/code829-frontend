@@ -7,8 +7,11 @@ import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { loadStripe } from '@stripe/stripe-js';
 import type { Stripe } from '@stripe/stripe-js';
 
+import { createLogger } from '@code829/shared/lib/logger';
 import { eventsApi, tableBookingApi, bookingsApi } from '../../services/api';
 import type { EventDetail, EventTableDto, EventTablesResponse } from '@code829/shared/types/event';
+
+const log = createLogger('Public/EventDetailPage');
 import type { TableLock } from '@code829/shared/types/layout';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { useAuth } from '@code829/shared/hooks/useAuth';
@@ -121,7 +124,9 @@ export default function EventDetailPage() {
       try {
         const { data } = await eventsApi.getBySlug(slug);
         setEvent(data);
-      } catch {
+        log.info('Loaded event', { slug, id: data.id });
+      } catch (err) {
+        log.error('Failed to load event', { slug, err });
         message.error('Event not found');
         navigate('/events');
       } finally {

@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Row, Col } from 'antd';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
+import { createLogger } from '@code829/shared/lib/logger';
 import { eventsApi } from '../../services/api';
 import type { EventSummary } from '@code829/shared/types/event';
+
+const log = createLogger('Public/HomePage');
 import EventCard from '../../components/events/EventCard';
 import { cubicBezier } from "framer-motion";
 
@@ -23,8 +26,9 @@ export default function HomePage() {
         ]);
         setFeatured(featRes.data.items.filter((e) => e.isFeatured));
         setUpcoming(upRes.data.items);
-      } catch {
-        // silently fail — page still renders
+        log.info('Loaded home events', { featured: featRes.data.items.filter((e) => e.isFeatured).length, upcoming: upRes.data.items.length });
+      } catch (err) {
+        log.error('Failed to load home events', err);
       } finally {
         setLoading(false);
       }

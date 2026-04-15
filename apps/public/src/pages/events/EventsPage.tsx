@@ -2,9 +2,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Row, Col, Pagination, App, Skeleton } from 'antd';
 import { motion } from 'framer-motion';
+import { createLogger } from '@code829/shared/lib/logger';
 import { eventsApi } from '../../services/api';
 import type { EventSummary, EventFacets } from '@code829/shared/types/event';
 import type { EventListParams } from '@code829/shared/services/eventsApi';
+
+const log = createLogger('Public/EventsPage');
 import EventCard from '../../components/events/EventCard';
 import EventFilters from '../../components/events/EventFilters';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
@@ -26,7 +29,9 @@ export default function EventsPage() {
       const { data } = await eventsApi.list({ ...filters, page, pageSize });
       setEvents(data?.items ?? []);
       setTotal(data?.totalCount ?? 0);
-    } catch {
+      log.info('Loaded events', { count: data?.items?.length ?? 0, total: data?.totalCount ?? 0 });
+    } catch (err) {
+      log.error('Failed to load events', err);
       message.error('Failed to load events');
     } finally {
       setLoading(false);
