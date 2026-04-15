@@ -359,11 +359,12 @@ html, body {
 
 @media (max-width: 768px) {
   .hero-section {
-    min-height: 85vh;
+    min-height: 90vh;
     padding: 40px 16px 60px;
   }
   .hero-section::after {
-    opacity: 0.4;
+    background: url('/site-bg.jpg') center 30% / contain no-repeat;
+    opacity: 0.55;
   }
 }
 
