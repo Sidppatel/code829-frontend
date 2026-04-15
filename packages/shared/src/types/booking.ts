@@ -13,8 +13,8 @@ export interface Booking {
   venueName?: string;
   venueAddress?: string;
   subtotalCents: number;
-  feeCents: number;
   totalCents: number;
+  feeCents?: number;
   qrToken: string;
   tableId?: string;
   tableLabel?: string;
