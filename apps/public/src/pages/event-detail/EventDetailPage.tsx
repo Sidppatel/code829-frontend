@@ -67,6 +67,7 @@ export default function EventDetailPage() {
   // Stripe state
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [taxAmountCents, setTaxAmountCents] = useState<number | null>(null);
   const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
 
   // Refs for cleanup
@@ -211,6 +212,7 @@ export default function EventDetailPage() {
       });
       setBookingId(booking.id);
       setClientSecret(booking.clientSecret ?? null);
+      setTaxAmountCents(booking.transaction?.taxAmountCents ?? null);
       setStep('checkout');
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
@@ -245,6 +247,7 @@ export default function EventDetailPage() {
     setCheckoutError(null);
     setClientSecret(null);
     setBookingId(null);
+    setTaxAmountCents(null);
     if (step === 'checkout') setStep('select-table');
     await loadTables();
   };
@@ -255,6 +258,7 @@ export default function EventDetailPage() {
     setCheckoutError(null);
     setClientSecret(null);
     setBookingId(null);
+    setTaxAmountCents(null);
     if (step === 'checkout') setStep('select-table');
     void loadTables();
   };
@@ -279,6 +283,7 @@ export default function EventDetailPage() {
         });
         setBookingId(booking.id);
         setClientSecret(booking.clientSecret ?? null);
+        setTaxAmountCents(booking.transaction?.taxAmountCents ?? null);
       } catch (err: unknown) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
         setCheckoutError(axiosErr?.response?.data?.message ?? 'Failed to create booking');
@@ -294,6 +299,7 @@ export default function EventDetailPage() {
     setCheckoutError(null);
     setClientSecret(null);
     setBookingId(null);
+    setTaxAmountCents(null);
     setStep('capacity');
   };
 
@@ -344,6 +350,7 @@ export default function EventDetailPage() {
               onPaymentSuccess={handlePaymentSuccess}
               onCancel={handleCancelLock}
               onExpired={handleLockExpired}
+              taxAmountCents={taxAmountCents}
             />
           </Col>
         </Row>
@@ -393,6 +400,7 @@ export default function EventDetailPage() {
               stripePromise={stripePromiseRef.current}
               onPaymentSuccess={handlePaymentSuccess}
               onCancel={handleCancelOpen}
+              taxAmountCents={taxAmountCents}
             />
           </Col>
         </Row>
