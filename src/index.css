@@ -314,16 +314,16 @@ html, body {
 
 /* Hero section */
 .hero-section {
-  min-height: 88vh;
+  min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   position: relative;
   overflow: hidden;
   background:
-    url('/site-bg.jpg') center top / cover no-repeat,
+    url('/site-bg.jpg') center center / cover no-repeat,
     #1a1a1a;
-  padding: 80px 20px 120px;
+  padding: 0 20px 100px;
   text-align: center;
   /* Break out of parent padding to go full-width */
   margin-left: -16px;
@@ -333,16 +333,14 @@ html, body {
   padding-top: 160px;
 }
 
-/* On mobile: show full image, blend into gray below */
+/* Mobile adjustments */
 @media (max-width: 768px) {
   .hero-section {
     background:
-      url('/site-bg.jpg') center top / contain no-repeat,
-      linear-gradient(to bottom, #1a1a1a 0%, #1a1a1a 25%, #4a4a4a 32%, #A9A9A9 40%);
+      url('/site-bg.jpg') center center / cover no-repeat,
+      #1a1a1a;
     min-height: 100vh;
-    padding-top: 140px;
-    padding-bottom: 80px;
-    align-items: flex-end;
+    padding-bottom: 60px;
   }
 }
 
@@ -356,41 +354,23 @@ html, body {
     /* Bottom fade — long smooth dissolve into page gray */
     linear-gradient(to bottom,
       transparent 0%,
-      transparent 35%,
-      rgba(169, 169, 169, 0.15) 55%,
-      rgba(169, 169, 169, 0.45) 70%,
-      rgba(169, 169, 169, 0.75) 82%,
-      #A9A9A9 95%,
+      transparent 40%,
+      rgba(169, 169, 169, 0.08) 55%,
+      rgba(169, 169, 169, 0.25) 68%,
+      rgba(169, 169, 169, 0.55) 78%,
+      rgba(169, 169, 169, 0.85) 88%,
+      #A9A9A9 96%,
       #A9A9A9 100%),
-    /* Subtle tint for text readability */
-    linear-gradient(160deg,
-      rgba(22, 15, 35, 0.3) 0%,
-      rgba(10, 5, 20, 0.15) 50%,
-      rgba(0, 0, 0, 0.1) 100%),
+    /* Subtle dark overlay for text contrast at bottom */
+    linear-gradient(to bottom,
+      transparent 0%,
+      transparent 50%,
+      rgba(0, 0, 0, 0.35) 100%),
     /* Side vignette */
     radial-gradient(ellipse at center,
       transparent 40%,
-      rgba(10, 5, 20, 0.25) 100%);
+      rgba(10, 5, 20, 0.2) 100%);
   pointer-events: none;
-}
-
-/* Mobile: adjust overlay to fade earlier since image is smaller with contain */
-@media (max-width: 768px) {
-  .hero-section::before {
-    background:
-      linear-gradient(to bottom,
-        transparent 0%,
-        transparent 15%,
-        rgba(169, 169, 169, 0.2) 25%,
-        rgba(169, 169, 169, 0.5) 32%,
-        rgba(169, 169, 169, 0.8) 38%,
-        #A9A9A9 45%,
-        #A9A9A9 100%),
-      linear-gradient(160deg,
-        rgba(22, 15, 35, 0.3) 0%,
-        rgba(10, 5, 20, 0.1) 30%,
-        transparent 50%);
-  }
 }
 
 .hero-section > * {
