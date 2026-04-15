@@ -66,91 +66,87 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>
-          {/* Badge — sits above the image on mobile */}
-          <motion.div variants={itemVariants} className="hero-badge-wrap">
+          <motion.div variants={itemVariants}>
             <div style={{
               display: 'inline-flex',
               padding: '8px 20px',
               borderRadius: 30,
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: '#C4B5FD',
+              background: 'rgba(124, 92, 255, 0.12)',
+              border: '1px solid rgba(124, 92, 255, 0.25)',
+              color: '#B8AFC9',
               fontSize: 12,
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: 2,
+              marginBottom: 40,
               backdropFilter: 'blur(12px)',
             }}>
-              ✨ Experience the Unforgettable
+              ✨ Members Only
             </div>
           </motion.div>
 
-          {/* Image + text overlay area */}
-          <div className="hero-image-area">
-            <motion.h1
-              variants={itemVariants}
-              style={{
-                fontSize: 'clamp(3rem, 10vw, 6.5rem)',
-                fontWeight: 900,
-                color: '#FFFFFF',
-                lineHeight: 1,
-                marginBottom: 32,
-                letterSpacing: '-0.06em'
-              }}
-            >
-              Create <span className="gradient-text">Infinite</span> <br />
-              Memories.
-            </motion.h1>
+          <motion.h1
+            variants={itemVariants}
+            style={{
+              fontSize: 'clamp(2.8rem, 8vw, 5.5rem)',
+              fontWeight: 800,
+              color: '#F5F2FA',
+              lineHeight: 1.05,
+              marginBottom: 28,
+              letterSpacing: '-0.04em'
+            }}
+          >
+            Create <span className="gradient-text">Infinite</span> <br />
+            Memories.
+          </motion.h1>
 
-            <motion.p
-              variants={itemVariants}
-              style={{
-                fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
-                color: 'rgba(255, 255, 255, 0.75)',
-                maxWidth: 700,
-                margin: '0 auto 0',
-                lineHeight: 1.6,
-                fontWeight: 500
-              }}
-            >
-              Managing, discovering, and booking exclusive events has never felt this premium. Welcome to the Nebula future.
-            </motion.p>
-          </div>
+          <motion.p
+            variants={itemVariants}
+            style={{
+              fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+              color: '#B8AFC9',
+              maxWidth: 580,
+              margin: '0 auto 48px',
+              lineHeight: 1.7,
+              fontWeight: 400
+            }}
+          >
+            Discover and book exclusive, members-only events. Where fashion meets nightlife and every detail is intentional.
+          </motion.p>
 
           <motion.div
             variants={itemVariants}
-            style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap', marginTop: 48 }}
+            style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}
           >
             <Button
               type="primary"
               size="large"
               onClick={() => navigate('/events')}
               style={{
-                height: 64,
-                padding: '0 48px',
-                borderRadius: 18,
-                fontSize: 18,
+                height: 56,
+                padding: '0 40px',
+                borderRadius: 14,
+                fontSize: 16,
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                background: 'linear-gradient(135deg, #6E5BFF 0%, #F46DB2 100%)',
                 border: 'none',
-                boxShadow: '0 15px 35px rgba(99, 102, 241, 0.35)'
+                boxShadow: '0 8px 32px rgba(110, 91, 255, 0.35)',
               }}
             >
               Explore Events
             </Button>
             <Button
               size="large"
-              className="glass-card"
               onClick={() => navigate('/feedback')}
               style={{
-                height: 64,
-                padding: '0 48px',
-                borderRadius: 18,
-                fontSize: 18,
+                height: 56,
+                padding: '0 40px',
+                borderRadius: 14,
+                fontSize: 16,
                 fontWeight: 600,
-                color: '#FFFFFF',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                background: 'rgba(255, 255, 255, 0.08)',
+                color: '#B8AFC9',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                background: 'rgba(255, 255, 255, 0.04)',
                 backdropFilter: 'blur(12px)',
               }}
             >

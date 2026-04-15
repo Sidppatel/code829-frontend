@@ -82,7 +82,7 @@ export default function PublicLayout() {
           alignItems: 'center',
           justifyContent: 'space-between',
           zIndex: 1000,
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
         }}
       >
         {/* Logo */}
@@ -96,12 +96,12 @@ export default function PublicLayout() {
                 type="text"
                 onClick={() => navigate(link.path)}
                 style={{
-                  color: location.pathname === link.path ? '#C4B5FD' : 'rgba(255,255,255,0.7)',
+                  color: location.pathname === link.path ? '#9B82FF' : 'rgba(255,255,255,0.6)',
                   fontWeight: location.pathname === link.path ? 700 : 500,
                   fontSize: 15,
                   padding: '6px 16px',
                   borderRadius: 10,
-                  background: location.pathname === link.path ? 'rgba(124, 58, 237, 0.15)' : 'transparent',
+                  background: location.pathname === link.path ? 'rgba(124, 92, 255, 0.12)' : 'transparent',
                 }}
               >
                 {link.label}
@@ -136,9 +136,9 @@ export default function PublicLayout() {
                 fontWeight: 600,
                 height: 42,
                 padding: '0 24px',
-                background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                background: 'linear-gradient(135deg, #6E5BFF 0%, #F46DB2 100%)',
                 border: 'none',
-                boxShadow: '0 8px 16px rgba(99, 102, 241, 0.25)',
+                boxShadow: '0 8px 16px rgba(110, 91, 255, 0.3)',
               }}
             >
               Sign In
@@ -161,10 +161,10 @@ export default function PublicLayout() {
         placement="left"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        closeIcon={<CloseOutlined style={{ color: 'var(--text-primary)' }} />}
+        closeIcon={<CloseOutlined style={{ color: '#F5F2FA' }} />}
         styles={{
-          header: { background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)' },
-          body: { background: 'var(--bg-surface)', padding: 0, display: 'flex', flexDirection: 'column' },
+          header: { background: '#1D1727', borderBottom: '1px solid rgba(255,255,255,0.08)' },
+          body: { background: '#1D1727', padding: 0, display: 'flex', flexDirection: 'column' },
           wrapper: { width: 'min(280px, 85vw)' }
         }}
         title={
@@ -291,7 +291,7 @@ export default function PublicLayout() {
                 alignItems: 'center',
                 gap: 2,
                 padding: '4px 12px',
-                color: active || isMenuOpen ? '#C4B5FD' : 'rgba(255,255,255,0.55)',
+                color: active || isMenuOpen ? '#9B82FF' : 'rgba(255,255,255,0.45)',
                 fontSize: 10,
                 fontFamily: "'Inter', sans-serif",
                 position: 'relative',
@@ -306,7 +306,7 @@ export default function PublicLayout() {
                   width: 4,
                   height: 4,
                   borderRadius: '50%',
-                  background: '#C4B5FD',
+                  background: '#9B82FF',
                 }} />
               )}
             </button>
