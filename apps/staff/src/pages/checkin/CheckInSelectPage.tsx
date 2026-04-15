@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { App, Input } from 'antd';
 import { CalendarOutlined, EnvironmentOutlined, ScanOutlined, SearchOutlined } from '@ant-design/icons';
-import { eventsApi } from '../../services/eventsApi';
+import { eventsApi } from '../../services/api';
 import { checkInApi } from '../../services/api';
 import { formatEventDate } from '@code829/shared/utils/date';
 import type { EventSummary } from '@code829/shared/types/event';

@@ -1,6 +1,6 @@
-import apiClient from '@code829/shared/lib/axios';
-import type { EventSummary, EventDetail, EventFacets, EventTablesResponse } from '@code829/shared/types/event';
-import type { PagedResponse } from '@code829/shared/types/shared';
+import apiClient from '../lib/axios';
+import type { EventSummary, EventDetail, EventFacets, EventTablesResponse } from '../types/event';
+import type { PagedResponse } from '../types/shared';
 
 export interface EventListParams {
   search?: string;

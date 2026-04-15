@@ -1,2 +1,2 @@
 export { imagesApi } from '@code829/shared/services/imagesApi';
-export { developerApi } from './developerApi';
+export { developerApi } from '@code829/shared/services/developerApi';

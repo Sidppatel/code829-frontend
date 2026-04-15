@@ -4,7 +4,7 @@ import { SearchOutlined, InfoCircleOutlined, RedoOutlined } from '@ant-design/ic
 import { developerApi } from '../../services/api';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
-import type { DevLogEntry, DevLogParams } from '../../services/developerApi';
+import type { DevLogEntry, DevLogParams } from '@code829/shared/services/developerApi';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
 import PageHeader from '@code829/shared/components/shared/PageHeader';

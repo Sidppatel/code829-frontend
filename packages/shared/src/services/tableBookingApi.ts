@@ -1,5 +1,5 @@
-import apiClient from '@code829/shared/lib/axios';
-import type { TableLock } from '@code829/shared/types/layout';
+import apiClient from '../lib/axios';
+import type { TableLock } from '../types/layout';
 
 export const tableBookingApi = {
   lockTable: (eventId: string, tableId: string) =>

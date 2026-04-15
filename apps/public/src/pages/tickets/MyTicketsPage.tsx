@@ -7,7 +7,7 @@ import {
   CheckCircleOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { ticketsApi } from '../../services/ticketsApi';
+import { ticketsApi } from '../../services/api';
 import type { GuestTicket } from '@code829/shared/types/ticket';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';

@@ -1,5 +1,5 @@
-import apiClient from '@code829/shared/lib/axios';
-import type { DashboardStats, NextEventDashboard } from '@code829/shared/types/developer';
+import apiClient from '../lib/axios';
+import type { DashboardStats, NextEventDashboard } from '../types/developer';
 
 export const adminDashboardApi = {
   getStats: () =>

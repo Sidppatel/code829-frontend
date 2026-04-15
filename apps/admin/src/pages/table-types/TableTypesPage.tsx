@@ -4,7 +4,7 @@ import { PlusOutlined, EditOutlined, TeamOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../services/api';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import type { TableTemplate } from '@code829/shared/types/layout';
-import type { CreateTableTemplatePayload } from '../../services/adminLayoutApi';
+import type { CreateTableTemplatePayload } from '@code829/shared/services/adminLayoutApi';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import HumanCard from '@code829/shared/components/shared/HumanCard';

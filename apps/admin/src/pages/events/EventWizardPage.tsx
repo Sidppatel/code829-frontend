@@ -25,11 +25,8 @@ import {
 import { Typography } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
-import {
-  adminEventsApi,
-  type CreateEventPayload,
-} from '../../services/adminEventsApi';
-import { adminVenuesApi, imagesApi } from '../../services/api';
+import { adminEventsApi, adminVenuesApi, imagesApi } from '../../services/api';
+import type { CreateEventPayload } from '@code829/shared/services/adminEventsApi';
 import type { Venue } from '@code829/shared/types/venue';
 import type { ImageDto } from '@code829/shared/types/image';
 import PageHeader from '@code829/shared/components/shared/PageHeader';

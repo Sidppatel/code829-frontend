@@ -5,7 +5,7 @@ import { developerApi } from '../../services/api';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import { formatEventDate } from '@code829/shared/utils/date';
-import type { DevUser } from '../../services/developerApi';
+import type { DevUser } from '@code829/shared/services/developerApi';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import EmptyState from '@code829/shared/components/shared/EmptyState';

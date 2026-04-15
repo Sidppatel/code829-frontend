@@ -3,7 +3,7 @@ import { List, Input, Button, App, Tag } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import { developerApi, imagesApi } from '../../services/api';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
-import type { AppSetting } from '../../services/developerApi';
+import type { AppSetting } from '@code829/shared/services/developerApi';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import PulseIndicator from '@code829/shared/components/shared/PulseIndicator';

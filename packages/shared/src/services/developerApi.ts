@@ -1,5 +1,5 @@
-import apiClient from '@code829/shared/lib/axios';
-import type { PagedResponse } from '@code829/shared/types/shared';
+import apiClient from '../lib/axios';
+import type { PagedResponse } from '../types/shared';
 
 export interface DevLogEntry {
   id: string;

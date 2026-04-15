@@ -5,7 +5,7 @@ import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
 import type { Booking, BookingStatus } from '@code829/shared/types/booking';
-import type { AdminBookingListParams } from '../../services/adminBookingsApi';
+import type { AdminBookingListParams } from '@code829/shared/services/adminBookingsApi';
 import BookingStatusTag from '../../components/bookings/BookingStatusTag';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import EmptyState from '@code829/shared/components/shared/EmptyState';

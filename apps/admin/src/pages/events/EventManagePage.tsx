@@ -25,7 +25,7 @@ import {
   BorderOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { adminEventsApi } from '../../services/adminEventsApi';
+import { adminEventsApi } from '../../services/api';
 import { formatDateRange } from '@code829/shared/utils/date';
 import type { EventDetail } from '@code829/shared/types/event';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';

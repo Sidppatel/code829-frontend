@@ -4,7 +4,7 @@ import { Row, Col, Pagination, App, Skeleton } from 'antd';
 import { motion } from 'framer-motion';
 import { eventsApi } from '../../services/api';
 import type { EventSummary, EventFacets } from '@code829/shared/types/event';
-import type { EventListParams } from '../../services/eventsApi';
+import type { EventListParams } from '@code829/shared/services/eventsApi';
 import EventCard from '../../components/events/EventCard';
 import EventFilters from '../../components/events/EventFilters';
 import EmptyState from '@code829/shared/components/shared/EmptyState';

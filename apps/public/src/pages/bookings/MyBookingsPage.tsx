@@ -4,8 +4,7 @@ import { Table, Button, App, Space, Modal, Image, Card, Empty, Pagination, Skele
 import type { ColumnsType } from 'antd/es/table';
 import { QrcodeOutlined, CalendarOutlined, SearchOutlined, SendOutlined, GiftOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { bookingsApi } from '../../services/bookingsApi';
-import { ticketsApi } from '../../services/ticketsApi';
+import { bookingsApi, ticketsApi } from '../../services/api';
 import type { Booking } from '@code829/shared/types/booking';
 import type { GuestTicket } from '@code829/shared/types/ticket';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';

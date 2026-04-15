@@ -1,6 +1,6 @@
-import apiClient from '@code829/shared/lib/axios';
-import type { Booking } from '@code829/shared/types/booking';
-import type { PagedResponse } from '@code829/shared/types/shared';
+import apiClient from '../lib/axios';
+import type { Booking } from '../types/booking';
+import type { PagedResponse } from '../types/shared';
 
 export interface AdminBookingListParams extends Record<string, unknown> {
   page?: number;

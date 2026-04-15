@@ -5,7 +5,7 @@ import { SearchOutlined, MailOutlined } from '@ant-design/icons';
 import { developerApi } from '../../services/api';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { formatEventDate } from '@code829/shared/utils/date';
-import type { EmailLogEntry } from '../../services/developerApi';
+import type { EmailLogEntry } from '@code829/shared/services/developerApi';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
 import PulseIndicator from '@code829/shared/components/shared/PulseIndicator';

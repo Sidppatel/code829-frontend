@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Card, Input, Button, App, List } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import { developerApi } from '../../services/api';
-import type { AppSetting } from '../../services/developerApi';
+import type { AppSetting } from '@code829/shared/services/developerApi';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 

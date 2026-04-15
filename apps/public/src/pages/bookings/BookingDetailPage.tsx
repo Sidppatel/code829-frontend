@@ -16,7 +16,7 @@ import {
   TeamOutlined,
   AppstoreOutlined,
 } from '@ant-design/icons';
-import { bookingsApi } from '../../services/bookingsApi';
+import { bookingsApi } from '../../services/api';
 import type { Booking } from '@code829/shared/types/booking';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';

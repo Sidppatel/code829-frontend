@@ -8,7 +8,7 @@ import {
   UserOutlined,
   LoginOutlined,
 } from '@ant-design/icons';
-import { ticketsApi } from '../../services/ticketsApi';
+import { ticketsApi } from '../../services/api';
 import type { TicketClaimInfo } from '@code829/shared/types/ticket';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import { useAuth } from '@code829/shared/hooks/useAuth';

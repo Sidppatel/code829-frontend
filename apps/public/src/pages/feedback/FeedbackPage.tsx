@@ -10,7 +10,7 @@ import {
   MessageOutlined,
   SendOutlined,
 } from '@ant-design/icons';
-import { feedbackApi } from '../../services/feedbackApi';
+import { feedbackApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 
 const feedbackTypes = [

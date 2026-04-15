@@ -1,6 +1,6 @@
-import apiClient from '@code829/shared/lib/axios';
-import type { EventDetail, EventTicketType } from '@code829/shared/types/event';
-import type { PagedResponse } from '@code829/shared/types/shared';
+import apiClient from '../lib/axios';
+import type { EventDetail, EventTicketType } from '../types/event';
+import type { PagedResponse } from '../types/shared';
 
 export interface AdminEventListParams extends Record<string, unknown> {
   page?: number;

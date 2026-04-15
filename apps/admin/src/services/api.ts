@@ -1,9 +1,9 @@
 export { imagesApi } from '@code829/shared/services/imagesApi';
 export { checkInApi } from '@code829/shared/services/checkInApi';
-export { adminEventsApi } from './adminEventsApi';
-export { adminBookingsApi } from './adminBookingsApi';
-export { adminVenuesApi } from './adminVenuesApi';
-export { adminLayoutApi } from './adminLayoutApi';
-export { adminDashboardApi } from './adminDashboardApi';
-export { developerApi } from './developerApi';
-export { eventsApi } from './eventsApi';
+export { adminEventsApi } from '@code829/shared/services/adminEventsApi';
+export { adminBookingsApi } from '@code829/shared/services/adminBookingsApi';
+export { adminVenuesApi } from '@code829/shared/services/adminVenuesApi';
+export { adminLayoutApi } from '@code829/shared/services/adminLayoutApi';
+export { adminDashboardApi } from '@code829/shared/services/adminDashboardApi';
+export { developerApi } from '@code829/shared/services/developerApi';
+export { eventsApi } from '@code829/shared/services/eventsApi';

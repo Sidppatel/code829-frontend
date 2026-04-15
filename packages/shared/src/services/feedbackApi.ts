@@ -1,4 +1,4 @@
-import apiClient from '@code829/shared/lib/axios';
+import apiClient from '../lib/axios';
 
 export interface SubmitFeedbackRequest {
   name: string;

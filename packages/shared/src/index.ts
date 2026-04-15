@@ -30,6 +30,17 @@ export { authApi } from './services/authApi';
 export { adminAuthApi } from './services/adminAuthApi';
 export { imagesApi } from './services/imagesApi';
 export { checkInApi } from './services/checkInApi';
+export { eventsApi } from './services/eventsApi';
+export { bookingsApi } from './services/bookingsApi';
+export { ticketsApi } from './services/ticketsApi';
+export { tableBookingApi } from './services/tableBookingApi';
+export { feedbackApi } from './services/feedbackApi';
+export { adminEventsApi } from './services/adminEventsApi';
+export { adminBookingsApi } from './services/adminBookingsApi';
+export { adminVenuesApi } from './services/adminVenuesApi';
+export { adminLayoutApi } from './services/adminLayoutApi';
+export { adminDashboardApi } from './services/adminDashboardApi';
+export { developerApi } from './services/developerApi';
 
 // Components
 export { ThemedApp } from './components/ThemedApp';

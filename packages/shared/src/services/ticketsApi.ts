@@ -1,5 +1,5 @@
-import apiClient from '@code829/shared/lib/axios';
-import type { BookingTicket, GuestTicket, TicketClaimInfo } from '@code829/shared/types/ticket';
+import apiClient from '../lib/axios';
+import type { BookingTicket, GuestTicket, TicketClaimInfo } from '../types/ticket';
 
 export const ticketsApi = {
   getForBooking: (bookingId: string) =>

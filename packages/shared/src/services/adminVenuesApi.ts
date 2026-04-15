@@ -1,6 +1,6 @@
-import apiClient from '@code829/shared/lib/axios';
-import type { Venue } from '@code829/shared/types/venue';
-import type { PagedResponse } from '@code829/shared/types/shared';
+import apiClient from '../lib/axios';
+import type { Venue } from '../types/venue';
+import type { PagedResponse } from '../types/shared';
 
 export interface CreateVenuePayload {
   name: string;

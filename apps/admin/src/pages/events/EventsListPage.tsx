@@ -10,7 +10,7 @@ import { adminEventsApi } from '../../services/api';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
 import { formatEventDate } from '@code829/shared/utils/date';
 import type { EventDetail } from '@code829/shared/types/event';
-import type { AdminEventListParams } from '../../services/adminEventsApi';
+import type { AdminEventListParams } from '@code829/shared/services/adminEventsApi';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import SharedEventTable from '../../components/events/SharedEventTable';

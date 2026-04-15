@@ -7,9 +7,7 @@ import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { loadStripe } from '@stripe/stripe-js';
 import type { Stripe } from '@stripe/stripe-js';
 
-import { eventsApi } from '../../services/eventsApi';
-import { tableBookingApi } from '../../services/tableBookingApi';
-import { bookingsApi } from '../../services/bookingsApi';
+import { eventsApi, tableBookingApi, bookingsApi } from '../../services/api';
 import type { EventDetail, EventTableDto, EventTablesResponse } from '@code829/shared/types/event';
 import type { TableLock } from '@code829/shared/types/layout';
 import { centsToUSD } from '@code829/shared/utils/currency';

@@ -4,7 +4,7 @@ import { DollarOutlined, UndoOutlined, SearchOutlined } from '@ant-design/icons'
 import { developerApi } from '../../services/api';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
-import type { DevEventListItem, EventFeeInfo } from '../../services/developerApi';
+import type { DevEventListItem, EventFeeInfo } from '@code829/shared/services/developerApi';
 import type { PagedResponse } from '@code829/shared/types/shared';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import HumanCard from '@code829/shared/components/shared/HumanCard';

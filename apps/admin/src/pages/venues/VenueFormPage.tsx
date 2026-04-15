@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Form, Input, Button, Space, App, Row, Col } from 'antd';
 import { adminVenuesApi, imagesApi } from '../../services/api';
-import type { CreateVenuePayload } from '../../services/adminVenuesApi';
+import type { CreateVenuePayload } from '@code829/shared/services/adminVenuesApi';
 import type { ImageDto } from '@code829/shared/types/image';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
