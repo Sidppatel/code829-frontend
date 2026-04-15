@@ -65,8 +65,9 @@ export default function HomePage() {
     >
       {/* Hero Section */}
       <section className="hero-section">
-        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
-          <motion.div variants={itemVariants}>
+        <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>
+          {/* Badge — sits above the image on mobile */}
+          <motion.div variants={itemVariants} className="hero-badge-wrap">
             <div style={{
               display: 'inline-flex',
               padding: '8px 20px',
@@ -78,45 +79,47 @@ export default function HomePage() {
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: 2,
-              marginBottom: 32,
               backdropFilter: 'blur(12px)',
             }}>
               ✨ Experience the Unforgettable
             </div>
           </motion.div>
 
-          <motion.h1
-            variants={itemVariants}
-            style={{
-              fontSize: 'clamp(3rem, 10vw, 6.5rem)',
-              fontWeight: 900,
-              color: '#FFFFFF',
-              lineHeight: 1,
-              marginBottom: 32,
-              letterSpacing: '-0.06em'
-            }}
-          >
-            Create <span className="gradient-text">Infinite</span> <br />
-            Memories.
-          </motion.h1>
+          {/* Image + text overlay area */}
+          <div className="hero-image-area">
+            <motion.h1
+              variants={itemVariants}
+              style={{
+                fontSize: 'clamp(3rem, 10vw, 6.5rem)',
+                fontWeight: 900,
+                color: '#FFFFFF',
+                lineHeight: 1,
+                marginBottom: 32,
+                letterSpacing: '-0.06em'
+              }}
+            >
+              Create <span className="gradient-text">Infinite</span> <br />
+              Memories.
+            </motion.h1>
 
-          <motion.p
-            variants={itemVariants}
-            style={{
-              fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
-              color: 'rgba(255, 255, 255, 0.75)',
-              maxWidth: 700,
-              margin: '0 auto 56px',
-              lineHeight: 1.6,
-              fontWeight: 500
-            }}
-          >
-            Managing, discovering, and booking exclusive events has never felt this premium. Welcome to the Nebula future.
-          </motion.p>
+            <motion.p
+              variants={itemVariants}
+              style={{
+                fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
+                color: 'rgba(255, 255, 255, 0.75)',
+                maxWidth: 700,
+                margin: '0 auto 0',
+                lineHeight: 1.6,
+                fontWeight: 500
+              }}
+            >
+              Managing, discovering, and booking exclusive events has never felt this premium. Welcome to the Nebula future.
+            </motion.p>
+          </div>
 
           <motion.div
             variants={itemVariants}
-            style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}
+            style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap', marginTop: 48 }}
           >
             <Button
               type="primary"

@@ -361,47 +361,53 @@ html, body {
   pointer-events: none;
 }
 
+/* On desktop, hero-image-area is transparent (whole section has bg) */
+.hero-image-area {
+  position: relative;
+}
+.hero-badge-wrap {
+  margin-bottom: 32px;
+}
+
 @media (max-width: 768px) {
   .hero-section {
     min-height: auto;
-    flex-direction: column;
-    padding: 0 0 40px;
-    gap: 0;
+    padding: 24px 0 40px;
   }
-  /* On mobile: full image visible, no crop, image on top */
-  .hero-section::after {
-    position: relative;
-    display: block;
-    width: 100%;
-    order: -1;
-    /* Maintain image aspect ratio (~1.6:1) */
-    padding-top: 62%;
-    flex-shrink: 0;
-    background: url('/site-bg.jpg') center center / contain no-repeat;
-    -webkit-mask-image:
-      linear-gradient(to bottom, black 50%, transparent 100%),
-      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-    -webkit-mask-composite: destination-in;
-    mask-image:
-      linear-gradient(to bottom, black 50%, transparent 100%),
-      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-    mask-composite: intersect;
-  }
+  /* Hide the full-section image on mobile */
+  .hero-section::after,
   .hero-section::before {
     display: none;
   }
-  .hero-section > * {
-    z-index: 2;
-    padding-left: 16px;
-    padding-right: 16px;
+  .hero-badge-wrap {
+    margin-bottom: 16px;
+    padding: 0 16px;
   }
-  /* On mobile, hero text should be dark since it's on gray bg */
-  .hero-section h1,
-  .hero-section .gradient-text {
-    color: var(--text-primary) !important;
+  /* On mobile: image behind only the title + subtitle */
+  .hero-image-area {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    margin: 0 12px;
+    padding: 48px 20px;
+    background:
+      url('/site-bg.jpg') center center / cover no-repeat,
+      #1a1a1a;
   }
-  .hero-section p {
-    color: var(--text-secondary) !important;
+  /* Dark overlay for text readability on mobile image */
+  .hero-image-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 0;
+  }
+  .hero-image-area > * {
+    position: relative;
+    z-index: 1;
+  }
+  .hero-section > .page-container > *:last-child {
+    padding: 0 16px;
   }
 }
 
