@@ -345,22 +345,45 @@ html, body {
 
 @media (max-width: 768px) {
   .hero-section {
-    min-height: 70vh;
-    padding: 40px 16px 60px;
+    min-height: auto;
+    flex-direction: column;
+    padding: 0 0 40px;
+    gap: 0;
   }
+  /* On mobile: full image visible, no crop, image on top */
   .hero-section::after {
+    position: relative;
+    display: block;
+    width: 100%;
+    order: -1;
+    /* Maintain image aspect ratio (~1.6:1) */
+    padding-top: 62%;
+    flex-shrink: 0;
+    background: url('/site-bg.jpg') center center / contain no-repeat;
     -webkit-mask-image:
-      radial-gradient(ellipse 90% 65% at center center,
-        rgba(0,0,0,1) 15%,
-        rgba(0,0,0,0.8) 35%,
-        rgba(0,0,0,0.4) 60%,
-        rgba(0,0,0,0) 100%);
+      linear-gradient(to bottom, black 50%, transparent 100%),
+      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    -webkit-mask-composite: destination-in;
     mask-image:
-      radial-gradient(ellipse 90% 65% at center center,
-        rgba(0,0,0,1) 15%,
-        rgba(0,0,0,0.8) 35%,
-        rgba(0,0,0,0.4) 60%,
-        rgba(0,0,0,0) 100%);
+      linear-gradient(to bottom, black 50%, transparent 100%),
+      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    mask-composite: intersect;
+  }
+  .hero-section::before {
+    display: none;
+  }
+  .hero-section > * {
+    z-index: 2;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  /* On mobile, hero text should be dark since it's on gray bg */
+  .hero-section h1,
+  .hero-section .gradient-text {
+    color: var(--text-primary) !important;
+  }
+  .hero-section p {
+    color: var(--text-secondary) !important;
   }
 }
 
