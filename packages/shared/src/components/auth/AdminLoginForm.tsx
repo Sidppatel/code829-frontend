@@ -13,16 +13,20 @@ interface AdminLoginFormProps {
 
 export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath = '/forgot-password' }: AdminLoginFormProps) {
   const [loading, setLoading] = useState(false);
-  const { setAuth } = useAuthStore();
+  const { setAuth, logout } = useAuthStore();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { message } = App.useApp();
 
-  // Show error message if redirected due to insufficient role
+  // Handle insufficient role redirect — clear stale session and show error
   useEffect(() => {
     const error = searchParams.get('error');
     if (error === 'insufficient_role') {
+      logout();
       message.error('Access denied — your account does not have permission for this portal');
+      // Clean up URL so the error doesn't re-trigger on refresh
+      searchParams.delete('error');
+      setSearchParams(searchParams, { replace: true });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

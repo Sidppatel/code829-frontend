@@ -15,14 +15,16 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, minRole = 'User' }: Props) {
-  const { token, user, logout } = useAuthStore();
+  const { token, user } = useAuthStore();
   const location = useLocation();
   if (!token || !user) {
     const returnUrl = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?returnUrl=${returnUrl}`} replace />;
   }
   if (ROLE_LEVEL[user.role] < ROLE_LEVEL[minRole]) {
-    logout();
+    // Don't call logout() here — it mutates Zustand during render, causing a
+    // re-render that races with the Navigate and swallows the error param.
+    // The login page handles the session clear when it sees this param.
     return <Navigate to="/login?error=insufficient_role" replace />;
   }
   return <>{children}</>;
