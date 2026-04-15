@@ -63,12 +63,21 @@ export interface EventFacets {
 }
 
 export interface EventTicketType {
-  id?: string;
-  name: string;
+  id: string;
+  label: string;
   priceCents: number;
-  capacity?: number;
+  displayPriceCents: number;
+  maxQuantity?: number;
+  sortOrder: number;
+  isActive: boolean;
+  soldCount: number;
+  availableCount: number;
   description?: string;
-  soldCount?: number;
+}
+
+export interface EventTicketTypesResponse {
+  eventId: string;
+  ticketTypes: EventTicketType[];
 }
 
 

@@ -156,16 +156,16 @@ export default function EventWizardPage() {
         layoutMode,
         ticketTypes: layoutMode === 'Open' ? values.ticketTypes?.map((tt: any) => ({
           id: tt.id,
-          name: Array.isArray(tt.name) ? tt.name[0] : tt.name,
+          label: Array.isArray(tt.name) ? tt.name[0] : tt.name,
           priceCents: Math.round(Number(tt.price) * 100),
-          capacity: Number(tt.capacity),
+          maxQuantity: Number(tt.capacity),
           description: tt.description
         })) : undefined
       };
       
       // For Open mode, max capacity is sum of ticket types
       if (layoutMode === 'Open' && payload.ticketTypes && payload.ticketTypes.length > 0) {
-        payload.maxCapacity = payload.ticketTypes.reduce((acc, curr) => acc + (curr.capacity || 0), 0);
+        payload.maxCapacity = payload.ticketTypes.reduce((acc, curr) => acc + (curr.maxQuantity || 0), 0);
         // If the sum is 0, set to null to avoid DB constraint violation (CK_events_MaxCapacity > 0)
         if (payload.maxCapacity === 0) payload.maxCapacity = undefined;
       } else if (layoutMode === 'Open') {

@@ -6,6 +6,7 @@ export interface CreateBookingRequest {
   eventId: string;
   tableId?: string;
   seatsReserved?: number;
+  eventTicketTypeId?: string;
 }
 
 export const bookingsApi = {

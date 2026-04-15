@@ -9,7 +9,7 @@ import type { Stripe } from '@stripe/stripe-js';
 
 import { createLogger } from '@code829/shared/lib/logger';
 import { eventsApi, tableBookingApi, bookingsApi } from '../../services/api';
-import type { EventDetail, EventTableDto, EventTablesResponse } from '@code829/shared/types/event';
+import type { EventDetail, EventTableDto, EventTablesResponse, EventTicketType } from '@code829/shared/types/event';
 
 const log = createLogger('Public/EventDetailPage');
 import type { TableLock } from '@code829/shared/types/layout';
@@ -61,6 +61,8 @@ export default function EventDetailPage() {
   const [confirming, setConfirming] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [seatCount, setSeatCount] = useState(1);
+  const [selectedTicketTypeId, setSelectedTicketTypeId] = useState<string | undefined>(undefined);
+  const [ticketTypes, setTicketTypes] = useState<EventTicketType[]>([]);
 
   // Stripe state
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -135,6 +137,21 @@ export default function EventDetailPage() {
     };
     void load();
   }, [slug, message, navigate]);
+
+  // Load ticket types for Open events
+  useEffect(() => {
+    if (!event || event.layoutMode !== 'Open') return;
+    const loadTicketTypes = async () => {
+      try {
+        const { data } = await eventsApi.getTicketTypes(event.id);
+        setTicketTypes(data.ticketTypes);
+      } catch {
+        // Event may not have ticket types — that's OK
+        setTicketTypes([]);
+      }
+    };
+    void loadTicketTypes();
+  }, [event]);
 
   const loadTables = useCallback(async () => {
     if (!event) return;
@@ -242,8 +259,9 @@ export default function EventDetailPage() {
     void loadTables();
   };
 
-  const handleCapacityProceed = (seats: number) => {
+  const handleCapacityProceed = (seats: number, ticketTypeId?: string) => {
     setSeatCount(seats);
+    setSelectedTicketTypeId(ticketTypeId);
     setCheckoutError(null);
     setStep('checkout-open');
   };
@@ -257,6 +275,7 @@ export default function EventDetailPage() {
         const { data: booking } = await bookingsApi.create({
           eventId: event.id,
           seatsReserved: seatCount,
+          ...(selectedTicketTypeId ? { eventTicketTypeId: selectedTicketTypeId } : {}),
         });
         setBookingId(booking.id);
         setClientSecret(booking.clientSecret ?? null);
@@ -269,7 +288,7 @@ export default function EventDetailPage() {
       }
     };
     void createBooking();
-  }, [step, event, seatCount, clientSecret]);
+  }, [step, event, seatCount, selectedTicketTypeId, clientSecret]);
 
   const handleCancelOpen = () => {
     setCheckoutError(null);
@@ -345,6 +364,7 @@ export default function EventDetailPage() {
               maxCapacity={event.maxCapacity ?? 0}
               totalSold={event.totalSold}
               pricePerPersonCents={event.pricePerPersonCents ?? 0}
+              ticketTypes={ticketTypes.length > 0 ? ticketTypes : undefined}
               onProceed={handleCapacityProceed}
             />
           </Col>

@@ -13,11 +13,11 @@ export default function EventTicketTypesTable({ ticketTypes, loading }: EventTic
   const columns: ColumnsType<EventTicketType> = [
     {
       title: 'Ticket Tier',
-      dataIndex: 'name',
-      key: 'name',
-      render: (name: string) => (
+      dataIndex: 'label',
+      key: 'label',
+      render: (label: string) => (
         <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-          {name}
+          {label}
         </div>
       ),
     },
@@ -38,7 +38,7 @@ export default function EventTicketTypesTable({ ticketTypes, loading }: EventTic
       width: 150,
       render: (_, record) => (
         <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-          <strong>{record.soldCount || 0}</strong> / {record.capacity || '∞'}
+          <strong>{record.soldCount || 0}</strong> / {record.maxQuantity || '∞'}
         </div>
       ),
     },
@@ -48,7 +48,7 @@ export default function EventTicketTypesTable({ ticketTypes, loading }: EventTic
       width: 200,
       render: (_, record) => {
         const sold = record.soldCount || 0;
-        const total = record.capacity || 0;
+        const total = record.maxQuantity || 0;
         const percent = total > 0 ? Math.round((sold / total) * 100) : 0;
         return (
           <div style={{ minWidth: 120 }}>
@@ -69,7 +69,7 @@ export default function EventTicketTypesTable({ ticketTypes, loading }: EventTic
       width: 120,
       render: (_, record) => {
         const sold = record.soldCount || 0;
-        const total = record.capacity || 0;
+        const total = record.maxQuantity || 0;
         const isSoldOut = total > 0 && sold >= total;
         
         return isSoldOut ? (
@@ -86,7 +86,7 @@ export default function EventTicketTypesTable({ ticketTypes, loading }: EventTic
       <Table
         dataSource={ticketTypes}
         columns={columns}
-        rowKey={(record) => record.id || record.name}
+        rowKey={(record) => record.id}
         loading={loading}
         pagination={false}
         size="middle"
