@@ -5,5 +5,4 @@ export { adminBookingsApi } from '@code829/shared/services/adminBookingsApi';
 export { adminVenuesApi } from '@code829/shared/services/adminVenuesApi';
 export { adminLayoutApi } from '@code829/shared/services/adminLayoutApi';
 export { adminDashboardApi } from '@code829/shared/services/adminDashboardApi';
-export { developerApi } from '@code829/shared/services/developerApi';
 export { eventsApi } from '@code829/shared/services/eventsApi';
