@@ -12,6 +12,9 @@ import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
 import BookingStatusTag from '../../components/bookings/BookingStatusTag';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Public/MyBookingsPage');
 
 type BookingFilters = Record<string, unknown> & {
   page?: number;
@@ -52,8 +55,10 @@ export default function MyBookingsPage() {
     const confirm = async () => {
       try {
         await bookingsApi.confirmByPaymentIntent(paymentIntent);
+        log.info('Payment confirmed via Stripe redirect', { paymentIntent });
         message.success('Payment confirmed!');
-      } catch {
+      } catch (err) {
+        log.error('Failed to confirm payment intent', err);
         message.warning('Payment received — booking will update shortly');
       }
       setSearchParams({}, { replace: true });
@@ -70,7 +75,9 @@ export default function MyBookingsPage() {
         // Filter out tickets for bookings the user owns (those show in the main list)
         // We only want tickets where the user is a guest, not the booker
         setGuestTickets(tickets);
-      } catch {
+        log.info('Loaded guest tickets', { count: tickets.length });
+      } catch (err) {
+        log.error('Failed to load guest tickets', err);
         // Silently fail — guest tickets are supplementary
       }
     };
@@ -83,7 +90,8 @@ export default function MyBookingsPage() {
       const url = URL.createObjectURL(blob as Blob);
       setGuestQrUrl(url);
       setGuestQrLabel(`Seat #${ticket.seatNumber} — ${ticket.eventTitle}`);
-    } catch {
+    } catch (err) {
+      log.error('Failed to load guest ticket QR', err);
       message.error('Failed to load QR code');
     }
   };
@@ -91,9 +99,11 @@ export default function MyBookingsPage() {
   const handleCancel = async (id: string) => {
     try {
       await bookingsApi.cancel(id);
+      log.info('Booking cancelled', { bookingId: id });
       message.success('Booking cancelled');
       refresh();
-    } catch {
+    } catch (err) {
+      log.error('Failed to cancel booking', err);
       message.error('Failed to cancel booking');
     }
   };
@@ -104,7 +114,8 @@ export default function MyBookingsPage() {
       const { data: blob } = await bookingsApi.getQrCode(bookingId);
       const url = URL.createObjectURL(blob as Blob);
       setQrUrl(url);
-    } catch {
+    } catch (err) {
+      log.error('Failed to load booking QR code', err);
       message.error('Failed to load QR code');
     } finally {
       setQrLoading(false);

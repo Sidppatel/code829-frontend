@@ -15,6 +15,9 @@ import type { BookingTicket } from '@code829/shared/types/ticket';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import { formatEventDate } from '@code829/shared/utils/date';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Public/BookingTicketsPage');
 
 export default function BookingTicketsPage() {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -35,7 +38,9 @@ export default function BookingTicketsPage() {
     try {
       const { data } = await ticketsApi.getForBooking(bookingId);
       setTickets(data);
-    } catch {
+      log.info('Loaded tickets for booking', { bookingId, count: data.length });
+    } catch (err) {
+      log.error('Failed to load tickets', err);
       message.error('Failed to load tickets');
     } finally {
       setLoading(false);
@@ -53,7 +58,8 @@ export default function BookingTicketsPage() {
       const url = URL.createObjectURL(blob as Blob);
       setQrUrl(url);
       setQrSeat(seatNumber);
-    } catch {
+    } catch (err) {
+      log.error('Failed to load ticket QR code', err);
       message.error('Failed to load QR code');
     }
   };
@@ -69,12 +75,14 @@ export default function BookingTicketsPage() {
     setSending(true);
     try {
       await ticketsApi.invite(bookingId, inviteModal, inviteEmail.trim(), inviteName.trim() || undefined);
+      log.info('Ticket invite sent', { bookingId, ticketId: inviteModal, email: inviteEmail.trim() });
       message.success(`Invite sent to ${inviteEmail}`);
       setInviteModal(null);
       setInviteEmail('');
       setInviteName('');
       void loadTickets();
-    } catch {
+    } catch (err) {
+      log.error('Failed to send ticket invite', err);
       message.error('Failed to send invite');
     } finally {
       setSending(false);
@@ -85,9 +93,11 @@ export default function BookingTicketsPage() {
     if (!bookingId) return;
     try {
       await ticketsApi.revoke(bookingId, ticketId);
+      log.info('Ticket invite revoked', { bookingId, ticketId });
       message.success('Invite revoked');
       void loadTickets();
-    } catch {
+    } catch (err) {
+      log.error('Failed to revoke ticket invite', err);
       message.error('Failed to revoke invite');
     }
   };

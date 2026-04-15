@@ -12,6 +12,9 @@ import {
 } from '@ant-design/icons';
 import { feedbackApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Public/FeedbackPage');
 
 const feedbackTypes = [
   { value: 'General', label: 'General', icon: <MessageOutlined /> },
@@ -46,8 +49,10 @@ export default function FeedbackPage() {
         message: body.trim(),
         rating,
       });
+      log.info('Feedback submitted', { type, rating });
       setSubmitted(true);
-    } catch {
+    } catch (err) {
+      log.error('Failed to submit feedback', err);
       message.error('Failed to submit feedback. Please try again.');
     } finally {
       setSubmitting(false);

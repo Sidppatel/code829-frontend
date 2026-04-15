@@ -22,6 +22,9 @@ import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
 import BookingStatusTag from '../../components/bookings/BookingStatusTag';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
+import { createLogger } from '@code829/shared/lib/logger';
+
+const log = createLogger('Public/BookingDetailPage');
 
 export default function BookingDetailPage() {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -38,7 +41,9 @@ export default function BookingDetailPage() {
       try {
         const { data } = await bookingsApi.getById(bookingId);
         setBooking(data);
-      } catch {
+        log.info('Loaded booking details', { bookingId, bookingNumber: data.bookingNumber });
+      } catch (err) {
+        log.error('Failed to load booking details', err);
         message.error('Failed to load booking details');
         navigate('/bookings', { replace: true });
       } finally {
@@ -53,7 +58,8 @@ export default function BookingDetailPage() {
     try {
       const { data: blob } = await bookingsApi.getQrCode(bookingId);
       setQrUrl(URL.createObjectURL(blob as Blob));
-    } catch {
+    } catch (err) {
+      log.error('Failed to load QR code', err);
       message.error('Failed to load QR code');
     }
   };
@@ -62,10 +68,12 @@ export default function BookingDetailPage() {
     if (!bookingId) return;
     try {
       await bookingsApi.cancel(bookingId);
+      log.info('Booking cancelled', { bookingId });
       message.success('Booking cancelled');
       const { data } = await bookingsApi.getById(bookingId);
       setBooking(data);
-    } catch {
+    } catch (err) {
+      log.error('Failed to cancel booking', err);
       message.error('Failed to cancel booking');
     }
   };
