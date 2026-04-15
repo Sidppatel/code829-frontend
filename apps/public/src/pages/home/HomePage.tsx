@@ -68,7 +68,7 @@ export default function HomePage() {
       style={{ minHeight: '100vh', position: 'relative' }}
     >
       {/* Hero Section */}
-      <section className="hero-section">
+      <section className="hero-section" style={{ minHeight: 'auto', padding: '120px 20px 60px' }}>
         <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>
           <motion.div variants={itemVariants}>
           </motion.div>
