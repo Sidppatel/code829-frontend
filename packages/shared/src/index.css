@@ -302,10 +302,8 @@ html, body {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background:
-    linear-gradient(160deg, rgba(22, 15, 35, 0.3) 0%, rgba(20, 10, 40, 0.2) 50%, rgba(0, 0, 0, 0.15) 100%),
-    url('/site-bg.jpg') center / cover no-repeat;
-  padding: 80px 20px 60px;
+  background: url('/site-bg.jpg') center 20% / cover no-repeat;
+  padding: 80px 20px 100px;
   text-align: center;
   /* Break out of parent padding to go full-width */
   margin-left: -16px;
@@ -313,6 +311,37 @@ html, body {
   width: calc(100% + 32px);
   margin-top: -130px;
   padding-top: 160px;
+}
+
+/* Blending overlays — vignette + bottom fade into page bg */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    /* Bottom fade into page gray */
+    linear-gradient(to bottom,
+      transparent 0%,
+      transparent 50%,
+      rgba(169, 169, 169, 0.4) 75%,
+      rgba(169, 169, 169, 0.85) 90%,
+      #A9A9A9 100%),
+    /* Overall tint for text readability */
+    linear-gradient(160deg,
+      rgba(22, 15, 35, 0.35) 0%,
+      rgba(10, 5, 20, 0.2) 50%,
+      rgba(0, 0, 0, 0.15) 100%),
+    /* Side vignette */
+    radial-gradient(ellipse at center,
+      transparent 40%,
+      rgba(10, 5, 20, 0.3) 100%);
+  pointer-events: none;
+}
+
+.hero-section > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Mobile-first page padding */
