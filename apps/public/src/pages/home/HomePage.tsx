@@ -67,22 +67,6 @@ export default function HomePage() {
       <section className="hero-section">
         <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>
           <motion.div variants={itemVariants}>
-            <div style={{
-              display: 'inline-flex',
-              padding: '8px 20px',
-              borderRadius: 30,
-              background: 'rgba(124, 92, 255, 0.12)',
-              border: '1px solid rgba(124, 92, 255, 0.25)',
-              color: '#B8AFC9',
-              fontSize: 12,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: 2,
-              marginBottom: 40,
-              backdropFilter: 'blur(12px)',
-            }}>
-              ✨ Members Only
-            </div>
           </motion.div>
 
           <motion.h1
@@ -96,8 +80,7 @@ export default function HomePage() {
               letterSpacing: '-0.04em'
             }}
           >
-            Create <span className="gradient-text">Infinite</span> <br />
-            Memories.
+            <span className="gradient-text">THE CODE</span> <br />
           </motion.h1>
 
           <motion.p
@@ -111,7 +94,7 @@ export default function HomePage() {
               fontWeight: 400
             }}
           >
-            Discover and book exclusive, members-only events. Where fashion meets nightlife and every detail is intentional.
+            Managing, discovering and booking exclusive events has never felf this preminum. Welcome to THE CODE.
           </motion.p>
 
           <motion.div
