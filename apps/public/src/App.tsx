@@ -5,6 +5,7 @@ import ErrorBoundary from '@code829/shared/components/shared/ErrorBoundary';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import ProtectedRoute from '@code829/shared/components/auth/ProtectedRoute';
 import PublicLayout from './components/layout/PublicLayout';
+import { useSessionRefresh } from '@code829/shared/hooks/useSessionRefresh';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 
@@ -64,6 +65,8 @@ function AppContent() {
 }
 
 export default function App() {
+  useSessionRefresh();
+
   return (
     <BrowserRouter>
       <ErrorBoundary>

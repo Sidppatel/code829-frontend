@@ -4,6 +4,7 @@ import NotFoundPage from '@code829/shared/components/shared/NotFoundPage';
 import ErrorBoundary from '@code829/shared/components/shared/ErrorBoundary';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import ProtectedRoute from '@code829/shared/components/auth/ProtectedRoute';
+import { useSessionRefresh } from '@code829/shared/hooks/useSessionRefresh';
 import StaffLayout from './components/layout/StaffLayout';
 
 const StaffLoginPage = lazy(() => import('./pages/login/StaffLoginPage'));
@@ -14,6 +15,8 @@ const CheckInSelectPage = lazy(() => import('./pages/checkin/CheckInSelectPage')
 const CheckInPage = lazy(() => import('./pages/checkin/CheckInPage'));
 
 export default function App() {
+  useSessionRefresh('/admin/auth/me');
+
   return (
     <BrowserRouter>
       <ErrorBoundary>

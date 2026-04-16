@@ -67,7 +67,25 @@ apiClient.interceptors.response.use(
       return apiClient(config);
     }
 
-    if (status === 401) {
+    if (status === 401 && !config?._skipAuthRetry) {
+      // Session cookie might still be valid — try one silent refresh
+      try {
+        const meUrl = config?.url?.startsWith('/admin') ? '/admin/auth/me' : '/auth/me';
+        const res = await apiClient.get(meUrl, { _skipAuthRetry: true } as any);
+        if (res.data?.id) {
+          useAuthStore.getState().setUser(res.data);
+          // Retry original request
+          if (config) {
+            config._skipAuthRetry = true;
+            return apiClient(config);
+          }
+        }
+      } catch {
+        log.warn(`Session expired: ${method} ${url}`);
+        useAuthStore.getState().logout();
+      }
+    } else if (status === 401) {
+      // Already retried — do not loop
       log.warn(`Auth expired: ${method} ${url}`);
       useAuthStore.getState().logout();
     } else if (status && status >= 500) {
