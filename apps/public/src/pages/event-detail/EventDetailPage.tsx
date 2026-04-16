@@ -69,6 +69,7 @@ export default function EventDetailPage() {
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [taxAmountCents, setTaxAmountCents] = useState<number | null>(null);
   const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
+  const [paymentMode, setPaymentMode] = useState<'live' | 'mock'>('live');
 
   // Refs for cleanup
   const tableLockRef = useRef<TableLock | null>(null);
@@ -111,11 +112,13 @@ export default function EventDetailPage() {
     const init = async () => {
       try {
         const { data } = await bookingsApi.getStripeConfig();
-        if (data.publishableKey) {
+        setPaymentMode(data.mode);
+        if (data.mode === 'live' && data.publishableKey) {
           stripePromiseRef.current = loadStripe(data.publishableKey);
         }
       } catch {
-        // Stripe not configured
+        // Stripe not configured — fall back to mock
+        setPaymentMode('mock');
       }
     };
     void init();
@@ -351,6 +354,7 @@ export default function EventDetailPage() {
               onCancel={handleCancelLock}
               onExpired={handleLockExpired}
               taxAmountCents={taxAmountCents}
+              paymentMode={paymentMode}
             />
           </Col>
         </Row>
@@ -406,6 +410,7 @@ export default function EventDetailPage() {
               onPaymentSuccess={handlePaymentSuccess}
               onCancel={handleCancelOpen}
               taxAmountCents={taxAmountCents}
+              paymentMode={paymentMode}
             />
           </Col>
         </Row>

@@ -1,4 +1,4 @@
-import { Card, Descriptions, Divider, Typography, Space, Alert } from 'antd';
+import { Card, Descriptions, Divider, Typography, Space, Alert, Button } from 'antd';
 import { Elements } from '@stripe/react-stripe-js';
 import type { Stripe } from '@stripe/stripe-js';
 import { centsToUSD } from '@code829/shared/utils/currency';
@@ -18,6 +18,7 @@ interface GridCheckoutProps {
   onCancel: () => void;
   onExpired: () => void;
   taxAmountCents?: number | null;
+  paymentMode?: 'live' | 'mock';
 }
 
 interface OpenCheckoutProps {
@@ -32,12 +33,13 @@ interface OpenCheckoutProps {
   onPaymentSuccess: () => void;
   onCancel: () => void;
   taxAmountCents?: number | null;
+  paymentMode?: 'live' | 'mock';
 }
 
 type Props = GridCheckoutProps | OpenCheckoutProps;
 
 export default function CheckoutPanel(props: Props) {
-  const { mode, confirming, setConfirming, error, clientSecret, stripePromise, onPaymentSuccess, onCancel, taxAmountCents } = props;
+  const { mode, confirming, setConfirming, error, clientSecret, stripePromise, onPaymentSuccess, onCancel, taxAmountCents, paymentMode } = props;
 
   let subtotal: number;
   let description: string;
@@ -54,6 +56,12 @@ export default function CheckoutPanel(props: Props) {
 
   const tax = taxAmountCents ?? 0;
   const total = subtotal + tax;
+  const isMock = paymentMode === 'mock';
+
+  const handleMockPay = () => {
+    setConfirming(true);
+    onPaymentSuccess();
+  };
 
   return (
     <Card title="Checkout" styles={{ header: { borderBottom: 'none' } }}>
@@ -115,10 +123,31 @@ export default function CheckoutPanel(props: Props) {
         )}
 
         {error && (
-          <Alert type="error" title={error} showIcon />
+          <Alert type="error" message={error} showIcon />
         )}
 
-        {clientSecret && stripePromise ? (
+        {isMock ? (
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <Alert
+              type="info"
+              message="Development Mode"
+              description="Stripe is not configured. Payment will be simulated."
+              showIcon
+            />
+            <Button
+              type="primary"
+              size="large"
+              block
+              onClick={handleMockPay}
+              loading={confirming}
+            >
+              Pay Now (Dev)
+            </Button>
+            <Button block onClick={onCancel} disabled={confirming}>
+              Cancel
+            </Button>
+          </Space>
+        ) : clientSecret && stripePromise ? (
           <Elements stripe={stripePromise} options={{ clientSecret }}>
             <StripePaymentForm
               onSuccess={onPaymentSuccess}

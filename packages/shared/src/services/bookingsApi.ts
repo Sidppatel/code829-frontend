@@ -32,5 +32,5 @@ export const bookingsApi = {
     apiClient.get(`/bookings/${id}/qr`, { responseType: 'blob' }),
 
   getStripeConfig: () =>
-    apiClient.get<{ publishableKey: string }>('/bookings/stripe-config'),
+    apiClient.get<{ publishableKey: string; mode: 'live' | 'mock' }>('/bookings/stripe-config'),
 };
