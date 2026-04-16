@@ -8,7 +8,7 @@ import StripePaymentForm from './StripePaymentForm';
 
 interface GridCheckoutProps {
   mode: 'grid';
-  tableLock: TableLock;
+  tableLocks: TableLock[];
   confirming: boolean;
   setConfirming: (v: boolean) => void;
   error: string | null;
@@ -45,9 +45,11 @@ export default function CheckoutPanel(props: Props) {
   let description: string;
 
   if (mode === 'grid') {
-    const { tableLock } = props;
-    subtotal = tableLock.displayPriceCents;
-    description = `Table ${tableLock.tableLabel} - ${tableLock.capacity} seats`;
+    const { tableLocks } = props;
+    subtotal = tableLocks.reduce((sum, l) => sum + l.displayPriceCents, 0);
+    const labels = tableLocks.map(l => l.tableLabel).join(', ');
+    const totalSeats = tableLocks.reduce((sum, l) => sum + l.capacity, 0);
+    description = `Table${tableLocks.length > 1 ? 's' : ''} ${labels} — ${totalSeats} seats`;
   } else {
     const { seatCount, pricePerPersonCents } = props;
     subtotal = seatCount * pricePerPersonCents;
@@ -66,27 +68,34 @@ export default function CheckoutPanel(props: Props) {
   return (
     <Card title="Checkout" styles={{ header: { borderBottom: 'none' } }}>
       <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        {mode === 'grid' && (
-          <TableLockTimer
-            expiresAt={(props as GridCheckoutProps).tableLock.expiresAt}
-            onExpired={(props as GridCheckoutProps).onExpired}
-          />
-        )}
+        {mode === 'grid' && (() => {
+          const earliest = (props as GridCheckoutProps).tableLocks
+            .map(l => l.expiresAt).sort()[0];
+          return earliest ? (
+            <TableLockTimer
+              expiresAt={earliest}
+              onExpired={(props as GridCheckoutProps).onExpired}
+            />
+          ) : null;
+        })()}
 
         <Descriptions column={1} size="small">
-          {mode === 'grid' && (
-            <>
-              <Descriptions.Item label="Table">
-                {(props as GridCheckoutProps).tableLock.tableLabel}
-              </Descriptions.Item>
-              <Descriptions.Item label="Seats included">
-                {(props as GridCheckoutProps).tableLock.capacity}
-              </Descriptions.Item>
-              <Descriptions.Item label="Pricing">
-                Whole table (not per seat)
-              </Descriptions.Item>
-            </>
-          )}
+          {mode === 'grid' && (() => {
+            const locks = (props as GridCheckoutProps).tableLocks;
+            return (
+              <>
+                <Descriptions.Item label={locks.length > 1 ? 'Tables' : 'Table'}>
+                  {locks.map(l => l.tableLabel).join(', ')}
+                </Descriptions.Item>
+                <Descriptions.Item label="Seats included">
+                  {locks.reduce((sum, l) => sum + l.capacity, 0)}
+                </Descriptions.Item>
+                <Descriptions.Item label="Pricing">
+                  {locks.length > 1 ? `${locks.length} whole tables (not per seat)` : 'Whole table (not per seat)'}
+                </Descriptions.Item>
+              </>
+            );
+          })()}
           {mode === 'open' && (
             <Descriptions.Item label="Order">{description}</Descriptions.Item>
           )}

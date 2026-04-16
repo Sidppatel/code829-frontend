@@ -5,6 +5,7 @@ import type { PagedResponse } from '../types/shared';
 export interface CreateBookingRequest {
   eventId: string;
   tableId?: string;
+  tableIds?: string[];
   seatsReserved?: number;
   eventTicketTypeId?: string;
 }

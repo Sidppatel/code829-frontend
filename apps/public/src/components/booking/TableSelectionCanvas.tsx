@@ -11,8 +11,9 @@ interface Props {
   eventTableTypes: EventTableTypeInfo[];
   gridRows: number;
   gridCols: number;
-  lockedTable: EventTableDto | null;
+  lockedTables: EventTableDto[];
   onLockTable: (table: EventTableDto) => void;
+  onUnlockTable: (table: EventTableDto) => void;
   onProceedToCheckout: () => void;
   lockingTableId: string | null;
   onLockExpired: () => void;
@@ -55,8 +56,9 @@ export default function TableSelectionCanvas({
   eventTableTypes,
   gridRows,
   gridCols,
-  lockedTable,
+  lockedTables,
   onLockTable,
+  onUnlockTable,
   onProceedToCheckout,
   lockingTableId,
   onLockExpired,
@@ -100,12 +102,12 @@ export default function TableSelectionCanvas({
 
   const getTooltip = (table: EventTableDto): string => {
     const label = gridLabel(table.gridRow, table.gridCol);
-    if (table.isLockedByYou) return `${label} — Reserved by you (click to view details)`;
-    if (lockedTable && table.status === 'Available') return `${label} — ${table.capacity} seats — ${centsToUSD(table.priceCents)} — Click to switch`;
+    if (table.isLockedByYou) return `${label} — Reserved by you (click to remove)`;
+    if (lockedTables.length > 0 && table.status === 'Available') return `${label} — ${table.capacity} seats — ${centsToUSD(table.displayPriceCents)} — Click to add`;
     switch (table.status) {
       case 'Booked': return `${label} — Booked`;
       case 'Held': return `${label} — Reserved by another guest`;
-      default: return `${label} — ${table.capacity} seats — ${centsToUSD(table.priceCents)} — Click to reserve`;
+      default: return `${label} — ${table.capacity} seats — ${centsToUSD(table.displayPriceCents)} — Click to reserve`;
     }
   };
 
@@ -113,11 +115,10 @@ export default function TableSelectionCanvas({
     if (!isClickable(table)) return;
 
     if (table.isLockedByYou) {
-      // Already locked by user — clicking shows detail panel (handled via lockedTable prop)
+      onUnlockTable(table);
       return;
     }
 
-    // Lock the table immediately
     onLockTable(table);
   };
 
@@ -200,7 +201,7 @@ export default function TableSelectionCanvas({
                 {gridLabel(table.gridRow, table.gridCol)}
               </Typography.Text>
               <span className="ts-table-meta">
-                {table.capacity}p &middot; {centsToUSD(table.priceCents)}
+                {table.capacity}p &middot; {centsToUSD(table.displayPriceCents)}
               </span>
 
               {/* Inline countdown for user's locked table */}
@@ -252,7 +253,7 @@ export default function TableSelectionCanvas({
                 style={{ background: ett.color ?? 'var(--accent-violet)' }}
               />
               <Typography.Text style={{ fontSize: 12 }}>
-                {ett.label} &middot; {ett.capacity}p &middot; {centsToUSD(ett.priceCents)}
+                {ett.label} &middot; {ett.capacity}p &middot; {centsToUSD(ett.displayPriceCents)}
               </Typography.Text>
             </Space>
           ))}
@@ -268,56 +269,70 @@ export default function TableSelectionCanvas({
           {rows}
         </div>
 
-        {/* Detail panel — only shown when user has a locked table */}
-        {lockedTable && lockedTable.isLockedByYou && (
-          <Card
-            size="small"
-            title={`Table ${gridLabel(lockedTable.gridRow, lockedTable.gridCol)} — Reserved`}
-            className="ts-detail-card"
-          >
-            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
-              {lockedTable.holdExpiresAt && (
-                <TableLockTimer expiresAt={lockedTable.holdExpiresAt} onExpired={onLockExpired} />
-              )}
-              {lockedTable.color && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography.Text type="secondary">Color</Typography.Text>
-                  <div style={{
-                    width: 20, height: 20, borderRadius: 4,
-                    background: lockedTable.color, border: '1px solid var(--border)',
-                  }} />
+        {/* Detail panel — shown when user has locked tables */}
+        {lockedTables.length > 0 && (() => {
+          const labels = lockedTables.map(t => gridLabel(t.gridRow, t.gridCol)).join(', ');
+          const totalSeats = lockedTables.reduce((sum, t) => sum + t.capacity, 0);
+          const totalPrice = lockedTables.reduce((sum, t) => sum + t.displayPriceCents, 0);
+          const earliestExpiry = lockedTables
+            .map(t => t.holdExpiresAt).filter(Boolean).sort()[0];
+
+          // Group by type
+          const groups = new Map<string, EventTableDto[]>();
+          for (const t of lockedTables) {
+            const key = t.eventTableLabel ?? 'Table';
+            groups.set(key, [...(groups.get(key) ?? []), t]);
+          }
+
+          return (
+            <Card
+              size="small"
+              title={`${lockedTables.length} Table${lockedTables.length > 1 ? 's' : ''} Selected — ${labels}`}
+              className="ts-detail-card"
+            >
+              <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                {earliestExpiry && (
+                  <TableLockTimer expiresAt={earliestExpiry} onExpired={onLockExpired} />
+                )}
+                {[...groups.entries()].map(([typeLabel, groupTables]) => (
+                  <div key={typeLabel} style={{ padding: '4px 0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography.Text strong>{typeLabel}</Typography.Text>
+                      {groupTables[0].color && (
+                        <div style={{
+                          width: 16, height: 16, borderRadius: 3,
+                          background: groupTables[0].color, border: '1px solid var(--border)',
+                        }} />
+                      )}
+                    </div>
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                      {groupTables[0].shape} &middot;{' '}
+                      {groupTables.length} &times; {groupTables[0].capacity} seats &middot;{' '}
+                      {centsToUSD(groupTables.reduce((s, t) => s + t.displayPriceCents, 0))}
+                    </Typography.Text>
+                  </div>
+                ))}
+                <Divider style={{ margin: '4px 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography.Text type="secondary">Total seats</Typography.Text>
+                  <Typography.Text>{totalSeats}</Typography.Text>
                 </div>
-              )}
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography.Text type="secondary">Type</Typography.Text>
-                <Typography.Text>{lockedTable.eventTableLabel}</Typography.Text>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography.Text type="secondary">Shape</Typography.Text>
-                <Typography.Text>{lockedTable.shape}</Typography.Text>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography.Text type="secondary">Capacity</Typography.Text>
-                <Typography.Text>{lockedTable.capacity} seats</Typography.Text>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography.Text type="secondary">Table price</Typography.Text>
-                <Typography.Text strong>{centsToUSD(lockedTable.priceCents)}</Typography.Text>
-              </div>
-              <Typography.Text type="secondary" style={{ fontSize: 11 }}>
-                Whole table &mdash; covers all {lockedTable.capacity} seats
-              </Typography.Text>
-              <Button
-                type="primary"
-                block
-                style={{ marginTop: 8 }}
-                onClick={onProceedToCheckout}
-              >
-                Proceed to Checkout
-              </Button>
-            </Space>
-          </Card>
-        )}
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography.Text type="secondary">Total price</Typography.Text>
+                  <Typography.Text strong>{centsToUSD(totalPrice)}</Typography.Text>
+                </div>
+                <Button
+                  type="primary"
+                  block
+                  style={{ marginTop: 8 }}
+                  onClick={onProceedToCheckout}
+                >
+                  Proceed to Checkout
+                </Button>
+              </Space>
+            </Card>
+          );
+        })()}
       </div>
     </div>
   );

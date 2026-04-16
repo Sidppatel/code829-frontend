@@ -56,7 +56,7 @@ export default function EventDetailPage() {
   // Booking flow state
   const [step, setStep] = useState<BookingStep>('info');
   const [tablesData, setTablesData] = useState<EventTablesResponse | null>(null);
-  const [tableLock, setTableLock] = useState<TableLock | null>(null);
+  const [tableLocks, setTableLocks] = useState<TableLock[]>([]);
   const [lockingTableId, setLockingTableId] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
@@ -72,38 +72,53 @@ export default function EventDetailPage() {
   const [paymentMode, setPaymentMode] = useState<'live' | 'mock'>('live');
 
   // Refs for cleanup
-  const tableLockRef = useRef<TableLock | null>(null);
+  const tableLocksRef = useRef<TableLock[]>([]);
   const eventRef = useRef<EventDetail | null>(null);
+  const bookingIdRef = useRef<string | null>(null);
 
-  useEffect(() => { tableLockRef.current = tableLock; }, [tableLock]);
+  useEffect(() => { tableLocksRef.current = tableLocks; }, [tableLocks]);
   useEffect(() => { eventRef.current = event; }, [event]);
+  useEffect(() => { bookingIdRef.current = bookingId; }, [bookingId]);
 
-  // Release table lock on page leave
+  // Release table lock and cancel pending booking on page leave
   useEffect(() => {
-    const releaseLock = () => {
-      const lock = tableLockRef.current;
-      const ev = eventRef.current;
-      if (!lock || !ev) return;
+    const cleanup = () => {
       const apiUrl = import.meta.env.VITE_API_URL ?? '';
-      const token = localStorage.getItem('code829-auth');
-      if (token) {
-        try {
-          const parsed = JSON.parse(token) as { state?: { token?: string } };
-          const jwt = parsed?.state?.token;
-          if (jwt) {
-            const payload = JSON.stringify({ eventId: ev.id, tableId: lock.tableId, token: jwt });
-            const blob = new Blob([payload], { type: 'application/json' });
-            navigator.sendBeacon(`${apiUrl}/tables/release-beacon`, blob);
-          }
-        } catch { /* ignore */ }
+      const rawToken = localStorage.getItem('code829-auth');
+      if (!rawToken) return;
+      let jwt: string | undefined;
+      try {
+        const parsed = JSON.parse(rawToken) as { state?: { token?: string } };
+        jwt = parsed?.state?.token;
+      } catch { return; }
+      if (!jwt) return;
+
+      // Cancel pending booking (also releases table lock via sp_cancel_booking)
+      const bid = bookingIdRef.current;
+      if (bid) {
+        const payload = JSON.stringify({ bookingId: bid, token: jwt });
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon(`${apiUrl}/bookings/cancel-beacon`, blob);
+        return; // sp_cancel_booking handles the table release
+      }
+
+      // No booking yet — just release all table locks if held
+      const locks = tableLocksRef.current;
+      const ev = eventRef.current;
+      if (locks.length > 0 && ev) {
+        for (const lock of locks) {
+          const payload = JSON.stringify({ eventId: ev.id, tableId: lock.tableId, token: jwt });
+          const blob = new Blob([payload], { type: 'application/json' });
+          navigator.sendBeacon(`${apiUrl}/tables/release-beacon`, blob);
+        }
       }
     };
 
-    const handleBeforeUnload = () => { releaseLock(); };
+    const handleBeforeUnload = () => { cleanup(); };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      releaseLock();
+      cleanup();
     };
   }, []);
 
@@ -181,7 +196,7 @@ export default function EventDetailPage() {
         tableBookingApi.getMyLocks(event.id),
       ]);
       setTablesData(tablesRes.data);
-      if (locksRes.data.length > 0) setTableLock(locksRes.data[0]);
+      if (locksRes.data.length > 0) setTableLocks(locksRes.data);
       setStep('select-table');
     } else if (event.layoutMode === 'Open') {
       setStep('capacity');
@@ -193,7 +208,7 @@ export default function EventDetailPage() {
     setLockingTableId(table.id);
     try {
       const { data } = await tableBookingApi.lockTable(event.id, table.id);
-      setTableLock(data);
+      setTableLocks(prev => [...prev, data]);
       setCheckoutError(null);
       await loadTables();
     } catch (err: unknown) {
@@ -204,14 +219,23 @@ export default function EventDetailPage() {
     }
   };
 
+  const handleUnlockTable = async (table: EventTableDto) => {
+    if (!event) return;
+    try {
+      await tableBookingApi.releaseTable(event.id, table.id);
+      setTableLocks(prev => prev.filter(l => l.tableId !== table.id));
+      await loadTables();
+    } catch { /* ignore */ }
+  };
+
   const handleProceedToCheckout = async () => {
-    if (!tableLock || !event) return;
+    if (tableLocks.length === 0 || !event) return;
     setConfirming(true);
     setCheckoutError(null);
     try {
       const { data: booking } = await bookingsApi.create({
         eventId: event.id,
-        tableId: tableLock.tableId,
+        tableIds: tableLocks.map(l => l.tableId),
       });
       setBookingId(booking.id);
       setClientSecret(booking.clientSecret ?? null);
@@ -239,14 +263,16 @@ export default function EventDetailPage() {
   };
 
   const handleCancelLock = async () => {
-    if (!event || !tableLock) return;
+    if (!event) return;
     if (bookingId) {
       try { await bookingsApi.cancel(bookingId); } catch { /* ignore */ }
     }
-    try {
-      await tableBookingApi.releaseTable(event.id, tableLock.tableId);
-    } catch { /* ignore */ }
-    setTableLock(null);
+    for (const lock of tableLocks) {
+      try {
+        await tableBookingApi.releaseTable(event.id, lock.tableId);
+      } catch { /* ignore */ }
+    }
+    setTableLocks([]);
     setCheckoutError(null);
     setClientSecret(null);
     setBookingId(null);
@@ -257,7 +283,7 @@ export default function EventDetailPage() {
 
   const handleLockExpired = () => {
     message.warning('Your table reservation has expired');
-    setTableLock(null);
+    setTableLocks([]);
     setCheckoutError(null);
     setClientSecret(null);
     setBookingId(null);
@@ -298,7 +324,10 @@ export default function EventDetailPage() {
     void createBooking();
   }, [step, event, seatCount, selectedTicketTypeId, clientSecret]);
 
-  const handleCancelOpen = () => {
+  const handleCancelOpen = async () => {
+    if (bookingId) {
+      try { await bookingsApi.cancel(bookingId); } catch { /* ignore */ }
+    }
     setCheckoutError(null);
     setClientSecret(null);
     setBookingId(null);
@@ -309,7 +338,7 @@ export default function EventDetailPage() {
   if (loading) return <LoadingSpinner />;
   if (!event) return null;
 
-  const lockedTableFromGrid = tablesData?.tables.find((t) => t.isLockedByYou) ?? null;
+  const lockedTablesFromGrid = tablesData?.tables.filter((t) => t.isLockedByYou) ?? [];
 
   if (step === 'select-table' && tablesData) {
     return (
@@ -323,8 +352,9 @@ export default function EventDetailPage() {
           eventTableTypes={tablesData.eventTableTypes ?? []}
           gridRows={tablesData.gridRows ?? 10}
           gridCols={tablesData.gridCols ?? 10}
-          lockedTable={lockedTableFromGrid}
+          lockedTables={lockedTablesFromGrid}
           onLockTable={handleLockTable}
+          onUnlockTable={handleUnlockTable}
           onProceedToCheckout={handleProceedToCheckout}
           lockingTableId={lockingTableId}
           onLockExpired={handleLockExpired}
@@ -333,7 +363,7 @@ export default function EventDetailPage() {
     );
   }
 
-  if (step === 'checkout' && tableLock) {
+  if (step === 'checkout' && tableLocks.length > 0) {
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={handleCancelLock}>
@@ -344,7 +374,7 @@ export default function EventDetailPage() {
           <Col xs={24} sm={16} md={12} lg={8}>
             <CheckoutPanel
               mode="grid"
-              tableLock={tableLock}
+              tableLocks={tableLocks}
               confirming={confirming}
               setConfirming={setConfirming}
               error={checkoutError}
@@ -392,7 +422,7 @@ export default function EventDetailPage() {
 
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={handleCancelOpen}>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => void handleCancelOpen()}>
           Back to Seat Selection
         </Button>
         <Typography.Title level={3}>Complete Your Booking &mdash; {event.title}</Typography.Title>

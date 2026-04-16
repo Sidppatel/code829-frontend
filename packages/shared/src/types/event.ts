@@ -91,6 +91,7 @@ export interface EventTableTypeInfo {
   shape: string;
   color?: string;
   priceCents: number;
+  displayPriceCents: number;
 }
 
 export interface EventTableDto {
@@ -100,6 +101,7 @@ export interface EventTableDto {
   shape: string;
   color?: string;
   priceCents: number;
+  displayPriceCents: number;
   gridRow: number;
   gridCol: number;
   sortOrder?: number;
