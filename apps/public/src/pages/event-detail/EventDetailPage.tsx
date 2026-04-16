@@ -74,7 +74,7 @@ export default function EventDetailPage() {
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [taxAmountCents, setTaxAmountCents] = useState<number | null>(null);
   const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
-  const [paymentMode, setPaymentMode] = useState<'live' | 'mock'>('live');
+  const [paymentUnavailable, setPaymentUnavailable] = useState(false);
 
   // Refs for cleanup
   const tableLocksRef = useRef<TableLock[]>([]);
@@ -121,18 +121,21 @@ export default function EventDetailPage() {
     };
   }, []);
 
-  // Load Stripe publishable key once
+  // Load Stripe publishable key once — no silent fallback; block checkout if unavailable.
   useEffect(() => {
     const init = async () => {
       try {
         const { data } = await bookingsApi.getStripeConfig();
-        setPaymentMode(data.mode);
-        if (data.mode === 'live' && data.publishableKey) {
-          stripePromiseRef.current = loadStripe(data.publishableKey);
+        if (!data.publishableKey) {
+          log.error('Stripe config missing publishable key');
+          setPaymentUnavailable(true);
+          return;
         }
-      } catch {
-        // Stripe not configured — fall back to mock
-        setPaymentMode('mock');
+        stripePromiseRef.current = loadStripe(data.publishableKey);
+        setPaymentUnavailable(false);
+      } catch (err) {
+        log.error('Failed to load Stripe config', { err });
+        setPaymentUnavailable(true);
       }
     };
     void init();
@@ -182,6 +185,10 @@ export default function EventDetailPage() {
   }, [event, message]);
 
   const handleBookNow = async () => {
+    if (paymentUnavailable) {
+      message.error('Payment service is currently unavailable. Please try again in a moment.');
+      return;
+    }
     if (!isAuthenticated) {
       message.info('Please log in to book');
       navigate(`/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
@@ -383,7 +390,6 @@ export default function EventDetailPage() {
               onCancel={handleCancelLock}
               onExpired={handleLockExpired}
               taxAmountCents={taxAmountCents}
-              paymentMode={paymentMode}
             />
           </Col>
         </Row>
@@ -439,7 +445,6 @@ export default function EventDetailPage() {
               onPaymentSuccess={handlePaymentSuccess}
               onCancel={handleCancelOpen}
               taxAmountCents={taxAmountCents}
-              paymentMode={paymentMode}
             />
           </Col>
         </Row>
