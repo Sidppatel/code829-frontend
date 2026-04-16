@@ -10,17 +10,19 @@ export interface PricingRow {
   soldCount: number;
   capacity: number | null;
   description?: string;
+  seatCapacity?: number;
 }
 
 interface EventPricingTiersTableProps {
   tiers: PricingRow[];
   loading?: boolean;
   defaultPlatformFeeCents?: number;
+  mode?: 'open' | 'grid';
 }
 
 const { useBreakpoint } = Grid;
 
-function MobileCard({ row, defaultFee }: { row: PricingRow; defaultFee: number }) {
+function MobileCard({ row, defaultFee, mode }: { row: PricingRow; defaultFee: number; mode: 'open' | 'grid' }) {
   const fee = row.platformFeeCents ?? defaultFee;
   const total = row.priceCents + fee;
   const cap = row.capacity != null && row.capacity > 0 ? row.capacity : '∞';
@@ -45,6 +47,12 @@ function MobileCard({ row, defaultFee }: { row: PricingRow; defaultFee: number }
         </Tag>
       </div>
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        {mode === 'grid' && row.seatCapacity != null && (
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Seats</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{row.seatCapacity}</div>
+          </div>
+        )}
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Price</div>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{centsToUSD(row.priceCents)}</div>
@@ -54,7 +62,9 @@ function MobileCard({ row, defaultFee }: { row: PricingRow; defaultFee: number }
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>{fee > 0 ? centsToUSD(fee) : '—'}</div>
         </div>
         <div style={{ marginLeft: 'auto' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Sold</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            {mode === 'grid' ? 'Booked' : 'Sold'}
+          </div>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>
             <strong>{row.soldCount}</strong> / {cap}
           </div>
@@ -64,7 +74,7 @@ function MobileCard({ row, defaultFee }: { row: PricingRow; defaultFee: number }
   );
 }
 
-export default function EventPricingTiersTable({ tiers, loading, defaultPlatformFeeCents = 0 }: EventPricingTiersTableProps) {
+export default function EventPricingTiersTable({ tiers, loading, defaultPlatformFeeCents = 0, mode = 'open' }: EventPricingTiersTableProps) {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
@@ -72,7 +82,7 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
     return (
       <div>
         {tiers.map((row, i) => (
-          <MobileCard key={row.id || `${row.name}-${i}`} row={row} defaultFee={defaultPlatformFeeCents} />
+          <MobileCard key={row.id || `${row.name}-${i}`} row={row} defaultFee={defaultPlatformFeeCents} mode={mode} />
         ))}
       </div>
     );
@@ -80,7 +90,7 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
 
   const columns: ColumnsType<PricingRow> = [
     {
-      title: 'Ticket Tier',
+      title: mode === 'grid' ? 'Table Type' : 'Ticket Tier',
       dataIndex: 'name',
       key: 'name',
       render: (name: string, record: PricingRow) => (
@@ -92,6 +102,15 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
         </div>
       ),
     },
+    ...(mode === 'grid' ? [{
+      title: 'Capacity',
+      dataIndex: 'seatCapacity',
+      key: 'seatCapacity',
+      width: 100,
+      render: (val: number) => (
+        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{val} seats</span>
+      ),
+    }] as ColumnsType<PricingRow> : []),
     {
       title: 'Price',
       dataIndex: 'priceCents',
@@ -129,7 +148,7 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
       },
     },
     {
-      title: 'Sold / Capacity',
+      title: mode === 'grid' ? 'Booked / Total' : 'Sold / Capacity',
       key: 'capacity',
       width: 140,
       render: (_: unknown, record: PricingRow) => (

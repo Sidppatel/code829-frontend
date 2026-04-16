@@ -40,6 +40,7 @@ export interface EventDetail extends EventSummary {
   createdAt: string;
   minPricePerTableCents?: number;
   ticketTypes?: EventTicketType[];
+  tableTypes?: EventTableTypeSummary[];
 }
 
 export interface VenueBasic {
@@ -83,6 +84,20 @@ export interface EventTicketTypesResponse {
   ticketTypes: EventTicketType[];
 }
 
+
+export interface EventTableTypeSummary {
+  id: string;
+  label: string;
+  capacity: number;
+  shape: string;
+  color?: string;
+  priceCents: number;
+  platformFeeCents?: number;
+  displayPriceCents: number;
+  totalTables: number;
+  availableTables: number;
+  bookedTables: number;
+}
 
 export interface EventTableTypeInfo {
   id: string;

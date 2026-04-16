@@ -105,20 +105,36 @@ export default function EventManagePage() {
   const isOpen = event.layoutMode === 'Open';
 
   const ticketTypes = (event.ticketTypes || []) as any[];
-  const pricingRows = ticketTypes.map((tt: any) => ({
-    id: tt.id,
-    name: tt.label || tt.name,
-    priceCents: tt.priceCents,
-    platformFeeCents: tt.platformFeeCents ?? null,
-    soldCount: tt.soldCount || 0,
-    capacity: tt.maxQuantity ?? tt.capacity ?? null,
-    description: tt.description,
-  }));
-  const totalCapacity = pricingRows.reduce((acc, t) => acc + (t.capacity || 0), 0);
+  const tableTypes = (event.tableTypes || []) as any[];
+
+  const pricingRows = isGrid
+    ? tableTypes.map((tt: any) => ({
+        id: tt.id,
+        name: tt.label,
+        priceCents: tt.priceCents,
+        platformFeeCents: tt.platformFeeCents ?? null,
+        soldCount: tt.bookedTables || 0,
+        capacity: tt.totalTables || null,
+        seatCapacity: tt.capacity,
+        description: `${tt.shape}${tt.color ? '' : ''}`,
+      }))
+    : ticketTypes.map((tt: any) => ({
+        id: tt.id,
+        name: tt.label || tt.name,
+        priceCents: tt.priceCents,
+        platformFeeCents: tt.platformFeeCents ?? null,
+        soldCount: tt.soldCount || 0,
+        capacity: tt.maxQuantity ?? tt.capacity ?? null,
+        description: tt.description,
+      }));
+
+  const totalCapacity = isGrid
+    ? pricingRows.reduce((acc, t) => acc + (t.capacity || 0), 0)
+    : pricingRows.reduce((acc, t) => acc + (t.capacity || 0), 0);
   const totalSold = pricingRows.reduce((acc, t) => acc + t.soldCount, 0);
   const calculatedMaxCapacity = isOpen
     ? (event.maxCapacity || totalCapacity)
-    : (event.maxCapacity || 0);
+    : (event.maxCapacity || totalCapacity);
 
   return (
     <div>
@@ -214,7 +230,7 @@ export default function EventManagePage() {
           <Row gutter={[32, 32]} style={{ marginBottom: pricingRows.length > 0 ? 32 : 0 }}>
             <Col xs={24} sm={8}>
               <div style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 }}>
-                Max Capacity
+                {isGrid ? 'Total Tables' : 'Max Capacity'}
               </div>
               <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1px' }}>
                 {calculatedMaxCapacity > 0 ? calculatedMaxCapacity : 'Unlimited'}
@@ -254,7 +270,7 @@ export default function EventManagePage() {
                       }}>
                         Pricing Breakdown
                       </div>
-                      <EventPricingTiersTable tiers={pricingRows} />
+                      <EventPricingTiersTable tiers={pricingRows} mode={isGrid ? 'grid' : 'open'} />
                     </div>
                   )}
 
