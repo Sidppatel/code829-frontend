@@ -13,7 +13,7 @@ interface Props {
 export default function EventCard({ event }: Props) {
   const navigate = useNavigate();
 
-  const displayPrice = event.minPricePerTableCents ?? event.pricePerPersonCents;
+  const displayPrice = event.displayMinPricePerTableCents ?? event.displayPricePerPersonCents ?? event.minPricePerTableCents ?? event.pricePerPersonCents;
   const priceLabel = displayPrice
     ? centsToUSD(displayPrice)
     : 'Free';

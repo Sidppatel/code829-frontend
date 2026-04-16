@@ -30,7 +30,7 @@ export default function EventSidebar({ event, isSoldOut, remaining, handleBookNo
               letterSpacing: '-1px',
               lineHeight: 1.1
             }}>
-              {(event.minPricePerTableCents ?? event.pricePerPersonCents) ? centsToUSD(event.minPricePerTableCents ?? event.pricePerPersonCents!) : 'Complimentary'}
+              {(event.displayMinPricePerTableCents ?? event.displayPricePerPersonCents ?? event.minPricePerTableCents ?? event.pricePerPersonCents) ? centsToUSD((event.displayMinPricePerTableCents ?? event.displayPricePerPersonCents ?? event.minPricePerTableCents ?? event.pricePerPersonCents)!) : 'Complimentary'}
             </div>
           </div>
 

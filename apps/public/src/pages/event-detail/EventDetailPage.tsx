@@ -374,7 +374,7 @@ export default function EventDetailPage() {
             <CapacityBookingForm
               maxCapacity={event.maxCapacity ?? 0}
               totalSold={event.totalSold}
-              pricePerPersonCents={event.pricePerPersonCents ?? 0}
+              pricePerPersonCents={event.displayPricePerPersonCents ?? event.pricePerPersonCents ?? 0}
               ticketTypes={ticketTypes.length > 0 ? ticketTypes : undefined}
               onProceed={handleCapacityProceed}
             />
@@ -388,7 +388,7 @@ export default function EventDetailPage() {
     const selectedType = selectedTicketTypeId
       ? ticketTypes.find(tt => tt.id === selectedTicketTypeId)
       : undefined;
-    const checkoutPrice = selectedType?.displayPriceCents ?? event.pricePerPersonCents ?? 0;
+    const checkoutPrice = selectedType?.displayPriceCents ?? event.displayPricePerPersonCents ?? event.pricePerPersonCents ?? 0;
 
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
@@ -475,7 +475,7 @@ export default function EventDetailPage() {
             <div>
               <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>From</div>
               <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)' }}>
-                {(event.minPricePerTableCents ?? event.pricePerPersonCents) ? centsToUSD(event.minPricePerTableCents ?? event.pricePerPersonCents!) : 'Free'}
+                {(event.displayMinPricePerTableCents ?? event.displayPricePerPersonCents ?? event.minPricePerTableCents ?? event.pricePerPersonCents) ? centsToUSD((event.displayMinPricePerTableCents ?? event.displayPricePerPersonCents ?? event.minPricePerTableCents ?? event.pricePerPersonCents)!) : 'Free'}
               </div>
             </div>
             <Button

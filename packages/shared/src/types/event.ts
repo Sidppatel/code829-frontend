@@ -17,6 +17,9 @@ export interface EventSummary {
   totalSold: number;
   noOfAvailableTables: number;
   minPricePerTableCents?: number;
+  displayPricePerPersonCents?: number;
+  displayMinPricePerTableCents?: number;
+  displayMinTicketTypePriceCents?: number;
   venue?: VenueBasic;
   ticketTypes?: EventTicketType[];
 }
