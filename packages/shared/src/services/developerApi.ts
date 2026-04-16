@@ -33,6 +33,18 @@ export interface AppSetting {
   key: string;
   value: string;
   description?: string;
+  updatedAt?: string;
+}
+
+export interface SecretStatus {
+  key: string;
+  configured: boolean;
+  description?: string;
+}
+
+export interface SettingsResponse {
+  settings: AppSetting[];
+  secrets: SecretStatus[];
 }
 
 export interface DevUser {
@@ -86,7 +98,7 @@ export const developerApi = {
     apiClient.get('/developer/system-logs', { params }),
 
   getSettings: () =>
-    apiClient.get<AppSetting[]>('/developer/settings'),
+    apiClient.get<SettingsResponse>('/developer/settings'),
 
   updateSetting: (key: string, value: string) =>
     apiClient.put('/developer/settings', { key, value }),
