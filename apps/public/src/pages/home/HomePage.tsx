@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Row, Col } from 'antd';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { createLogger } from '@code829/shared/lib/logger';
 import { eventsApi } from '../../services/api';
 import type { EventSummary } from '@code829/shared/types/event';
@@ -67,6 +68,7 @@ export default function HomePage() {
       variants={containerVariants}
       style={{ minHeight: '100vh', position: 'relative' }}
     >
+      <Helmet><title>Discover Events - Code829</title></Helmet>
       {/* Hero Section */}
       <section className="hero-section" style={{ minHeight: 'auto', padding: '120px 20px 60px' }}>
         <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>

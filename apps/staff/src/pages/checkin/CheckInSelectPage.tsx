@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { App, Input } from 'antd';
 import { CalendarOutlined, EnvironmentOutlined, ScanOutlined, SearchOutlined } from '@ant-design/icons';
+import { Helmet } from 'react-helmet-async';
 import { eventsApi } from '../../services/api';
 import { checkInApi } from '../../services/api';
 import { formatEventDate } from '@code829/shared/utils/date';
@@ -55,7 +56,8 @@ export default function CheckInSelectPage() {
 
   return (
     <div className="spring-up">
-      <PageHeader 
+      <Helmet><title>Select Event - Code829 Staff</title></Helmet>
+      <PageHeader
         title="Staff Check-In" 
         subtitle={[
           "Select an event to start welcoming your guests.",

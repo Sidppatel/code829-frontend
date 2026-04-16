@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, App, Progress } from 'antd';
+import { Helmet } from 'react-helmet-async';
 import {
   CalendarOutlined,
   EnvironmentOutlined,
@@ -54,6 +55,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="spring-up">
+      <Helmet><title>Dashboard - Code829 Admin</title></Helmet>
       <PageHeader
         title="Dashboard"
         subtitle={[

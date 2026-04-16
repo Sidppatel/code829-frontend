@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Row, Col, Pagination, App, Skeleton } from 'antd';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { createLogger } from '@code829/shared/lib/logger';
 import { eventsApi } from '../../services/api';
 import type { EventSummary, EventFacets } from '@code829/shared/types/event';
@@ -90,6 +91,7 @@ export default function EventsPage() {
       animate="animate"
       style={{ minHeight: '100vh', paddingBottom: 100 }}
     >
+      <Helmet><title>Events - Code829</title></Helmet>
       {/* Page Header with hero background */}
       <section className="hero-section" style={{ minHeight: 'auto', padding: '120px 20px 60px' }}>
         <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>

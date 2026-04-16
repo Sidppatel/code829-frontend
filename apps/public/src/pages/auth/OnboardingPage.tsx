@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Form, Input, Button, Typography, App, Card } from 'antd';
 import { UserOutlined, PhoneOutlined } from '@ant-design/icons';
+import { Helmet } from 'react-helmet-async';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import { safeReturnUrl } from '@code829/shared/lib/safeRedirect';
@@ -45,6 +46,7 @@ export default function OnboardingPage() {
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 120px)', padding: '24px 16px' }}>
+      <Helmet><title>Complete Profile - Code829</title></Helmet>
       <Card style={{ width: '100%', maxWidth: 440, borderRadius: 16 }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <Typography.Title level={3} style={{ margin: 0 }}>Complete Your Profile</Typography.Title>

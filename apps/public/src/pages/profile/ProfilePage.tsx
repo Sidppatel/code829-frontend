@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, Form, Input, Switch, Button, App, Row, Col } from 'antd';
+import { Helmet } from 'react-helmet-async';
 import { createLogger } from '@code829/shared/lib/logger';
 import { authApi, imagesApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
@@ -76,6 +77,7 @@ export default function ProfilePage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
+      <Helmet><title>Profile - Code829</title></Helmet>
       <PageHeader title="Profile" subtitle="Manage your account information" />
       <Card>
         <AvatarUpload

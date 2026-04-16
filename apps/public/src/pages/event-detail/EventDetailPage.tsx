@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Typography, Row, Col, Button, Space, App } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Helmet } from 'react-helmet-async';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { loadStripe } from '@stripe/stripe-js';
 import type { Stripe } from '@stripe/stripe-js';
@@ -457,6 +458,7 @@ export default function EventDetailPage() {
       variants={containerVariants}
       style={{ paddingBottom: 150, minHeight: '100vh', position: 'relative' }}
     >
+      <Helmet><title>{event?.title ?? 'Event'} - Code829</title></Helmet>
       <EventHero event={event} itemVariants={itemVariants} />
 
       <div className="page-container" style={{ marginTop: isMobile ? 32 : 60 }}>

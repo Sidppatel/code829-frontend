@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Table, Tag, Input, Pagination, Spin, Modal, Descriptions, Button } from 'antd';
 import { SearchOutlined, InfoCircleOutlined, RedoOutlined } from '@ant-design/icons';
+import { Helmet } from 'react-helmet-async';
 import { developerApi } from '../../services/api';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
@@ -113,6 +114,7 @@ export default function DevLogsPage() {
 
   return (
     <div className="spring-up">
+      <Helmet><title>Error Logs - Code829 Developer</title></Helmet>
       <PageHeader
         title="Error Logs"
         subtitle={[

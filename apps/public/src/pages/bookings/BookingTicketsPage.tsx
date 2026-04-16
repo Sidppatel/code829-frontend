@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Button, App, Tag, Modal, Input, Image, Empty, Tooltip } from 'antd';
+import { Helmet } from 'react-helmet-async';
 import {
   QrcodeOutlined,
   SendOutlined,
@@ -89,17 +90,25 @@ export default function BookingTicketsPage() {
     }
   };
 
-  const handleRevoke = async (ticketId: string) => {
+  const handleRevoke = (ticketId: string) => {
     if (!bookingId) return;
-    try {
-      await ticketsApi.revoke(bookingId, ticketId);
-      log.info('Ticket invite revoked', { bookingId, ticketId });
-      message.success('Invite revoked');
-      void loadTickets();
-    } catch (err) {
-      log.error('Failed to revoke ticket invite', err);
-      message.error('Failed to revoke invite');
-    }
+    Modal.confirm({
+      title: 'Revoke Invitation',
+      content: 'Are you sure you want to revoke this ticket invitation? The guest will lose access.',
+      okText: 'Revoke',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await ticketsApi.revoke(bookingId, ticketId);
+          log.info('Ticket invite revoked', { bookingId, ticketId });
+          message.success('Invite revoked');
+          void loadTickets();
+        } catch (err) {
+          log.error('Failed to revoke ticket invite', err);
+          message.error('Failed to revoke invite');
+        }
+      },
+    });
   };
 
   const statusTag = (status: string) => {
@@ -118,6 +127,7 @@ export default function BookingTicketsPage() {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
+      <Helmet><title>Manage Tickets - Code829</title></Helmet>
       <PageHeader
         title="Manage Tickets"
         subtitle={first ? `${first.eventTitle} • ${first.bookingNumber}` : 'Booking tickets'}

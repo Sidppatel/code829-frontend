@@ -22,6 +22,7 @@ export default function EventHero({ event, itemVariants }: EventHeroProps) {
         <img
           src={event.imageUrl}
           alt={event.title}
+          loading="lazy"
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
       ) : (

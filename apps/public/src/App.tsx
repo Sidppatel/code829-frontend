@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import NotFoundPage from '@code829/shared/components/shared/NotFoundPage';
 import ErrorBoundary from '@code829/shared/components/shared/ErrorBoundary';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import ProtectedRoute from '@code829/shared/components/auth/ProtectedRoute';
@@ -55,7 +56,7 @@ function AppContent() {
             <Route path="profile" element={<ProfilePage />} />
           </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

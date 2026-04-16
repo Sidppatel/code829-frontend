@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Button, App, Tag, Divider, Image, Modal, Space } from 'antd';
+import { Helmet } from 'react-helmet-async';
 import {
   CalendarOutlined,
   EnvironmentOutlined,
@@ -64,18 +65,26 @@ export default function BookingDetailPage() {
     }
   };
 
-  const handleCancel = async () => {
+  const handleCancel = () => {
     if (!bookingId) return;
-    try {
-      await bookingsApi.cancel(bookingId);
-      log.info('Booking cancelled', { bookingId });
-      message.success('Booking cancelled');
-      const { data } = await bookingsApi.getById(bookingId);
-      setBooking(data);
-    } catch (err) {
-      log.error('Failed to cancel booking', err);
-      message.error('Failed to cancel booking');
-    }
+    Modal.confirm({
+      title: 'Cancel Booking',
+      content: 'Are you sure you want to cancel this booking? This action cannot be undone.',
+      okText: 'Cancel Booking',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await bookingsApi.cancel(bookingId);
+          log.info('Booking cancelled', { bookingId });
+          message.success('Booking cancelled');
+          const { data } = await bookingsApi.getById(bookingId);
+          setBooking(data);
+        } catch (err) {
+          log.error('Failed to cancel booking', err);
+          message.error('Failed to cancel booking');
+        }
+      },
+    });
   };
 
   if (loading) return <LoadingSpinner />;
@@ -117,6 +126,7 @@ export default function BookingDetailPage() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto' }}>
+      <Helmet><title>Booking Details - Code829</title></Helmet>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
         <Button
@@ -138,6 +148,7 @@ export default function BookingDetailPage() {
           <img
             src={booking.eventImagePath}
             alt={booking.eventTitle}
+            loading="lazy"
             style={{ width: '100%', height: 180, objectFit: 'cover' }}
           />
         </div>

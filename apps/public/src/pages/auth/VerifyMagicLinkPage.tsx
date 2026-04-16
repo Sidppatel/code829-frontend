@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Typography, App, Spin } from 'antd';
+import { Helmet } from 'react-helmet-async';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import { safeReturnUrl } from '@code829/shared/lib/safeRedirect';
@@ -65,6 +66,7 @@ export default function VerifyMagicLinkPage() {
   if (error) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 16 }}>
+        <Helmet><title>Verifying Login - Code829</title></Helmet>
         <Typography.Title level={4}>Login Failed</Typography.Title>
         <Typography.Text type="secondary">{error}</Typography.Text>
         <a href="/login">Back to login</a>
@@ -74,6 +76,7 @@ export default function VerifyMagicLinkPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 16 }}>
+      <Helmet><title>Verifying Login - Code829</title></Helmet>
       <Spin size="large" />
       <Typography.Text type="secondary">{status}</Typography.Text>
     </div>

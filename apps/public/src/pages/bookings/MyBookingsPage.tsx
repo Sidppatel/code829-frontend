@@ -4,6 +4,7 @@ import { Table, Button, App, Space, Modal, Image, Card, Empty, Pagination, Skele
 import type { ColumnsType } from 'antd/es/table';
 import { QrcodeOutlined, CalendarOutlined, SearchOutlined, SendOutlined, GiftOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { bookingsApi, ticketsApi } from '../../services/api';
 import type { Booking } from '@code829/shared/types/booking';
 import type { GuestTicket } from '@code829/shared/types/ticket';
@@ -96,16 +97,24 @@ export default function MyBookingsPage() {
     }
   };
 
-  const handleCancel = async (id: string) => {
-    try {
-      await bookingsApi.cancel(id);
-      log.info('Booking cancelled', { bookingId: id });
-      message.success('Booking cancelled');
-      refresh();
-    } catch (err) {
-      log.error('Failed to cancel booking', err);
-      message.error('Failed to cancel booking');
-    }
+  const handleCancel = (id: string) => {
+    Modal.confirm({
+      title: 'Cancel Booking',
+      content: 'Are you sure you want to cancel this booking? This action cannot be undone.',
+      okText: 'Cancel Booking',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await bookingsApi.cancel(id);
+          log.info('Booking cancelled', { bookingId: id });
+          message.success('Booking cancelled');
+          refresh();
+        } catch (err) {
+          log.error('Failed to cancel booking', err);
+          message.error('Failed to cancel booking');
+        }
+      },
+    });
   };
 
   const handleShowQr = async (bookingId: string) => {
@@ -286,6 +295,7 @@ export default function MyBookingsPage() {
 
   return (
     <>
+      <Helmet><title>My Bookings - Code829</title></Helmet>
       <PageHeader title="My Bookings" subtitle="View and manage your event bookings" />
 
       <Input.Search

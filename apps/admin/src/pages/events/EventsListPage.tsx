@@ -1,4 +1,5 @@
 import { Button, Input, Tooltip, Tag } from 'antd';
+import { Helmet } from 'react-helmet-async';
 import {
   PlusOutlined,
   SearchOutlined,
@@ -120,6 +121,7 @@ export default function EventsListPage() {
 
   return (
     <div className="spring-up">
+      <Helmet><title>Events - Code829 Admin</title></Helmet>
       <PageHeader
         title="Events"
         subtitle={[

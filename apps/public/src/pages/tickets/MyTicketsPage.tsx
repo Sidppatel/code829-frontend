@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Tag, Button, App, Empty, Modal, Image } from 'antd';
+import { Helmet } from 'react-helmet-async';
 import {
   QrcodeOutlined,
   CalendarOutlined,
@@ -55,6 +56,7 @@ export default function MyTicketsPage() {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
+      <Helmet><title>My Tickets - Code829</title></Helmet>
       <PageHeader title="My Tickets" subtitle="Your event tickets and invitations" />
 
       {tickets.length === 0 ? (
