@@ -308,8 +308,8 @@ export default function EventManagePage() {
         <div className="admin-section-title"><DollarOutlined /> Sales</div>
         {(() => {
           const sold = event.totalSold ?? 0;
-          const total = event.totalCapacity ?? 0;
-          const available = total - sold;
+          const total = isGrid ? calculatedMaxCapacity : (event.totalCapacity ?? 0);
+          const available = isGrid ? (event.noOfAvailableTables ?? 0) : (total - sold);
           const fillRate = total > 0 ? Math.round((sold / total) * 100) : 0;
           return (
             <>
