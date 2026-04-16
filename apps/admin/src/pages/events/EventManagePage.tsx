@@ -322,12 +322,6 @@ export default function EventManagePage() {
                   <div className="next-event-stat-value">{available}</div>
                   <div className="next-event-stat-label">Available</div>
                 </div>
-                {event.layoutMode === 'Grid' && (
-                  <div className="next-event-stat">
-                    <div className="next-event-stat-value">{event.noOfAvailableTables}</div>
-                    <div className="next-event-stat-label">Avail. Tables</div>
-                  </div>
-                )}
                 <div className="next-event-stat">
                   <div className="next-event-stat-value">{fillRate}%</div>
                   <div className="next-event-stat-label">Fill Rate</div>
