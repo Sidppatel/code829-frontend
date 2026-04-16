@@ -4,6 +4,7 @@ import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { adminAuthApi } from '../../services/adminAuthApi';
+import { safeReturnUrl } from '../../lib/safeRedirect';
 import BrandLogo from '../shared/BrandLogo';
 
 interface AdminLoginFormProps {
@@ -35,8 +36,7 @@ export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath =
     try {
       const { data } = await adminAuthApi.login(values.email, values.password);
       setAuth(data.token, data.user);
-      const returnUrl = searchParams.get('returnUrl') || '/';
-      navigate(returnUrl, { replace: true });
+      navigate(safeReturnUrl(searchParams.get('returnUrl')), { replace: true });
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Invalid email or password';
       message.error(msg);

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { AxiosError } from 'axios';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
+import { safeReturnUrl } from '@code829/shared/lib/safeRedirect';
 
 
 export default function LoginPage() {
@@ -72,7 +73,7 @@ export default function LoginPage() {
       const { data } = await authApi.devLogin(values.email);
       setAuth(data.token, data.user);
       message.success(`Logged in as ${data.user.firstName}`);
-      navigate(returnUrl ?? '/');
+      navigate(safeReturnUrl(returnUrl));
     } catch {
       message.error('Dev login failed');
     } finally {

@@ -15,6 +15,7 @@ const log = createLogger('Public/EventDetailPage');
 import type { TableLock } from '@code829/shared/types/layout';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { useAuth } from '@code829/shared/hooks/useAuth';
+import { useAuthStore } from '@code829/shared/stores/authStore';
 
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import TableSelectionCanvas from '../../components/booking/TableSelectionCanvas';
@@ -51,6 +52,9 @@ export default function EventDetailPage() {
   const { message } = App.useApp();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const storeToken = useAuthStore((s) => s.token);
+  const tokenRef = useRef(storeToken);
+  tokenRef.current = storeToken;
   const isMobile = useIsMobile();
 
   // Booking flow state
@@ -84,13 +88,7 @@ export default function EventDetailPage() {
   useEffect(() => {
     const cleanup = () => {
       const apiUrl = import.meta.env.VITE_API_URL ?? '';
-      const rawToken = localStorage.getItem('code829-auth');
-      if (!rawToken) return;
-      let jwt: string | undefined;
-      try {
-        const parsed = JSON.parse(rawToken) as { state?: { token?: string } };
-        jwt = parsed?.state?.token;
-      } catch { return; }
+      const jwt = tokenRef.current;
       if (!jwt) return;
 
       // Cancel pending booking (also releases table lock via sp_cancel_booking)

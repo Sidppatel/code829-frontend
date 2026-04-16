@@ -68,13 +68,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     ];
     
     let corsOrigin = 'https://code829.com';
-    if (origin && (allowedOrigins.includes(origin) || origin.endsWith('.code829.pages.dev'))) {
+    if (origin && allowedOrigins.includes(origin)) {
       corsOrigin = origin;
     }
 
     newResponse.headers.set('Access-Control-Allow-Origin', corsOrigin);
     newResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     newResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    newResponse.headers.set('Access-Control-Allow-Credentials', 'true');
 
     return newResponse;
   } catch (err) {
@@ -96,7 +97,7 @@ export const onRequestOptions: PagesFunction<Env> = async (context) => {
   ];
   
   let corsOrigin = 'https://code829.com';
-  if (origin && (allowedOrigins.includes(origin) || origin.endsWith('.code829.pages.dev'))) {
+  if (origin && allowedOrigins.includes(origin)) {
     corsOrigin = origin;
   }
 
@@ -106,6 +107,7 @@ export const onRequestOptions: PagesFunction<Env> = async (context) => {
       'Access-Control-Allow-Origin': corsOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Max-Age': '86400',
     },
   });

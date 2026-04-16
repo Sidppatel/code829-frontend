@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import type { UserProfile, AdminUserProfile } from '../types/auth';
 
 interface AuthState {
@@ -10,15 +9,12 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      token: null,
-      user: null,
-      setAuth: (token, user) => set({ token, user }),
-      setUser: (user) => set({ user }),
-      logout: () => set({ token: null, user: null }),
-    }),
-    { name: 'code829-auth' },
-  ),
-);
+// Auth state is memory-only — the HttpOnly session cookie handles persistence
+// across page reloads via DeviceSessionMiddleware on the backend.
+export const useAuthStore = create<AuthState>()((set) => ({
+  token: null,
+  user: null,
+  setAuth: (token, user) => set({ token, user }),
+  setUser: (user) => set({ user }),
+  logout: () => set({ token: null, user: null }),
+}));

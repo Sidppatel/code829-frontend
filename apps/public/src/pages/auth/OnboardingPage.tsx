@@ -4,6 +4,7 @@ import { Form, Input, Button, Typography, App, Card } from 'antd';
 import { UserOutlined, PhoneOutlined } from '@ant-design/icons';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
+import { safeReturnUrl } from '@code829/shared/lib/safeRedirect';
 
 export default function OnboardingPage() {
   const [form] = Form.useForm();
@@ -34,7 +35,7 @@ export default function OnboardingPage() {
         setAuth(token, updatedUser);
       }
       message.success('Welcome to Code829!');
-      navigate(returnUrl ?? '/', { replace: true });
+      navigate(safeReturnUrl(returnUrl), { replace: true });
     } catch {
       message.error('Failed to save profile');
     } finally {

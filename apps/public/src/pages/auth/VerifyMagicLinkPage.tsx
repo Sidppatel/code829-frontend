@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Typography, App, Spin } from 'antd';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
+import { safeReturnUrl } from '@code829/shared/lib/safeRedirect';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 3000;
@@ -39,7 +40,7 @@ export default function VerifyMagicLinkPage() {
           navigate(onboardUrl, { replace: true });
         } else {
           message.success(`Welcome back, ${data.user.firstName}!`);
-          navigate(returnUrl ?? '/', { replace: true });
+          navigate(safeReturnUrl(returnUrl), { replace: true });
         }
       } catch (err) {
         // Retry on network errors or 5xx (backend cold start)
