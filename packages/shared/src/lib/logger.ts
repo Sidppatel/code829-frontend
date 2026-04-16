@@ -5,6 +5,8 @@
  * (e.g. sending error logs to a backend endpoint).
  */
 
+import { reportError } from './errorReporter';
+
 type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
 
 const LEVEL_COLORS: Record<LogLevel, string> = {
@@ -30,6 +32,10 @@ function formatEntry(level: LogLevel, source: string, message: string, data?: un
     console[level === 'ERROR' ? 'error' : level === 'WARN' ? 'warn' : 'info'](
       prefix, LEVEL_COLORS[level], message,
     );
+  }
+
+  if (level === 'ERROR') {
+    reportError(source, message, data);
   }
 }
 

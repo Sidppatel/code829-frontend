@@ -107,6 +107,9 @@ importers:
       '@fontsource/playfair-display':
         specifier: ^5.2.8
         version: 5.2.8
+      '@types/dompurify':
+        specifier: ^3.0.5
+        version: 3.2.0
       antd:
         specifier: ^6.3.5
         version: 6.3.5(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -116,6 +119,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.20
+      dompurify:
+        specifier: ^3.3.3
+        version: 3.3.3
       framer-motion:
         specifier: ^12.38.0
         version: 12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -228,6 +234,9 @@ importers:
       react-router-dom:
         specifier: ^7.13.2
         version: 7.14.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      web-vitals:
+        specifier: ^5.2.0
+        version: 5.2.0
       zustand:
         specifier: ^5.0.12
         version: 5.0.12(@types/react@19.2.14)(react@19.2.5)
@@ -356,6 +365,12 @@ importers:
       '@ant-design/icons':
         specifier: ^6.0.0
         version: 6.1.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@fontsource/inter':
+        specifier: ^5.0.0
+        version: 5.2.8
+      '@fontsource/playfair-display':
+        specifier: ^5.0.0
+        version: 5.2.8
       antd:
         specifier: ^6.0.0
         version: 6.3.5(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -374,12 +389,28 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.5(react@19.2.5)
+      react-easy-crop:
+        specifier: ^5.0.0
+        version: 5.5.7(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      react-helmet-async:
+        specifier: ^3.0.0
+        version: 3.0.0(react@19.2.5)
       react-router-dom:
         specifier: ^7.0.0
         version: 7.14.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       zustand:
         specifier: ^5.0.0
         version: 5.0.12(@types/react@19.2.14)(react@19.2.5)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      vite:
+        specifier: ^8.0.1
+        version: 8.0.8(@types/node@24.12.2)
 
 packages:
 
@@ -1866,6 +1897,9 @@ packages:
         optional: true
       yaml:
         optional: true
+
+  web-vitals@5.2.0:
+    resolution: {integrity: sha512-i2z98bEmaCqSDiHEDu+gHl/dmR4Q+TxFmG3/13KkMO+o8UxQzCqWaDRCiLgEa41nlO4VpXSI0ASa1xWmO9sBlA==}
 
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
@@ -3424,6 +3458,8 @@ snapshots:
     optionalDependencies:
       '@types/node': 24.12.2
       fsevents: 2.3.3
+
+  web-vitals@5.2.0: {}
 
   which@2.0.2:
     dependencies:

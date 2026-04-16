@@ -4,6 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from '@code829/shared/context/ThemeContext';
 import { ThemedApp } from '@code829/shared/components/ThemedApp';
 import { initGlobalErrorListeners } from '@code829/shared/lib/globalErrors';
+import { initWebVitals } from './lib/webVitals';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
@@ -29,3 +30,5 @@ createRoot(rootEl).render(
     </HelmetProvider>
   </StrictMode>,
 );
+
+initWebVitals();

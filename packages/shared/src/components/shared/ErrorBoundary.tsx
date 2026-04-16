@@ -1,5 +1,4 @@
-import { Component } from 'react';
-import type { ErrorInfo, ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Result, Button } from 'antd';
 import { createLogger } from '../../lib/logger';
 
@@ -12,7 +11,13 @@ interface State {
   error: Error | null;
 }
 
-export default class ErrorBoundary extends Component<Props, State> {
+const log = createLogger('ErrorBoundary');
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+interface ErrorBoundary extends Component<Props, State> {}
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -22,17 +27,15 @@ export default class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  private static readonly logger = createLogger('ErrorBoundary');
-
   componentDidCatch(error: Error, info: ErrorInfo) {
-    ErrorBoundary.logger.error('React ErrorBoundary caught error', {
+    log.error('React ErrorBoundary caught error', {
       message: error.message,
       stack: error.stack,
       componentStack: info.componentStack,
     });
   }
 
-  render() {
+  render(): ReactNode {
     if (this.state.hasError) {
       return (
         <Result
@@ -50,3 +53,5 @@ export default class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+export default ErrorBoundary;
