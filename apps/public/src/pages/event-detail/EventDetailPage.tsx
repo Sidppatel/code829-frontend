@@ -381,6 +381,11 @@ export default function EventDetailPage() {
   }
 
   if (step === 'checkout-open') {
+    const selectedType = selectedTicketTypeId
+      ? ticketTypes.find(tt => tt.id === selectedTicketTypeId)
+      : undefined;
+    const checkoutPrice = selectedType?.displayPriceCents ?? event.pricePerPersonCents ?? 0;
+
     return (
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={handleCancelOpen}>
@@ -392,7 +397,7 @@ export default function EventDetailPage() {
             <CheckoutPanel
               mode="open"
               seatCount={seatCount}
-              pricePerPersonCents={event.pricePerPersonCents ?? 0}
+              pricePerPersonCents={checkoutPrice}
               confirming={confirming}
               setConfirming={setConfirming}
               error={checkoutError}
