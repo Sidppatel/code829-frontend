@@ -1,30 +1,33 @@
 /**
- * Ink Wash — centralized color palette for the whole frontend.
+ * Under the Moonlight — centralized color palette for the whole frontend.
  *
  * This file is the single source of truth for every color used in the site.
  * CSS files and inline styles are forbidden from containing hex / rgb / hsl
  * literals — they must reference the CSS custom properties this module
  * injects via `applyThemeVars()`, or import the semantic tokens directly.
  *
- * Palette reference: Figma "100 Color Combinations" — Combination 8: Ink Wash.
- * Charcoal black, cool gray tones, and soft ivory — simplicity and high contrast.
- * Source swatches: #252525, #545454, #7D7D7D, #CFCFCF (plus implied soft ivory
- * for page surface, matching the description).
+ * Palette reference: Figma "100 Color Combinations" — Combination 75:
+ * Under the Moonlight. Cool indigo / periwinkle / midnight blue scale,
+ * source: figma.com/color-palettes/under-the-moonlight.
+ *   #CCCCFF pale lavender   → page surface
+ *   #A3A3CC soft periwinkle → borders, disabled
+ *   #5C5C99 dusky indigo    → muted text / strong border
+ *   #292966 midnight blue   → brand / primary text
  */
 
 export const palette = {
-  /** Soft ivory — page surface (description-implied) */
-  salt: '#F5F2EC',
-  /** Cool light gray — borders, subtle separation */
-  lightGray: '#CFCFCF',
-  /** Cool mid gray — muted text, strong borders */
-  mediumGray: '#7D7D7D',
-  /** Charcoal black — brand, primary text */
-  pepper: '#252525',
+  /** Pale lavender — page surface (lightest) */
+  salt: '#CCCCFF',
+  /** Soft periwinkle — default border / disabled */
+  lightGray: '#A3A3CC',
+  /** Dusky indigo — muted text, strong borders */
+  mediumGray: '#5C5C99',
+  /** Midnight blue — brand, primary text (darkest) */
+  pepper: '#292966',
 } as const;
 
-/** Fourth Ink Wash source swatch — reserved for text.secondary tier. */
-const INK_DARK_GRAY = '#545454';
+/** Intermediate shade between pepper and mediumGray — for text.secondary tier. */
+const INDIGO_SECONDARY = '#3E3E80';
 
 export const status = {
   info: '#1D4ED8',
@@ -36,23 +39,23 @@ export const status = {
 
 export const semantic = {
   brand: palette.pepper,
-  brandHover: '#151515',
-  brandLight: '#444444',
+  brandHover: '#1A1A4A',
+  brandLight: '#434380',
   brandOn: palette.salt,
 
   surface: {
     page: palette.salt,
     surface: palette.salt,
-    elevated: '#EDEAE3',
-    soft: 'rgba(37, 37, 37, 0.04)',
-    muted: 'rgba(37, 37, 37, 0.08)',
-    pressed: 'rgba(37, 37, 37, 0.14)',
-    overlay: 'rgba(37, 37, 37, 0.60)',
+    elevated: '#DDDDFF',
+    soft: 'rgba(41, 41, 102, 0.04)',
+    muted: 'rgba(41, 41, 102, 0.08)',
+    pressed: 'rgba(41, 41, 102, 0.14)',
+    overlay: 'rgba(41, 41, 102, 0.60)',
   },
 
   text: {
     primary: palette.pepper,
-    secondary: INK_DARK_GRAY,
+    secondary: INDIGO_SECONDARY,
     muted: palette.mediumGray,
     disabled: palette.lightGray,
     onBrand: palette.salt,
@@ -60,7 +63,7 @@ export const semantic = {
 
   border: {
     default: palette.lightGray,
-    subtle: '#E5E1D9',
+    subtle: '#BCBCE0',
     strong: palette.mediumGray,
   },
 
@@ -75,7 +78,7 @@ export const semantic = {
     warning: 'rgba(180, 83, 9, 0.10)',
     danger: 'rgba(185, 28, 28, 0.10)',
     success: 'rgba(21, 128, 61, 0.10)',
-    neutral: 'rgba(125, 125, 125, 0.18)',
+    neutral: 'rgba(92, 92, 153, 0.18)',
   },
 
   status,
@@ -83,7 +86,7 @@ export const semantic = {
 
 export const chartPalette = [
   palette.pepper,
-  INK_DARK_GRAY,
+  INDIGO_SECONDARY,
   palette.mediumGray,
   status.info,
   status.success,
@@ -103,7 +106,7 @@ export const shadows = {
 
 export const tablePickerPresets = [
   palette.pepper,
-  INK_DARK_GRAY,
+  INDIGO_SECONDARY,
   palette.mediumGray,
   palette.lightGray,
   semantic.brandLight,
@@ -170,16 +173,16 @@ export const cssVars: Record<string, string> = {
   'shadow-color-medium': semantic.shadow.medium,
   'shadow-color-strong': semantic.shadow.strong,
 
-  'nav-bg': 'rgba(245, 242, 236, 0.88)',
+  'nav-bg': 'rgba(204, 204, 255, 0.88)',
   'nav-border': semantic.border.default,
 
-  'glass-bg': 'rgba(245, 242, 236, 0.75)',
+  'glass-bg': 'rgba(204, 204, 255, 0.75)',
   'glass-border': semantic.border.default,
 
   'card-shadow':
     '0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06), 0 16px 48px rgba(0, 0, 0, 0.04)',
   'shadow-hover':
-    '0 16px 40px rgba(37, 37, 37, 0.12), 0 4px 12px rgba(37, 37, 37, 0.06)',
+    '0 16px 40px rgba(41, 41, 102, 0.12), 0 4px 12px rgba(41, 41, 102, 0.06)',
 };
 
 const STYLE_ELEMENT_ID = 'app-theme-colors';
