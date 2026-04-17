@@ -1,6 +1,7 @@
 import apiClient from '../lib/axios';
 import type { Booking } from '../types/booking';
 import type { PagedResponse } from '../types/shared';
+import type { PricingQuote, PricingQuoteRequest } from '../types/pricing';
 
 export interface CreateBookingRequest {
   eventId: string;
@@ -34,4 +35,7 @@ export const bookingsApi = {
 
   getStripeConfig: () =>
     apiClient.get<{ publishableKey: string; mode: 'live' | 'test' }>('/bookings/stripe-config'),
+
+  getQuote: (request: PricingQuoteRequest) =>
+    apiClient.post<PricingQuote>('/bookings/quote', request),
 };

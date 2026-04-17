@@ -20,6 +20,10 @@ export interface EventSummary {
   displayPricePerPersonCents?: number;
   displayMinPricePerTableCents?: number;
   displayMinTicketTypePriceCents?: number;
+  displayFromAmountCents?: number;
+  displayFromFormatted?: string;
+  isSoldOut?: boolean;
+  availableCount?: number;
   venue?: VenueBasic;
   ticketTypes?: EventTicketType[];
 }

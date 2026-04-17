@@ -2,7 +2,6 @@ import { Tag, Space } from 'antd';
 import { CalendarOutlined, EnvironmentOutlined, ArrowRightOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { EventSummary } from '@code829/shared/types/event';
-import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
 import EventImageFallback from './EventImageFallback';
 
@@ -13,10 +12,7 @@ interface Props {
 export default function EventCard({ event }: Props) {
   const navigate = useNavigate();
 
-  const displayPrice = event.displayMinPricePerTableCents ?? event.displayPricePerPersonCents ?? event.minPricePerTableCents ?? event.pricePerPersonCents;
-  const priceLabel = displayPrice
-    ? centsToUSD(displayPrice)
-    : 'Free';
+  const priceLabel = event.displayFromFormatted ?? 'Free';
 
   return (
     <div 

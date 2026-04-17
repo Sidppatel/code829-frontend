@@ -2,7 +2,6 @@ import { motion, type Variants } from 'framer-motion';
 import { Typography, Button, Space } from 'antd';
 import { ShareAltOutlined, MessageOutlined } from '@ant-design/icons';
 import type { EventDetail } from '@code829/shared/types/event';
-import { centsToUSD } from '@code829/shared/utils/currency';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 
 interface EventSidebarProps {
@@ -30,7 +29,7 @@ export default function EventSidebar({ event, isSoldOut, remaining, handleBookNo
               letterSpacing: '-1px',
               lineHeight: 1.1
             }}>
-              {(event.displayMinPricePerTableCents ?? event.displayPricePerPersonCents ?? event.minPricePerTableCents ?? event.pricePerPersonCents) ? centsToUSD((event.displayMinPricePerTableCents ?? event.displayPricePerPersonCents ?? event.minPricePerTableCents ?? event.pricePerPersonCents)!) : 'Complimentary'}
+              {event.displayFromFormatted ?? 'Complimentary'}
             </div>
           </div>
 

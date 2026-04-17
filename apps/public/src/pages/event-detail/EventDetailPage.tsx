@@ -14,7 +14,6 @@ import type { EventDetail, EventTableDto, EventTablesResponse, EventTicketType }
 
 const log = createLogger('Public/EventDetailPage');
 import type { TableLock } from '@code829/shared/types/layout';
-import { centsToUSD } from '@code829/shared/utils/currency';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 
@@ -452,9 +451,8 @@ export default function EventDetailPage() {
     );
   }
 
-  const capacity = event.layoutMode === 'Open' ? ((event.totalCapacity && event.totalCapacity > 0) ? event.totalCapacity : (event.maxCapacity ?? 0)) : 0;
-  const remaining = capacity - (event.totalSold ?? 0);
-  const isSoldOut = event.layoutMode === 'Open' && remaining <= 0;
+  const isSoldOut = event.isSoldOut ?? false;
+  const remaining = event.availableCount ?? 0;
 
   return (
     <motion.div
@@ -510,7 +508,7 @@ export default function EventDetailPage() {
             <div>
               <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>From</div>
               <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)' }}>
-                {(event.displayMinPricePerTableCents ?? event.displayPricePerPersonCents ?? event.minPricePerTableCents ?? event.pricePerPersonCents) ? centsToUSD((event.displayMinPricePerTableCents ?? event.displayPricePerPersonCents ?? event.minPricePerTableCents ?? event.pricePerPersonCents)!) : 'Free'}
+                {event.displayFromFormatted ?? 'Free'}
               </div>
             </div>
             <Button
