@@ -1,19 +1,24 @@
 /**
- * Salt and Pepper — centralized color palette for the whole frontend.
+ * Stone Path — centralized color palette for the whole frontend.
  *
  * This file is the single source of truth for every color used in the site.
  * CSS files and inline styles are forbidden from containing hex / rgb / hsl
  * literals — they must reference the CSS custom properties this module
  * injects via `applyThemeVars()`, or import the semantic tokens directly.
  *
- * Palette reference: https://www.figma.com/color-palettes/salt-and-pepper/
+ * Palette reference: Figma "100 Color Combinations" — Combination 67: Stone Path.
+ * A warm neutral scale running from pale cream through stone/taupe to deep earth.
  */
 
 export const palette = {
-  salt: '#FFFFFF',
-  lightGray: '#D4D4D4',
-  mediumGray: '#B3B3B3',
-  pepper: '#2B2B2B',
+  /** Lightest — warm cream / pale stone (field kept as "salt" for back-compat) */
+  salt: '#EDE7DA',
+  /** Light stone — pale taupe (field kept as "lightGray" for back-compat) */
+  lightGray: '#C4B59A',
+  /** Mid stone — warm taupe (field kept as "mediumGray" for back-compat) */
+  mediumGray: '#8B7D63',
+  /** Darkest — deep earth / warm charcoal (field kept as "pepper" for back-compat) */
+  pepper: '#3E362A',
 } as const;
 
 export const status = {
@@ -26,31 +31,31 @@ export const status = {
 
 export const semantic = {
   brand: palette.pepper,
-  brandHover: '#1A1A1A',
-  brandLight: '#4A4A4A',
+  brandHover: '#2A241C',
+  brandLight: '#5A4F3D',
   brandOn: palette.salt,
 
   surface: {
     page: palette.salt,
     surface: palette.salt,
-    elevated: '#FAFAFA',
-    soft: 'rgba(43, 43, 43, 0.04)',
-    muted: 'rgba(43, 43, 43, 0.08)',
-    pressed: 'rgba(43, 43, 43, 0.12)',
-    overlay: 'rgba(43, 43, 43, 0.60)',
+    elevated: '#FAF6EF',
+    soft: 'rgba(62, 54, 42, 0.04)',
+    muted: 'rgba(62, 54, 42, 0.08)',
+    pressed: 'rgba(62, 54, 42, 0.14)',
+    overlay: 'rgba(62, 54, 42, 0.60)',
   },
 
   text: {
     primary: palette.pepper,
-    secondary: '#4B4B4B',
-    muted: '#6B6B6B',
+    secondary: '#5A4F3D',
+    muted: '#7A6D5A',
     disabled: palette.mediumGray,
     onBrand: palette.salt,
   },
 
   border: {
     default: palette.lightGray,
-    subtle: '#EAEAEA',
+    subtle: '#E0D6C2',
     strong: palette.mediumGray,
   },
 
@@ -65,7 +70,7 @@ export const semantic = {
     warning: 'rgba(180, 83, 9, 0.10)',
     danger: 'rgba(185, 28, 28, 0.10)',
     success: 'rgba(21, 128, 61, 0.10)',
-    neutral: 'rgba(179, 179, 179, 0.18)',
+    neutral: 'rgba(139, 125, 99, 0.18)',
   },
 
   status,
@@ -93,10 +98,10 @@ export const shadows = {
 
 export const tablePickerPresets = [
   palette.pepper,
-  '#4A4A4A',
-  '#6B6B6B',
-  '#8A8A8A',
+  semantic.brandLight,
+  semantic.text.muted,
   palette.mediumGray,
+  palette.lightGray,
   status.info,
   status.success,
   status.warning,
@@ -160,19 +165,19 @@ export const cssVars: Record<string, string> = {
   'shadow-color-medium': semantic.shadow.medium,
   'shadow-color-strong': semantic.shadow.strong,
 
-  'nav-bg': 'rgba(255, 255, 255, 0.88)',
+  'nav-bg': 'rgba(237, 231, 218, 0.88)',
   'nav-border': semantic.border.default,
 
-  'glass-bg': 'rgba(255, 255, 255, 0.75)',
+  'glass-bg': 'rgba(237, 231, 218, 0.75)',
   'glass-border': semantic.border.default,
 
   'card-shadow':
     '0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06), 0 16px 48px rgba(0, 0, 0, 0.04)',
   'shadow-hover':
-    '0 16px 40px rgba(43, 43, 43, 0.12), 0 4px 12px rgba(43, 43, 43, 0.06)',
+    '0 16px 40px rgba(62, 54, 42, 0.12), 0 4px 12px rgba(62, 54, 42, 0.06)',
 };
 
-const STYLE_ELEMENT_ID = 'salt-and-pepper-theme';
+const STYLE_ELEMENT_ID = 'app-theme-colors';
 
 function buildRootRule(vars: Record<string, string>): string {
   const lines = Object.entries(vars).map(([key, value]) => `  --${key}: ${value};`);
