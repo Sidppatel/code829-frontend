@@ -138,20 +138,22 @@ export default function CheckoutPanel(props: Props) {
           <Alert type="error" message={error} showIcon />
         )}
 
-        {clientSecret && stripePromise ? (
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
-            <StripePaymentForm
-              onSuccess={onPaymentSuccess}
-              onCancel={onCancel}
-              confirming={confirming}
-              setConfirming={setConfirming}
-            />
-          </Elements>
-        ) : error ? (
-          <Alert type="warning" message="Payment unavailable" description="Payment service is not ready. Please refresh and try again." showIcon />
-        ) : (
-          <Skeleton.Input active block style={{ height: 140 }} />
-        )}
+        <div className="checkout-pay-sticky">
+          {clientSecret && stripePromise ? (
+            <Elements stripe={stripePromise} options={{ clientSecret }}>
+              <StripePaymentForm
+                onSuccess={onPaymentSuccess}
+                onCancel={onCancel}
+                confirming={confirming}
+                setConfirming={setConfirming}
+              />
+            </Elements>
+          ) : error ? (
+            <Alert type="warning" message="Payment unavailable" description="Payment service is not ready. Please refresh and try again." showIcon />
+          ) : (
+            <Skeleton.Input active block style={{ height: 140 }} />
+          )}
+        </div>
       </Space>
     </Card>
   );

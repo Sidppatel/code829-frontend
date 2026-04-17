@@ -1325,7 +1325,7 @@ html.light .next-event-stat {
 }
 
 @media (max-width: 768px) {
-  .ts-grid { max-width: 100%; border-radius: 8px; }
+  .ts-grid { max-width: 100%; border-radius: 8px; overflow-x: auto; }
   .ts-cell { min-width: 50px; height: 58px; }
   .ts-col-header { min-width: 50px; }
   .ts-row-header { width: 26px; min-width: 26px; }
@@ -1333,6 +1333,29 @@ html.light .next-event-stat {
   .ts-table-label { font-size: 10px; }
   .ts-table-meta { font-size: 8px; }
   .ts-detail-card { max-width: 100%; }
+}
+
+/* iOS 44px touch target floor for small phones (iPhone SE, mini). */
+@media (max-width: 374px) {
+  .ts-cell { min-width: 44px; height: 52px; }
+  .ts-col-header { min-width: 44px; }
+  .ts-table-label { font-size: 11px; font-weight: 600; }
+  .ts-table-meta { font-size: 9px; }
+}
+
+/* Sticky Pay action on mobile so the primary CTA stays reachable while the
+   user scrolls the line-item summary above it. */
+.checkout-pay-sticky { width: 100%; }
+@media (max-width: 768px) {
+  .checkout-pay-sticky {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-surface);
+    padding: 12px 16px;
+    margin: 0 -16px -16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 5;
+  }
 }
 
 /* ── Color picker display ── */
