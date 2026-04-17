@@ -10,6 +10,11 @@ export default defineConfig({
     },
   },
   build: {
+    // Explicit even though Vite's production default is off — prevents an
+    // accidental `sourcemap: true` from leaking the TS/JSX tree to anyone
+    // with DevTools. If you need maps for a release investigation, generate
+    // them locally and don't deploy them.
+    sourcemap: false,
     rollupOptions: {
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
