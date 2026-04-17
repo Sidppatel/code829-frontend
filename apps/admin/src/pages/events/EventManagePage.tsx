@@ -209,7 +209,7 @@ export default function EventManagePage() {
 
         <HumanCard 
           className="human-noise" 
-          style={{ padding: 28, border: '1px solid var(--border)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+          style={{ padding: 28, border: '1px solid var(--border)', boxShadow: 'var(--card-shadow)' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
             <Tag 

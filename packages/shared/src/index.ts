@@ -45,6 +45,7 @@ export { developerApi } from './services/developerApi';
 // Theme
 export { STATUS_COLORS, EVENT_STATUS_COLORS, LOG_SEVERITY_COLORS, EMAIL_STATUS_COLORS } from './theme/statusColors';
 export { portalCardStyle, portalPanelStyle, portalElevatedStyle } from './theme/portalStyles';
+export { palette, semantic, status, cssVars, chartPalette, shadows, gradients, tablePickerPresets, applyThemeVars } from './theme/colors';
 
 // Components
 export { ThemedApp } from './components/ThemedApp';

@@ -80,7 +80,7 @@ export default function HomePage() {
             style={{
               fontSize: 'clamp(2.8rem, 8vw, 5.5rem)',
               fontWeight: 800,
-              color: '#F5F2FA',
+              color: 'var(--text-primary)',
               lineHeight: 1.05,
               marginBottom: 28,
               letterSpacing: '-0.04em'
@@ -94,7 +94,7 @@ export default function HomePage() {
             variants={itemVariants}
             style={{
               fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-              color: '#B8AFC9',
+              color: 'var(--text-secondary)',
               maxWidth: 580,
               margin: '0 auto 48px',
               lineHeight: 1.7,
@@ -118,9 +118,9 @@ export default function HomePage() {
                 borderRadius: 14,
                 fontSize: 16,
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #6E5BFF 0%, #F46DB2 100%)',
+                background: 'var(--gradient-brand)',
                 border: 'none',
-                boxShadow: '0 8px 32px rgba(110, 91, 255, 0.35)',
+                boxShadow: 'var(--shadow-hover)',
               }}
             >
               Explore Events
@@ -134,9 +134,9 @@ export default function HomePage() {
                 borderRadius: 14,
                 fontSize: 16,
                 fontWeight: 600,
-                color: '#B8AFC9',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                background: 'rgba(255, 255, 255, 0.04)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-soft)',
                 backdropFilter: 'blur(12px)',
               }}
             >

@@ -69,7 +69,7 @@ export default function EmptyState({ title = 'Nothing here yet', description, ac
             height: 48,
             padding: '0 32px',
             fontWeight: 600,
-            boxShadow: '0 4px 12px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
+            boxShadow: 'var(--shadow-md)'
           }}
         >
           {actionLabel}

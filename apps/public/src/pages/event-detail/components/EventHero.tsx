@@ -37,7 +37,7 @@ export default function EventHero({ event, itemVariants }: EventHeroProps) {
       <div style={{
         position: 'absolute',
         inset: 0,
-        background: 'linear-gradient(to bottom, rgba(11, 14, 20, 0.4) 0%, rgba(11, 14, 20, 0.95) 90%)',
+        background: 'linear-gradient(to bottom, transparent 0%, var(--bg-overlay) 90%)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-end',
@@ -58,7 +58,7 @@ export default function EventHero({ event, itemVariants }: EventHeroProps) {
                 icon={<ArrowLeftOutlined />}
                 onClick={() => navigate('/events')}
                 style={{
-                  color: 'rgba(255,255,255,0.8)',
+                  color: 'var(--text-on-brand)',
                   fontWeight: 600,
                   fontSize: isMobile ? 14 : 15,
                   padding: 0,
@@ -73,9 +73,9 @@ export default function EventHero({ event, itemVariants }: EventHeroProps) {
                 <Tag style={{ 
                   borderRadius: 10, 
                   border: 'none', 
-                  background: 'var(--accent-violet)', 
-                  color: '#fff', 
-                  fontWeight: 800, 
+                  background: 'var(--primary)',
+                  color: 'var(--text-on-brand)',
+                  fontWeight: 800,
                   padding: isMobile ? '2px 12px' : '4px 18px',
                   margin: 0
                 }}>
@@ -85,9 +85,9 @@ export default function EventHero({ event, itemVariants }: EventHeroProps) {
                   <Tag style={{ 
                     borderRadius: 10, 
                     border: 'none', 
-                    background: 'var(--accent-gold)', 
-                    color: '#000', 
-                    fontWeight: 800, 
+                    background: 'var(--status-warning)',
+                    color: 'var(--text-on-brand)',
+                    fontWeight: 800,
                     padding: isMobile ? '2px 12px' : '4px 18px',
                     margin: 0
                   }}>
@@ -100,7 +100,7 @@ export default function EventHero({ event, itemVariants }: EventHeroProps) {
             <h1 style={{
               fontSize: isMobile ? 'clamp(1.8rem, 10vw, 3rem)' : 'clamp(2.5rem, 8vw, 6rem)',
               fontWeight: 900,
-              color: '#fff',
+              color: 'var(--text-on-brand)',
               marginBottom: isMobile ? 16 : 24,
               letterSpacing: '-0.06em',
               lineHeight: 1
@@ -108,7 +108,7 @@ export default function EventHero({ event, itemVariants }: EventHeroProps) {
               {event.title}
             </h1>
 
-            <Space orientation={isMobile ? 'vertical' : 'horizontal'} size={isMobile ? 8 : 40} style={{ color: 'rgba(255,255,255,0.9)', fontSize: isMobile ? 14 : 16, fontWeight: 600 }}>
+            <Space orientation={isMobile ? 'vertical' : 'horizontal'} size={isMobile ? 8 : 40} style={{ color: 'var(--text-on-brand)', fontSize: isMobile ? 14 : 16, fontWeight: 600 }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <CalendarOutlined style={{ color: 'var(--accent-rose)' }} />
                 {formatDateRange(event.startDate, event.endDate)}

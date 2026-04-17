@@ -44,7 +44,7 @@ function JsonBlock({ label, value }: { label: string; value?: string }) {
     <div style={{ marginTop: 8 }}>
       <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
       <pre style={{
-        background: 'var(--bg-elevated, rgba(0,0,0,0.2))',
+        background: 'var(--bg-elevated)',
         borderRadius: 8,
         padding: '10px 12px',
         fontSize: 12,
@@ -52,7 +52,7 @@ function JsonBlock({ label, value }: { label: string; value?: string }) {
         maxHeight: 240,
         margin: 0,
         color: 'var(--text-primary)',
-        border: '1px solid var(--border, rgba(255,255,255,0.08))',
+        border: '1px solid var(--border)',
       }}>
         {pretty}
       </pre>

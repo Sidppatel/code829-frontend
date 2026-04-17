@@ -163,8 +163,8 @@ export default function ImageUpload({
               borderRadius: 10,
               overflow: 'hidden',
               border: img.isPrimary
-                ? '2px solid var(--accent-violet, #7c3aed)'
-                : '1px solid var(--border, rgba(255,255,255,0.1))',
+                ? '2px solid var(--primary)'
+                : '1px solid var(--border)',
             }}
           >
             <AntImage
@@ -186,15 +186,15 @@ export default function ImageUpload({
                   justifyContent: 'center',
                   gap: 4,
                   padding: '4px',
-                  background: 'rgba(0,0,0,0.6)',
+                  background: 'var(--bg-overlay)',
                 }}
               >
                 <Button
                   type="text"
                   size="small"
-                  icon={img.isPrimary ? <StarFilled style={{ color: '#faad14' }} /> : <StarOutlined />}
+                  icon={img.isPrimary ? <StarFilled style={{ color: 'var(--status-warning)' }} /> : <StarOutlined />}
                   onClick={() => handleSetPrimary(img.id)}
-                  style={{ color: '#fff', fontSize: 12 }}
+                  style={{ color: 'var(--text-on-brand)', fontSize: 12 }}
                   title="Set as primary"
                 />
                 <Popconfirm
@@ -207,7 +207,7 @@ export default function ImageUpload({
                     type="text"
                     size="small"
                     icon={<DeleteOutlined />}
-                    style={{ color: '#ff4d4f', fontSize: 12 }}
+                    style={{ color: 'var(--status-danger)', fontSize: 12 }}
                     title="Delete"
                   />
                 </Popconfirm>
@@ -220,8 +220,8 @@ export default function ImageUpload({
                   top: 4,
                   left: 4,
                   fontSize: 10,
-                  background: 'var(--accent-violet, #7c3aed)',
-                  color: '#fff',
+                  background: 'var(--primary)',
+                  color: 'var(--text-on-brand)',
                   padding: '1px 6px',
                   borderRadius: 4,
                   fontWeight: 600,
@@ -308,7 +308,7 @@ export default function ImageUpload({
                 position: 'relative',
                 width: '100%',
                 height: 280,
-                background: '#111',
+                background: 'var(--bg-elevated)',
                 borderRadius: 12,
                 overflow: 'hidden',
                 marginBottom: 20,
@@ -327,8 +327,8 @@ export default function ImageUpload({
                 style={{
                   containerStyle: { borderRadius: 12 },
                   cropAreaStyle: {
-                    border: '2px solid var(--accent-violet, #7c3aed)',
-                    boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)',
+                    border: '2px solid var(--primary)',
+                    boxShadow: '0 0 0 9999px var(--bg-overlay)',
                   },
                 }}
               />

@@ -168,7 +168,7 @@ export default function CheckInPage() {
         <HumanCard 
           style={{ 
             borderLeft: `8px solid ${scanResult.success ? 'var(--accent-green)' : 'var(--accent-rose)'}`,
-            background: scanResult.success ? 'hsla(161, 64%, 43%, 0.05)' : 'hsla(350, 89%, 60%, 0.05)'
+            background: scanResult.success ? 'var(--status-success-bg)' : 'var(--status-danger-bg)'
           }}
           className="spring-up"
         >

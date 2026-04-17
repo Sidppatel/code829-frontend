@@ -48,7 +48,7 @@ const EventImageFallback: React.FC<EventImageFallbackProps> = ({
     <div style={{ 
       width: '100%', 
       height: '100%', 
-      background: 'linear-gradient(135deg, var(--accent-violet-dark) 0%, var(--bg-surface) 100%)',
+      background: 'var(--gradient-hero-fallback)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -61,7 +61,7 @@ const EventImageFallback: React.FC<EventImageFallbackProps> = ({
         position: 'absolute',
         inset: 0,
         opacity: 0.1,
-        backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)`,
+        backgroundImage: `radial-gradient(circle at 2px 2px, var(--bg-muted) 1px, transparent 0)`,
         backgroundSize: '24px 24px',
       }} />
 
@@ -69,7 +69,7 @@ const EventImageFallback: React.FC<EventImageFallbackProps> = ({
       <div style={{
         position: 'absolute',
         fontSize: '14rem',
-        color: 'rgba(255,255,255,0.03)',
+        color: 'var(--bg-soft)',
         userSelect: 'none',
         pointerEvents: 'none',
         transform: 'rotate(-10deg)',
@@ -85,9 +85,9 @@ const EventImageFallback: React.FC<EventImageFallbackProps> = ({
       <div style={{
         fontSize,
         fontWeight: 900,
-        color: 'rgba(255,255,255,0.22)',
+        color: 'var(--bg-pressed)',
         zIndex: 1,
-        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.1))',
+        filter: 'drop-shadow(var(--shadow-md))',
         lineHeight: 1,
         fontFamily: 'inherit',
         userSelect: 'none'

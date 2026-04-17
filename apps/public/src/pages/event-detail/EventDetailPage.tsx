@@ -641,7 +641,7 @@ export default function EventDetailPage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+              boxShadow: 'var(--card-shadow)',
               border: '1px solid var(--primary-soft)',
               background: 'var(--nav-bg)',
             }}
@@ -663,9 +663,9 @@ export default function EventDetailPage() {
                 borderRadius: 14,
                 fontWeight: 800,
                 fontSize: 16,
-                background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                background: 'var(--gradient-brand)',
                 border: 'none',
-                boxShadow: '0 8px 20px rgba(99, 102, 241, 0.3)'
+                boxShadow: 'var(--shadow-hover)'
               }}
             >
               Reserve

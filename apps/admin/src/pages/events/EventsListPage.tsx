@@ -29,7 +29,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const s = STATUS_MAP[status] ?? { label: status, color: '#9CA3AF' };
+  const s = STATUS_MAP[status] ?? { label: status, color: 'var(--status-neutral)' };
   const isPulse = status === 'Published';
 
   return (
@@ -140,7 +140,7 @@ export default function EventsListPage() {
               height: 48,
               padding: '0 32px',
               fontWeight: 700,
-              boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
+              boxShadow: 'var(--shadow-md)'
             }}
           >
             Create Event

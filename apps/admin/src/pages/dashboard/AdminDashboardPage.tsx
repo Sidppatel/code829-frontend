@@ -74,7 +74,7 @@ export default function AdminDashboardPage() {
               height: 48,
               padding: '0 32px',
               fontWeight: 700,
-              boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
+              boxShadow: 'var(--shadow-md)'
             }}
           >
             Create Event
@@ -103,8 +103,8 @@ export default function AdminDashboardPage() {
                     gap: 8,
                     padding: '6px 16px',
                     borderRadius: 99,
-                    background: 'rgba(255,255,255,0.15)',
-                    color: 'white',
+                    background: 'var(--bg-muted)',
+                    color: 'var(--text-on-brand)',
                     fontSize: 12,
                     fontWeight: 800,
                     textTransform: 'uppercase',
@@ -132,7 +132,7 @@ export default function AdminDashboardPage() {
                       {formatEventDate(nextEvent.startDate)}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 15 }}>
-                      <EnvironmentOutlined style={{ color: 'rgba(255,255,255,0.8)' }} />
+                      <EnvironmentOutlined style={{ color: 'var(--text-on-brand)' }} />
                       {nextEvent.venueName || 'Virtual'}
                     </div>
                   </div>
@@ -148,14 +148,14 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div style={{
-                  background: 'rgba(0,0,0,0.2)',
+                  background: 'var(--bg-overlay)',
                   padding: isMobile ? 24 : 32,
                   borderRadius: 'var(--radius-lg)',
                   backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255,255,255,0.1)'
+                  border: '1px solid var(--border)'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 14 }}>
-                    <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Guest Progress</span>
+                    <span style={{ color: 'var(--text-on-brand)', fontWeight: 600 }}>Guest Progress</span>
                     <span style={{ color: 'white', fontWeight: 800 }}>
                       {nextEvent.soldCount} / {nextEvent.totalCapacity}
                     </span>
@@ -164,11 +164,11 @@ export default function AdminDashboardPage() {
                     // eslint-disable-next-line event-platform/no-business-calc-in-jsx -- dashboard display; backend returns sold+total but not the percent.
                     percent={(nextEvent.soldCount / nextEvent.totalCapacity) * 100}
                     showInfo={false}
-                    strokeColor="#FBBF24"
-                    railColor="rgba(255,255,255,0.1)"
+                    strokeColor="var(--status-warning)"
+                    railColor="var(--bg-muted)"
                     size={12}
                   />
-                  <div style={{ marginTop: 24, fontSize: 13, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+                  <div style={{ marginTop: 24, fontSize: 13, color: 'var(--text-on-brand)', fontStyle: 'italic' }}>
                     “Ticket sales are up 12% compared to your last rooftop event.”
                   </div>
                 </div>

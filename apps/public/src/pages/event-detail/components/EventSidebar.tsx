@@ -47,10 +47,10 @@ export default function EventSidebar({ event, isSoldOut, remaining, handleBookNo
                 borderRadius: 18,
                 fontSize: 18,
                 fontWeight: 800,
-                background: isSoldOut ? 'var(--bg-soft)' : 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                background: isSoldOut ? 'var(--bg-soft)' : 'var(--gradient-brand)',
                 border: 'none',
-                boxShadow: isSoldOut ? 'none' : '0 15px 35px rgba(99, 102, 241, 0.35)',
-                color: isSoldOut ? 'var(--text-muted)' : 'white'
+                boxShadow: isSoldOut ? 'none' : 'var(--shadow-hover)',
+                color: isSoldOut ? 'var(--text-muted)' : 'var(--text-on-brand)'
               }}
             >
               {isSoldOut ? 'Sold Out' : 'Reserve tickets'}
@@ -69,7 +69,7 @@ export default function EventSidebar({ event, isSoldOut, remaining, handleBookNo
                 width: 8,
                 height: 8,
                 borderRadius: '50%',
-                background: !isSoldOut ? '#22c55e' : 'var(--accent-rose)'
+                background: !isSoldOut ? 'var(--status-success)' : 'var(--status-danger)'
               }} />
               {!isSoldOut
                 ? (event.layoutMode === 'Grid'

@@ -6,14 +6,15 @@
  */
 
 import { reportError } from './errorReporter';
+import { status } from '../theme/colors';
 
 type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
 
 const LEVEL_COLORS: Record<LogLevel, string> = {
-  DEBUG: 'color: #9CA3AF',
-  INFO:  'color: #10B981',
-  WARN:  'color: #F59E0B',
-  ERROR: 'color: #EF4444',
+  DEBUG: `color: ${status.neutral}`,
+  INFO:  `color: ${status.success}`,
+  WARN:  `color: ${status.warning}`,
+  ERROR: `color: ${status.danger}`,
 };
 
 function timestamp(): string {

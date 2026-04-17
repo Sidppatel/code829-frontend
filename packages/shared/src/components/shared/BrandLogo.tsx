@@ -47,7 +47,7 @@ export default function BrandLogo({
         borderRadius: '50%',
         overflow: 'hidden',
         flexShrink: 0,
-        background: '#000',
+        background: 'var(--primary)',
       }}>
         <img
           src="/logo.jpg"
