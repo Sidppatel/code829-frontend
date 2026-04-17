@@ -86,7 +86,7 @@ export default function VenuesPage() {
                 height: 48,
                 padding: '0 32px',
                 fontWeight: 700,
-                boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
+                boxShadow: 'var(--shadow-md)'
               }}
             >
               Add Venue
@@ -128,7 +128,7 @@ export default function VenuesPage() {
                     justifyContent: 'center',
                     fontSize: 20,
                     flexShrink: 0,
-                    boxShadow: v.isActive ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
+                    boxShadow: v.isActive ? 'var(--shadow-sm)' : 'none'
                   }}>
                     🏛️
                   </div>

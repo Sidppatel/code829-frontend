@@ -117,14 +117,14 @@ export default function LoginPage() {
               width: 64, 
               height: 64, 
               borderRadius: 18, 
-              background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))', 
+              background: 'var(--primary)',
               margin: '0 auto 24px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
+              color: 'var(--text-on-brand)',
               fontSize: 28,
-              boxShadow: '0 12px 24px rgba(99, 102, 241, 0.2)'
+              boxShadow: 'var(--shadow-hover)'
             }}>
               ✦
             </div>
@@ -142,8 +142,8 @@ export default function LoginPage() {
                 width: 80, 
                 height: 80, 
                 borderRadius: '50%', 
-                background: 'rgba(99, 102, 241, 0.05)', 
-                display: 'flex', 
+                background: 'var(--bg-soft)',
+                display: 'flex',
                 alignItems: 'center', 
                 justifyContent: 'center', 
                 margin: '0 auto 24px' 
@@ -179,7 +179,7 @@ export default function LoginPage() {
                   style={{ 
                     borderRadius: 16, 
                     height: 56, 
-                    background: 'rgba(0,0,0,0.03)', 
+                    background: 'var(--bg-soft)',
                     border: '1px solid var(--border)',
                     fontSize: 16
                   }}
@@ -201,9 +201,9 @@ export default function LoginPage() {
                     fontWeight: 800,
                     background: cooldown > 0
                       ? 'var(--bg-elevated)'
-                      : 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                      : 'var(--primary)',
                     border: 'none',
-                    boxShadow: '0 10px 25px rgba(99, 102, 241, 0.3)',
+                    boxShadow: 'var(--shadow-hover)',
                     marginTop: 12,
                   }}
                 >
@@ -245,7 +245,7 @@ export default function LoginPage() {
                   prefix={<LoginOutlined style={{ color: 'var(--text-muted)', marginRight: 8 }} />}
                   placeholder="admin@code829.com"
                   size="large"
-                  style={{ borderRadius: 14, height: 50, background: 'rgba(0,0,0,0.02)' }}
+                  style={{ borderRadius: 14, height: 50, background: 'var(--bg-soft)' }}
                 />
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>

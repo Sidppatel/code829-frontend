@@ -73,7 +73,7 @@ export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath =
               prefix={<MailOutlined style={{ color: 'var(--text-muted)', marginRight: 8 }} />}
               placeholder="Email"
               size="large"
-              style={{ height: 52, borderRadius: 14, background: 'rgba(0,0,0,0.03)', border: '1px solid var(--border)', fontSize: 15 }}
+              style={{ height: 52, borderRadius: 14, background: 'var(--bg-soft)', border: '1px solid var(--border)', fontSize: 15 }}
             />
           </Form.Item>
           <Form.Item name="password" rules={[{ required: true, message: 'Please enter your password' }]}>
@@ -81,7 +81,7 @@ export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath =
               prefix={<LockOutlined style={{ color: 'var(--text-muted)', marginRight: 8 }} />}
               placeholder="Password"
               size="large"
-              style={{ height: 52, borderRadius: 14, background: 'rgba(0,0,0,0.03)', border: '1px solid var(--border)', fontSize: 15 }}
+              style={{ height: 52, borderRadius: 14, background: 'var(--bg-soft)', border: '1px solid var(--border)', fontSize: 15 }}
             />
           </Form.Item>
           <div style={{ textAlign: 'right', marginBottom: 16, marginTop: -8 }}>
@@ -99,9 +99,9 @@ export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath =
                 borderRadius: 14,
                 fontSize: 16,
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                background: 'var(--primary)',
                 border: 'none',
-                boxShadow: '0 8px 20px rgba(99, 102, 241, 0.25)',
+                boxShadow: 'var(--shadow-hover)',
               }}
             >
               Sign In

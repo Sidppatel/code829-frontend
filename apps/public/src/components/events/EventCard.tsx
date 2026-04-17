@@ -53,10 +53,10 @@ export default function EventCard({ event }: Props) {
             style={{ 
               borderRadius: 10, 
               border: 'none', 
-              background: 'rgba(0,0,0,0.6)', 
-              backdropFilter: 'blur(10px)', 
+              background: 'var(--bg-overlay)',
+              backdropFilter: 'blur(10px)',
               WebkitBackdropFilter: 'blur(10px)',
-              color: '#fff', 
+              color: 'var(--text-on-brand)',
               fontWeight: 700, 
               padding: '4px 12px' 
             }}
@@ -103,13 +103,13 @@ export default function EventCard({ event }: Props) {
             width: 44, 
             height: 44, 
             borderRadius: 12, 
-            background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+            background: 'var(--primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
+            color: 'var(--text-on-brand)',
             fontSize: 20,
-            boxShadow: '0 8px 16px rgba(99, 102, 241, 0.3)'
+            boxShadow: 'var(--shadow-md)'
           }}>
             <ArrowRightOutlined />
           </div>

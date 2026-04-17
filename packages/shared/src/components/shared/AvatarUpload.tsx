@@ -144,8 +144,8 @@ export default function AvatarUpload({
             size={size}
             shape={shape}
             style={{
-              background: url ? undefined : 'var(--accent-violet, #7c3aed)',
-              border: '3px solid var(--border, rgba(255,255,255,0.12))',
+              background: url ? undefined : 'var(--primary)',
+              border: '3px solid var(--border)',
               display: 'block',
             }}
           />
@@ -168,7 +168,7 @@ export default function AvatarUpload({
               position: 'absolute',
               inset: 0,
               borderRadius: shape === 'circle' ? '50%' : 10,
-              background: 'rgba(0,0,0,0)',
+              background: 'transparent',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -177,19 +177,19 @@ export default function AvatarUpload({
             }}
             onClick={() => fileInputRef.current?.click()}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0.45)';
+              (e.currentTarget as HTMLDivElement).style.background = 'var(--bg-overlay)';
               const icon = e.currentTarget.querySelector('span') as HTMLElement | null;
               if (icon) icon.style.opacity = '1';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0)';
+              (e.currentTarget as HTMLDivElement).style.background = 'transparent';
               const icon = e.currentTarget.querySelector('span') as HTMLElement | null;
               if (icon) icon.style.opacity = '0';
             }}
           >
             <CameraOutlined
               style={{
-                color: '#fff',
+                color: 'var(--text-on-brand)',
                 fontSize: size * 0.28,
                 opacity: 0,
                 transition: 'opacity 0.2s',
@@ -266,7 +266,7 @@ export default function AvatarUpload({
                 position: 'relative',
                 width: '100%',
                 height: 340,
-                background: '#111',
+                background: 'var(--bg-elevated)',
                 borderRadius: 12,
                 overflow: 'hidden',
                 marginBottom: 20,
@@ -285,8 +285,8 @@ export default function AvatarUpload({
                 style={{
                   containerStyle: { borderRadius: 12 },
                   cropAreaStyle: {
-                    border: '2px solid var(--accent-violet, #7c3aed)',
-                    boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)',
+                    border: '2px solid var(--primary)',
+                    boxShadow: '0 0 0 9999px var(--bg-overlay)',
                   },
                 }}
               />

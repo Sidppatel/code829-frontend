@@ -1,11 +1,13 @@
+import { status, semantic } from './colors';
+
 export const STATUS_COLORS = {
-  success: 'var(--accent-green)',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  danger: 'var(--accent-rose)',
-  info: '#3B82F6',
-  critical: 'var(--accent-violet)',
-  neutral: '#9CA3AF',
+  success: status.success,
+  warning: status.warning,
+  error: status.danger,
+  danger: status.danger,
+  info: status.info,
+  critical: status.danger,
+  neutral: status.neutral,
 } as const;
 
 export const EVENT_STATUS_COLORS: Record<string, string> = {
@@ -13,7 +15,7 @@ export const EVENT_STATUS_COLORS: Record<string, string> = {
   Published: STATUS_COLORS.success,
   SoldOut: STATUS_COLORS.warning,
   Cancelled: STATUS_COLORS.error,
-  Completed: 'var(--primary)',
+  Completed: semantic.brand,
 };
 
 export const LOG_SEVERITY_COLORS: Record<string, string> = {

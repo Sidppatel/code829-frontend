@@ -8,6 +8,7 @@ import type { CreateTableTemplatePayload } from '@code829/shared/services/adminL
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
+import { semantic, tablePickerPresets } from '@code829/shared/theme/colors';
 
 export default function TableTypesPage() {
   const [types, setTypes] = useState<TableTemplate[]>([]);
@@ -44,7 +45,7 @@ export default function TableTypesPage() {
       name: record.name,
       defaultCapacity: record.defaultCapacity,
       defaultShape: record.defaultShape,
-      defaultColor: record.defaultColor ?? '#7C3AED',
+      defaultColor: record.defaultColor ?? semantic.brand,
       defaultPriceCents: centsToDollars(record.defaultPriceCents),
     });
     setModalOpen(true);
@@ -60,7 +61,7 @@ export default function TableTypesPage() {
         defaultShape: values.defaultShape,
         defaultColor: typeof values.defaultColor === 'string'
           ? values.defaultColor
-          : values.defaultColor?.toHexString?.() ?? '#7C3AED',
+          : values.defaultColor?.toHexString?.() ?? semantic.brand,
         defaultPriceCents: values.defaultPriceCents != null
           ? Math.round(values.defaultPriceCents * 100)
           : undefined,
@@ -111,7 +112,7 @@ export default function TableTypesPage() {
               width: 40,
               height: 40,
               borderRadius: 10,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              boxShadow: 'var(--shadow-sm)'
             }}
           />
           <div>
@@ -185,8 +186,8 @@ export default function TableTypesPage() {
             onClick={() => openEdit(record)} 
             style={{ 
               border: '1px solid var(--border)',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-            }} 
+              boxShadow: 'var(--shadow-sm)'
+            }}
           />
         </Tooltip>
       ),
@@ -215,7 +216,7 @@ export default function TableTypesPage() {
               height: 48,
               padding: '0 32px',
               fontWeight: 700,
-              boxShadow: '0 8px 16px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3)'
+              boxShadow: 'var(--shadow-md)'
             }}
           >
             Add Template
@@ -317,10 +318,7 @@ export default function TableTypesPage() {
                   presets={[
                     {
                       label: 'Theme Colors',
-                      colors: [
-                        '#7C3AED', '#2563EB', '#10B981', '#F59E0B', 
-                        '#EF4444', '#EC4899', '#6366F1', '#14B8A6'
-                      ],
+                      colors: [...tablePickerPresets],
                     },
                   ]}
                 />

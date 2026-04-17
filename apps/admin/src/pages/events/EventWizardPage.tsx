@@ -394,9 +394,9 @@ export default function EventWizardPage() {
                 alignItems: 'center',
                 gap: 8,
                 padding: '12px 14px',
-                background: 'var(--bg-elevated, rgba(124,58,237,0.06))',
+                background: 'var(--bg-elevated)',
                 borderRadius: 10,
-                border: '1px solid var(--border-light, rgba(124,58,237,0.15))',
+                border: '1px solid var(--border)',
                 fontSize: 13,
                 color: 'var(--text-secondary)',
               }}>

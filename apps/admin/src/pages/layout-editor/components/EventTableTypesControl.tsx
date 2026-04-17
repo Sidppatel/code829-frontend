@@ -5,6 +5,7 @@ import type { EventTableType, TableTemplate } from '@code829/shared/types/layout
 import type { EditorMode } from '../LayoutEditorPage';
 import { adminLayoutApi } from '../../../services/api';
 import { centsToUSD, centsToDollars } from '@code829/shared/utils/currency';
+import { tablePickerPresets } from '@code829/shared/theme/colors';
 
 const SHAPES = ['Round', 'Rectangle', 'Square', 'Cocktail'].map((s) => ({ label: s, value: s }));
 
@@ -240,7 +241,7 @@ export default function EventTableTypesControl({
               showText
               presets={[{
                 label: 'Recommended',
-                colors: ['#7C3AED', '#5B21B6', '#2563EB', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#6366F1', '#14B8A6', '#F97316', '#8B5CF6'],
+                colors: [...tablePickerPresets],
               }]}
             />
           </Form.Item>
@@ -276,7 +277,7 @@ export default function EventTableTypesControl({
               showText
               presets={[{
                 label: 'Recommended',
-                colors: ['#7C3AED', '#5B21B6', '#2563EB', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#6366F1', '#14B8A6', '#F97316', '#8B5CF6'],
+                colors: [...tablePickerPresets],
               }]}
             />
           </Form.Item>

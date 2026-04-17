@@ -79,7 +79,7 @@ export default function FeedbackPage() {
             <div style={{ 
               width: 80, 
               height: 80, 
-              background: 'rgba(99, 102, 241, 0.1)', 
+              background: 'var(--bg-muted)',
               borderRadius: 99, 
               display: 'flex', 
               alignItems: 'center', 
@@ -108,9 +108,9 @@ export default function FeedbackPage() {
                 padding: '0 40px', 
                 borderRadius: 12, 
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                background: 'var(--primary)',
                 border: 'none',
-                boxShadow: '0 8px 20px rgba(99,102,241,0.3)',
+                boxShadow: 'var(--shadow-hover)',
               }}
             >
               Submit Another
@@ -158,7 +158,7 @@ export default function FeedbackPage() {
             <div style={{ 
               width: 80, 
               height: 80, 
-              background: 'rgba(99, 102, 241, 0.1)', 
+              background: 'var(--bg-muted)',
               borderRadius: 24, 
               display: 'flex', 
               alignItems: 'center', 
@@ -187,9 +187,9 @@ export default function FeedbackPage() {
                 padding: '0 48px', 
                 borderRadius: 16, 
                 fontWeight: 800,
-                background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                background: 'var(--primary)',
                 border: 'none',
-                boxShadow: '0 10px 25px rgba(99, 102, 241, 0.3)',
+                boxShadow: 'var(--shadow-hover)',
               }}
             >
               Share More
@@ -247,16 +247,16 @@ export default function FeedbackPage() {
                           padding: '14px 24px',
                           borderRadius: 16,
                           cursor: 'pointer',
-                          background: type === t.value ? 'var(--accent-violet)' : 'rgba(255,255,255,0.03)',
+                          background: type === t.value ? 'var(--primary)' : 'var(--bg-soft)',
                           border: 'none',
-                          color: type === t.value ? '#fff' : 'var(--text-primary)',
+                          color: type === t.value ? 'var(--text-on-brand)' : 'var(--text-primary)',
                           transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                           display: 'flex',
                           alignItems: 'center',
                           gap: 10,
                           fontWeight: 700,
                           fontSize: 14,
-                          boxShadow: type === t.value ? '0 8px 20px rgba(99, 102, 241, 0.3)' : 'none',
+                          boxShadow: type === t.value ? 'var(--shadow-hover)' : 'none',
                           transform: type === t.value ? 'translateY(-2px)' : 'none'
                         }}
                       >
@@ -272,7 +272,7 @@ export default function FeedbackPage() {
                     Global Satisfaction
                   </label>
                   <div style={{ 
-                    background: 'rgba(0,0,0,0.02)', 
+                    background: 'var(--bg-soft)',
                     padding: '32px', 
                     borderRadius: 24, 
                     border: '1px solid var(--border)',
@@ -303,7 +303,7 @@ export default function FeedbackPage() {
                         style={{ 
                           height: 60, 
                           borderRadius: 18, 
-                          background: 'rgba(0,0,0,0.02)', 
+                          background: 'var(--bg-soft)',
                           border: '1px solid var(--border)', 
                           color: 'var(--text-primary)',
                           fontSize: 16,
@@ -326,7 +326,7 @@ export default function FeedbackPage() {
                         style={{ 
                           height: 60, 
                           borderRadius: 18, 
-                          background: 'rgba(0,0,0,0.02)', 
+                          background: 'var(--bg-soft)',
                           border: '1px solid var(--border)', 
                           color: 'var(--text-primary)',
                           fontSize: 16,
@@ -350,7 +350,7 @@ export default function FeedbackPage() {
                     rows={6}
                     style={{ 
                       borderRadius: 24, 
-                      background: 'rgba(0,0,0,0.02)', 
+                      background: 'var(--bg-soft)',
                       border: '1px solid var(--border)', 
                       color: 'var(--text-primary)', 
                       padding: '24px',
@@ -374,9 +374,9 @@ export default function FeedbackPage() {
                     borderRadius: 20, 
                     fontWeight: 900, 
                     fontSize: 18,
-                    background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
+                    background: 'var(--primary)',
                     border: 'none',
-                    boxShadow: '0 15px 35px rgba(99, 102, 241, 0.35)',
+                    boxShadow: 'var(--shadow-hover)',
                     textTransform: 'uppercase',
                     letterSpacing: 1
                   }}

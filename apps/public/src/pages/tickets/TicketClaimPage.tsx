@@ -120,7 +120,7 @@ export default function TicketClaimPage() {
 
         <Card
           size="small"
-          style={{ margin: '20px 0', textAlign: 'left', borderRadius: 12, background: 'var(--bg-elevated, #f9fafb)' }}
+          style={{ margin: '20px 0', textAlign: 'left', borderRadius: 12, background: 'var(--bg-elevated)' }}
           styles={{ body: { padding: 16 } }}
         >
           <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 8 }}>{info.eventTitle}</div>
