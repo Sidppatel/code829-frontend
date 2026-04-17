@@ -9,14 +9,14 @@ const tokens = {
   colorSuccess: status.success,
   colorError: status.danger,
   colorWarning: status.warning,
-  colorInfo: status.info,
+  colorInfo: semantic.brand,
   fontFamily: "'Inter', sans-serif",
   fontSize: 15,
   borderRadius: 12,
   colorBgContainer: semantic.surface.surface,
   colorBgElevated: semantic.surface.elevated,
   colorBgLayout: semantic.surface.page,
-  colorBgBase: semantic.surface.page,
+  colorBgBase: semantic.surface.nav,
   colorText: semantic.text.primary,
   colorTextSecondary: semantic.text.secondary,
   colorTextTertiary: semantic.text.muted,
@@ -32,32 +32,36 @@ const components = {
   Input: { colorBgContainer: semantic.surface.surface, borderRadius: 12 },
   Select: { colorBgContainer: semantic.surface.surface, borderRadius: 12 },
   Menu: {
+    darkItemBg: 'transparent',
+    darkSubMenuItemBg: 'transparent',
+    darkItemSelectedBg: semantic.surface.pressed,
+    darkItemHoverBg: semantic.surface.soft,
     itemSelectedBg: semantic.surface.muted,
     itemHoverBg: semantic.surface.soft,
-    itemSelectedColor: semantic.brand,
+    itemSelectedColor: semantic.brandLight,
   },
   Layout: {
-    headerBg: semantic.surface.page,
+    headerBg: semantic.surface.nav,
     bodyBg: semantic.surface.page,
-    siderBg: semantic.surface.elevated,
+    siderBg: semantic.surface.nav,
     footerBg: 'transparent',
   },
   Table: {
     colorBgContainer: semantic.surface.surface,
-    headerBg: semantic.surface.elevated,
+    headerBg: semantic.surface.nav,
     rowHoverBg: semantic.surface.soft,
   },
   Modal: { contentBg: semantic.surface.surface, headerBg: semantic.surface.surface },
-  Dropdown: { colorBgElevated: semantic.surface.surface },
+  Dropdown: { colorBgElevated: semantic.surface.elevated },
   Tag: { borderRadiusSM: 6 },
-  Pagination: { itemActiveBg: semantic.surface.muted },
+  Pagination: { itemActiveBg: semantic.surface.pressed },
 };
 
 export function ThemedApp({ children }: { children: ReactNode }) {
   return (
     <ConfigProvider
       theme={{
-        algorithm: antTheme.defaultAlgorithm,
+        algorithm: antTheme.darkAlgorithm,
         token: tokens,
         components,
       }}
