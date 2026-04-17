@@ -1,6 +1,4 @@
-import { useNavigate } from 'react-router-dom';
 import { Typography, Button, Dropdown, Space } from 'antd';
-import { RocketOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import PulseIndicator from '../shared/PulseIndicator';
 import BrandLogo from '../shared/BrandLogo';
@@ -15,8 +13,6 @@ interface TopHeaderProps {
 }
 
 export default function TopHeader({ isMobile, title, user, userMenuItems, showMetrics = false }: TopHeaderProps) {
-  const navigate = useNavigate();
-
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -58,28 +54,6 @@ export default function TopHeader({ isMobile, title, user, userMenuItems, showMe
       </div>
 
       <Space size={16}>
-        {!isMobile && (
-          <Button
-            type="primary"
-            icon={<RocketOutlined />}
-            onClick={() => navigate('/')}
-            style={{
-              borderRadius: 'var(--radius-md)',
-              background: 'linear-gradient(135deg, var(--accent-violet), var(--accent-rose))',
-              border: 'none',
-              boxShadow: '0 8px 16px rgba(99, 102, 241, 0.25)',
-              fontWeight: 700,
-              height: 44,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '0 20px',
-            }}
-            className="hover-lift"
-          >
-            Live Experience
-          </Button>
-        )}
         <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
           <Button
             type="text"
