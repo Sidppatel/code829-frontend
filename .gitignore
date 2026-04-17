@@ -1,17 +1,25 @@
 # Dependencies
 node_modules/
 .pnpm-store/
-# Monorepo specific (if pnpm is used, consider repo-root lockfile as truth)
+# Monorepo specific (pnpm workspaces — keep pnpm-lock.yaml only)
 package-lock.json
 yarn.lock
 
 # Build outputs
 dist/
 dist-ssr/
+build/
 *.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Bundle analysis artifacts
+stats.html
+bundle-analysis.html
+*.tgz
 
 # Logs
 /logs/
+**/logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -28,8 +36,11 @@ lerna-debug.log*
 # Editor & System
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json.example
 .idea/
 .DS_Store
+desktop.ini
+ehthumbs.db
 *.suo
 *.ntvs*
 *.njsproj
@@ -38,6 +49,10 @@ lerna-debug.log*
 .gitnexus
 Thumbs.db
 *.local
+
+# Linter / TS caches
+.eslintcache
+.stylelintcache
 
 # Tools & Frameworks
 .wrangler/
@@ -58,3 +73,4 @@ vite.config.ts.timestamp-*
 /playwright-report/
 /test-results/
 /playwright/.cache/
+blob-report/
