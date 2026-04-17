@@ -17,9 +17,8 @@ stats.html
 bundle-analysis.html
 *.tgz
 
-# Logs
+# Logs — runtime output only. Source directories named logs/ stay tracked.
 /logs/
-**/logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
