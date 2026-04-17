@@ -53,3 +53,8 @@ vite.config.ts.timestamp-*
 .vercel
 .now
 .netlify
+
+# Playwright
+/playwright-report/
+/test-results/
+/playwright/.cache/
