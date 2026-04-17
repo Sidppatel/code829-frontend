@@ -187,14 +187,27 @@ export default function BookingDetailPage() {
         {booking.ticketCount > 0 && infoRow(<SendOutlined />, 'Tickets', `${booking.ticketCount} ticket${booking.ticketCount !== 1 ? 's' : ''}`)}
       </Card>
 
-      {/* Price */}
-      <Card size="small" style={{ marginBottom: 12, borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
-        {sectionTitle('Price')}
-        {priceRow('Subtotal', booking.totalCents)}
-        {booking.transaction?.taxAmountCents ? priceRow('Tax', booking.transaction.taxAmountCents) : null}
-        <Divider style={{ margin: '8px 0' }} />
-        {priceRow('Total', booking.transaction?.totalChargedCents ?? booking.totalCents, true)}
-      </Card>
+      {/* Price — mirrors the checkout breakdown so the receipt shape is familiar.
+          booking.totalCents is pre-tax (admin + platform fee). The charged total comes from the
+          StripeTransaction once the webhook has enriched it; amountCents is the PaymentIntent
+          amount and is already tax-inclusive, so it works as a fallback before enrichment. */}
+      {(() => {
+        const subtotalCents = booking.totalCents;
+        const chargedCents = booking.transaction?.totalChargedCents
+          ?? booking.transaction?.amountCents
+          ?? subtotalCents;
+        const taxCents = booking.transaction?.taxAmountCents
+          ?? Math.max(0, chargedCents - subtotalCents);
+        return (
+          <Card size="small" style={{ marginBottom: 12, borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
+            {sectionTitle('Price')}
+            {priceRow('Subtotal', subtotalCents)}
+            {taxCents > 0 && priceRow('Tax', taxCents)}
+            <Divider style={{ margin: '8px 0' }} />
+            {priceRow('Total', chargedCents, true)}
+          </Card>
+        );
+      })()}
 
       {/* Payment Info */}
       {booking.transaction && (

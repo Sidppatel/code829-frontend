@@ -97,16 +97,11 @@ export default function CheckoutPanel(props: Props) {
           <Skeleton active paragraph={{ rows: 3 }} />
         ) : (
           <>
+            {/* Customers see only the admission price (admin price + platform fee rolled in) and tax. */}
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography.Text>Subtotal</Typography.Text>
-              <Typography.Text>{centsToUSD(quote.subtotalCents)}</Typography.Text>
+              <Typography.Text>{centsToUSD(quote.subtotalCents + quote.feeCents)}</Typography.Text>
             </div>
-            {quote.feeCents > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography.Text>Platform fee</Typography.Text>
-                <Typography.Text>{centsToUSD(quote.feeCents)}</Typography.Text>
-              </div>
-            )}
             {quote.taxCents > 0 ? (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
