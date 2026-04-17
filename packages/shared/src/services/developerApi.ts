@@ -52,7 +52,9 @@ export interface DevUser {
   email: string;
   firstName: string;
   lastName: string;
-  role: string;
+  phone?: string;
+  isActive: boolean;
+  lastLoginAt?: string;
   createdAt: string;
 }
 
@@ -106,8 +108,11 @@ export const developerApi = {
   getUsers: (params?: { page?: number; pageSize?: number; search?: string }) =>
     apiClient.get<PagedResponse<DevUser>>('/developer/users', { params }),
 
-  updateUserRole: (id: string, role: string) =>
-    apiClient.put(`/developer/users/${id}/role`, { role }),
+  updateUserStatus: (id: string, isActive: boolean) =>
+    apiClient.put(`/developer/users/${id}/status`, isActive),
+
+  deleteUser: (id: string) =>
+    apiClient.delete(`/developer/users/${id}`),
 
   getEvents: (params?: { page?: number; pageSize?: number; search?: string }) =>
     apiClient.get<PagedResponse<DevEventListItem>>('/developer/events', { params }),

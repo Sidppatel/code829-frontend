@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Form, Input, Button, Typography, Card, App, Spin, Result } from 'antd';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LockOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { adminAuthApi } from '../../services/adminAuthApi';
 import type { InvitationInfoDto } from '../../types/auth';
 import BrandLogo from '../shared/BrandLogo';
+
+type InvitationSignupValues = {
+  firstName: string;
+  lastName: string;
+  password: string;
+  confirmPassword: string;
+};
 
 export default function InvitationSignupForm() {
   const [loading, setLoading] = useState(false);
@@ -30,7 +37,7 @@ export default function InvitationSignupForm() {
       .finally(() => setFetching(false));
   }, [token]);
 
-  const onFinish = async (values: { password: string; confirmPassword: string }) => {
+  const onFinish = async (values: InvitationSignupValues) => {
     if (values.password !== values.confirmPassword) {
       message.error('Passwords do not match');
       return;
@@ -41,6 +48,8 @@ export default function InvitationSignupForm() {
     try {
       const { data } = await adminAuthApi.signup({
         token,
+        firstName: values.firstName.trim(),
+        lastName: values.lastName.trim(),
         password: values.password,
       });
       setAuth(data.token, data.user);
@@ -88,6 +97,18 @@ export default function InvitationSignupForm() {
         </div>
 
         <Form layout="vertical" onFinish={onFinish} autoComplete="off">
+          <Form.Item
+            name="firstName"
+            rules={[{ required: true, whitespace: true, message: 'Please enter your first name' }]}
+          >
+            <Input placeholder="First name" size="large" />
+          </Form.Item>
+          <Form.Item
+            name="lastName"
+            rules={[{ required: true, whitespace: true, message: 'Please enter your last name' }]}
+          >
+            <Input placeholder="Last name" size="large" />
+          </Form.Item>
           <Form.Item name="password" rules={[{ required: true, min: 8, message: 'Password must be at least 8 characters' }]}>
             <Input.Password prefix={<LockOutlined />} placeholder="Choose a secure password" size="large" />
           </Form.Item>
