@@ -9,10 +9,11 @@ interface EventSidebarProps {
   isSoldOut: boolean;
   remaining: number;
   handleBookNow: () => void;
+  isStartingBooking?: boolean;
   itemVariants: Variants;
 }
 
-export default function EventSidebar({ event, isSoldOut, remaining, handleBookNow, itemVariants }: EventSidebarProps) {
+export default function EventSidebar({ event, isSoldOut, remaining, handleBookNow, isStartingBooking, itemVariants }: EventSidebarProps) {
   const isMobile = useIsMobile();
 
   return (
@@ -39,7 +40,8 @@ export default function EventSidebar({ event, isSoldOut, remaining, handleBookNo
               size="large"
               block
               onClick={handleBookNow}
-              disabled={isSoldOut}
+              loading={isStartingBooking}
+              disabled={isSoldOut || isStartingBooking}
               style={{
                 height: 72,
                 borderRadius: 18,

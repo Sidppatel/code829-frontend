@@ -74,6 +74,7 @@ export default function EventDetailPage() {
   const [taxAmountCents, setTaxAmountCents] = useState<number | null>(null);
   const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
   const [paymentUnavailable, setPaymentUnavailable] = useState(false);
+  const [isStartingBooking, setIsStartingBooking] = useState(false);
 
   // Refs for cleanup
   const tableLocksRef = useRef<TableLock[]>([]);
@@ -165,8 +166,9 @@ export default function EventDetailPage() {
       try {
         const { data } = await eventsApi.getTicketTypes(event.id);
         setTicketTypes(data.ticketTypes);
-      } catch {
-        // Event may not have ticket types — that's OK
+      } catch (err) {
+        // Event may not have ticket types — that's OK, but log so a real 500 isn't hidden
+        log.info('Ticket types not available for event', { eventId: event.id, err });
         setTicketTypes([]);
       }
     };
@@ -184,6 +186,7 @@ export default function EventDetailPage() {
   }, [event, message]);
 
   const handleBookNow = async () => {
+    if (isStartingBooking) return; // guard against mobile double-tap
     if (paymentUnavailable) {
       message.error('Payment service is currently unavailable. Please try again in a moment.');
       return;
@@ -195,16 +198,24 @@ export default function EventDetailPage() {
     }
     if (!event) return;
 
-    if (event.layoutMode === 'Grid') {
-      const [tablesRes, locksRes] = await Promise.all([
-        eventsApi.getTables(event.id),
-        tableBookingApi.getMyLocks(event.id),
-      ]);
-      setTablesData(tablesRes.data);
-      if (locksRes.data.length > 0) setTableLocks(locksRes.data);
-      setStep('select-table');
-    } else if (event.layoutMode === 'Open') {
-      setStep('capacity');
+    setIsStartingBooking(true);
+    try {
+      if (event.layoutMode === 'Grid') {
+        const [tablesRes, locksRes] = await Promise.all([
+          eventsApi.getTables(event.id),
+          tableBookingApi.getMyLocks(event.id),
+        ]);
+        setTablesData(tablesRes.data);
+        if (locksRes.data.length > 0) setTableLocks(locksRes.data);
+        setStep('select-table');
+      } else if (event.layoutMode === 'Open') {
+        setStep('capacity');
+      }
+    } catch (err) {
+      log.error('Failed to start booking', { err });
+      message.error('Could not start booking — please try again');
+    } finally {
+      setIsStartingBooking(false);
     }
   };
 
@@ -230,7 +241,11 @@ export default function EventDetailPage() {
       await tableBookingApi.releaseTable(event.id, table.id);
       setTableLocks(prev => prev.filter(l => l.tableId !== table.id));
       await loadTables();
-    } catch { /* ignore */ }
+    } catch (err) {
+      // Lock will expire server-side if we can't release it now
+      log.warn('Failed to release table lock', { tableId: table.id, err });
+      setTableLocks(prev => prev.filter(l => l.tableId !== table.id));
+    }
   };
 
   const handleProceedToCheckout = async () => {
@@ -270,12 +285,15 @@ export default function EventDetailPage() {
   const handleCancelLock = async () => {
     if (!event) return;
     if (bookingId) {
-      try { await bookingsApi.cancel(bookingId); } catch { /* ignore */ }
+      try { await bookingsApi.cancel(bookingId); }
+      catch (err) { log.warn('Failed to cancel booking during lock cleanup', { bookingId, err }); }
     }
     for (const lock of tableLocks) {
       try {
         await tableBookingApi.releaseTable(event.id, lock.tableId);
-      } catch { /* ignore */ }
+      } catch (err) {
+        log.warn('Failed to release table lock during cleanup', { tableId: lock.tableId, err });
+      }
     }
     setTableLocks([]);
     setCheckoutError(null);
@@ -331,7 +349,8 @@ export default function EventDetailPage() {
 
   const handleCancelOpen = async () => {
     if (bookingId) {
-      try { await bookingsApi.cancel(bookingId); } catch { /* ignore */ }
+      try { await bookingsApi.cancel(bookingId); }
+      catch (err) { log.warn('Failed to cancel booking during cleanup', { bookingId, err }); }
     }
     setCheckoutError(null);
     setClientSecret(null);
@@ -470,12 +489,13 @@ export default function EventDetailPage() {
             <EventAbout event={event} itemVariants={itemVariants} />
           </Col>
           <Col xs={24} lg={9}>
-            <EventSidebar 
-              event={event} 
-              isSoldOut={isSoldOut} 
+            <EventSidebar
+              event={event}
+              isSoldOut={isSoldOut}
               remaining={remaining}
               handleBookNow={handleBookNow}
-              itemVariants={itemVariants} 
+              isStartingBooking={isStartingBooking}
+              itemVariants={itemVariants}
             />
           </Col>
         </Row>
@@ -484,7 +504,7 @@ export default function EventDetailPage() {
       {isMobile && !isSoldOut && step === 'info' && (
         <div style={{
           position: 'fixed',
-          bottom: 'calc(var(--bottom-nav-height, 65px) + 12px)',
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-height, 65px) + 12px)',
           left: 16,
           right: 16,
           zIndex: 1000,
@@ -514,6 +534,8 @@ export default function EventDetailPage() {
             <Button
               type="primary"
               onClick={handleBookNow}
+              loading={isStartingBooking}
+              disabled={isStartingBooking || paymentUnavailable}
               style={{
                 height: 48,
                 padding: '0 32px',
