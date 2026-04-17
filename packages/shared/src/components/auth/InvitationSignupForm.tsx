@@ -30,7 +30,7 @@ export default function InvitationSignupForm() {
       .finally(() => setFetching(false));
   }, [token]);
 
-  const onFinish = async (values: { firstName: string; lastName: string; password: string; confirmPassword: string }) => {
+  const onFinish = async (values: { password: string; confirmPassword: string }) => {
     if (values.password !== values.confirmPassword) {
       message.error('Passwords do not match');
       return;
@@ -42,12 +42,10 @@ export default function InvitationSignupForm() {
       const { data } = await adminAuthApi.signup({
         token,
         password: values.password,
-        firstName: values.firstName,
-        lastName: values.lastName,
       });
       setAuth(data.token, data.user);
-      message.success('Account created successfully!');
-      navigate('/', { replace: true });
+      message.success('Password set successfully! Please complete your profile.');
+      navigate('/profile', { replace: true, state: { setup: true } });
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to create account';
       message.error(msg);
@@ -90,14 +88,8 @@ export default function InvitationSignupForm() {
         </div>
 
         <Form layout="vertical" onFinish={onFinish} autoComplete="off">
-          <Form.Item name="firstName" rules={[{ required: true, message: 'First name is required' }]}>
-            <Input prefix={<UserOutlined />} placeholder="First name" size="large" />
-          </Form.Item>
-          <Form.Item name="lastName" rules={[{ required: true, message: 'Last name is required' }]}>
-            <Input prefix={<UserOutlined />} placeholder="Last name" size="large" />
-          </Form.Item>
           <Form.Item name="password" rules={[{ required: true, min: 8, message: 'Password must be at least 8 characters' }]}>
-            <Input.Password prefix={<LockOutlined />} placeholder="Password" size="large" />
+            <Input.Password prefix={<LockOutlined />} placeholder="Choose a secure password" size="large" />
           </Form.Item>
           <Form.Item name="confirmPassword" rules={[{ required: true, message: 'Please confirm your password' }]}>
             <Input.Password prefix={<LockOutlined />} placeholder="Confirm password" size="large" />

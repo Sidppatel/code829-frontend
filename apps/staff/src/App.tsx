@@ -13,6 +13,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/forgot-password/ForgotPass
 const ResetPasswordPage = lazy(() => import('./pages/reset-password/ResetPasswordPage'));
 const CheckInSelectPage = lazy(() => import('./pages/checkin/CheckInSelectPage'));
 const CheckInPage = lazy(() => import('./pages/checkin/CheckInPage'));
+const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
 
 export default function App() {
   useSessionRefresh('/admin/auth/me');
@@ -30,6 +31,7 @@ export default function App() {
               <Route index element={<Navigate to="checkin/select" replace />} />
               <Route path="checkin/select" element={<CheckInSelectPage />} />
               <Route path="checkin/:eventId" element={<CheckInPage />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

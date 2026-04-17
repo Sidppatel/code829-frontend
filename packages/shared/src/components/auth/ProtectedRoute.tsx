@@ -28,10 +28,14 @@ export default function ProtectedRoute({ children, minRole = 'User' }: Props) {
     return <Navigate to={`/login?returnUrl=${returnUrl}`} replace />;
   }
   if (ROLE_LEVEL[user.role] < ROLE_LEVEL[minRole]) {
-    // Don't call logout() here — it mutates Zustand during render, causing a
-    // re-render that races with the Navigate and swallows the error param.
-    // The login page handles the session clear when it sees this param.
     return <Navigate to="/login?error=insufficient_role" replace />;
   }
+
+  // Onboarding guard: don't let user access anything except /profile if they haven't set their name
+  const isPendingSetup = user.firstName === 'Pending' && user.lastName === 'Setup';
+  if (isPendingSetup && location.pathname !== '/profile') {
+    return <Navigate to="/profile" state={{ setup: true }} replace />;
+  }
+
   return <>{children}</>;
 }

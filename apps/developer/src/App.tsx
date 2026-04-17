@@ -19,6 +19,7 @@ const DevEventsPage = lazy(() => import('./pages/events/DevEventsPage'));
 const AdminManagementPage = lazy(() => import('./pages/admins/AdminManagementPage'));
 const StaffManagementPage = lazy(() => import('./pages/staff/StaffManagementPage'));
 const DevInvitationsPage = lazy(() => import('./pages/invitations/DevInvitationsPage'));
+const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
 
 export default function App() {
   useSessionRefresh('/admin/auth/me');
@@ -41,6 +42,7 @@ export default function App() {
               <Route path="users" element={<DevUsersPage />} />
               <Route path="events" element={<DevEventsPage />} />
               <Route path="settings" element={<DevSettingsPage />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
