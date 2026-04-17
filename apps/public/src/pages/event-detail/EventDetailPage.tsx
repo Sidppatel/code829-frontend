@@ -277,7 +277,10 @@ export default function EventDetailPage() {
     return () => { cancelled = true; };
   }, [bookingIdParam, clientSecret, step, setSearchParams]);
 
-  // Load ticket types for Open events
+  // Load ticket types for Open events.
+  // If the endpoint returns 5xx we show a user-visible error so we don't silently fall back
+  // to the "no ticket types" state and let them try to book an event that actually requires one.
+  const [ticketTypesError, setTicketTypesError] = useState(false);
   useEffect(() => {
     if (!event || event.layoutMode !== 'Open') return;
     setTicketTypesLoading(true);
@@ -285,10 +288,18 @@ export default function EventDetailPage() {
       try {
         const { data } = await eventsApi.getTicketTypes(event.id);
         setTicketTypes(data.ticketTypes);
+        setTicketTypesError(false);
       } catch (err) {
-        // Event may not have ticket types — that's OK, but log so a real 500 isn't hidden
-        log.info('Ticket types not available for event', { eventId: event.id, err });
-        setTicketTypes([]);
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 404) {
+          log.info('Event has no ticket types', { eventId: event.id });
+          setTicketTypes([]);
+          setTicketTypesError(false);
+        } else {
+          log.error('Failed to load ticket types', { eventId: event.id, err });
+          setTicketTypes([]);
+          setTicketTypesError(true);
+        }
       } finally {
         setTicketTypesLoading(false);
       }
@@ -310,6 +321,10 @@ export default function EventDetailPage() {
     if (isStartingBooking) return; // guard against mobile double-tap
     if (paymentUnavailable) {
       message.error('Payment service is currently unavailable. Please try again in a moment.');
+      return;
+    }
+    if (ticketTypesError) {
+      message.error('Ticket types are unavailable. Please refresh the page and try again.');
       return;
     }
     if (!isAuthenticated) {

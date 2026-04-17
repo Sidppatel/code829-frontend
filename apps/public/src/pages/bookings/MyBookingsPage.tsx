@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Table, Button, App, Space, Modal, Image, Card, Empty, Pagination, Skeleton, Input } from 'antd';
+import { Table, Button, App, Space, Modal, Image, Card, Empty, Pagination, Skeleton, Input, Alert } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { QrcodeOutlined, CalendarOutlined, SearchOutlined, SendOutlined, GiftOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -31,6 +31,7 @@ export default function MyBookingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const confirmedRef = useRef(false);
   const [guestTickets, setGuestTickets] = useState<GuestTicket[]>([]);
+  const [guestTicketsError, setGuestTicketsError] = useState(false);
   const [guestQrUrl, setGuestQrUrl] = useState<string | null>(null);
   const [guestQrLabel, setGuestQrLabel] = useState('');
 
@@ -73,13 +74,12 @@ export default function MyBookingsPage() {
     const loadGuestTickets = async () => {
       try {
         const { data: tickets } = await ticketsApi.getMine();
-        // Filter out tickets for bookings the user owns (those show in the main list)
-        // We only want tickets where the user is a guest, not the booker
         setGuestTickets(tickets);
+        setGuestTicketsError(false);
         log.info('Loaded guest tickets', { count: tickets.length });
       } catch (err) {
         log.error('Failed to load guest tickets', err);
-        // Silently fail — guest tickets are supplementary
+        setGuestTicketsError(true);
       }
     };
     void loadGuestTickets();
@@ -348,6 +348,16 @@ export default function MyBookingsPage() {
           </>
         )}
       </div>
+
+      {guestTicketsError && (
+        <Alert
+          style={{ marginTop: 24 }}
+          type="warning"
+          showIcon
+          message="Some guest tickets could not be loaded"
+          description="Invited tickets may not appear in this list. Refresh the page to try again."
+        />
+      )}
 
       {/* Guest Tickets Section */}
       {guestTickets.length > 0 && (

@@ -75,6 +75,7 @@ export interface EventTicketType {
   isActive: boolean;
   soldCount: number;
   availableCount: number;
+  isSoldOut: boolean;
   description?: string;
 }
 
@@ -121,6 +122,7 @@ export interface EventTableDto {
   sortOrder?: number;
   status: 'Available' | 'Held' | 'HeldByYou' | 'Booked';
   holdExpiresAt?: string;
+  isAvailable: boolean;
   isLockedByYou: boolean;
   eventTableId: string;
   eventTableLabel?: string;
