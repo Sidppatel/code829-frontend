@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Typography, Row, Col, Button, Space, App, Skeleton } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Row, Col, Button, App, Skeleton } from 'antd';
 import { Helmet } from 'react-helmet-async';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { loadStripe } from '@stripe/stripe-js';
@@ -17,13 +16,12 @@ import type { TableLock } from '@code829/shared/types/layout';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 
-import TableSelectionCanvas from '../../components/booking/TableSelectionCanvas';
-import CheckoutPanel from '../../components/booking/CheckoutPanel';
-import CapacityBookingForm from '../../components/booking/CapacityBookingForm';
-
 import EventHero from './components/EventHero';
 import EventAbout from './components/EventAbout';
 import EventSidebar from './components/EventSidebar';
+import SelectTableStep from './steps/SelectTableStep';
+import CapacityStep from './steps/CapacityStep';
+import CheckoutStep from './steps/CheckoutStep';
 
 const containerVariants = {
   initial: { opacity: 0 },
@@ -145,6 +143,51 @@ export default function EventDetailPage() {
       cleanup();
     };
   }, []);
+
+  // Per-step cleanup: when the user navigates back (browser back button changes `step` in the URL)
+  // away from a critical step, release any held locks and cancel pending bookings server-side.
+  // Cancellation is best-effort via the regular (non-beacon) APIs so we see errors in logs.
+  const prevStepRef = useRef<BookingStep>(step);
+  useEffect(() => {
+    const prev = prevStepRef.current;
+    prevStepRef.current = step;
+    if (prev === step) return;
+
+    // Left select-table or checkout while still holding a locks-based booking
+    const leftLockFlow = (prev === 'select-table' || prev === 'checkout') && step !== 'checkout';
+    if (leftLockFlow && event) {
+      const bid = bookingIdRef.current;
+      const locks = tableLocksRef.current;
+      void (async () => {
+        if (bid) {
+          try { await bookingsApi.cancel(bid); }
+          catch (err) { log.warn('Step-change cleanup: cancel booking failed', { bid, err }); }
+        }
+        for (const lock of locks) {
+          try { await tableBookingApi.releaseTable(event.id, lock.tableId); }
+          catch (err) { log.warn('Step-change cleanup: release table failed', { tableId: lock.tableId, err }); }
+        }
+      })();
+      setTableLocks([]);
+      setClientSecret(null);
+      setTaxAmountCents(null);
+      if (bid) setBookingIdState(null);
+    }
+
+    // Left checkout-open with a pending booking
+    if (prev === 'checkout-open' && step !== 'checkout-open') {
+      const bid = bookingIdRef.current;
+      if (bid) {
+        void (async () => {
+          try { await bookingsApi.cancel(bid); }
+          catch (err) { log.warn('Step-change cleanup: cancel open booking failed', { bid, err }); }
+        })();
+        setClientSecret(null);
+        setTaxAmountCents(null);
+        setBookingIdState(null);
+      }
+    }
+  }, [step, event]);
 
   // Hide the sticky mobile CTA when the virtual keyboard is open so it can't cover an input.
   useEffect(() => {
@@ -449,90 +492,50 @@ export default function EventDetailPage() {
 
   const lockedTablesFromGrid = tablesData?.tables.filter((t) => t.isLockedByYou) ?? [];
 
-  if (step === 'select-table' && !tablesData) {
+  if (step === 'select-table') {
     return (
-      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => setStep('info')}>Back to Event</Button>
-        <Typography.Title level={3}>Select a Table &mdash; {event.title}</Typography.Title>
-        <Skeleton.Node active style={{ width: '100%', height: 400 }} />
-      </Space>
-    );
-  }
-
-  if (step === 'select-table' && tablesData) {
-    return (
-      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => { void handleCancelLock(); setStep('info'); }}>
-          Back to Event
-        </Button>
-        <Typography.Title level={3}>Select a Table &mdash; {event.title}</Typography.Title>
-        <TableSelectionCanvas
-          tables={tablesData.tables}
-          eventTableTypes={tablesData.eventTableTypes ?? []}
-          gridRows={tablesData.gridRows ?? 10}
-          gridCols={tablesData.gridCols ?? 10}
-          lockedTables={lockedTablesFromGrid}
-          onLockTable={handleLockTable}
-          onUnlockTable={handleUnlockTable}
-          onProceedToCheckout={handleProceedToCheckout}
-          lockingTableId={lockingTableId}
-          onLockExpired={handleLockExpired}
-        />
-      </Space>
+      <SelectTableStep
+        event={event}
+        tablesData={tablesData}
+        lockingTableId={lockingTableId}
+        lockedTables={lockedTablesFromGrid}
+        onLockTable={handleLockTable}
+        onUnlockTable={handleUnlockTable}
+        onProceedToCheckout={handleProceedToCheckout}
+        onLockExpired={handleLockExpired}
+        onBack={() => { void handleCancelLock(); setStep('info'); }}
+      />
     );
   }
 
   if (step === 'checkout' && tableLocks.length > 0) {
     return (
-      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={handleCancelLock}>
-          Back to Table Selection
-        </Button>
-        <Typography.Title level={3}>Complete Your Booking &mdash; {event.title}</Typography.Title>
-        <Row gutter={[24, 24]} justify="center">
-          <Col xs={24} sm={16} md={12} lg={8}>
-            <CheckoutPanel
-              mode="grid"
-              tableLocks={tableLocks}
-              confirming={confirming}
-              setConfirming={setConfirming}
-              error={checkoutError}
-              clientSecret={clientSecret}
-              stripePromise={stripePromiseRef.current}
-              onPaymentSuccess={handlePaymentSuccess}
-              onCancel={handleCancelLock}
-              onExpired={handleLockExpired}
-              taxAmountCents={taxAmountCents}
-            />
-          </Col>
-        </Row>
-      </Space>
+      <CheckoutStep
+        mode="grid"
+        event={event}
+        tableLocks={tableLocks}
+        confirming={confirming}
+        setConfirming={setConfirming}
+        error={checkoutError}
+        clientSecret={clientSecret}
+        stripePromise={stripePromiseRef.current}
+        taxAmountCents={taxAmountCents}
+        onPaymentSuccess={handlePaymentSuccess}
+        onCancel={handleCancelLock}
+        onExpired={handleLockExpired}
+      />
     );
   }
 
   if (step === 'capacity') {
     return (
-      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => setStep('info')}>
-          Back to Event
-        </Button>
-        <Typography.Title level={3}>Reserve Seats &mdash; {event.title}</Typography.Title>
-        <Row gutter={[24, 24]} justify="center">
-          <Col xs={24} sm={16} md={12} lg={8}>
-            {ticketTypesLoading ? (
-              <Skeleton active paragraph={{ rows: 4 }} />
-            ) : (
-              <CapacityBookingForm
-                maxCapacity={event.maxCapacity ?? 0}
-                totalSold={event.totalSold}
-                pricePerPersonCents={event.displayPricePerPersonCents ?? event.pricePerPersonCents ?? 0}
-                ticketTypes={ticketTypes.length > 0 ? ticketTypes : undefined}
-                onProceed={handleCapacityProceed}
-              />
-            )}
-          </Col>
-        </Row>
-      </Space>
+      <CapacityStep
+        event={event}
+        ticketTypes={ticketTypes}
+        ticketTypesLoading={ticketTypesLoading}
+        onProceed={handleCapacityProceed}
+        onBack={() => setStep('info')}
+      />
     );
   }
 
@@ -543,29 +546,20 @@ export default function EventDetailPage() {
     const checkoutPrice = selectedType?.displayPriceCents ?? event.displayPricePerPersonCents ?? event.pricePerPersonCents ?? 0;
 
     return (
-      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => void handleCancelOpen()}>
-          Back to Seat Selection
-        </Button>
-        <Typography.Title level={3}>Complete Your Booking &mdash; {event.title}</Typography.Title>
-        <Row gutter={[24, 24]} justify="center">
-          <Col xs={24} sm={16} md={12} lg={8}>
-            <CheckoutPanel
-              mode="open"
-              seatCount={seatCount}
-              pricePerPersonCents={checkoutPrice}
-              confirming={confirming}
-              setConfirming={setConfirming}
-              error={checkoutError}
-              clientSecret={clientSecret}
-              stripePromise={stripePromiseRef.current}
-              onPaymentSuccess={handlePaymentSuccess}
-              onCancel={handleCancelOpen}
-              taxAmountCents={taxAmountCents}
-            />
-          </Col>
-        </Row>
-      </Space>
+      <CheckoutStep
+        mode="open"
+        event={event}
+        seatCount={seatCount}
+        pricePerPersonCents={checkoutPrice}
+        confirming={confirming}
+        setConfirming={setConfirming}
+        error={checkoutError}
+        clientSecret={clientSecret}
+        stripePromise={stripePromiseRef.current}
+        taxAmountCents={taxAmountCents}
+        onPaymentSuccess={handlePaymentSuccess}
+        onCancel={handleCancelOpen}
+      />
     );
   }
 
