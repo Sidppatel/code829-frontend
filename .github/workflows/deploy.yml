@@ -87,8 +87,9 @@ jobs:
         run: pnpm --filter "${{ matrix.package }}" build
 
       - name: Deploy ${{ matrix.domain }}
-        uses: cloudflare/wrangler-action@a1a26a7931b21e8470a7f34c9c10f845a7690623 # v3.6.0
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4"
           command: pages deploy ${{ matrix.dist }} --project-name=${{ matrix.project }}
