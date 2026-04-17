@@ -4,6 +4,9 @@ on:
   push:
     branches: [master]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
   group: deploy-cloudflare-pages-${{ github.ref }}
   cancel-in-progress: true
@@ -90,8 +93,7 @@ jobs:
         run: npm install --global wrangler@4
 
       - name: Deploy ${{ matrix.domain }}
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy ${{ matrix.dist }} --project-name=${{ matrix.project }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: wrangler pages deploy ${{ matrix.dist }} --project-name=${{ matrix.project }}
