@@ -1,5 +1,5 @@
 import apiClient from '../lib/axios';
-import type { EventDetail, EventTicketType } from '../types/event';
+import type { EventDetail } from '../types/event';
 import type { PagedResponse } from '../types/shared';
 
 export interface AdminEventListParams extends Record<string, unknown> {
@@ -8,6 +8,19 @@ export interface AdminEventListParams extends Record<string, unknown> {
   status?: string;
   search?: string;
   category?: string;
+}
+
+/**
+ * Input shape the backend Create/Update endpoints expect for a single ticket type.
+ * Mirrors `NestedTicketType{Request,Update}` in `contracts/DTOs/Events`.
+ * Note `name` / `capacity` — NOT `label` / `maxQuantity` (those are response-side names).
+ */
+export interface EventTicketTypeInput {
+  id?: string;
+  name: string;
+  priceCents: number;
+  capacity?: number;
+  description?: string;
 }
 
 export interface CreateEventPayload {
@@ -22,7 +35,7 @@ export interface CreateEventPayload {
   maxCapacity?: number;
   bannerImageUrl?: string;
   pricePerPersonCents?: number;
-  ticketTypes?: EventTicketType[];
+  ticketTypes?: EventTicketTypeInput[];
 }
 
 export interface UpdateEventPayload extends Partial<CreateEventPayload> {
