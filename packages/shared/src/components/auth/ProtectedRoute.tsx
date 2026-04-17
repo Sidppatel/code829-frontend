@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import type { UserRole } from '../../types/auth';
+import LoadingSpinner from '../shared/LoadingSpinner';
 
 const ROLE_LEVEL: Record<UserRole, number> = {
   User: 1,
@@ -15,8 +16,13 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, minRole = 'User' }: Props) {
-  const { token, user } = useAuthStore();
+  const { token, user, isHydrated } = useAuthStore();
   const location = useLocation();
+
+  // useSessionRefresh is still probing the session cookie — don't redirect yet, or a valid
+  // refresh will get bounced to /login before the store has had a chance to populate.
+  if (!isHydrated) return <LoadingSpinner />;
+
   if (!token || !user) {
     const returnUrl = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?returnUrl=${returnUrl}`} replace />;

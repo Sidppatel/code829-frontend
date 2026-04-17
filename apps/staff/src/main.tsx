@@ -4,6 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from '@code829/shared/context/ThemeContext';
 import { ThemedApp } from '@code829/shared/components/ThemedApp';
 import { initGlobalErrorListeners } from '@code829/shared/lib/globalErrors';
+import { configureApiClient } from '@code829/shared/lib/axios';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
@@ -14,6 +15,7 @@ import '@code829/shared/index.css';
 import App from './App';
 
 initGlobalErrorListeners();
+configureApiClient('staff');
 
 const rootEl = document.getElementById('root');
 if (!rootEl) throw new Error('Root element not found');

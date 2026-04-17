@@ -24,18 +24,37 @@ const apiClient = axios.create({
   baseURL: getBaseURL(),
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
+  // Session cookies are HttpOnly and per-portal (session_user / session_admin / …). They
+  // need to ride along on every request so DeviceSessionMiddleware can rehydrate the
+  // session on refresh. Vite dev proxy forwards them fine once this flag is on.
+  withCredentials: true,
 });
+
+/**
+ * Portal identifier attached to every outgoing request as the X-Portal header. The backend
+ * uses it to pick the matching cookie (session_user / session_admin / session_staff /
+ * session_developer), so two portals open in the same browser never clobber each other's
+ * session. Each app calls {@link configureApiClient} once at boot.
+ */
+export type PortalId = 'user' | 'admin' | 'staff' | 'developer';
+
+let portalId: PortalId | null = null;
+export function configureApiClient(portal: PortalId) {
+  portalId = portal;
+  apiClient.defaults.headers.common['X-Portal'] = portal;
+}
 
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
-  
+  if (portalId) config.headers['X-Portal'] = portalId;
+
   // Ensure relative URLs don't bypass the /api proxy
   // If baseline is '/api' and url is '/events', make it 'events' so it becomes '/api/events'
   if (config.baseURL === '/api' && config.url?.startsWith('/')) {
     config.url = config.url.substring(1);
   }
-  
+
   return config;
 });
 

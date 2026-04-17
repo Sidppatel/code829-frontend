@@ -54,10 +54,21 @@ export default function EventDetailPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useAuth();
+  const isHydrated = useAuthStore((s) => s.isHydrated);
   const storeToken = useAuthStore((s) => s.token);
   const tokenRef = useRef(storeToken);
   tokenRef.current = storeToken;
   const isMobile = useIsMobile();
+
+  // Event detail requires auth (Q3 = b). Redirect anonymous visitors to /login as soon as
+  // the session-cookie probe has finished and decided they're not signed in. Waiting on
+  // isHydrated is what prevents a valid session-cookie refresh from bouncing to /login.
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+      navigate(`/login?returnUrl=${returnUrl}`, { replace: true });
+    }
+  }, [isHydrated, isAuthenticated, navigate]);
 
   // Booking flow state — step lives in the URL so browser back and refresh both work
   const rawStep = searchParams.get('step');
@@ -331,11 +342,8 @@ export default function EventDetailPage() {
       message.error('Ticket types are unavailable. Please refresh the page and try again.');
       return;
     }
-    if (!isAuthenticated) {
-      message.info('Please log in to book');
-      navigate(`/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
-      return;
-    }
+    // Auth is enforced by the top-level redirect effect above; by the time the user can
+    // click Book Now they're guaranteed to be signed in.
     if (!event) return;
 
     setIsStartingBooking(true);

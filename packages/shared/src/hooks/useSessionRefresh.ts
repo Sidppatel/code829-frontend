@@ -6,13 +6,20 @@ import apiClient from '../lib/axios';
  * On mount, if no JWT is in memory but the session cookie might still be valid,
  * attempt to restore the session by calling /auth/me.
  * DeviceSessionMiddleware will authenticate via the cookie and return the user.
+ *
+ * Always flips {@link useAuthStore.isHydrated} to `true` once finished — guards wait
+ * for that flag so they don't redirect during the probe.
  */
 export function useSessionRefresh(meEndpoint = '/auth/me') {
   const token = useAuthStore((s) => s.token);
   const setAuth = useAuthStore((s) => s.setAuth);
+  const setHydrated = useAuthStore((s) => s.setHydrated);
 
   useEffect(() => {
-    if (token) return; // Already have a token in memory
+    if (token) {
+      setHydrated(true);
+      return;
+    }
 
     const refresh = async () => {
       try {
@@ -24,6 +31,8 @@ export function useSessionRefresh(meEndpoint = '/auth/me') {
         }
       } catch {
         // No valid session — user needs to log in
+      } finally {
+        setHydrated(true);
       }
     };
     void refresh();
