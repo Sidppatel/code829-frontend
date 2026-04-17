@@ -17,6 +17,7 @@ export interface BookingTicket {
   invitedEmail?: string;
   inviteSentAt?: string;
   claimedAt?: string;
+  guestUserId?: string;
 }
 
 export interface GuestTicket {

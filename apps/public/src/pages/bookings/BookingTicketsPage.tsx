@@ -17,6 +17,7 @@ import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import { formatEventDate } from '@code829/shared/utils/date';
 import { createLogger } from '@code829/shared/lib/logger';
+import { useAuthStore } from '@code829/shared/stores/authStore';
 
 const log = createLogger('Public/BookingTicketsPage');
 
@@ -24,6 +25,7 @@ export default function BookingTicketsPage() {
   const { bookingId } = useParams<{ bookingId: string }>();
   const navigate = useNavigate();
   const { message } = App.useApp();
+  const currentUserId = useAuthStore((s) => s.user?.id);
 
   const [tickets, setTickets] = useState<BookingTicket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -200,7 +202,9 @@ export default function BookingTicketsPage() {
                   QR
                 </Button>
 
-                {ticket.status === 'Unassigned' && (
+                {/* Every non-checked-in ticket gets both actions. The only time Claim for
+                    Myself is hidden is when the current user has already claimed it. */}
+                {ticket.status !== 'CheckedIn' && !(ticket.status === 'Claimed' && ticket.guestUserId === currentUserId) && (
                   <Button
                     size="small"
                     type="primary"
@@ -211,7 +215,7 @@ export default function BookingTicketsPage() {
                   </Button>
                 )}
 
-                {(ticket.status === 'Unassigned' || ticket.status === 'Invited') && (
+                {ticket.status !== 'CheckedIn' && (
                   <Button
                     size="small"
                     type="primary"
@@ -226,8 +230,8 @@ export default function BookingTicketsPage() {
                   </Button>
                 )}
 
-                {(ticket.status === 'Invited' || ticket.status === 'Claimed') && ticket.seatNumber !== 1 && (
-                  <Tooltip title="Revoke invite and unassign">
+                {(ticket.status === 'Invited' || ticket.status === 'Claimed') && (
+                  <Tooltip title="Revoke and unassign">
                     <Button
                       size="small"
                       danger
