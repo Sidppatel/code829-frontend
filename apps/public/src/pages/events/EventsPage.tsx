@@ -51,7 +51,13 @@ export default function EventsPage() {
   }, [searchParams, page]);
 
   useEffect(() => {
-    eventsApi.getFacets().then((res) => setFacets(res.data)).catch(() => {});
+    eventsApi.getFacets()
+      .then((res) => setFacets(res.data))
+      .catch((err) => {
+        // Facets power the filter sidebar. Log but don't block — list still works without them.
+        log.warn('Failed to load facets', { err });
+        setFacets(null);
+      });
   }, []);
 
   const handleFilterChange = (newFilters: EventListParams) => {

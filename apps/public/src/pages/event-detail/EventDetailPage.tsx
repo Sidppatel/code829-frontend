@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Typography, Row, Col, Button, Space, App } from 'antd';
+import { Typography, Row, Col, Button, Space, App, Skeleton } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Helmet } from 'react-helmet-async';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
@@ -17,7 +17,6 @@ import type { TableLock } from '@code829/shared/types/layout';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 
-import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import TableSelectionCanvas from '../../components/booking/TableSelectionCanvas';
 import CheckoutPanel from '../../components/booking/CheckoutPanel';
 import CapacityBookingForm from '../../components/booking/CapacityBookingForm';
@@ -81,6 +80,7 @@ export default function EventDetailPage() {
   const [seatCount, setSeatCount] = useState(1);
   const [selectedTicketTypeId, setSelectedTicketTypeId] = useState<string | undefined>(undefined);
   const [ticketTypes, setTicketTypes] = useState<EventTicketType[]>([]);
+  const [ticketTypesLoading, setTicketTypesLoading] = useState(false);
 
   // Stripe state
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -99,6 +99,7 @@ export default function EventDetailPage() {
   const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
   const [paymentUnavailable, setPaymentUnavailable] = useState(false);
   const [isStartingBooking, setIsStartingBooking] = useState(false);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   // Refs for cleanup
   const tableLocksRef = useRef<TableLock[]>([]);
@@ -143,6 +144,20 @@ export default function EventDetailPage() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       cleanup();
     };
+  }, []);
+
+  // Hide the sticky mobile CTA when the virtual keyboard is open so it can't cover an input.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const onResize = () => {
+      // Keyboard typically reduces viewport height by >150px on mobile
+      setIsKeyboardOpen(vv.height < window.innerHeight - 150);
+    };
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
   }, []);
 
   // Load Stripe publishable key once — no silent fallback; block checkout if unavailable.
@@ -214,6 +229,7 @@ export default function EventDetailPage() {
   // Load ticket types for Open events
   useEffect(() => {
     if (!event || event.layoutMode !== 'Open') return;
+    setTicketTypesLoading(true);
     const loadTicketTypes = async () => {
       try {
         const { data } = await eventsApi.getTicketTypes(event.id);
@@ -222,6 +238,8 @@ export default function EventDetailPage() {
         // Event may not have ticket types — that's OK, but log so a real 500 isn't hidden
         log.info('Ticket types not available for event', { eventId: event.id, err });
         setTicketTypes([]);
+      } finally {
+        setTicketTypesLoading(false);
       }
     };
     void loadTicketTypes();
@@ -411,10 +429,35 @@ export default function EventDetailPage() {
     setStep('capacity');
   };
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) {
+    return (
+      <div className="page-container" style={{ paddingTop: isMobile ? 32 : 60 }}>
+        <Skeleton.Image active style={{ width: '100%', height: isMobile ? 200 : 340, borderRadius: 16 }} />
+        <Row gutter={isMobile ? [24, 24] : [60, 60]} style={{ marginTop: 40 }}>
+          <Col xs={24} lg={15}>
+            <Skeleton active paragraph={{ rows: 6 }} />
+          </Col>
+          <Col xs={24} lg={9}>
+            <Skeleton active title paragraph={{ rows: 3 }} style={{ marginBottom: 24 }} />
+            <Skeleton.Button active block style={{ height: 72 }} />
+          </Col>
+        </Row>
+      </div>
+    );
+  }
   if (!event) return null;
 
   const lockedTablesFromGrid = tablesData?.tables.filter((t) => t.isLockedByYou) ?? [];
+
+  if (step === 'select-table' && !tablesData) {
+    return (
+      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => setStep('info')}>Back to Event</Button>
+        <Typography.Title level={3}>Select a Table &mdash; {event.title}</Typography.Title>
+        <Skeleton.Node active style={{ width: '100%', height: 400 }} />
+      </Space>
+    );
+  }
 
   if (step === 'select-table' && tablesData) {
     return (
@@ -476,13 +519,17 @@ export default function EventDetailPage() {
         <Typography.Title level={3}>Reserve Seats &mdash; {event.title}</Typography.Title>
         <Row gutter={[24, 24]} justify="center">
           <Col xs={24} sm={16} md={12} lg={8}>
-            <CapacityBookingForm
-              maxCapacity={event.maxCapacity ?? 0}
-              totalSold={event.totalSold}
-              pricePerPersonCents={event.displayPricePerPersonCents ?? event.pricePerPersonCents ?? 0}
-              ticketTypes={ticketTypes.length > 0 ? ticketTypes : undefined}
-              onProceed={handleCapacityProceed}
-            />
+            {ticketTypesLoading ? (
+              <Skeleton active paragraph={{ rows: 4 }} />
+            ) : (
+              <CapacityBookingForm
+                maxCapacity={event.maxCapacity ?? 0}
+                totalSold={event.totalSold}
+                pricePerPersonCents={event.displayPricePerPersonCents ?? event.pricePerPersonCents ?? 0}
+                ticketTypes={ticketTypes.length > 0 ? ticketTypes : undefined}
+                onProceed={handleCapacityProceed}
+              />
+            )}
           </Col>
         </Row>
       </Space>
@@ -553,7 +600,7 @@ export default function EventDetailPage() {
         </Row>
       </div>
 
-      {isMobile && !isSoldOut && step === 'info' && (
+      {isMobile && !isSoldOut && step === 'info' && !isKeyboardOpen && (
         <div style={{
           position: 'fixed',
           bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-height, 65px) + 12px)',

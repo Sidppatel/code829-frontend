@@ -58,7 +58,7 @@ export default function CapacityBookingForm({
                       key={tt.id}
                       value={tt.id}
                       disabled={tt.availableCount <= 0}
-                      style={{ width: '100%', padding: '8px 0' }}
+                      style={{ width: '100%', padding: '12px 0', minHeight: 44 }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', minWidth: 200 }}>
                         <div>
@@ -101,7 +101,8 @@ export default function CapacityBookingForm({
             max={available}
             value={seats}
             onChange={(v: number | null) => setSeats(v ?? 1)}
-            style={{ width: '100%' }}
+            size="large"
+            style={{ width: '100%', minHeight: 44 }}
             disabled={available <= 0}
           />
         </div>
@@ -127,6 +128,7 @@ export default function CapacityBookingForm({
           block
           onClick={() => onProceed(seats, selectedTicketTypeId)}
           disabled={available <= 0}
+          style={{ minHeight: 48 }}
         >
           Proceed to Checkout
         </Button>
