@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Row, Col, Button, App, Skeleton } from 'antd';
@@ -101,13 +101,17 @@ export default function EventDetailPage() {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   // Backend-authoritative pricing quote — never compute totals in the browser.
-  const quoteSelection: PricingQuoteRequest | null = event
-    ? (step === 'checkout' && tableLocks.length > 0
-        ? { eventId: event.id, tableIds: tableLocks.map(l => l.tableId) }
-        : step === 'checkout-open' && seatCount > 0
-          ? { eventId: event.id, seatCount, eventTicketTypeId: selectedTicketTypeId }
-          : null)
-    : null;
+  // Memoized so an unrelated re-render doesn't fire a new /bookings/quote request.
+  const quoteSelection: PricingQuoteRequest | null = useMemo(() => {
+    if (!event) return null;
+    if (step === 'checkout' && tableLocks.length > 0) {
+      return { eventId: event.id, tableIds: tableLocks.map(l => l.tableId) };
+    }
+    if (step === 'checkout-open' && seatCount > 0) {
+      return { eventId: event.id, seatCount, eventTicketTypeId: selectedTicketTypeId };
+    }
+    return null;
+  }, [event, step, tableLocks, seatCount, selectedTicketTypeId]);
   const { quote, isLoading: quoteLoading, error: quoteError } = useBookingQuote(quoteSelection);
 
   // Refs for cleanup
