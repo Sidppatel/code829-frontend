@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Typography, Row, Col, Button, Space, App } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
@@ -45,20 +45,34 @@ const itemVariants = {
 
 type BookingStep = 'info' | 'select-table' | 'checkout' | 'capacity' | 'checkout-open';
 
+const VALID_STEPS: BookingStep[] = ['info', 'select-table', 'checkout', 'capacity', 'checkout-open'];
+
 export default function EventDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useAuth();
   const storeToken = useAuthStore((s) => s.token);
   const tokenRef = useRef(storeToken);
   tokenRef.current = storeToken;
   const isMobile = useIsMobile();
 
-  // Booking flow state
-  const [step, setStep] = useState<BookingStep>('info');
+  // Booking flow state — step lives in the URL so browser back and refresh both work
+  const rawStep = searchParams.get('step');
+  const step: BookingStep = (rawStep && VALID_STEPS.includes(rawStep as BookingStep))
+    ? rawStep as BookingStep
+    : 'info';
+  const setStep = (next: BookingStep) => {
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev);
+      if (next === 'info') params.delete('step');
+      else params.set('step', next);
+      return params;
+    }, { replace: false });
+  };
   const [tablesData, setTablesData] = useState<EventTablesResponse | null>(null);
   const [tableLocks, setTableLocks] = useState<TableLock[]>([]);
   const [lockingTableId, setLockingTableId] = useState<string | null>(null);
@@ -70,7 +84,17 @@ export default function EventDetailPage() {
 
   // Stripe state
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [bookingId, setBookingId] = useState<string | null>(null);
+  const bookingIdParam = searchParams.get('bookingId');
+  const [bookingId, setBookingIdState] = useState<string | null>(bookingIdParam);
+  const setBookingId = (next: string | null) => {
+    setBookingIdState(next);
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev);
+      if (next) params.set('bookingId', next);
+      else params.delete('bookingId');
+      return params;
+    }, { replace: true });
+  };
   const [taxAmountCents, setTaxAmountCents] = useState<number | null>(null);
   const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
   const [paymentUnavailable, setPaymentUnavailable] = useState(false);
@@ -158,6 +182,34 @@ export default function EventDetailPage() {
     };
     void load();
   }, [slug, message, navigate]);
+
+  // Restore booking context when landing on checkout via refresh or deep link.
+  useEffect(() => {
+    if (!bookingIdParam || clientSecret) return;
+    if (step !== 'checkout' && step !== 'checkout-open') return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await bookingsApi.getById(bookingIdParam);
+        if (cancelled) return;
+        if (data.status !== 'Pending') {
+          // Stale booking — start over on the info step
+          setSearchParams(new URLSearchParams(), { replace: true });
+          setBookingIdState(null);
+          return;
+        }
+        setBookingIdState(data.id);
+        setClientSecret(data.clientSecret ?? null);
+        setTaxAmountCents(data.transaction?.taxAmountCents ?? null);
+      } catch (err) {
+        log.warn('Failed to restore booking from URL', { bookingIdParam, err });
+        setSearchParams(new URLSearchParams(), { replace: true });
+        setBookingIdState(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [bookingIdParam, clientSecret, step, setSearchParams]);
 
   // Load ticket types for Open events
   useEffect(() => {
