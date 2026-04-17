@@ -28,6 +28,7 @@ import {
 import { adminEventsApi } from '../../services/api';
 import { formatDateRange } from '@code829/shared/utils/date';
 import type { EventDetail } from '@code829/shared/types/event';
+import type { EventStats } from '@code829/shared/services/adminEventsApi';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import EventPricingTiersTable from '../../components/events/EventPricingTiersTable';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
@@ -56,6 +57,7 @@ function StatusPill({ status }: { status: string }) {
 export default function EventManagePage() {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<EventDetail | null>(null);
+  const [stats, setStats] = useState<EventStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [layoutLocked, setLayoutLocked] = useState(false);
   const { message } = App.useApp();
@@ -68,7 +70,9 @@ export default function EventManagePage() {
         const { data } = await adminEventsApi.getById(id);
         setEvent(data);
 
-        // Load layout lock status for Grid events
+        const statsRes = await adminEventsApi.getStats(id);
+        setStats(statsRes.data);
+
         if (data.layoutMode === 'Grid') {
           const lockedRes = await adminEventsApi.checkLayoutLocked(id);
           setLayoutLocked(lockedRes.data.locked);
@@ -128,13 +132,8 @@ export default function EventManagePage() {
         description: tt.description,
       }));
 
-  const totalCapacity = isGrid
-    ? pricingRows.reduce((acc, t) => acc + (t.capacity || 0), 0)
-    : pricingRows.reduce((acc, t) => acc + (t.capacity || 0), 0);
-  const totalSold = pricingRows.reduce((acc, t) => acc + t.soldCount, 0);
-  const calculatedMaxCapacity = isOpen
-    ? (event.maxCapacity || totalCapacity)
-    : (event.maxCapacity || totalCapacity);
+  const totalSold = stats?.totalSold ?? 0;
+  const calculatedMaxCapacity = stats?.maxCapacity ?? 0;
 
   return (
     <div>
@@ -307,10 +306,10 @@ export default function EventManagePage() {
       <div className="admin-section">
         <div className="admin-section-title"><DollarOutlined /> Sales</div>
         {(() => {
-          const sold = event.totalSold ?? 0;
-          const total = isGrid ? calculatedMaxCapacity : (event.totalCapacity ?? 0);
-          const available = isGrid ? (event.noOfAvailableTables ?? 0) : (total - sold);
-          const fillRate = total > 0 ? Math.round((sold / total) * 100) : 0;
+          const sold = stats?.totalSold ?? 0;
+          const total = stats?.maxCapacity ?? 0;
+          const available = isGrid ? (event.noOfAvailableTables ?? 0) : Math.max(total - sold, 0);
+          const fillRate = stats?.fillRatePct ?? 0;
           return (
             <>
               <div className="next-event-stats">

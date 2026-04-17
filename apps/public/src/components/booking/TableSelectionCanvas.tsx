@@ -1,12 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Card, Button, Typography, Space, Divider, theme, Spin } from 'antd';
 import { LockOutlined, CheckCircleOutlined, StopOutlined, LoadingOutlined } from '@ant-design/icons';
 import type { EventTableDto, EventTableTypeInfo } from '@code829/shared/types/event';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import TableLockTimer from './TableLockTimer';
 import { useHoldTimer } from '@code829/shared/hooks/useHoldTimer';
+import { useBookingQuote } from '@code829/shared/hooks/useBookingQuote';
 
 interface Props {
+  eventId: string;
   tables: EventTableDto[];
   eventTableTypes: EventTableTypeInfo[];
   gridRows: number;
@@ -58,6 +60,7 @@ function CellCountdown({ expiresAt }: { expiresAt: string }) {
 }
 
 export default function TableSelectionCanvas({
+  eventId,
   tables,
   eventTableTypes,
   gridRows,
@@ -71,6 +74,14 @@ export default function TableSelectionCanvas({
 }: Props) {
   const { token } = theme.useToken();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  const quoteSelection = useMemo(
+    () => lockedTables.length > 0
+      ? { eventId, tableIds: lockedTables.map(t => t.id) }
+      : null,
+    [eventId, lockedTables]
+  );
+  const { quote } = useBookingQuote(quoteSelection);
 
   const isClickable = useCallback((table: EventTableDto) => {
     if (table.status === 'Available') return true;
@@ -278,12 +289,10 @@ export default function TableSelectionCanvas({
         {/* Detail panel — shown when user has locked tables */}
         {lockedTables.length > 0 && (() => {
           const labels = lockedTables.map(labelFor).join(', ');
-          const totalSeats = lockedTables.reduce((sum, t) => sum + t.capacity, 0);
-          const totalPrice = lockedTables.reduce((sum, t) => sum + t.displayPriceCents, 0);
           const earliestExpiry = lockedTables
             .map(t => t.holdExpiresAt).filter(Boolean).sort()[0];
 
-          // Group by type
+          // Group by type (display-only — count and per-table price, no aggregation)
           const groups = new Map<string, EventTableDto[]>();
           for (const t of lockedTables) {
             const key = t.eventTableLabel ?? 'Table';
@@ -313,19 +322,20 @@ export default function TableSelectionCanvas({
                     </div>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                       {groupTables[0].shape} &middot;{' '}
-                      {groupTables.length} &times; {groupTables[0].capacity} seats &middot;{' '}
-                      {centsToUSD(groupTables.reduce((s, t) => s + t.displayPriceCents, 0))}
+                      {groupTables.length} &times; {centsToUSD(groupTables[0].displayPriceCents)}
                     </Typography.Text>
                   </div>
                 ))}
                 <Divider style={{ margin: '4px 0' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography.Text type="secondary">Total seats</Typography.Text>
-                  <Typography.Text>{totalSeats}</Typography.Text>
+                  <Typography.Text>{quote?.seatsIncluded ?? '—'}</Typography.Text>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography.Text type="secondary">Total price</Typography.Text>
-                  <Typography.Text strong>{centsToUSD(totalPrice)}</Typography.Text>
+                  <Typography.Text strong>
+                    {quote ? centsToUSD(quote.totalCents) : '—'}
+                  </Typography.Text>
                 </div>
                 <Button
                   type="primary"

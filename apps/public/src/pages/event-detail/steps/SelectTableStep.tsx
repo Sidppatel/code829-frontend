@@ -27,6 +27,7 @@ export default function SelectTableStep({
         <Row justify="center"><Col xs={24}><Skeleton.Node active style={{ width: '100%', height: 400 }} /></Col></Row>
       ) : (
         <TableSelectionCanvas
+          eventId={event.id}
           tables={tablesData.tables}
           eventTableTypes={tablesData.eventTableTypes ?? []}
           gridRows={tablesData.gridRows ?? 10}

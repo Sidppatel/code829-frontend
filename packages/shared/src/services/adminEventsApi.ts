@@ -29,6 +29,13 @@ export interface UpdateEventPayload extends Partial<CreateEventPayload> {
   status?: string;
 }
 
+export interface EventStats {
+  totalSold: number;
+  maxCapacity: number;
+  fillRatePct: number;
+  grossRevenueCents: number;
+}
+
 export const adminEventsApi = {
   list: (params?: AdminEventListParams) =>
     apiClient.get<PagedResponse<EventDetail>>('/admin/events', { params }),
@@ -61,4 +68,7 @@ export const adminEventsApi = {
 
   checkLayoutLocked: (id: string) =>
     apiClient.get<{ locked: boolean }>(`/admin/events/${id}/layout-locked`),
+
+  getStats: (id: string) =>
+    apiClient.get<EventStats>(`/admin/events/${id}/stats`),
 };

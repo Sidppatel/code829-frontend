@@ -47,8 +47,10 @@ export default function CheckoutPanel(props: Props) {
   if (mode === 'grid') {
     const { tableLocks } = props;
     const labels = tableLocks.map(l => l.tableLabel).join(', ');
-    const totalSeats = tableLocks.reduce((sum, l) => sum + l.capacity, 0);
-    description = `Table${tableLocks.length > 1 ? 's' : ''} ${labels} — ${totalSeats} seats`;
+    const totalSeats = quote?.seatsIncluded;
+    description = totalSeats !== undefined
+      ? `Table${tableLocks.length > 1 ? 's' : ''} ${labels} — ${totalSeats} seats`
+      : `Table${tableLocks.length > 1 ? 's' : ''} ${labels}`;
   } else {
     description = `${props.seatCount} seat${props.seatCount !== 1 ? 's' : ''}`;
   }
@@ -76,7 +78,7 @@ export default function CheckoutPanel(props: Props) {
                   {locks.map(l => l.tableLabel).join(', ')}
                 </Descriptions.Item>
                 <Descriptions.Item label="Seats included">
-                  {locks.reduce((sum, l) => sum + l.capacity, 0)}
+                  {quote?.seatsIncluded ?? '—'}
                 </Descriptions.Item>
                 <Descriptions.Item label="Pricing">
                   {locks.length > 1 ? `${locks.length} whole tables (not per seat)` : 'Whole table (not per seat)'}
@@ -100,7 +102,7 @@ export default function CheckoutPanel(props: Props) {
             {/* Customers see only the admission price (admin price + platform fee rolled in) and tax. */}
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography.Text>Subtotal</Typography.Text>
-              <Typography.Text>{centsToUSD(quote.subtotalCents + quote.feeCents)}</Typography.Text>
+              <Typography.Text>{centsToUSD(quote.displaySubtotalCents)}</Typography.Text>
             </div>
             {quote.taxCents > 0 ? (
               <>

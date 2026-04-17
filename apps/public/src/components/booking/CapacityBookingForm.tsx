@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Card, InputNumber, Space, Typography, Divider, Radio } from 'antd';
 import { TeamOutlined, TagOutlined } from '@ant-design/icons';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import type { EventTicketType } from '@code829/shared/types/event';
+import { useBookingQuote } from '@code829/shared/hooks/useBookingQuote';
 
 interface Props {
+  eventId: string;
   maxCapacity: number;
   availableCount: number;
   pricePerPersonCents: number;
@@ -13,6 +15,7 @@ interface Props {
 }
 
 export default function CapacityBookingForm({
+  eventId,
   maxCapacity,
   availableCount,
   pricePerPersonCents,
@@ -31,7 +34,12 @@ export default function CapacityBookingForm({
 
   const priceCents = selectedType?.displayPriceCents ?? pricePerPersonCents;
   const available = selectedType ? selectedType.availableCount : availableCount;
-  const total = priceCents * seats;
+
+  const quoteSelection = useMemo(
+    () => ({ eventId, seatCount: seats, eventTicketTypeId: selectedTicketTypeId }),
+    [eventId, seats, selectedTicketTypeId]
+  );
+  const { quote, isLoading: quoteLoading } = useBookingQuote(quoteSelection);
 
   return (
     <Card title="Reserve Seats" styles={{ header: { borderBottom: 'none' } }}>
@@ -114,7 +122,9 @@ export default function CapacityBookingForm({
 
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography.Text strong>Total</Typography.Text>
-          <Typography.Text strong style={{ fontSize: 18 }}>{centsToUSD(total)}</Typography.Text>
+          <Typography.Text strong style={{ fontSize: 18 }}>
+            {quoteLoading || !quote ? '—' : centsToUSD(quote.totalCents)}
+          </Typography.Text>
         </div>
         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
           + applicable taxes at checkout

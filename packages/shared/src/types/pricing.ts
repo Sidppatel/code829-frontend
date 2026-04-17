@@ -3,6 +3,8 @@ export interface PricingQuote {
   feeCents: number;
   taxCents: number;
   totalCents: number;
+  displaySubtotalCents: number;
+  seatsIncluded: number;
   currency: string;
   formattedTotal: string;
   expiresAt: string;
