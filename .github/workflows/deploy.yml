@@ -1,42 +1,94 @@
-name: Deploy to Cloudflare Page
-    
-    on:
-      push:
-        branches: [master]
-    
-    jobs:
-      deploy:
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout
-            uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v4.1.7
-    
-          - name: Setup Node
-            uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
-            with:
-              node-version: 22
-              cache: npm
-    
-          - name: Install dependencies
-            run: npm ci
-    
-          - name: Security Audit
-            run: npm audit --audit-level=moderate
-    
-          - name: Type check
-            run: npx tsc --noEmit
-    
-          - name: Build
-            run: npm run build
-            env:
-              VITE_API_URL: ${{ secrets.VITE_API_URL }}
-              VITE_APP_NAME: code829
-              VITE_DEFAULT_THEME: system
-    
-          - name: Deploy to Cloudflare Pages
-            uses: cloudflare/wrangler-action@a1a26a7931b21e8470a7f34c9c10f845a7690623 # v3.6.0
-            with:
-              apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-              accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-              projectName: code829
-              command: pages deploy apps/public/dist --project-name=code829-main
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [master]
+
+concurrency:
+  group: deploy-cloudflare-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate workspace
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v4.1.7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Security Audit
+        run: pnpm audit --audit-level=moderate
+
+  deploy:
+    name: Deploy ${{ matrix.app }}
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: public
+            package: "@code829/public"
+            dist: apps/public/dist
+            project: code829-public
+            domain: code829.com
+          - app: admin
+            package: "@code829/admin"
+            dist: apps/admin/dist
+            project: code829-admin
+            domain: admin.code829.com
+          - app: developer
+            package: "@code829/developer"
+            dist: apps/developer/dist
+            project: code829-developer
+            domain: developer.code829.com
+          - app: staff
+            package: "@code829/staff"
+            dist: apps/staff/dist
+            project: code829-staff
+            domain: staff.code829.com
+    env:
+      VITE_API_URL: ${{ secrets.VITE_API_URL }}
+      VITE_APP_NAME: code829
+      VITE_DEFAULT_THEME: system
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v4.1.7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build ${{ matrix.app }}
+        run: pnpm --filter "${{ matrix.package }}" build
+
+      - name: Deploy ${{ matrix.domain }}
+        uses: cloudflare/wrangler-action@a1a26a7931b21e8470a7f34c9c10f845a7690623 # v3.6.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy ${{ matrix.dist }} --project-name=${{ matrix.project }}

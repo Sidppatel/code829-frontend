@@ -37,17 +37,26 @@ The client-side single-page application for the Code829 Event Platform. Provides
 git clone <your-frontend-repo-url> code829-frontend
 cd code829-frontend
 
-npm install     # Install dependencies
-npm run dev     # Start dev server at http://localhost:5173
+pnpm install          # Install workspace dependencies
+pnpm dev:public       # Start public app at http://localhost:5173
+pnpm dev:admin        # Start admin app at http://localhost:5174
+pnpm dev:staff        # Start staff app at http://localhost:5175
+pnpm dev:developer    # Start developer app at http://localhost:5176
 ```
 
 ### Available Scripts
 
 ```bash
-npm run dev       # Dev server with HMR (port 5173)
-npm run build     # TypeScript check + Vite production build
-npm run lint      # ESLint check
-npm run preview   # Preview production build locally
+pnpm dev:public        # Public app dev server
+pnpm dev:admin         # Admin app dev server
+pnpm dev:staff         # Staff app dev server
+pnpm dev:developer     # Developer app dev server
+pnpm build             # Build all apps in the workspace
+pnpm build:public      # Build only the public app
+pnpm build:admin       # Build only the admin app
+pnpm build:staff       # Build only the staff app
+pnpm build:developer   # Build only the developer app
+pnpm lint              # ESLint check across the workspace
 ```
 
 ---
@@ -288,12 +297,22 @@ The Axios instance (`src/lib/axios.ts`) provides:
 
 ### Cloudflare Pages (Production)
 
-The frontend deploys automatically via GitHub Actions on push to `master`:
+The frontend deploys automatically via GitHub Actions on push to `master`.
+Each app is deployed to its own Cloudflare Pages project:
+
+| App | Pages project | Production domain |
+|---|---|---|
+| Public | `code829-public` | `code829.com` |
+| Admin | `code829-admin` | `admin.code829.com` |
+| Developer | `code829-developer` | `developer.code829.com` |
+| Staff | `code829-staff` | `staff.code829.com` |
+
+The workflow:
 
 1. Checks out code
-2. Installs dependencies (`npm ci`)
-3. Builds (`npm run build` with `VITE_API_URL` from secrets)
-4. Deploys to Cloudflare Pages via Wrangler
+2. Installs workspace dependencies with `pnpm`
+3. Builds each app independently
+4. Deploys each `apps/*/dist` folder to its matching Cloudflare Pages project via Wrangler
 
 ### SPA Routing
 
