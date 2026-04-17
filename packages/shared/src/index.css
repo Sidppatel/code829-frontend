@@ -116,7 +116,10 @@ html, body {
 
 /* Utility Classes */
 .gradient-text {
-  color: var(--primary);
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .glass-card {
@@ -309,7 +312,7 @@ html, body {
   display: inline-block;
   width: 4px;
   height: 24px;
-  background: var(--primary);
+  background: var(--gradient-brand-vertical);
   border-radius: 4px;
   flex-shrink: 0;
 }
@@ -484,7 +487,7 @@ html, body {
 .next-event-progress-fill {
   height: 100%;
   border-radius: 99px;
-  background: var(--primary);
+  background: var(--gradient-brand-to-gold);
   transition: width 0.6s ease;
 }
 .next-event-stats {
@@ -1249,7 +1252,7 @@ html, body {
 .venue-avatar {
   width: 40px; height: 40px;
   border-radius: 10px;
-  background: var(--bg-muted);
+  background: var(--gradient-avatar-tint);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1281,7 +1284,7 @@ html, body {
 
 /* ── Edit mode banner ── */
 .edit-mode-banner {
-  background: var(--bg-muted);
+  background: var(--gradient-banner-brand);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 12px 18px;
@@ -1296,7 +1299,7 @@ html, body {
 
 /* ── Publish action strip ── */
 .publish-strip {
-  background: var(--status-success-bg);
+  background: var(--gradient-banner-success);
   border: 1px solid var(--status-success);
   border-radius: 12px;
   padding: 14px 18px;

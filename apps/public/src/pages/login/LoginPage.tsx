@@ -117,7 +117,7 @@ export default function LoginPage() {
               width: 64, 
               height: 64, 
               borderRadius: 18, 
-              background: 'var(--primary)',
+              background: 'var(--gradient-brand)',
               margin: '0 auto 24px',
               display: 'flex',
               alignItems: 'center',
@@ -201,7 +201,7 @@ export default function LoginPage() {
                     fontWeight: 800,
                     background: cooldown > 0
                       ? 'var(--bg-elevated)'
-                      : 'var(--primary)',
+                      : 'var(--gradient-brand)',
                     border: 'none',
                     boxShadow: 'var(--shadow-hover)',
                     marginTop: 12,

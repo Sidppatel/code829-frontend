@@ -48,7 +48,7 @@ const EventImageFallback: React.FC<EventImageFallbackProps> = ({
     <div style={{ 
       width: '100%', 
       height: '100%', 
-      background: 'linear-gradient(135deg, var(--accent-violet-dark) 0%, var(--bg-surface) 100%)',
+      background: 'var(--gradient-hero-fallback)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

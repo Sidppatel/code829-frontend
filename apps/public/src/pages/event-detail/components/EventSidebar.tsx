@@ -47,7 +47,7 @@ export default function EventSidebar({ event, isSoldOut, remaining, handleBookNo
                 borderRadius: 18,
                 fontSize: 18,
                 fontWeight: 800,
-                background: isSoldOut ? 'var(--bg-soft)' : 'var(--primary)',
+                background: isSoldOut ? 'var(--bg-soft)' : 'var(--gradient-brand)',
                 border: 'none',
                 boxShadow: isSoldOut ? 'none' : 'var(--shadow-hover)',
                 color: isSoldOut ? 'var(--text-muted)' : 'var(--text-on-brand)'

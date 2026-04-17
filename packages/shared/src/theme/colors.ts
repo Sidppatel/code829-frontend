@@ -102,6 +102,20 @@ export const chartPalette = [
   status.danger,
 ] as const;
 
+/**
+ * Gradient strings — centralized for gradient-heavy CTAs and accents.
+ * Use via `var(--gradient-*)` in CSS / inline styles, or import `gradients.*`.
+ */
+export const gradients = {
+  brand: `linear-gradient(135deg, ${palette.violet} 0%, ${palette.rose} 100%)`,
+  brandVertical: `linear-gradient(180deg, ${palette.violet}, ${palette.rose})`,
+  brandToGold: `linear-gradient(90deg, ${palette.violet}, ${palette.gold})`,
+  heroFallback: `linear-gradient(135deg, ${palette.violetDark} 0%, ${palette.bgSurface} 100%)`,
+  bannerBrand: `linear-gradient(90deg, rgba(124, 92, 255, 0.12), rgba(245, 158, 11, 0.08))`,
+  bannerSuccess: `linear-gradient(90deg, rgba(16, 185, 129, 0.10), rgba(16, 185, 129, 0.04))`,
+  avatarTint: `linear-gradient(135deg, rgba(124, 92, 255, 0.20), rgba(245, 158, 11, 0.15))`,
+} as const;
+
 export const shadows = {
   antToken: `0 4px 16px ${semantic.shadow.strong}`,
   antCard: `0 2px 12px ${semantic.shadow.medium}`,
@@ -194,6 +208,14 @@ export const cssVars: Record<string, string> = {
     '0 2px 4px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25), 0 16px 48px rgba(0, 0, 0, 0.15)',
   'shadow-hover':
     '0 16px 40px rgba(38, 19, 98, 0.18), 0 4px 12px rgba(27, 12, 69, 0.08)',
+
+  'gradient-brand': gradients.brand,
+  'gradient-brand-vertical': gradients.brandVertical,
+  'gradient-brand-to-gold': gradients.brandToGold,
+  'gradient-hero-fallback': gradients.heroFallback,
+  'gradient-banner-brand': gradients.bannerBrand,
+  'gradient-banner-success': gradients.bannerSuccess,
+  'gradient-avatar-tint': gradients.avatarTint,
 };
 
 const STYLE_ELEMENT_ID = 'app-theme-colors';

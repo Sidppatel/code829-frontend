@@ -663,7 +663,7 @@ export default function EventDetailPage() {
                 borderRadius: 14,
                 fontWeight: 800,
                 fontSize: 16,
-                background: 'var(--primary)',
+                background: 'var(--gradient-brand)',
                 border: 'none',
                 boxShadow: 'var(--shadow-hover)'
               }}

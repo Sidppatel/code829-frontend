@@ -103,13 +103,13 @@ export default function EventCard({ event }: Props) {
             width: 44, 
             height: 44, 
             borderRadius: 12, 
-            background: 'var(--primary)',
+            background: 'var(--gradient-brand)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: 'var(--text-on-brand)',
             fontSize: 20,
-            boxShadow: 'var(--shadow-md)'
+            boxShadow: 'var(--shadow-hover)'
           }}>
             <ArrowRightOutlined />
           </div>

@@ -136,7 +136,7 @@ export default function PublicLayout() {
                 fontWeight: 600,
                 height: 42,
                 padding: '0 24px',
-                background: 'var(--primary)',
+                background: 'var(--gradient-brand)',
                 border: 'none',
                 boxShadow: 'var(--shadow-hover)',
               }}

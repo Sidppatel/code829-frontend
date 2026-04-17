@@ -84,9 +84,9 @@ export default function EventsPage() {
 
   const itemVariants = {
     initial: { opacity: 0, y: 20 },
-    animate: { 
-      opacity: 1, 
-      y: 0, 
+    animate: {
+      opacity: 1,
+      y: 0,
       transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const }
     }
   };
@@ -106,7 +106,7 @@ export default function EventsPage() {
               The Collection
             </div>
             <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: 900, color: 'var(--text-primary)', marginBottom: 20, letterSpacing: '-2.5px' }}>
-              Explore <span className="gradient-text">Experiences</span>
+              Explore Experiences
             </h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: 18, maxWidth: 600, margin: '0 auto', fontWeight: 500, lineHeight: 1.6 }}>
               Discover an exclusive selection of upcoming events. Secure your spot in the future of entertainment.
@@ -160,12 +160,12 @@ export default function EventsPage() {
                     {/* Details */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
                       <div style={{ display: 'flex', gap: 8 }}>
-                         <Skeleton.Avatar active size="small" shape="square" />
-                         <Skeleton.Input active size="small" style={{ width: 140 }} />
+                        <Skeleton.Avatar active size="small" shape="square" />
+                        <Skeleton.Input active size="small" style={{ width: 140 }} />
                       </div>
                       <div style={{ display: 'flex', gap: 8 }}>
-                         <Skeleton.Avatar active size="small" shape="square" />
-                         <Skeleton.Input active size="small" style={{ width: 180 }} />
+                        <Skeleton.Avatar active size="small" shape="square" />
+                        <Skeleton.Input active size="small" style={{ width: 180 }} />
                       </div>
                     </div>
 
