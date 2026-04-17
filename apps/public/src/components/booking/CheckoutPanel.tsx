@@ -1,4 +1,4 @@
-import { Card, Descriptions, Divider, Typography, Space, Alert } from 'antd';
+import { Card, Descriptions, Divider, Typography, Space, Alert, Skeleton } from 'antd';
 import { Elements } from '@stripe/react-stripe-js';
 import type { Stripe } from '@stripe/stripe-js';
 import { centsToUSD } from '@code829/shared/utils/currency';
@@ -136,8 +136,10 @@ export default function CheckoutPanel(props: Props) {
               setConfirming={setConfirming}
             />
           </Elements>
-        ) : (
+        ) : error ? (
           <Alert type="warning" message="Payment unavailable" description="Payment service is not ready. Please refresh and try again." showIcon />
+        ) : (
+          <Skeleton.Input active block style={{ height: 140 }} />
         )}
       </Space>
     </Card>
