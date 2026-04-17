@@ -3,6 +3,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import type { Stripe } from '@stripe/stripe-js';
 import type { EventDetail } from '@code829/shared/types/event';
 import type { TableLock } from '@code829/shared/types/layout';
+import type { PricingQuote } from '@code829/shared/types/pricing';
 import CheckoutPanel from '../../../components/booking/CheckoutPanel';
 
 interface GridProps {
@@ -14,7 +15,9 @@ interface GridProps {
   error: string | null;
   clientSecret: string | null;
   stripePromise: Promise<Stripe | null> | null;
-  taxAmountCents: number | null;
+  quote: PricingQuote | null;
+  quoteLoading: boolean;
+  quoteError: string | null;
   onPaymentSuccess: () => void;
   onCancel: () => void;
   onExpired: () => void;
@@ -24,13 +27,14 @@ interface OpenProps {
   mode: 'open';
   event: EventDetail;
   seatCount: number;
-  pricePerPersonCents: number;
   confirming: boolean;
   setConfirming: (v: boolean) => void;
   error: string | null;
   clientSecret: string | null;
   stripePromise: Promise<Stripe | null> | null;
-  taxAmountCents: number | null;
+  quote: PricingQuote | null;
+  quoteLoading: boolean;
+  quoteError: string | null;
   onPaymentSuccess: () => void;
   onCancel: () => void;
 }
@@ -58,13 +62,14 @@ export default function CheckoutStep(props: Props) {
               onPaymentSuccess={props.onPaymentSuccess}
               onCancel={props.onCancel}
               onExpired={props.onExpired}
-              taxAmountCents={props.taxAmountCents}
+              quote={props.quote}
+              quoteLoading={props.quoteLoading}
+              quoteError={props.quoteError}
             />
           ) : (
             <CheckoutPanel
               mode="open"
               seatCount={props.seatCount}
-              pricePerPersonCents={props.pricePerPersonCents}
               confirming={props.confirming}
               setConfirming={props.setConfirming}
               error={props.error}
@@ -72,7 +77,9 @@ export default function CheckoutStep(props: Props) {
               stripePromise={props.stripePromise}
               onPaymentSuccess={props.onPaymentSuccess}
               onCancel={props.onCancel}
-              taxAmountCents={props.taxAmountCents}
+              quote={props.quote}
+              quoteLoading={props.quoteLoading}
+              quoteError={props.quoteError}
             />
           )}
         </Col>

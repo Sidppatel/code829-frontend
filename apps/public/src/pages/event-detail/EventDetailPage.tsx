@@ -13,8 +13,10 @@ import type { EventDetail, EventTableDto, EventTablesResponse, EventTicketType }
 
 const log = createLogger('Public/EventDetailPage');
 import type { TableLock } from '@code829/shared/types/layout';
+import type { PricingQuoteRequest } from '@code829/shared/types/pricing';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import { useAuthStore } from '@code829/shared/stores/authStore';
+import { useBookingQuote } from '@code829/shared/hooks/useBookingQuote';
 
 import EventHero from './components/EventHero';
 import EventAbout from './components/EventAbout';
@@ -93,11 +95,20 @@ export default function EventDetailPage() {
       return params;
     }, { replace: true });
   };
-  const [taxAmountCents, setTaxAmountCents] = useState<number | null>(null);
   const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
   const [paymentUnavailable, setPaymentUnavailable] = useState(false);
   const [isStartingBooking, setIsStartingBooking] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+
+  // Backend-authoritative pricing quote — never compute totals in the browser.
+  const quoteSelection: PricingQuoteRequest | null = event
+    ? (step === 'checkout' && tableLocks.length > 0
+        ? { eventId: event.id, tableIds: tableLocks.map(l => l.tableId) }
+        : step === 'checkout-open' && seatCount > 0
+          ? { eventId: event.id, seatCount, eventTicketTypeId: selectedTicketTypeId }
+          : null)
+    : null;
+  const { quote, isLoading: quoteLoading, error: quoteError } = useBookingQuote(quoteSelection);
 
   // Refs for cleanup
   const tableLocksRef = useRef<TableLock[]>([]);
@@ -170,7 +181,6 @@ export default function EventDetailPage() {
       })();
       setTableLocks([]);
       setClientSecret(null);
-      setTaxAmountCents(null);
       if (bid) setBookingIdState(null);
     }
 
@@ -183,7 +193,6 @@ export default function EventDetailPage() {
           catch (err) { log.warn('Step-change cleanup: cancel open booking failed', { bid, err }); }
         })();
         setClientSecret(null);
-        setTaxAmountCents(null);
         setBookingIdState(null);
       }
     }
@@ -259,7 +268,6 @@ export default function EventDetailPage() {
         }
         setBookingIdState(data.id);
         setClientSecret(data.clientSecret ?? null);
-        setTaxAmountCents(data.transaction?.taxAmountCents ?? null);
       } catch (err) {
         log.warn('Failed to restore booking from URL', { bookingIdParam, err });
         setSearchParams(new URLSearchParams(), { replace: true });
@@ -372,7 +380,6 @@ export default function EventDetailPage() {
       });
       setBookingId(booking.id);
       setClientSecret(booking.clientSecret ?? null);
-      setTaxAmountCents(booking.transaction?.taxAmountCents ?? null);
       setStep('checkout');
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
@@ -412,7 +419,6 @@ export default function EventDetailPage() {
     setCheckoutError(null);
     setClientSecret(null);
     setBookingId(null);
-    setTaxAmountCents(null);
     if (step === 'checkout') setStep('select-table');
     await loadTables();
   };
@@ -423,7 +429,6 @@ export default function EventDetailPage() {
     setCheckoutError(null);
     setClientSecret(null);
     setBookingId(null);
-    setTaxAmountCents(null);
     if (step === 'checkout') setStep('select-table');
     void loadTables();
   };
@@ -448,7 +453,6 @@ export default function EventDetailPage() {
         });
         setBookingId(booking.id);
         setClientSecret(booking.clientSecret ?? null);
-        setTaxAmountCents(booking.transaction?.taxAmountCents ?? null);
       } catch (err: unknown) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
         setCheckoutError(axiosErr?.response?.data?.message ?? 'Failed to create booking');
@@ -468,7 +472,6 @@ export default function EventDetailPage() {
     setCheckoutError(null);
     setClientSecret(null);
     setBookingId(null);
-    setTaxAmountCents(null);
     setStep('capacity');
   };
 
@@ -519,7 +522,9 @@ export default function EventDetailPage() {
         error={checkoutError}
         clientSecret={clientSecret}
         stripePromise={stripePromiseRef.current}
-        taxAmountCents={taxAmountCents}
+        quote={quote}
+        quoteLoading={quoteLoading}
+        quoteError={quoteError}
         onPaymentSuccess={handlePaymentSuccess}
         onCancel={handleCancelLock}
         onExpired={handleLockExpired}
@@ -540,23 +545,19 @@ export default function EventDetailPage() {
   }
 
   if (step === 'checkout-open') {
-    const selectedType = selectedTicketTypeId
-      ? ticketTypes.find(tt => tt.id === selectedTicketTypeId)
-      : undefined;
-    const checkoutPrice = selectedType?.displayPriceCents ?? event.displayPricePerPersonCents ?? event.pricePerPersonCents ?? 0;
-
     return (
       <CheckoutStep
         mode="open"
         event={event}
         seatCount={seatCount}
-        pricePerPersonCents={checkoutPrice}
         confirming={confirming}
         setConfirming={setConfirming}
         error={checkoutError}
         clientSecret={clientSecret}
         stripePromise={stripePromiseRef.current}
-        taxAmountCents={taxAmountCents}
+        quote={quote}
+        quoteLoading={quoteLoading}
+        quoteError={quoteError}
         onPaymentSuccess={handlePaymentSuccess}
         onCancel={handleCancelOpen}
       />

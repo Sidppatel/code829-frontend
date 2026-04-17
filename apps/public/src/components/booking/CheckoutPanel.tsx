@@ -3,6 +3,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import type { Stripe } from '@stripe/stripe-js';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import type { TableLock } from '@code829/shared/types/layout';
+import type { PricingQuote } from '@code829/shared/types/pricing';
 import TableLockTimer from './TableLockTimer';
 import StripePaymentForm from './StripePaymentForm';
 
@@ -17,13 +18,14 @@ interface GridCheckoutProps {
   onPaymentSuccess: () => void;
   onCancel: () => void;
   onExpired: () => void;
-  taxAmountCents?: number | null;
+  quote: PricingQuote | null;
+  quoteLoading: boolean;
+  quoteError: string | null;
 }
 
 interface OpenCheckoutProps {
   mode: 'open';
   seatCount: number;
-  pricePerPersonCents: number;
   confirming: boolean;
   setConfirming: (v: boolean) => void;
   error: string | null;
@@ -31,31 +33,25 @@ interface OpenCheckoutProps {
   stripePromise: Promise<Stripe | null> | null;
   onPaymentSuccess: () => void;
   onCancel: () => void;
-  taxAmountCents?: number | null;
+  quote: PricingQuote | null;
+  quoteLoading: boolean;
+  quoteError: string | null;
 }
 
 type Props = GridCheckoutProps | OpenCheckoutProps;
 
 export default function CheckoutPanel(props: Props) {
-  const { mode, confirming, setConfirming, error, clientSecret, stripePromise, onPaymentSuccess, onCancel, taxAmountCents } = props;
+  const { mode, confirming, setConfirming, error, clientSecret, stripePromise, onPaymentSuccess, onCancel, quote, quoteLoading, quoteError } = props;
 
-  let subtotal: number;
   let description: string;
-
   if (mode === 'grid') {
     const { tableLocks } = props;
-    subtotal = tableLocks.reduce((sum, l) => sum + l.displayPriceCents, 0);
     const labels = tableLocks.map(l => l.tableLabel).join(', ');
     const totalSeats = tableLocks.reduce((sum, l) => sum + l.capacity, 0);
     description = `Table${tableLocks.length > 1 ? 's' : ''} ${labels} — ${totalSeats} seats`;
   } else {
-    const { seatCount, pricePerPersonCents } = props;
-    subtotal = seatCount * pricePerPersonCents;
-    description = `${seatCount} seat${seatCount !== 1 ? 's' : ''} x ${centsToUSD(pricePerPersonCents)}`;
+    description = `${props.seatCount} seat${props.seatCount !== 1 ? 's' : ''}`;
   }
-
-  const tax = taxAmountCents ?? 0;
-  const total = subtotal + tax;
 
   return (
     <Card title="Checkout" styles={{ header: { borderBottom: 'none' } }}>
@@ -95,31 +91,46 @@ export default function CheckoutPanel(props: Props) {
 
         <Divider style={{ margin: '8px 0' }} />
 
-        {taxAmountCents ? (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography.Text>Admission Fee</Typography.Text>
-              <Typography.Text>{centsToUSD(subtotal)}</Typography.Text>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography.Text>Tax</Typography.Text>
-              <Typography.Text>{centsToUSD(taxAmountCents)}</Typography.Text>
-            </div>
-            <Divider style={{ margin: '8px 0' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography.Text strong>Total</Typography.Text>
-              <Typography.Text strong style={{ fontSize: 18 }}>{centsToUSD(total)}</Typography.Text>
-            </div>
-          </>
+        {quoteError ? (
+          <Alert type="error" message="Unable to load pricing" description={quoteError} showIcon />
+        ) : quoteLoading || !quote ? (
+          <Skeleton active paragraph={{ rows: 3 }} />
         ) : (
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography.Text strong>Admission Fee</Typography.Text>
-              <Typography.Text strong style={{ fontSize: 18 }}>{centsToUSD(subtotal)}</Typography.Text>
+              <Typography.Text>Subtotal</Typography.Text>
+              <Typography.Text>{centsToUSD(quote.subtotalCents)}</Typography.Text>
             </div>
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              + applicable taxes
-            </Typography.Text>
+            {quote.feeCents > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography.Text>Platform fee</Typography.Text>
+                <Typography.Text>{centsToUSD(quote.feeCents)}</Typography.Text>
+              </div>
+            )}
+            {quote.taxCents > 0 ? (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography.Text>Tax</Typography.Text>
+                  <Typography.Text>{centsToUSD(quote.taxCents)}</Typography.Text>
+                </div>
+                <Divider style={{ margin: '8px 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography.Text strong>Total</Typography.Text>
+                  <Typography.Text strong style={{ fontSize: 18 }}>{quote.formattedTotal}</Typography.Text>
+                </div>
+              </>
+            ) : (
+              <>
+                <Divider style={{ margin: '8px 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography.Text strong>Total</Typography.Text>
+                  <Typography.Text strong style={{ fontSize: 18 }}>{quote.formattedTotal}</Typography.Text>
+                </div>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  + applicable taxes
+                </Typography.Text>
+              </>
+            )}
           </>
         )}
 

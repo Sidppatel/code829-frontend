@@ -12,18 +12,13 @@ export interface EventSummary {
   venueCity: string;
   venueState: string;
   layoutMode: string;
-  pricePerPersonCents?: number;
   totalCapacity: number;
   totalSold: number;
   noOfAvailableTables: number;
-  minPricePerTableCents?: number;
-  displayPricePerPersonCents?: number;
-  displayMinPricePerTableCents?: number;
-  displayMinTicketTypePriceCents?: number;
   displayFromAmountCents?: number;
   displayFromFormatted?: string;
-  isSoldOut?: boolean;
-  availableCount?: number;
+  isSoldOut: boolean;
+  availableCount: number;
   venue?: VenueBasic;
   ticketTypes?: EventTicketType[];
 }
@@ -36,15 +31,15 @@ export interface EventDetail extends EventSummary {
   venue: VenueBasic;
   organizerId?: string;
   organizerName?: string;
-  pricePerPersonCents?: number;
   gridRows?: number;
   gridCols?: number;
   soldCount?: number;
   checkInCount?: number;
   createdAt: string;
-  minPricePerTableCents?: number;
   ticketTypes?: EventTicketType[];
   tableTypes?: EventTableTypeSummary[];
+  /** Raw per-person price (pre-fee) — admin surfaces only. Public pages use displayFromAmountCents. */
+  pricePerPersonCents?: number;
 }
 
 export interface VenueBasic {

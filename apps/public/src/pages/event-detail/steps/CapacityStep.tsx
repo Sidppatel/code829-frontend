@@ -23,8 +23,8 @@ export default function CapacityStep({ event, ticketTypes, ticketTypesLoading, o
           ) : (
             <CapacityBookingForm
               maxCapacity={event.maxCapacity ?? 0}
-              totalSold={event.totalSold}
-              pricePerPersonCents={event.displayPricePerPersonCents ?? event.pricePerPersonCents ?? 0}
+              availableCount={event.availableCount}
+              pricePerPersonCents={event.displayFromAmountCents ?? 0}
               ticketTypes={ticketTypes.length > 0 ? ticketTypes : undefined}
               onProceed={onProceed}
             />

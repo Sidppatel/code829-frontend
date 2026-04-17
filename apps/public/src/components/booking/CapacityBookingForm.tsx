@@ -6,7 +6,7 @@ import type { EventTicketType } from '@code829/shared/types/event';
 
 interface Props {
   maxCapacity: number;
-  totalSold: number;
+  availableCount: number;
   pricePerPersonCents: number;
   ticketTypes?: EventTicketType[];
   onProceed: (seats: number, ticketTypeId?: string) => void;
@@ -14,7 +14,7 @@ interface Props {
 
 export default function CapacityBookingForm({
   maxCapacity,
-  totalSold,
+  availableCount,
   pricePerPersonCents,
   ticketTypes,
   onProceed,
@@ -30,9 +30,7 @@ export default function CapacityBookingForm({
     : undefined;
 
   const priceCents = selectedType?.displayPriceCents ?? pricePerPersonCents;
-  const available = selectedType
-    ? selectedType.availableCount
-    : maxCapacity - totalSold;
+  const available = selectedType ? selectedType.availableCount : availableCount;
   const total = priceCents * seats;
 
   return (
