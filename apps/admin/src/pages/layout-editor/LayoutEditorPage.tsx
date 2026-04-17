@@ -219,13 +219,16 @@ export default function LayoutEditorPage() {
       }
     }
 
+    // Default label to a grid-coordinate style (A1, B3, …) so the label visible in the
+    // editor is the same string the public checkout and booking record store. Admin can
+    // still rename via SelectedTableControl. If the auto-computed coord is already taken
+    // (e.g., editing a weird layout), fall back to numeric suffixes so save doesn't fail.
     const existingLabels = new Set(tables.map((t) => t.label));
-    const baseName = et.label.length > 16 ? et.label.slice(0, 16) : et.label;
-    let label = `${baseName} ${tables.length + 1}`;
-    let counter = tables.length + 1;
+    const coordLabel = `${String.fromCharCode(65 + (col % 26))}${row + 1}`;
+    let label = coordLabel;
+    let counter = 2;
     while (existingLabels.has(label)) {
-      counter++;
-      label = `${baseName} ${counter}`;
+      label = `${coordLabel}-${counter++}`;
     }
 
     const newTable: LayoutTable = {

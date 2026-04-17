@@ -11,7 +11,8 @@ interface TableElementProps {
   onClick: () => void;
 }
 
-/** Derive display label from grid position: col letter + row number (e.g. A1, B3) */
+/** Fallback label derived from grid coords. Only used when a table has no stored label —
+ *  the server's label is authoritative and must match what the public checkout shows. */
 function gridLabel(gridRow: number, gridCol: number): string {
   const col = String.fromCharCode(65 + (gridCol % 26));
   return `${col}${gridRow + 1}`;
@@ -75,7 +76,7 @@ export default function TableElement({
         </div>
       )}
 
-      <div className="fp-table-label">{gridLabel(table.gridRow, table.gridCol)}</div>
+      <div className="fp-table-label">{table.label || gridLabel(table.gridRow, table.gridCol)}</div>
       <div className="fp-table-meta">
         {table.capacity}p &middot; {centsToUSD(table.priceCents)}
       </div>

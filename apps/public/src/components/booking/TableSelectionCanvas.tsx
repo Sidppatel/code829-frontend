@@ -20,9 +20,15 @@ interface Props {
 }
 
 /** Derive display label from grid position: col letter + row number (e.g. A1, B3) */
+// Fallback used only when a table has no server-assigned label.
+// The server's label is authoritative and must match what the checkout + booking record show.
 function gridLabel(gridRow: number, gridCol: number): string {
   const col = String.fromCharCode(65 + (gridCol % 26));
   return `${col}${gridRow + 1}`;
+}
+
+function labelFor(table: EventTableDto): string {
+  return table.label || gridLabel(table.gridRow, table.gridCol);
 }
 
 const SHAPE_RADIUS: Record<string, string> = {
@@ -101,7 +107,7 @@ export default function TableSelectionCanvas({
   }, [token]);
 
   const getTooltip = (table: EventTableDto): string => {
-    const label = gridLabel(table.gridRow, table.gridCol);
+    const label = labelFor(table);
     if (table.isLockedByYou) return `${label} — Reserved by you (click to remove)`;
     if (lockedTables.length > 0 && table.status === 'Available') return `${label} — ${table.capacity} seats — ${centsToUSD(table.displayPriceCents)} — Click to add`;
     switch (table.status) {
@@ -198,7 +204,7 @@ export default function TableSelectionCanvas({
               )}
 
               <Typography.Text strong className="ts-table-label">
-                {gridLabel(table.gridRow, table.gridCol)}
+                {labelFor(table)}
               </Typography.Text>
               <span className="ts-table-meta">
                 {table.capacity}p &middot; {centsToUSD(table.displayPriceCents)}
@@ -271,7 +277,7 @@ export default function TableSelectionCanvas({
 
         {/* Detail panel — shown when user has locked tables */}
         {lockedTables.length > 0 && (() => {
-          const labels = lockedTables.map(t => gridLabel(t.gridRow, t.gridCol)).join(', ');
+          const labels = lockedTables.map(labelFor).join(', ');
           const totalSeats = lockedTables.reduce((sum, t) => sum + t.capacity, 0);
           const totalPrice = lockedTables.reduce((sum, t) => sum + t.displayPriceCents, 0);
           const earliestExpiry = lockedTables

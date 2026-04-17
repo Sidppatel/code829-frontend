@@ -90,6 +90,19 @@ export default function BookingTicketsPage() {
     }
   };
 
+  const handleClaimSelf = async (ticketId: string) => {
+    if (!bookingId) return;
+    try {
+      await ticketsApi.claimSelf(bookingId, ticketId);
+      log.info('Ticket self-claimed', { bookingId, ticketId });
+      message.success('Ticket claimed — it now appears in your My Tickets');
+      void loadTickets();
+    } catch (err) {
+      log.error('Failed to claim ticket for self', err);
+      message.error('Failed to claim ticket');
+    }
+  };
+
   const handleRevoke = (ticketId: string) => {
     if (!bookingId) return;
     Modal.confirm({
@@ -187,6 +200,17 @@ export default function BookingTicketsPage() {
                   QR
                 </Button>
 
+                {ticket.status === 'Unassigned' && (
+                  <Button
+                    size="small"
+                    type="primary"
+                    icon={<UserOutlined />}
+                    onClick={() => handleClaimSelf(ticket.id)}
+                  >
+                    Claim for Myself
+                  </Button>
+                )}
+
                 {(ticket.status === 'Unassigned' || ticket.status === 'Invited') && (
                   <Button
                     size="small"
@@ -198,7 +222,7 @@ export default function BookingTicketsPage() {
                       setInviteEmail(ticket.invitedEmail ?? '');
                     }}
                   >
-                    {ticket.status === 'Invited' ? 'Resend' : 'Invite'}
+                    {ticket.status === 'Invited' ? 'Resend' : 'Send to Guest'}
                   </Button>
                 )}
 

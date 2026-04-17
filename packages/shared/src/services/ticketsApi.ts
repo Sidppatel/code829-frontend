@@ -14,6 +14,11 @@ export const ticketsApi = {
   revoke: (bookingId: string, ticketId: string) =>
     apiClient.post(`/bookings/${bookingId}/tickets/${ticketId}/revoke`),
 
+  claimSelf: (bookingId: string, ticketId: string) =>
+    apiClient.post<{ message: string; ticketId: string }>(
+      `/bookings/${bookingId}/tickets/${ticketId}/claim-self`
+    ),
+
   getClaimInfo: (token: string) =>
     apiClient.get<TicketClaimInfo>('/tickets/claim', { params: { token } }),
 
