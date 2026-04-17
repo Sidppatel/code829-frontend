@@ -4,7 +4,7 @@ import { PlusOutlined, AimOutlined, EditOutlined } from '@ant-design/icons';
 import type { EventTableType, TableTemplate } from '@code829/shared/types/layout';
 import type { EditorMode } from '../LayoutEditorPage';
 import { adminLayoutApi } from '../../../services/api';
-import { centsToUSD } from '@code829/shared/utils/currency';
+import { centsToUSD, centsToDollars } from '@code829/shared/utils/currency';
 
 const SHAPES = ['Round', 'Rectangle', 'Square', 'Cocktail'].map((s) => ({ label: s, value: s }));
 
@@ -71,7 +71,7 @@ export default function EventTableTypesControl({
       capacity: et.capacity,
       shape: et.shape,
       color: et.color,
-      priceDollars: et.priceCents / 100,
+      priceDollars: centsToDollars(et.priceCents),
     });
     setEditModalOpen(true);
   };
@@ -121,7 +121,7 @@ export default function EventTableTypesControl({
         capacity: t.defaultCapacity,
         shape: t.defaultShape,
         color: t.defaultColor,
-        priceDollars: t.defaultPriceCents / 100,
+        priceDollars: centsToDollars(t.defaultPriceCents),
       });
     }
   };
@@ -148,7 +148,7 @@ export default function EventTableTypesControl({
                   capacity: first.defaultCapacity,
                   shape: first.defaultShape,
                   color: first.defaultColor,
-                  priceDollars: first.defaultPriceCents / 100,
+                  priceDollars: centsToDollars(first.defaultPriceCents),
                 });
               }
               setAddModalOpen(true);

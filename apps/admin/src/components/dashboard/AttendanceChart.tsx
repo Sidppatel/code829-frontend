@@ -30,6 +30,7 @@ export default function AttendanceChart({ data = DEFAULT_DATA, height = 300 }: A
     return data.map((d, i) => {
       const x = (i / (data.length - 1)) * width;
       const y = height - (d.checkIns / maxValue) * height;
+      // eslint-disable-next-line event-platform/no-business-calc-in-jsx -- SVG coordinate math
       const capY = height - (d.capacity / maxValue) * height;
       return { x, y, capY, ...d };
     });

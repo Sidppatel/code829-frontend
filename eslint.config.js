@@ -24,11 +24,9 @@ export default defineConfig([
       },
     },
     rules: {
-      // Severity 'warn' for now because pre-existing sites outside the booking
-      // flow still have business arithmetic (timer displays, admin dashboards,
-      // etc.). Catches new regressions without breaking the build on legacy code.
-      // Escalate to 'error' once the backlog clears.
-      'event-platform/no-business-calc-in-jsx': 'warn',
+      // Severity 'error': the backlog has been cleared. Intentional exceptions use
+      // `// eslint-disable-next-line event-platform/no-business-calc-in-jsx -- <reason>`.
+      'event-platform/no-business-calc-in-jsx': 'error',
     },
     languageOptions: {
       ecmaVersion: 2020,

@@ -24,6 +24,7 @@ const { useBreakpoint } = Grid;
 
 function MobileCard({ row, defaultFee, mode }: { row: PricingRow; defaultFee: number; mode: 'open' | 'grid' }) {
   const fee = row.platformFeeCents ?? defaultFee;
+  // eslint-disable-next-line event-platform/no-business-calc-in-jsx -- admin preview subtotal; booking flow uses the authoritative quote.
   const total = row.priceCents + fee;
   const cap = row.capacity != null && row.capacity > 0 ? row.capacity : '∞';
 
@@ -139,6 +140,7 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
       width: 120,
       render: (_: unknown, record: PricingRow) => {
         const fee = record.platformFeeCents ?? defaultPlatformFeeCents;
+        // eslint-disable-next-line event-platform/no-business-calc-in-jsx -- admin preview subtotal; booking flow uses the authoritative quote.
         const total = record.priceCents + fee;
         return (
           <Tag style={{ color: 'var(--accent-gold)', background: 'color-mix(in srgb, var(--accent-gold) 14%, transparent)', borderColor: 'color-mix(in srgb, var(--accent-gold) 24%, transparent)', fontWeight: 700, borderRadius: 6, fontSize: 13 }}>

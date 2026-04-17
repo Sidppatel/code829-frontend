@@ -161,6 +161,7 @@ export default function AdminDashboardPage() {
                     </span>
                   </div>
                   <Progress
+                    // eslint-disable-next-line event-platform/no-business-calc-in-jsx -- dashboard display; backend returns sold+total but not the percent.
                     percent={(nextEvent.soldCount / nextEvent.totalCapacity) * 100}
                     showInfo={false}
                     strokeColor="#FBBF24"

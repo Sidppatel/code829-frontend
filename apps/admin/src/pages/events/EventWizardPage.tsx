@@ -33,6 +33,7 @@ import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import ImageUpload from '@code829/shared/components/shared/ImageUpload';
 import { createLogger } from '@code829/shared/lib/logger';
+import { centsToDollars } from '@code829/shared/utils/currency';
 
 const log = createLogger('Admin/EventWizardPage');
 
@@ -114,12 +115,12 @@ export default function EventWizardPage() {
           isFeatured: data.isFeatured,
           maxCapacity: data.maxCapacity,
           pricePerPerson: data.pricePerPersonCents != null
-            ? data.pricePerPersonCents / 100
+            ? centsToDollars(data.pricePerPersonCents)
             : undefined,
           ticketTypes: data.ticketTypes?.map(tt => ({
             ...tt,
             name: (tt as any).label ? [(tt as any).label] : [],
-            price: (tt as any).priceCents / 100,
+            price: centsToDollars((tt as any).priceCents),
             capacity: (tt as any).maxQuantity
           })) || []
         });

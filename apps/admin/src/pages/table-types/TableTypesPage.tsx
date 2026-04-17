@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Table, Button, Switch, App, Tooltip, Modal, Form, Input, InputNumber, Select, ColorPicker } from 'antd';
 import { PlusOutlined, EditOutlined, TeamOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../services/api';
-import { centsToUSD } from '@code829/shared/utils/currency';
+import { centsToUSD, centsToDollars } from '@code829/shared/utils/currency';
 import type { TableTemplate } from '@code829/shared/types/layout';
 import type { CreateTableTemplatePayload } from '@code829/shared/services/adminLayoutApi';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
@@ -45,7 +45,7 @@ export default function TableTypesPage() {
       defaultCapacity: record.defaultCapacity,
       defaultShape: record.defaultShape,
       defaultColor: record.defaultColor ?? '#7C3AED',
-      defaultPriceCents: record.defaultPriceCents / 100,
+      defaultPriceCents: centsToDollars(record.defaultPriceCents),
     });
     setModalOpen(true);
   };
