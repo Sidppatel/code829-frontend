@@ -8,17 +8,23 @@ export function NavbarPublic({ items = [], user, onLogout, actions }: NavbarProp
   const userRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!menuOpen) return;
     const onDocClick = (e: MouseEvent) => {
-      if (!userRef.current?.contains(e.target as Node)) setMenuOpen(false);
+      // Handle desktop menu
+      if (menuOpen && userRef.current && !userRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMenuOpen(false);
+      if (e.key === 'Escape') {
+        setMenuOpen(false);
+        setMobileMenuOpen(false);
+      }
     };
-    document.addEventListener('mousedown', onDocClick);
+
+    document.addEventListener('click', onDocClick);
     document.addEventListener('keydown', onKey);
     return () => {
-      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('click', onDocClick);
       document.removeEventListener('keydown', onKey);
     };
   }, [menuOpen]);
