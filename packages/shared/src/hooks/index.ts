@@ -23,3 +23,5 @@ export type { QrFetcher, UseQrCodeResult } from './useQrCode';
 export { usePaymentIntentConfirmation } from './usePaymentIntentConfirmation';
 export { useGuestTickets } from './useGuestTickets';
 export type { UseGuestTicketsResult } from './useGuestTickets';
+export { useHomepageEvents } from './useHomepageEvents';
+export type { UseHomepageEventsResult } from './useHomepageEvents';

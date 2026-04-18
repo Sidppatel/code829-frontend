@@ -24,6 +24,8 @@ export type { QrFetcher, UseQrCodeResult } from './hooks/useQrCode';
 export { usePaymentIntentConfirmation } from './hooks/usePaymentIntentConfirmation';
 export { useGuestTickets } from './hooks/useGuestTickets';
 export type { UseGuestTicketsResult } from './hooks/useGuestTickets';
+export { useHomepageEvents } from './hooks/useHomepageEvents';
+export type { UseHomepageEventsResult } from './hooks/useHomepageEvents';
 
 // Context
 export { ThemeProvider } from './context/ThemeContext';

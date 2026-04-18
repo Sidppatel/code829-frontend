@@ -1,48 +1,24 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { createLogger } from '@code829/shared/lib/logger';
-import { eventsApi } from '../../services/api';
-import type { EventSummary } from '@code829/shared/types/event';
-
-const log = createLogger('Public/HomePage');
+import { useHomepageEvents } from '@code829/shared/hooks';
 import EventCard from '../../components/events/EventCard';
 
 export default function HomePage() {
-  const [featured, setFeatured] = useState<EventSummary[]>([]);
-  const [upcoming, setUpcoming] = useState<EventSummary[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { featured, upcoming, loading } = useHomepageEvents();
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [featRes, upRes] = await Promise.all([
-          eventsApi.list({ pageSize: 4 }),
-          eventsApi.list({ pageSize: 6 }),
-        ]);
-        setFeatured(featRes.data.items.filter((e) => e.isFeatured));
-        setUpcoming(upRes.data.items);
-        log.info('Loaded home events', {
-          featured: featRes.data.items.filter((e) => e.isFeatured).length,
-          upcoming: upRes.data.items.length,
-        });
-      } catch (err) {
-        log.error('Failed to load home events', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    void load();
-  }, []);
+  const stats = [
+    { n: `${upcoming.length || 6}`, l: 'Events this season' },
+    { n: '12', l: 'Partner venues' },
+    { n: '4.9', l: 'Guest rating' },
+  ];
 
   return (
     <div style={{ minHeight: '100vh', position: 'relative' }}>
       <Helmet><title>Curated evenings, thoughtfully seated — Code829</title></Helmet>
 
-      {/* HERO — HeroA (full-bleed organizer photo with ken-burns + duotone) */}
       <section className="c829-hero" style={{ position: 'relative', overflow: 'hidden', padding: '120px 32px 110px' }}>
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
           <div
@@ -211,11 +187,7 @@ export default function HomePage() {
               transition={{ duration: 0.7, delay: 0.45 }}
               style={{ marginTop: 48, display: 'flex', gap: 40, flexWrap: 'wrap' }}
             >
-              {[
-                { n: `${upcoming.length || 6}`, l: 'Events this season' },
-                { n: '12', l: 'Partner venues' },
-                { n: '4.9', l: 'Guest rating' },
-              ].map((x) => (
+              {stats.map((x) => (
                 <div key={x.l}>
                   <div
                     style={{
@@ -244,7 +216,6 @@ export default function HomePage() {
             </motion.div>
           </div>
 
-          {/* Organizer image card */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -337,7 +308,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* NEXT IN SEASON */}
       <section style={{ padding: '60px 32px 100px', maxWidth: 1200, margin: '0 auto' }}>
         <div
           style={{
