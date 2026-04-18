@@ -410,7 +410,7 @@ export default function EventWizardPage() {
                   <Button
                     size="small"
                     type="link"
-                    onClick={() => navigate(`/events/${id}/layout`)}
+                    onClick={() => navigate(`/layout/${id}`)}
                     style={{ marginLeft: 'auto' }}
                   >
                     Open editor →
