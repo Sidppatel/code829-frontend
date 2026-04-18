@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import type { UserRole } from '../../types/auth';
 import LoadingSpinner from '../shared/LoadingSpinner';
@@ -37,5 +37,5 @@ export default function ProtectedRoute({ children, minRole = 'User' }: Props) {
     return <Navigate to="/profile" state={{ setup: true }} replace />;
   }
 
-  return <>{children}</>;
+  return <>{children || <Outlet />}</>;
 }

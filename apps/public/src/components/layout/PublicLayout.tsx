@@ -17,6 +17,7 @@ import type { MenuProps } from 'antd';
 import { Avatar, Grid } from 'antd';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import BrandLogo from '@code829/shared/components/shared/BrandLogo';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const { Header, Content, Footer } = Layout;
 const { useBreakpoint } = Grid;
@@ -218,7 +219,17 @@ export default function PublicLayout() {
 
       {/* Content */}
       <Content style={{ background: 'transparent', padding: '130px 16px 100px', maxWidth: 1440, width: '100%', margin: '0 auto' }}>
-        <Outlet />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </Content>
 
       {/* Footer — desktop only */}

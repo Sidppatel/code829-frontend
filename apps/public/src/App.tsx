@@ -6,7 +6,6 @@ import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import ProtectedRoute from '@code829/shared/components/auth/ProtectedRoute';
 import PublicLayout from './components/layout/PublicLayout';
 import { useSessionRefresh } from '@code829/shared/hooks/useSessionRefresh';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 
 const HomePage = lazy(() => import('./pages/home/HomePage'));
@@ -27,40 +26,30 @@ function AppContent() {
   const location = useLocation();
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
-      >
-        <Routes location={location} key={location.pathname}>
-          {/* Public */}
-          <Route element={<PublicLayout />}>
-            <Route index element={<HomePage />} />
-            <Route path="events" element={<EventsPage />} />
-            <Route path="events/:slug" element={<EventDetailPage />} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="auth/verify" element={<VerifyMagicLinkPage />} />
-            <Route path="onboarding" element={<OnboardingPage />} />
-            <Route path="tickets/claim" element={<TicketClaimPage />} />
-            <Route path="feedback" element={<FeedbackPage />} />
-          </Route>
+    <Routes location={location}>
+      <Route element={<PublicLayout />}>
+        {/* Public */}
+        <Route index element={<HomePage />} />
+        <Route path="events" element={<EventsPage />} />
+        <Route path="events/:slug" element={<EventDetailPage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="auth/verify" element={<VerifyMagicLinkPage />} />
+        <Route path="onboarding" element={<OnboardingPage />} />
+        <Route path="tickets/claim" element={<TicketClaimPage />} />
+        <Route path="feedback" element={<FeedbackPage />} />
 
-          {/* Authenticated Users */}
-          <Route element={<ProtectedRoute><PublicLayout /></ProtectedRoute>}>
-            <Route path="bookings" element={<MyBookingsPage />} />
-            <Route path="bookings/:bookingId" element={<BookingDetailPage />} />
-            <Route path="bookings/:bookingId/tickets" element={<BookingTicketsPage />} />
-            <Route path="tickets" element={<MyTicketsPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-          </Route>
+        {/* Authenticated Users */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="bookings" element={<MyBookingsPage />} />
+          <Route path="bookings/:bookingId" element={<BookingDetailPage />} />
+          <Route path="bookings/:bookingId/tickets" element={<BookingTicketsPage />} />
+          <Route path="tickets" element={<MyTicketsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+        </Route>
+      </Route>
 
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </motion.div>
-    </AnimatePresence>
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
 
