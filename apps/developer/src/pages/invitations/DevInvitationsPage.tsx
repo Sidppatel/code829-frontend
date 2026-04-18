@@ -1,8 +1,19 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Modal, Form, Input, Select, Typography, Card, Tag, App, Space } from 'antd';
-import { SendOutlined, DeleteOutlined } from '@ant-design/icons';
+import { useCallback } from 'react';
+import { Button, Input, Select, Tag, Typography } from 'antd';
+import { DeleteOutlined, SendOutlined } from '@ant-design/icons';
 import apiClient from '@code829/shared/lib/axios';
-import PageHeader from '@code829/shared/components/shared/PageHeader';
+import {
+  CrudModal,
+  DataTableSection,
+  FormField,
+  PageShell,
+} from '@code829/shared/components/ui';
+import {
+  useAsyncAction,
+  useAsyncResource,
+  useConfirm,
+  useCrudModal,
+} from '@code829/shared/hooks';
 
 interface Invitation {
   id: string;
@@ -14,81 +25,147 @@ interface Invitation {
   createdAt: string;
 }
 
+interface InvitationForm {
+  email: string;
+  role: string;
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  Pending: 'blue',
+  Accepted: 'green',
+  Revoked: 'default',
+  Expired: 'orange',
+};
+
+const ROLE_COLORS: Record<string, string> = {
+  Admin: 'purple',
+  Staff: 'blue',
+};
+
 export default function DevInvitationsPage() {
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [form] = Form.useForm();
-  const { message } = App.useApp();
-
   const fetchInvitations = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data } = await apiClient.get('/developer/invitations');
-      setInvitations(data.items);
-    } catch { message.error('Failed to load invitations'); }
-    finally { setLoading(false); }
-  }, [message]);
+    const { data } = await apiClient.get<{ items: Invitation[] }>('/developer/invitations');
+    return data.items;
+  }, []);
+  const { data: invitations, loading, refresh } = useAsyncResource(fetchInvitations);
 
-  useEffect(() => { void fetchInvitations(); }, [fetchInvitations]);
+  const crud = useCrudModal<Invitation>();
+  const send = useAsyncAction(
+    (values: InvitationForm) => apiClient.post('/developer/invitations', values),
+    { successMessage: 'Invitation sent', onSuccess: () => { crud.close(); refresh(); } },
+  );
+  const revoke = useAsyncAction(
+    (id: string) => apiClient.delete(`/developer/invitations/${id}`),
+    { successMessage: 'Invitation revoked', onSuccess: refresh },
+  );
+  const confirm = useConfirm();
 
-  const sendInvitation = async (values: { email: string; role: string }) => {
-    setSending(true);
-    try {
-      await apiClient.post('/developer/invitations', values);
-      message.success('Invitation sent!');
-      form.resetFields();
-      setModalOpen(false);
-      void fetchInvitations();
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to send invitation';
-      message.error(msg);
-    } finally { setSending(false); }
-  };
-
-  const revokeInvitation = async (id: string) => {
-    try {
-      await apiClient.delete(`/developer/invitations/${id}`);
-      message.success('Invitation revoked');
-      void fetchInvitations();
-    } catch { message.error('Failed to revoke invitation'); }
-  };
-
-  const STATUS_COLORS: Record<string, string> = { Pending: 'blue', Accepted: 'green', Revoked: 'default', Expired: 'orange' };
-  const ROLE_COLORS: Record<string, string> = { Admin: 'purple', Staff: 'blue' };
+  const items = invitations ?? [];
 
   return (
-    <div style={{ padding: 24 }}>
-      <PageHeader title="Invitations" subtitle="Manage all platform invitations" />
-      <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Button type="primary" icon={<SendOutlined />} onClick={() => setModalOpen(true)}>Send Invitation</Button>
-        </Space>
-        <Table dataSource={invitations} rowKey="id" loading={loading}
-          columns={[
-            { title: 'Email', dataIndex: 'email' },
-            { title: 'Role', dataIndex: 'role', render: (r: string) => <Tag color={ROLE_COLORS[r]}>{r}</Tag> },
-            { title: 'Status', dataIndex: 'status', render: (s: string) => <Tag color={STATUS_COLORS[s]}>{s}</Tag> },
-            { title: 'Invited By', dataIndex: 'invitedByName' },
-            { title: 'Expires', dataIndex: 'expiresAt', render: (d: string) => new Date(d).toLocaleDateString() },
-            { title: 'Actions', render: (_: unknown, r: Invitation) => r.status === 'Pending' ? <Button icon={<DeleteOutlined />} danger size="small" onClick={() => revokeInvitation(r.id)}>Revoke</Button> : <Typography.Text type="secondary">—</Typography.Text> },
-          ]}
-        />
-      </Card>
-      <Modal title="Send Invitation" open={modalOpen} onCancel={() => setModalOpen(false)} footer={null}>
-        <Form form={form} layout="vertical" onFinish={sendInvitation} initialValues={{ role: 'Staff' }}>
-          <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
-            <Input placeholder="user@example.com" />
-          </Form.Item>
-          <Form.Item name="role" label="Role" rules={[{ required: true }]}>
-            <Select options={[{ value: 'Admin', label: 'Admin' }, { value: 'Staff', label: 'Staff' }]} />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={sending} block>Send Invitation</Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
+    <PageShell
+      title="Invitations"
+      subtitle="Manage all platform invitations"
+      extra={
+        <Button type="primary" icon={<SendOutlined />} onClick={crud.openCreate}>
+          Send Invitation
+        </Button>
+      }
+    >
+      <DataTableSection<Invitation>
+        data={items}
+        total={items.length}
+        page={1}
+        pageSize={items.length || 10}
+        loading={loading}
+        onPageChange={() => {}}
+        rowKey="id"
+        showSizeChanger={false}
+        columns={[
+          { title: 'Email', dataIndex: 'email', key: 'email' },
+          {
+            title: 'Role',
+            dataIndex: 'role',
+            key: 'role',
+            render: (r: string) => <Tag color={ROLE_COLORS[r]}>{r}</Tag>,
+          },
+          {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (s: string) => <Tag color={STATUS_COLORS[s]}>{s}</Tag>,
+          },
+          { title: 'Invited By', dataIndex: 'invitedByName', key: 'invitedByName' },
+          {
+            title: 'Expires',
+            dataIndex: 'expiresAt',
+            key: 'expiresAt',
+            render: (d: string) => new Date(d).toLocaleDateString(),
+          },
+          {
+            title: 'Actions',
+            key: 'actions',
+            render: (_: unknown, r: Invitation) =>
+              r.status === 'Pending' ? (
+                <Button
+                  icon={<DeleteOutlined />}
+                  danger
+                  size="small"
+                  onClick={() =>
+                    confirm({
+                      title: 'Revoke invitation?',
+                      description: `Revoke invitation for ${r.email}?`,
+                      tone: 'danger',
+                      confirmLabel: 'Revoke',
+                      onConfirm: () => revoke.run(r.id),
+                    })
+                  }
+                >
+                  Revoke
+                </Button>
+              ) : (
+                <Typography.Text type="secondary">—</Typography.Text>
+              ),
+          },
+        ]}
+        empty={{
+          title: 'No invitations yet',
+          description: 'Send your first invitation to get started.',
+          actionLabel: 'Send Invitation',
+          onAction: crud.openCreate,
+        }}
+      />
+      <CrudModal<InvitationForm>
+        open={crud.open}
+        mode={crud.mode}
+        onClose={crud.close}
+        saving={send.loading}
+        initialValues={{ role: 'Staff' }}
+        onSubmit={async (v) => { await send.run(v); }}
+        titles={{ create: 'Send Invitation', edit: 'Edit Invitation' }}
+        submitLabel={{ create: 'Send Invitation' }}
+      >
+        {() => (
+          <>
+            <FormField
+              name="email"
+              label="Email"
+              required
+              rules={[{ type: 'email', message: 'Enter a valid email' }]}
+            >
+              <Input placeholder="user@example.com" />
+            </FormField>
+            <FormField name="role" label="Role" required>
+              <Select
+                options={[
+                  { value: 'Admin', label: 'Admin' },
+                  { value: 'Staff', label: 'Staff' },
+                ]}
+              />
+            </FormField>
+          </>
+        )}
+      </CrudModal>
+    </PageShell>
   );
 }
