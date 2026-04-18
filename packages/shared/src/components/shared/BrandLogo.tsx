@@ -46,8 +46,6 @@ export default function BrandLogo({
       <div style={{
         width: iconSize,
         height: iconSize,
-        borderRadius: '50%',
-        overflow: 'hidden',
         flexShrink: 0,
       }}>
         <img
