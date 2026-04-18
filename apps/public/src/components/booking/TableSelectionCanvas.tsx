@@ -1,10 +1,13 @@
-import { useState, useCallback, useMemo } from 'react';
-import { Card, Button, Typography, Space, Divider, theme, Spin } from 'antd';
-import { LockOutlined, CheckCircleOutlined, StopOutlined, LoadingOutlined } from '@ant-design/icons';
+import { useMemo } from 'react';
+import { Card, Button, Typography, Space, Divider, theme } from 'antd';
 import type { EventTableDto, EventTableTypeInfo } from '@code829/shared/types/event';
 import { centsToUSD } from '@code829/shared/utils/currency';
+import {
+  FloorPlan,
+  TierLegend,
+  floorPlanLabelFor,
+} from '@code829/shared/components/floorplan';
 import TableLockTimer from './TableLockTimer';
-import { useHoldTimer } from '@code829/shared/hooks/useHoldTimer';
 import { useBookingQuote } from '@code829/shared/hooks/useBookingQuote';
 
 interface Props {
@@ -21,44 +24,6 @@ interface Props {
   onLockExpired: () => void;
 }
 
-/** Derive display label from grid position: col letter + row number (e.g. A1, B3) */
-// Fallback used only when a table has no server-assigned label.
-// The server's label is authoritative and must match what the checkout + booking record show.
-function gridLabel(gridRow: number, gridCol: number): string {
-  const col = String.fromCharCode(65 + (gridCol % 26));
-  return `${col}${gridRow + 1}`;
-}
-
-function labelFor(table: EventTableDto): string {
-  return table.label || gridLabel(table.gridRow, table.gridCol);
-}
-
-const SHAPE_RADIUS: Record<string, string> = {
-  Round: '16px',
-  Cocktail: '16px',
-  Square: '4px',
-  Rectangle: '6px',
-};
-
-/** Inline countdown rendered inside each cell the user has locked */
-function CellCountdown({ expiresAt }: { expiresAt: string }) {
-  const secondsLeft = useHoldTimer(expiresAt);
-  if (secondsLeft <= 0) return null;
-  const m = Math.floor(secondsLeft / 60);
-  const s = secondsLeft % 60;
-  const isUrgent = secondsLeft <= 60;
-  return (
-    <span style={{
-      fontSize: 10,
-      fontWeight: 700,
-      lineHeight: 1,
-      color: isUrgent ? 'var(--ant-color-error)' : 'var(--ant-color-warning)',
-    }}>
-      {m}:{s.toString().padStart(2, '0')}
-    </span>
-  );
-}
-
 export default function TableSelectionCanvas({
   eventId,
   tables,
@@ -73,170 +38,15 @@ export default function TableSelectionCanvas({
   onLockExpired,
 }: Props) {
   const { token } = theme.useToken();
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const quoteSelection = useMemo(
-    () => lockedTables.length > 0
-      ? { eventId, tableIds: lockedTables.map(t => t.id) }
-      : null,
-    [eventId, lockedTables]
+    () =>
+      lockedTables.length > 0
+        ? { eventId, tableIds: lockedTables.map((t) => t.id) }
+        : null,
+    [eventId, lockedTables],
   );
   const { quote } = useBookingQuote(quoteSelection);
-
-  const isClickable = useCallback((table: EventTableDto) => {
-    if (table.status === 'Available') return true;
-    if (table.isLockedByYou) return true;
-    return false;
-  }, []);
-
-  const getStatusStyle = useCallback((table: EventTableDto) => {
-    const tableColor = table.color ?? 'var(--accent-violet)';
-
-    if (table.isLockedByYou) {
-      return {
-        bg: tableColor,
-        border: token.colorPrimary,
-        opacity: 1,
-        cursor: 'pointer' as const,
-      };
-    }
-    switch (table.status) {
-      case 'Available':
-        return {
-          bg: tableColor,
-          border: tableColor,
-          opacity: 1,
-          cursor: 'pointer' as const,
-        };
-      case 'Held':
-        return { bg: tableColor, border: token.colorWarning, opacity: 0.5, cursor: 'not-allowed' as const };
-      case 'Booked':
-        return { bg: tableColor, border: token.colorTextDisabled, opacity: 0.5, cursor: 'not-allowed' as const };
-      default:
-        return { bg: tableColor, border: token.colorTextDisabled, opacity: 0.5, cursor: 'not-allowed' as const };
-    }
-  }, [token]);
-
-  const getTooltip = (table: EventTableDto): string => {
-    const label = labelFor(table);
-    if (table.isLockedByYou) return `${label} — Reserved by you (click to remove)`;
-    if (lockedTables.length > 0 && table.status === 'Available') return `${label} — ${table.capacity} seats — ${centsToUSD(table.displayPriceCents)} — Click to add`;
-    switch (table.status) {
-      case 'Booked': return `${label} — Booked`;
-      case 'Held': return `${label} — Reserved by another guest`;
-      default: return `${label} — ${table.capacity} seats — ${centsToUSD(table.displayPriceCents)} — Click to reserve`;
-    }
-  };
-
-  const handleTableClick = (table: EventTableDto) => {
-    if (!isClickable(table)) return;
-
-    if (table.isLockedByYou) {
-      onUnlockTable(table);
-      return;
-    }
-
-    onLockTable(table);
-  };
-
-  // Build cell map
-  const cellMap = new Map<string, EventTableDto>();
-  for (const t of tables) {
-    cellMap.set(`${t.gridRow},${t.gridCol}`, t);
-  }
-
-  // Column headers (A, B, C, ...)
-  const colHeaders: React.ReactNode[] = [<div key="corner" className="ts-header-corner" />];
-  for (let c = 0; c < gridCols; c++) {
-    colHeaders.push(
-      <div key={`col-${c}`} className="ts-col-header">
-        {String.fromCharCode(65 + (c % 26))}
-      </div>
-    );
-  }
-
-  // Build rows
-  const rows: React.ReactNode[] = [];
-  for (let r = 0; r < gridRows; r++) {
-    const cells: React.ReactNode[] = [
-      <div key={`rh-${r}`} className="ts-row-header">{r + 1}</div>,
-    ];
-
-    for (let c = 0; c < gridCols; c++) {
-      const key = `${r},${c}`;
-      const table = cellMap.get(key);
-
-      if (table) {
-        const isLocking = table.id === lockingTableId;
-        const isHovered = table.id === hoveredId;
-        const clickable = isClickable(table);
-        const borderRadius = SHAPE_RADIUS[table.shape] ?? SHAPE_RADIUS.Square;
-        const style = getStatusStyle(table);
-        const isUserLocked = table.isLockedByYou;
-
-        cells.push(
-          <div key={key} className="ts-cell ts-cell-occupied">
-            <div
-              role="button"
-              tabIndex={clickable ? 0 : -1}
-              aria-label={getTooltip(table)}
-              title={getTooltip(table)}
-              className={`ts-table${isUserLocked ? ' ts-table-selected' : ''}${!clickable ? ' ts-table-disabled' : ''}`}
-              style={{
-                '--table-bg': style.bg,
-                borderRadius,
-                borderColor: style.border,
-                opacity: isLocking ? 0.7 : style.opacity,
-                cursor: isLocking ? 'wait' : style.cursor,
-                boxShadow: isUserLocked
-                  ? `0 0 0 3px ${token.colorPrimaryBorder}`
-                  : isHovered && clickable
-                    ? `0 0 0 2px ${token.colorPrimaryBgHover}` : 'none',
-              } as React.CSSProperties}
-              onClick={() => handleTableClick(table)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleTableClick(table); }}
-              onMouseEnter={() => setHoveredId(table.id)}
-              onMouseLeave={() => setHoveredId(null)}
-            >
-              {/* Loading spinner while locking */}
-              {isLocking && (
-                <Spin indicator={<LoadingOutlined style={{ fontSize: 14, color: 'var(--ant-color-text-light-solid)' }} />} />
-              )}
-
-              {/* Status icon overlay */}
-              {!isLocking && table.status === 'Booked' && (
-                <StopOutlined className="ts-table-icon" />
-              )}
-              {!isLocking && table.status === 'Held' && !table.isLockedByYou && (
-                <LockOutlined className="ts-table-icon" />
-              )}
-              {!isLocking && table.isLockedByYou && (
-                <CheckCircleOutlined className="ts-table-icon ts-table-icon-mine" />
-              )}
-
-              <Typography.Text strong className="ts-table-label">
-                {labelFor(table)}
-              </Typography.Text>
-              <span className="ts-table-meta">
-                {table.capacity}p &middot; {centsToUSD(table.displayPriceCents)}
-              </span>
-
-              {/* Inline countdown for user's locked table */}
-              {table.isLockedByYou && table.holdExpiresAt && (
-                <CellCountdown expiresAt={table.holdExpiresAt} />
-              )}
-            </div>
-          </div>
-        );
-      } else {
-        cells.push(<div key={key} className="ts-cell ts-cell-empty" />);
-      }
-    }
-
-    rows.push(
-      <div key={`row-${r}`} className="ts-grid-row">{cells}</div>
-    );
-  }
 
   return (
     <div className="ts-wrapper">
@@ -247,11 +57,17 @@ export default function TableSelectionCanvas({
           <Typography.Text type="secondary">Available</Typography.Text>
         </Space>
         <Space size="small">
-          <div className="ts-legend-dot" style={{ background: token.colorWarning, opacity: 0.5 }} />
+          <div
+            className="ts-legend-dot"
+            style={{ background: token.colorWarning, opacity: 0.5 }}
+          />
           <Typography.Text type="secondary">Reserved</Typography.Text>
         </Space>
         <Space size="small">
-          <div className="ts-legend-dot" style={{ background: token.colorTextDisabled, opacity: 0.5 }} />
+          <div
+            className="ts-legend-dot"
+            style={{ background: token.colorTextDisabled, opacity: 0.5 }}
+          />
           <Typography.Text type="secondary">Booked</Typography.Text>
         </Space>
         <Space size="small">
@@ -262,37 +78,32 @@ export default function TableSelectionCanvas({
 
       {/* Pricing legend */}
       {eventTableTypes.length > 0 && (
-        <Space size="middle" wrap className="ts-pricing-legend">
-          {eventTableTypes.map((ett) => (
-            <Space key={ett.id} size="small">
-              <div
-                className="ts-legend-swatch"
-                style={{ background: ett.color ?? 'var(--accent-violet)' }}
-              />
-              <Typography.Text style={{ fontSize: 12 }}>
-                {ett.label} &middot; {ett.capacity}p &middot; {centsToUSD(ett.displayPriceCents)}
-              </Typography.Text>
-            </Space>
-          ))}
-        </Space>
+        <div className="ts-pricing-legend">
+          <TierLegend tiers={eventTableTypes} />
+        </div>
       )}
 
       <Divider style={{ margin: '4px 0' }} />
 
       <div className="ts-main">
-        {/* Grid floor plan */}
-        <div className="ts-grid" role="grid" aria-label="Table selection floor plan">
-          <div className="ts-grid-row ts-header-row">{colHeaders}</div>
-          {rows}
-        </div>
+        <FloorPlan
+          mode="select"
+          tables={tables}
+          tierTypes={eventTableTypes}
+          gridRows={gridRows}
+          gridCols={gridCols}
+          lockingTableId={lockingTableId}
+          onLockTable={onLockTable}
+          onUnlockTable={onUnlockTable}
+        />
 
-        {/* Detail panel — shown when user has locked tables */}
         {lockedTables.length > 0 && (() => {
-          const labels = lockedTables.map(labelFor).join(', ');
+          const labels = lockedTables.map(floorPlanLabelFor).join(', ');
           const earliestExpiry = lockedTables
-            .map(t => t.holdExpiresAt).filter(Boolean).sort()[0];
+            .map((t) => t.holdExpiresAt)
+            .filter(Boolean)
+            .sort()[0];
 
-          // Group by type (display-only — count and per-table price, no aggregation)
           const groups = new Map<string, EventTableDto[]>();
           for (const t of lockedTables) {
             const key = t.eventTableLabel ?? 'Table';
@@ -302,7 +113,9 @@ export default function TableSelectionCanvas({
           return (
             <Card
               size="small"
-              title={`${lockedTables.length} Table${lockedTables.length > 1 ? 's' : ''} Selected — ${labels}`}
+              title={`${lockedTables.length} Table${
+                lockedTables.length > 1 ? 's' : ''
+              } Selected — ${labels}`}
               className="ts-detail-card"
             >
               <Space orientation="vertical" size="small" style={{ width: '100%' }}>
@@ -311,18 +124,29 @@ export default function TableSelectionCanvas({
                 )}
                 {[...groups.entries()].map(([typeLabel, groupTables]) => (
                   <div key={typeLabel} style={{ padding: '4px 0' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
                       <Typography.Text strong>{typeLabel}</Typography.Text>
                       {groupTables[0].color && (
-                        <div style={{
-                          width: 16, height: 16, borderRadius: 3,
-                          background: groupTables[0].color, border: '1px solid var(--border)',
-                        }} />
+                        <div
+                          style={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: 3,
+                            background: groupTables[0].color,
+                            border: '1px solid var(--border)',
+                          }}
+                        />
                       )}
                     </div>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {groupTables[0].shape} &middot;{' '}
-                      {groupTables.length} &times; {centsToUSD(groupTables[0].displayPriceCents)}
+                      {groupTables[0].shape} ·{' '}
+                      {groupTables.length} × {centsToUSD(groupTables[0].displayPriceCents)}
                     </Typography.Text>
                   </div>
                 ))}

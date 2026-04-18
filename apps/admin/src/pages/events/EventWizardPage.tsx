@@ -19,6 +19,8 @@ import {
   InfoCircleOutlined,
   PlusOutlined,
   MinusCircleOutlined,
+  ArrowLeftOutlined,
+  ArrowRightOutlined,
 } from '@ant-design/icons';
 import { Typography } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -27,9 +29,20 @@ import { adminEventsApi, adminVenuesApi, imagesApi } from '../../services/api';
 import type { CreateEventPayload } from '@code829/shared/services/adminEventsApi';
 import type { Venue } from '@code829/shared/types/venue';
 import type { ImageDto } from '@code829/shared/types/image';
-import PageHeader from '@code829/shared/components/shared/PageHeader';
+import type { EventTableDto, EventTableTypeInfo } from '@code829/shared/types/event';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import ImageUpload from '@code829/shared/components/shared/ImageUpload';
+import {
+  DisplayHeading,
+  Kicker,
+  SeatingModeCard,
+  SeatingIconTables,
+  SeatingIconOpen,
+  Stepper,
+  SoftCard,
+  MiniStat,
+} from '@code829/shared/components/ui';
+import { FloorPlan, TierLegend } from '@code829/shared/components/floorplan';
 import { createLogger } from '@code829/shared/lib/logger';
 import { centsToDollars } from '@code829/shared/utils/currency';
 
@@ -45,19 +58,42 @@ const categories = [
   'Other',
 ];
 
+const STEPS = [
+  { key: 'details', label: 'Details' },
+  { key: 'seating', label: 'Seating' },
+  { key: 'tickets', label: 'Tickets' },
+  { key: 'review', label: 'Review' },
+] as const;
+
+// Which form fields must be valid to leave a given step.
+const STEP_FIELDS: Record<number, string[]> = {
+  0: ['title', 'category', 'venueId', 'startDate', 'startTime', 'endDate', 'endTime'],
+  1: [],
+  2: [],
+  3: [],
+};
+
 export default function EventWizardPage() {
   const { id } = useParams<{ id?: string }>();
   const isEditMode = Boolean(id);
   const [form] = Form.useForm();
+  const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [layoutMode, setLayoutMode] = useState<'Grid' | 'Open'>('Grid');
   const [layoutLocked, setLayoutLocked] = useState(false);
   const [images, setImages] = useState<ImageDto[]>([]);
+  const [existingTables] = useState<EventTableDto[]>([]);
+  const [existingTiers, setExistingTiers] = useState<EventTableTypeInfo[]>([]);
+  const [existingGrid, setExistingGrid] = useState<{ rows: number; cols: number }>({ rows: 8, cols: 10 });
   const { message } = App.useApp();
   const navigate = useNavigate();
   const ticketTypes = Form.useWatch('ticketTypes', form) || [];
+  const watchedTitle = Form.useWatch('title', form);
+  const watchedCategory = Form.useWatch('category', form);
+  const watchedVenueId = Form.useWatch('venueId', form);
+  const watchedStart = Form.useWatch('startDate', form);
 
   useEffect(() => {
     const loadVenues = async () => {
@@ -87,7 +123,6 @@ export default function EventWizardPage() {
         const mode = data.layoutMode === 'Open' ? 'Open' : 'Grid';
         setLayoutMode(mode);
 
-        // Check if layout mode is locked (has active bookings or table locks)
         try {
           const { data: lockData } = await adminEventsApi.checkLayoutLocked(id);
           setLayoutLocked(lockData.locked);
@@ -98,7 +133,26 @@ export default function EventWizardPage() {
         try {
           const { data: imgs } = await imagesApi.getByEntity('event', id);
           setImages(imgs);
-        } catch (err) { log.error('Failed to load event images', err); }
+        } catch (err) {
+          log.error('Failed to load event images', err);
+        }
+
+        if (mode === 'Grid' && data.tableTypes) {
+          setExistingTiers(
+            data.tableTypes.map((t) => ({
+              id: t.id,
+              label: t.label,
+              capacity: t.capacity,
+              shape: t.shape,
+              color: t.color,
+              priceCents: t.priceCents,
+              displayPriceCents: t.displayPriceCents,
+            })),
+          );
+        }
+        if (data.gridRows && data.gridCols) {
+          setExistingGrid({ rows: data.gridRows, cols: data.gridCols });
+        }
 
         log.info('Event loaded for editing', { id, status: data.status, layoutMode: mode });
         form.setFieldsValue({
@@ -115,12 +169,13 @@ export default function EventWizardPage() {
           pricePerPerson: data.pricePerPersonCents != null
             ? centsToDollars(data.pricePerPersonCents)
             : undefined,
-          ticketTypes: data.ticketTypes?.map(tt => ({
-            ...tt,
-            name: (tt as any).label ? [(tt as any).label] : [],
-            price: centsToDollars((tt as any).priceCents),
-            capacity: (tt as any).maxQuantity
-          })) || []
+          ticketTypes: data.ticketTypes?.map((tt) => ({
+            id: tt.id,
+            name: tt.label ? [tt.label] : [],
+            price: centsToDollars(tt.priceCents),
+            capacity: tt.maxQuantity,
+            description: tt.description,
+          })) || [],
         });
       } catch (err) {
         log.error('Failed to load event for editing', err);
@@ -153,19 +208,17 @@ export default function EventWizardPage() {
         venueId: values.venueId,
         isFeatured: values.isFeatured ?? false,
         layoutMode,
-        ticketTypes: layoutMode === 'Open' ? values.ticketTypes?.map((tt: any) => ({
+        ticketTypes: layoutMode === 'Open' ? values.ticketTypes?.map((tt: { id?: string; name: string | string[]; price: number; capacity: number; description?: string }) => ({
           id: tt.id,
           name: Array.isArray(tt.name) ? tt.name[0] : tt.name,
           priceCents: Math.round(Number(tt.price) * 100),
           capacity: Number(tt.capacity),
-          description: tt.description
-        })) : undefined
+          description: tt.description,
+        })) : undefined,
       };
 
-      // For Open mode, max capacity is sum of ticket types
       if (layoutMode === 'Open' && payload.ticketTypes && payload.ticketTypes.length > 0) {
         payload.maxCapacity = payload.ticketTypes.reduce((acc, curr) => acc + (curr.capacity || 0), 0);
-        // If the sum is 0, set to null to avoid DB constraint violation (CK_events_MaxCapacity > 0)
         if (payload.maxCapacity === 0) payload.maxCapacity = undefined;
       } else if (layoutMode === 'Open') {
         payload.maxCapacity = values.maxCapacity ? Number(values.maxCapacity) : undefined;
@@ -190,14 +243,33 @@ export default function EventWizardPage() {
     }
   };
 
+  const handleNext = async () => {
+    const fields = STEP_FIELDS[step] ?? [];
+    if (fields.length) {
+      try {
+        await form.validateFields(fields);
+      } catch {
+        message.error('Please complete required fields before continuing');
+        return;
+      }
+    }
+    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+  };
+
   if (loading) return <LoadingSpinner />;
 
+  const showFloorPlanPreview = layoutMode === 'Grid' && isEditMode && existingTables.length > 0;
+  const isLast = step === STEPS.length - 1;
+  const venueLabel = venues.find((v) => v.id === watchedVenueId)?.name ?? '—';
+
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
-      <PageHeader
-        title={isEditMode ? 'Edit Event' : 'Create Event'}
-        subtitle={isEditMode ? 'Update event details' : 'Fill in the event details'}
-      />
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: 24 }}>
+      <Kicker style={{ marginBottom: 8 }}>
+        {isEditMode ? 'Edit event' : 'New event'}
+      </Kicker>
+      <DisplayHeading as="h1" size="lg" style={{ marginBottom: 20 }}>
+        {isEditMode ? 'Edit event' : 'Create event'}
+      </DisplayHeading>
 
       {isEditMode && (
         <div className="edit-mode-banner">
@@ -213,484 +285,392 @@ export default function EventWizardPage() {
         </div>
       )}
 
-      <Card>
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <Form.Item
-            name="title"
-            label="Title"
-            rules={[{ required: true }]}
-          >
-            <Input placeholder="Event title" />
-          </Form.Item>
-          <Form.Item name="description" label="Description">
-            <Input.TextArea rows={4} placeholder="Event description" />
-          </Form.Item>
-          {isEditMode && id && (
-            <Form.Item label="Event Images">
-              <ImageUpload
-                entityType="event"
-                entityId={id}
-                images={images}
-                onImagesChange={setImages}
-              />
+      <Stepper steps={[...STEPS]} current={step} onSelect={setStep} />
+
+      <Form form={form} layout="vertical" onFinish={handleSubmit}>
+        {/* ── Step 1: Details ─────────────────────────────────────── */}
+        <div style={{ display: step === 0 ? 'block' : 'none' }}>
+          <SoftCard padding={24}>
+            <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+              <Input placeholder="Event title" />
             </Form.Item>
-          )}
-          <Row gutter={16}>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                name="category"
-                label="Category"
-                rules={[{ required: true }]}
-              >
-                <Select
-                  options={categories.map((c) => ({
-                    label: c,
-                    value: c,
-                  }))}
-                  placeholder="Select category"
+            <Form.Item name="description" label="Description">
+              <Input.TextArea rows={4} placeholder="Event description" />
+            </Form.Item>
+            {isEditMode && id && (
+              <Form.Item label="Event images">
+                <ImageUpload
+                  entityType="event"
+                  entityId={id}
+                  images={images}
+                  onImagesChange={setImages}
                 />
               </Form.Item>
-            </Col>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                name="venueId"
-                label="Venue"
-                rules={[{ required: true }]}
-              >
-                <Select
-                  options={venues.map((v) => ({
-                    label: v.name,
-                    value: v.id,
-                  }))}
-                  placeholder="Select venue"
-                  showSearch
-                  filterOption={(input, option) =>
-                    (option?.label as string)
-                      ?.toLowerCase()
-                      .includes(input.toLowerCase()) ?? false
-                  }
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col xs={12} sm={6}>
-              <Form.Item
-                name="startDate"
-                label="Start Date"
-                rules={[{ required: true, message: 'Required' }]}
-              >
-                <DatePicker
-                  format="MMM D, YYYY"
-                  placeholder="Pick date"
-                  style={{ width: '100%' }}
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={12} sm={6}>
-              <Form.Item
-                name="startTime"
-                label="Start Time"
-                rules={[{ required: true, message: 'Required' }]}
-              >
-                <TimePicker
-                  use12Hours
-                  format="h:mm a"
-                  placeholder="Pick time"
-                  minuteStep={5}
-                  needConfirm={false}
-                  style={{ width: '100%' }}
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={12} sm={6}>
-              <Form.Item
-                name="endDate"
-                label="End Date"
-                rules={[{ required: true, message: 'Required' }]}
-              >
-                <DatePicker
-                  format="MMM D, YYYY"
-                  placeholder="Pick date"
-                  style={{ width: '100%' }}
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={12} sm={6}>
-              <Form.Item
-                name="endTime"
-                label="End Time"
-                rules={[{ required: true, message: 'Required' }]}
-              >
-                <TimePicker
-                  use12Hours
-                  format="h:mm a"
-                  placeholder="Pick time"
-                  minuteStep={5}
-                  needConfirm={false}
-                  style={{ width: '100%' }}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                name="isFeatured"
-                label="Featured"
-                valuePropName="checked"
-              >
-                <Switch />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          {/* Seating Type Toggle — Tables vs Open selectable cards (design handoff pattern) */}
-          <div className="admin-section" style={{ marginTop: 0 }}>
-            <div className="admin-section-title">
-              <AppstoreOutlined />
-              Seating type
-            </div>
-
-            <Row gutter={[14, 14]} style={{ marginBottom: 16 }}>
+            )}
+            <Row gutter={16}>
               <Col xs={24} sm={12}>
-                <SeatingModeCard
-                  active={layoutMode === 'Grid'}
-                  disabled={layoutLocked}
-                  onClick={() => !layoutLocked && setLayoutMode('Grid')}
-                  title="Tables"
-                  subtitle="Assigned seating with table-level pricing tiers. Guests pick a specific table."
-                  icon={<SeatingIconTables active={layoutMode === 'Grid'} />}
-                  meta="Grid-based floor plan · per-table price"
-                />
+                <Form.Item name="category" label="Category" rules={[{ required: true }]}>
+                  <Select
+                    options={categories.map((c) => ({ label: c, value: c }))}
+                    placeholder="Select category"
+                  />
+                </Form.Item>
               </Col>
               <Col xs={24} sm={12}>
-                <SeatingModeCard
-                  active={layoutMode === 'Open'}
-                  disabled={layoutLocked}
-                  onClick={() => !layoutLocked && setLayoutMode('Open')}
-                  title="Open"
-                  subtitle="General admission. Sell by ticket tier with no fixed assignments."
-                  icon={<SeatingIconOpen active={layoutMode === 'Open'} />}
-                  meta="Ticket tiers · capacity-based"
+                <Form.Item name="venueId" label="Venue" rules={[{ required: true }]}>
+                  <Select
+                    options={venues.map((v) => ({ label: v.name, value: v.id }))}
+                    placeholder="Select venue"
+                    showSearch
+                    filterOption={(input, option) =>
+                      (option?.label as string)?.toLowerCase().includes(input.toLowerCase()) ?? false
+                    }
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col xs={12} sm={6}>
+                <Form.Item name="startDate" label="Start date" rules={[{ required: true, message: 'Required' }]}>
+                  <DatePicker format="MMM D, YYYY" placeholder="Pick date" style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Form.Item name="startTime" label="Start time" rules={[{ required: true, message: 'Required' }]}>
+                  <TimePicker use12Hours format="h:mm a" placeholder="Pick time" minuteStep={5} needConfirm={false} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Form.Item name="endDate" label="End date" rules={[{ required: true, message: 'Required' }]}>
+                  <DatePicker format="MMM D, YYYY" placeholder="Pick date" style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Form.Item name="endTime" label="End time" rules={[{ required: true, message: 'Required' }]}>
+                  <TimePicker use12Hours format="h:mm a" placeholder="Pick time" minuteStep={5} needConfirm={false} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Form.Item name="isFeatured" label="Featured" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </SoftCard>
+        </div>
+
+        {/* ── Step 2: Seating ─────────────────────────────────────── */}
+        <div style={{ display: step === 1 ? 'block' : 'none' }}>
+          <Row gutter={[14, 14]} style={{ marginBottom: 16 }}>
+            <Col xs={24} sm={12}>
+              <SeatingModeCard
+                active={layoutMode === 'Grid'}
+                disabled={layoutLocked}
+                onClick={() => !layoutLocked && setLayoutMode('Grid')}
+                title="Tables"
+                subtitle="Assigned seating with table-level pricing tiers. Guests pick a specific table."
+                icon={<SeatingIconTables active={layoutMode === 'Grid'} />}
+                meta="Grid-based floor plan · per-table price"
+              />
+            </Col>
+            <Col xs={24} sm={12}>
+              <SeatingModeCard
+                active={layoutMode === 'Open'}
+                disabled={layoutLocked}
+                onClick={() => !layoutLocked && setLayoutMode('Open')}
+                title="Open"
+                subtitle="General admission. Sell by ticket tier with no fixed assignments."
+                icon={<SeatingIconOpen active={layoutMode === 'Open'} />}
+                meta="Ticket tiers · capacity-based"
+              />
+            </Col>
+          </Row>
+
+          {layoutLocked && (
+            <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 12 }}>
+              Seating type cannot be changed — this event has active bookings or locked tables.
+            </div>
+          )}
+
+          {layoutMode === 'Grid' && (
+            <SoftCard tone="elevated" padding={18}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  color: 'var(--text-secondary)',
+                  fontSize: 13,
+                  marginBottom: showFloorPlanPreview ? 16 : 0,
+                }}
+              >
+                <InfoCircleOutlined style={{ color: 'var(--primary)' }} />
+                {isEditMode
+                  ? 'Refine the floor plan in the Layout Editor. Price is set per table.'
+                  : 'Configure tables in the Layout Editor after creation. Price is set per table.'}
+                {isEditMode && id && (
+                  <Button
+                    size="small"
+                    type="link"
+                    onClick={() => navigate(`/events/${id}/layout`)}
+                    style={{ marginLeft: 'auto' }}
+                  >
+                    Open editor →
+                  </Button>
+                )}
+              </div>
+
+              {showFloorPlanPreview && (
+                <>
+                  <TierLegend tiers={existingTiers} />
+                  <div style={{ marginTop: 12 }}>
+                    <FloorPlan
+                      mode="display"
+                      tables={existingTables}
+                      tierTypes={existingTiers}
+                      gridRows={existingGrid.rows}
+                      gridCols={existingGrid.cols}
+                    />
+                  </div>
+                </>
+              )}
+            </SoftCard>
+          )}
+
+          {layoutMode === 'Open' && (
+            <SoftCard padding={20}>
+              <Typography.Text strong style={{ display: 'block', marginBottom: 16, fontSize: 14 }}>
+                Ticket tiers
+              </Typography.Text>
+              <Form.List name="ticketTypes">
+                {(fields, { add, remove }) => (
+                  <>
+                    {fields.map(({ key, name, ...restField }) => (
+                      <Card
+                        key={key}
+                        size="small"
+                        style={{ marginBottom: 16, background: 'var(--bg-soft)', border: '1px solid var(--border)' }}
+                        extra={
+                          <Button
+                            type="text"
+                            danger
+                            icon={<MinusCircleOutlined />}
+                            onClick={() => remove(name)}
+                          >
+                            Remove
+                          </Button>
+                        }
+                      >
+                        <Form.Item {...restField} name={[name, 'id']} hidden>
+                          <Input />
+                        </Form.Item>
+                        <Row gutter={16}>
+                          <Col xs={24} sm={12}>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'name']}
+                              label="Tier name"
+                              rules={[
+                                { required: true, message: 'Missing tier name' },
+                                () => ({
+                                  validator(_, value) {
+                                    const nameVal = Array.isArray(value) ? value[0] : value;
+                                    if (!nameVal) return Promise.resolve();
+                                    const count = ticketTypes.filter((t: { name?: string | string[] }) =>
+                                      (Array.isArray(t?.name) ? t.name[0] : t?.name) === nameVal,
+                                    ).length;
+                                    if (count > 1) {
+                                      return Promise.reject(new Error('This tier name is already used'));
+                                    }
+                                    return Promise.resolve();
+                                  },
+                                }),
+                              ]}
+                            >
+                              <Select
+                                showSearch
+                                placeholder="Select or type..."
+                                options={[
+                                  { value: 'General', label: 'General' },
+                                  { value: 'VIP', label: 'VIP' },
+                                ]}
+                                mode="tags"
+                                maxCount={1}
+                                onSelect={() => {
+                                  setTimeout(() => {
+                                    (document.activeElement as HTMLElement)?.blur();
+                                  }, 0);
+                                }}
+                              />
+                            </Form.Item>
+                          </Col>
+                          <Col xs={12} sm={6}>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'price']}
+                              label="Price ($)"
+                              rules={[{ required: true, message: 'Price required' }]}
+                            >
+                              <InputNumber min={0} precision={2} style={{ width: '100%' }} placeholder="0.00" />
+                            </Form.Item>
+                          </Col>
+                          <Col xs={12} sm={6}>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'capacity']}
+                              label="Capacity"
+                              rules={[{ required: true, message: 'Qty required' }]}
+                            >
+                              <InputNumber min={1} style={{ width: '100%' }} placeholder="100" />
+                            </Form.Item>
+                          </Col>
+                          <Col xs={24}>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'description']}
+                              label="Description (optional)"
+                              style={{ marginBottom: 0 }}
+                            >
+                              <Input placeholder="e.g. Includes one free drink" />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      </Card>
+                    ))}
+                    <Button
+                      type="dashed"
+                      onClick={() => add()}
+                      block
+                      icon={<PlusOutlined />}
+                      style={{ height: 44, borderRadius: 10 }}
+                    >
+                      Add ticket tier
+                    </Button>
+                  </>
+                )}
+              </Form.List>
+              <div
+                style={{
+                  marginTop: 24,
+                  padding: '12px 14px',
+                  background: 'var(--bg-elevated)',
+                  borderRadius: 10,
+                  border: '1px solid var(--border-subtle)',
+                }}
+              >
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  <InfoCircleOutlined style={{ marginRight: 6 }} />
+                  Total capacity is the sum of all ticket tier capacities.
+                </Typography.Text>
+              </div>
+            </SoftCard>
+          )}
+        </div>
+
+        {/* ── Step 3: Tickets summary ─────────────────────────────── */}
+        <div style={{ display: step === 2 ? 'block' : 'none' }}>
+          <SoftCard padding={20}>
+            <DisplayHeading as="h3" size="sm" style={{ marginBottom: 14 }}>
+              Pricing preview
+            </DisplayHeading>
+            {layoutMode === 'Grid' ? (
+              <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+                <AppstoreOutlined style={{ marginRight: 6 }} />
+                Table pricing is configured per table in the Layout Editor.
+              </Typography.Text>
+            ) : (
+              <Row gutter={[12, 12]}>
+                {(ticketTypes as Array<{ name?: string | string[]; price?: number; capacity?: number }>)
+                  .map((tt, i) => {
+                    const tierName = Array.isArray(tt.name) ? tt.name[0] : tt.name;
+                    return (
+                      <Col xs={24} sm={12} md={8} key={i}>
+                        <MiniStat
+                          label={tierName || `Tier ${i + 1}`}
+                          value={tt.price != null ? `$${tt.price}` : '—'}
+                        />
+                      </Col>
+                    );
+                  })}
+              </Row>
+            )}
+          </SoftCard>
+        </div>
+
+        {/* ── Step 4: Review ──────────────────────────────────────── */}
+        <div style={{ display: step === 3 ? 'block' : 'none' }}>
+          <SoftCard padding={24}>
+            <Kicker style={{ marginBottom: 8 }}>Ready to {isEditMode ? 'save' : 'publish'}</Kicker>
+            <DisplayHeading as="h2" size="lg" style={{ marginBottom: 16 }}>
+              {watchedTitle || 'Untitled event'}
+            </DisplayHeading>
+            <Row gutter={[16, 16]}>
+              <Col xs={24} sm={8}>
+                <MiniStat label="Category" value={watchedCategory || '—'} />
+              </Col>
+              <Col xs={24} sm={8}>
+                <MiniStat label="Venue" value={venueLabel} />
+              </Col>
+              <Col xs={24} sm={8}>
+                <MiniStat
+                  label="Start"
+                  value={watchedStart ? dayjs(watchedStart).format('MMM D, YYYY') : '—'}
+                />
+              </Col>
+              <Col xs={24} sm={8}>
+                <MiniStat
+                  label="Seating"
+                  value={layoutMode === 'Grid' ? 'Tables' : 'Open'}
+                  tone="brand"
+                />
+              </Col>
+              <Col xs={24} sm={8}>
+                <MiniStat
+                  label="Tiers"
+                  value={layoutMode === 'Open' ? ticketTypes.length : existingTiers.length}
                 />
               </Col>
             </Row>
+          </SoftCard>
+        </div>
 
-            {layoutLocked && (
-              <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: -4, marginBottom: 12 }}>
-                Seating type cannot be changed — this event has active bookings or locked tables.
-              </div>
-            )}
-
-            {layoutMode === 'Grid' && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '12px 14px',
-                background: 'var(--bg-elevated)',
-                borderRadius: 10,
-                border: '1px solid var(--border)',
-                fontSize: 13,
-                color: 'var(--text-secondary)',
-              }}>
-                <InfoCircleOutlined style={{ color: 'var(--accent-violet)' }} />
-                Configure tables in the Layout Editor after creation. Price is set per table.
-              </div>
-            )}
-
-            {layoutMode === 'Open' && (
-              <div style={{ marginTop: 24 }}>
-                <Typography.Text strong style={{ display: 'block', marginBottom: 16, fontSize: 14 }}>
-                  Ticket Tiers
-                </Typography.Text>
-                
-                <Form.List name="ticketTypes">
-                  {(fields, { add, remove }) => (
-                    <>
-                      {fields.map(({ key, name, ...restField }) => (
-                        <Card 
-                          key={key} 
-                          size="small" 
-                          style={{ marginBottom: 16, background: 'var(--bg-soft)', border: '1px solid var(--border)' }}
-                          extra={
-                            <Button 
-                              type="text" 
-                              danger 
-                              icon={<MinusCircleOutlined />} 
-                              onClick={() => remove(name)}
-                            >
-                              Remove
-                            </Button>
-                          }
-                        >
-                          <Form.Item {...restField} name={[name, 'id']} hidden>
-                            <Input />
-                          </Form.Item>
-                          <Row gutter={16}>
-                            <Col xs={24} sm={12}>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'name']}
-                                label="Tier Name"
-                                rules={[
-                                  { required: true, message: 'Missing tier name' },
-                                  () => ({
-                                    validator(_, value) {
-                                      const nameVal = Array.isArray(value) ? value[0] : value;
-                                      if (!nameVal) return Promise.resolve();
-                                      const count = ticketTypes.filter((t: any) => 
-                                        (Array.isArray(t?.name) ? t.name[0] : t?.name) === nameVal
-                                      ).length;
-                                      if (count > 1) {
-                                        return Promise.reject(new Error('This tier name is already used'));
-                                      }
-                                      return Promise.resolve();
-                                    },
-                                  }),
-                                ]}
-                              >
-                                <Select
-                                  showSearch
-                                  placeholder="Select or type..."
-                                  options={[
-                                    { value: 'General', label: 'General' },
-                                    { value: 'VIP', label: 'VIP' },
-                                  ].map(opt => ({
-                                    ...opt,
-                                    disabled: ticketTypes.some((t: any) => 
-                                      (Array.isArray(t?.name) ? t.name[0] : t?.name) === opt.value && 
-                                      (Array.isArray(ticketTypes[name]?.name) ? ticketTypes[name].name[0] : ticketTypes[name]?.name) !== opt.value
-                                    )
-                                  }))}
-                                  // This allows custom text entry in Ant Design Select
-                                  mode="tags"
-                                  maxCount={1}
-                                  onSelect={() => {
-                                    // Force dropdown to close after selection
-                                    setTimeout(() => {
-                                      (document.activeElement as HTMLElement)?.blur();
-                                    }, 0);
-                                  }}
-                                />
-                              </Form.Item>
-                            </Col>
-                            <Col xs={12} sm={6}>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'price']}
-                                label="Price ($)"
-                                rules={[{ required: true, message: 'Price required' }]}
-                              >
-                                <InputNumber
-                                  min={0}
-                                  precision={2}
-                                  style={{ width: '100%' }}
-                                  placeholder="0.00"
-                                />
-                              </Form.Item>
-                            </Col>
-                            <Col xs={12} sm={6}>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'capacity']}
-                                label="Capacity"
-                                rules={[{ required: true, message: 'Qty required' }]}
-                              >
-                                <InputNumber
-                                  min={1}
-                                  style={{ width: '100%' }}
-                                  placeholder="100"
-                                />
-                              </Form.Item>
-                            </Col>
-                            <Col xs={24}>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'description']}
-                                label="Description (Optional)"
-                                style={{ marginBottom: 0 }}
-                              >
-                                <Input placeholder="e.g. Includes one free drink" />
-                              </Form.Item>
-                            </Col>
-                          </Row>
-                        </Card>
-                      ))}
-                      <Button
-                        type="dashed"
-                        onClick={() => add()}
-                        block
-                        icon={<PlusOutlined />}
-                        style={{ height: 44, borderRadius: 10 }}
-                      >
-                        Add Ticket Tier
-                      </Button>
-                    </>
-                  )}
-                </Form.List>
-
-                {/* Legacy Fallback / Single Price support if needed */}
-                <div style={{ marginTop: 24, padding: '16px', background: 'var(--bg-elevated)', borderRadius: 10, border: '1px solid var(--border-light)' }}>
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    <InfoCircleOutlined style={{ marginRight: 6 }} />
-                    Total capacity is automatically calculated as the sum of all ticket tiers.
-                  </Typography.Text>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <Form.Item>
-            <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={saving}
-                style={{ flex: 1, minWidth: 120, borderRadius: 10, height: 44 }}
-              >
-                {isEditMode ? 'Save Changes' : 'Create Event'}
-              </Button>
-              <Button
-                onClick={() => navigate(isEditMode ? `/events/${id}` : '/events')}
-                style={{ borderRadius: 10, height: 44 }}
-              >
-                Cancel
-              </Button>
-            </div>
-          </Form.Item>
-        </Form>
-      </Card>
-    </div>
-  );
-}
-
-// ── Seating mode selectable card (design handoff) ─────────────────
-interface SeatingModeCardProps {
-  active: boolean;
-  disabled?: boolean;
-  onClick: () => void;
-  title: string;
-  subtitle: string;
-  icon: React.ReactNode;
-  meta: string;
-}
-
-function SeatingModeCard({
-  active,
-  disabled,
-  onClick,
-  title,
-  subtitle,
-  icon,
-  meta,
-}: SeatingModeCardProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        width: '100%',
-        textAlign: 'left',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        padding: 18,
-        border: 'none',
-        borderRadius: 'var(--radius-lg)',
-        background: active ? 'var(--primary-soft)' : 'var(--bg-soft)',
-        outline: active ? '2px solid var(--primary)' : '1px solid var(--border-subtle)',
-        outlineOffset: active ? -2 : -1,
-        display: 'flex',
-        gap: 16,
-        alignItems: 'flex-start',
-        opacity: disabled ? 0.55 : 1,
-        transition: 'background 0.18s var(--ease-human), outline-color 0.18s var(--ease-human)',
-      }}
-    >
-      <div
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: 'var(--radius-md)',
-          flexShrink: 0,
-          background: active ? 'var(--bg-surface)' : 'var(--bg-muted)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {icon}
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <div
-            style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: 18,
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-            }}
-          >
-            {title}
-          </div>
-          {active && (
-            <span
-              style={{
-                fontSize: 10,
-                padding: '2px 8px',
-                borderRadius: 99,
-                background: 'var(--primary)',
-                color: 'var(--text-on-brand)',
-                fontWeight: 700,
-                letterSpacing: 1,
-                textTransform: 'uppercase',
-              }}
+        {/* ── Navigation ──────────────────────────────────────────── */}
+        <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
+          {step > 0 && (
+            <Button
+              icon={<ArrowLeftOutlined />}
+              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              style={{ height: 44, borderRadius: 10 }}
             >
-              Selected
-            </span>
+              Back
+            </Button>
+          )}
+          <Button
+            onClick={() => navigate(isEditMode ? `/events/${id}` : '/events')}
+            style={{ height: 44, borderRadius: 10 }}
+          >
+            Cancel
+          </Button>
+          {!isLast ? (
+            <Button
+              type="primary"
+              onClick={handleNext}
+              icon={<ArrowRightOutlined />}
+              iconPosition="end"
+              style={{ height: 44, borderRadius: 10, marginLeft: 'auto' }}
+            >
+              Continue
+            </Button>
+          ) : (
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={saving}
+              style={{ height: 44, borderRadius: 10, marginLeft: 'auto' }}
+            >
+              {isEditMode ? 'Save changes' : 'Create event'}
+            </Button>
           )}
         </div>
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 8 }}>
-          {subtitle}
-        </div>
-        <div
-          style={{
-            fontSize: 11,
-            color: 'var(--text-muted)',
-            fontWeight: 600,
-            letterSpacing: 0.5,
-          }}
-        >
-          {meta}
-        </div>
-      </div>
-    </button>
-  );
-}
-
-function SeatingIconTables({ active }: { active: boolean }) {
-  const c = active ? 'var(--primary)' : 'var(--text-muted)';
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <circle cx="8" cy="8" r="3.5" stroke={c} strokeWidth="1.6" />
-      <circle cx="24" cy="8" r="3.5" stroke={c} strokeWidth="1.6" />
-      <circle cx="8" cy="24" r="3.5" stroke={c} strokeWidth="1.6" />
-      <circle cx="24" cy="24" r="3.5" stroke={c} strokeWidth="1.6" />
-      <circle cx="16" cy="16" r="3.5" fill={c} opacity="0.25" />
-      <circle cx="16" cy="16" r="3.5" stroke={c} strokeWidth="1.6" />
-    </svg>
-  );
-}
-
-function SeatingIconOpen({ active }: { active: boolean }) {
-  const c = active ? 'var(--primary)' : 'var(--text-muted)';
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <rect x="3" y="6" width="26" height="5" rx="1.5" stroke={c} strokeWidth="1.6" />
-      <rect x="3" y="13.5" width="26" height="5" rx="1.5" stroke={c} strokeWidth="1.6" fill={c} fillOpacity="0.25" />
-      <rect x="3" y="21" width="26" height="5" rx="1.5" stroke={c} strokeWidth="1.6" />
-    </svg>
+      </Form>
+    </div>
   );
 }
