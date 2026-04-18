@@ -15,7 +15,6 @@ import {
 } from 'antd';
 import {
   EditOutlined,
-  AppstoreOutlined,
   InfoCircleOutlined,
   PlusOutlined,
   MinusCircleOutlined,
@@ -61,7 +60,6 @@ const categories = [
 const STEPS = [
   { key: 'details', label: 'Details' },
   { key: 'seating', label: 'Seating' },
-  { key: 'tickets', label: 'Tickets' },
   { key: 'review', label: 'Review' },
 ] as const;
 
@@ -70,7 +68,6 @@ const STEP_FIELDS: Record<number, string[]> = {
   0: ['title', 'category', 'venueId', 'startDate', 'startTime', 'endDate', 'endTime'],
   1: [],
   2: [],
-  3: [],
 };
 
 export default function EventWizardPage() {
@@ -80,6 +77,8 @@ export default function EventWizardPage() {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [eventLoaded, setEventLoaded] = useState(!isEditMode);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [layoutMode, setLayoutMode] = useState<'Grid' | 'Open'>('Grid');
   const [layoutLocked, setLayoutLocked] = useState(false);
@@ -180,7 +179,9 @@ export default function EventWizardPage() {
       } catch (err) {
         log.error('Failed to load event for editing', err);
         message.error('Failed to load event for editing');
+        setEventLoaded(true);
       } finally {
+        setEventLoaded(true);
         setLoading(false);
       }
     };
@@ -189,7 +190,12 @@ export default function EventWizardPage() {
 
   const handleSubmit = async () => {
     try {
-      const values = await form.validateFields();
+      const fieldsToValidate = layoutMode === 'Grid'
+        ? ['title', 'category', 'venueId', 'startDate', 'startTime', 'endDate', 'endTime']
+        : undefined;
+      const values = fieldsToValidate
+        ? await form.validateFields(fieldsToValidate)
+        : await form.validateFields();
       setSaving(true);
       const startDt = values.startDate
         .hour(values.startTime.hour())
@@ -228,11 +234,13 @@ export default function EventWizardPage() {
         await adminEventsApi.update(id, payload);
         log.info('Event updated', { id });
         message.success('Event updated');
+        setIsDirty(false);
         navigate(`/events/${id}`);
       } else {
         const { data } = await adminEventsApi.create(payload);
         log.info('Event created', { id: data.id, title: payload.title });
         message.success('Event created');
+        setIsDirty(false);
         navigate(`/events/${data.id}`);
       }
     } catch (err) {
@@ -295,7 +303,7 @@ export default function EventWizardPage() {
 
       <Stepper steps={[...STEPS]} current={step} onSelect={setStep} />
 
-      <Form form={form} layout="vertical" onFinish={handleSubmit}>
+      <Form form={form} layout="vertical" onFinish={handleSubmit} onValuesChange={() => setIsDirty(true)}>
         {/* ── Step 1: Details ─────────────────────────────────────── */}
         <div style={{ display: step === 0 ? 'block' : 'none' }}>
           <SoftCard padding={24}>
@@ -340,12 +348,25 @@ export default function EventWizardPage() {
             <Row gutter={16}>
               <Col xs={12} sm={6}>
                 <Form.Item name="startDate" label="Start date" rules={[{ required: true, message: 'Required' }]}>
-                  <DatePicker format="MMM D, YYYY" placeholder="Pick date" style={{ width: '100%' }} />
+                  <DatePicker
+                    format="MMM D, YYYY"
+                    placeholder="Pick date"
+                    style={{ width: '100%' }}
+                    getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+                  />
                 </Form.Item>
               </Col>
               <Col xs={12} sm={6}>
                 <Form.Item name="startTime" label="Start time" rules={[{ required: true, message: 'Required' }]}>
-                  <TimePicker use12Hours format="h:mm a" placeholder="Pick time" minuteStep={5} needConfirm={false} style={{ width: '100%' }} />
+                  <TimePicker
+                    use12Hours
+                    format="h:mm a"
+                    placeholder="Pick time"
+                    minuteStep={5}
+                    needConfirm={false}
+                    style={{ width: '100%' }}
+                    getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+                  />
                 </Form.Item>
               </Col>
               <Col xs={12} sm={6}>
@@ -366,7 +387,12 @@ export default function EventWizardPage() {
                     }),
                   ]}
                 >
-                  <DatePicker format="MMM D, YYYY" placeholder="Pick date" style={{ width: '100%' }} />
+                  <DatePicker
+                    format="MMM D, YYYY"
+                    placeholder="Pick date"
+                    style={{ width: '100%' }}
+                    getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+                  />
                 </Form.Item>
               </Col>
               <Col xs={12} sm={6}>
@@ -394,7 +420,15 @@ export default function EventWizardPage() {
                     }),
                   ]}
                 >
-                  <TimePicker use12Hours format="h:mm a" placeholder="Pick time" minuteStep={5} needConfirm={false} style={{ width: '100%' }} />
+                  <TimePicker
+                    use12Hours
+                    format="h:mm a"
+                    placeholder="Pick time"
+                    minuteStep={5}
+                    needConfirm={false}
+                    style={{ width: '100%' }}
+                    getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+                  />
                 </Form.Item>
               </Col>
             </Row>
@@ -612,38 +646,8 @@ export default function EventWizardPage() {
           )}
         </div>
 
-        {/* ── Step 3: Tickets summary ─────────────────────────────── */}
+        {/* ── Step 3: Review ──────────────────────────────────────── */}
         <div style={{ display: step === 2 ? 'block' : 'none' }}>
-          <SoftCard padding={20}>
-            <DisplayHeading as="h3" size="sm" style={{ marginBottom: 14 }}>
-              Pricing preview
-            </DisplayHeading>
-            {layoutMode === 'Grid' ? (
-              <Typography.Text type="secondary" style={{ fontSize: 13 }}>
-                <AppstoreOutlined style={{ marginRight: 6 }} />
-                Table pricing is configured per table in the Layout Editor.
-              </Typography.Text>
-            ) : (
-              <Row gutter={[12, 12]}>
-                {(ticketTypes as Array<{ name?: string | string[]; price?: number; capacity?: number }>)
-                  .map((tt, i) => {
-                    const tierName = Array.isArray(tt.name) ? tt.name[0] : tt.name;
-                    return (
-                      <Col xs={24} sm={12} md={8} key={i}>
-                        <MiniStat
-                          label={tierName || `Tier ${i + 1}`}
-                          value={tt.price != null ? `$${tt.price}` : '—'}
-                        />
-                      </Col>
-                    );
-                  })}
-              </Row>
-            )}
-          </SoftCard>
-        </div>
-
-        {/* ── Step 4: Review ──────────────────────────────────────── */}
-        <div style={{ display: step === 3 ? 'block' : 'none' }}>
           <SoftCard padding={24}>
             <Kicker style={{ marginBottom: 8 }}>Ready to {isEditMode ? 'save' : 'publish'}</Kicker>
             <DisplayHeading as="h2" size="lg" style={{ marginBottom: 16 }}>
@@ -696,6 +700,16 @@ export default function EventWizardPage() {
           >
             Cancel
           </Button>
+          {isEditMode && isDirty && (
+            <Button
+              onClick={handleSubmit}
+              loading={saving}
+              disabled={!eventLoaded}
+              style={{ height: 44, borderRadius: 10 }}
+            >
+              Save changes
+            </Button>
+          )}
           {!isLast ? (
             <Button
               type="primary"
@@ -711,6 +725,7 @@ export default function EventWizardPage() {
               type="primary"
               htmlType="submit"
               loading={saving}
+              disabled={!eventLoaded}
               style={{ height: 44, borderRadius: 10, marginLeft: 'auto' }}
             >
               {isEditMode ? 'Save changes' : 'Create event'}
