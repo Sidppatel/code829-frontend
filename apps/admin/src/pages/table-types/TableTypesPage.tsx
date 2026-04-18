@@ -1,332 +1,298 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Table, Button, Switch, App, Tooltip, Modal, Form, Input, InputNumber, Select, ColorPicker } from 'antd';
-import { PlusOutlined, EditOutlined, TeamOutlined } from '@ant-design/icons';
+import { useCallback } from 'react';
+import { Button, ColorPicker, Input, InputNumber, Select, Switch, Tooltip } from 'antd';
+import { EditOutlined, PlusOutlined, TeamOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../services/api';
-import { centsToUSD, centsToDollars } from '@code829/shared/utils/currency';
+import { centsToDollars, centsToUSD } from '@code829/shared/utils/currency';
 import type { TableTemplate } from '@code829/shared/types/layout';
 import type { CreateTableTemplatePayload } from '@code829/shared/services/adminLayoutApi';
-import PageHeader from '@code829/shared/components/shared/PageHeader';
-import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
+import {
+  CrudModal,
+  DataTableSection,
+  FormField,
+  LoadingBoundary,
+  PageShell,
+} from '@code829/shared/components/ui';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import { semantic, tablePickerPresets } from '@code829/shared/theme/colors';
+import {
+  useAsyncAction,
+  useAsyncResource,
+  useCrudModal,
+} from '@code829/shared/hooks';
+
+interface TemplateFormValues {
+  name: string;
+  defaultCapacity: number;
+  defaultShape: string;
+  defaultColor: string | { toHexString?: () => string };
+  defaultPriceCents?: number;
+}
+
+function normalizeColor(v: TemplateFormValues['defaultColor']): string {
+  if (typeof v === 'string') return v;
+  return v?.toHexString?.() ?? semantic.brand;
+}
 
 export default function TableTypesPage() {
-  const [types, setTypes] = useState<TableTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [form] = Form.useForm();
-  const { message } = App.useApp();
+  const fetchTypes = useCallback(async () => {
+    const { data } = await adminLayoutApi.listTableTemplates();
+    return data;
+  }, []);
+  const { data: types, loading, refresh } = useAsyncResource(fetchTypes);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data } = await adminLayoutApi.listTableTemplates();
-      setTypes(data);
-    } catch {
-      message.error('Failed to load table templates');
-    } finally {
-      setLoading(false);
-    }
-  }, [message]);
+  const crud = useCrudModal<TableTemplate>();
 
-  useEffect(() => { void load(); }, [load]);
-
-  const openCreate = () => {
-    setEditingId(null);
-    form.resetFields();
-    setModalOpen(true);
-  };
-
-  const openEdit = (record: TableTemplate) => {
-    setEditingId(record.id);
-    form.setFieldsValue({
-      name: record.name,
-      defaultCapacity: record.defaultCapacity,
-      defaultShape: record.defaultShape,
-      defaultColor: record.defaultColor ?? semantic.brand,
-      defaultPriceCents: centsToDollars(record.defaultPriceCents),
-    });
-    setModalOpen(true);
-  };
-
-  const handleSave = async () => {
-    try {
-      const values = await form.validateFields();
-      setSaving(true);
+  const save = useAsyncAction(
+    async (values: TemplateFormValues) => {
       const payload: CreateTableTemplatePayload = {
         name: values.name,
         defaultCapacity: values.defaultCapacity,
         defaultShape: values.defaultShape,
-        defaultColor: typeof values.defaultColor === 'string'
-          ? values.defaultColor
-          : values.defaultColor?.toHexString?.() ?? semantic.brand,
-        defaultPriceCents: values.defaultPriceCents != null
-          ? Math.round(values.defaultPriceCents * 100)
-          : undefined,
+        defaultColor: normalizeColor(values.defaultColor),
+        defaultPriceCents:
+          values.defaultPriceCents != null ? Math.round(values.defaultPriceCents * 100) : undefined,
       };
-      if (editingId) {
-        await adminLayoutApi.updateTableTemplate(editingId, payload);
-        message.success('Template updated');
-      } else {
-        await adminLayoutApi.createTableTemplate(payload);
-        message.success('Template created');
+      if (crud.mode === 'edit' && crud.entity) {
+        return adminLayoutApi.updateTableTemplate(crud.entity.id, payload);
       }
-      setModalOpen(false);
-      void load();
-    } catch {
-      message.error('Failed to save template');
-    } finally {
-      setSaving(false);
-    }
-  };
+      return adminLayoutApi.createTableTemplate(payload);
+    },
+    {
+      successMessage: 'Template saved',
+      onSuccess: () => { crud.close(); refresh(); },
+    },
+  );
 
-  const handleToggleActive = async (record: TableTemplate) => {
-    try {
-      await adminLayoutApi.updateTableTemplate(record.id, {
-        name: record.name,
-        defaultCapacity: record.defaultCapacity,
-        defaultShape: record.defaultShape,
-        defaultColor: record.defaultColor,
-        defaultPriceCents: record.defaultPriceCents,
-        isActive: !record.isActive,
-      });
-      message.success(`Template ${record.isActive ? 'deactivated' : 'activated'}`);
-      void load();
-    } catch {
-      message.error('Failed to update template');
-    }
-  };
+  const toggle = useAsyncAction(
+    (r: TableTemplate) =>
+      adminLayoutApi.updateTableTemplate(r.id, {
+        name: r.name,
+        defaultCapacity: r.defaultCapacity,
+        defaultShape: r.defaultShape,
+        defaultColor: r.defaultColor,
+        defaultPriceCents: r.defaultPriceCents,
+        isActive: !r.isActive,
+      }),
+    { successMessage: 'Template updated', onSuccess: refresh },
+  );
 
-  const columns = [
-    {
-      title: 'Template',
-      key: 'type',
-      render: (_: unknown, record: TableTemplate) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div
-            className="tt-swatch human-noise"
-            style={{ 
-              background: record.defaultColor || 'var(--primary)',
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              boxShadow: 'var(--shadow-sm)'
-            }}
-          />
-          <div>
-            <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 16, fontFamily: "'Playfair Display', serif" }}>
-              {record.name}
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              {record.defaultShape}
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Capacity',
-      dataIndex: 'defaultCapacity',
-      key: 'defaultCapacity',
-      width: 120,
-      render: (v: number) => (
-        <span style={{ 
-          color: 'var(--text-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          fontWeight: 600
-        }}>
-          <TeamOutlined style={{ color: 'var(--primary)' }} />{v} seats
-        </span>
-      ),
-    },
-    {
-      title: 'Default Price',
-      dataIndex: 'defaultPriceCents',
-      key: 'defaultPriceCents',
-      width: 140,
-      render: (v: number) => (
-        <span style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: 15 }}>{centsToUSD(v)}</span>
-      ),
-    },
-    {
-      title: 'Status',
-      key: 'isActive',
-      width: 120,
-      render: (_: unknown, record: TableTemplate) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ 
-            fontSize: 11, 
-            fontWeight: 700, 
-            color: record.isActive ? 'var(--accent-green)' : 'var(--text-muted)',
-            textTransform: 'uppercase'
-          }}>
-            {record.isActive ? 'Active' : 'Off'}
-          </span>
-          <Switch
-            checked={record.isActive}
-            onChange={() => handleToggleActive(record)}
-            size="small"
-          />
-        </div>
-      ),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      width: 100,
-      render: (_: unknown, record: TableTemplate) => (
-        <Tooltip title="Edit Template">
-          <Button 
-            shape="circle" 
-            icon={<EditOutlined />} 
-            onClick={() => openEdit(record)} 
-            style={{ 
-              border: '1px solid var(--border)',
-              boxShadow: 'var(--shadow-sm)'
-            }}
-          />
-        </Tooltip>
-      ),
-    },
-  ];
-
-  if (loading) return <LoadingSpinner skeleton="card" />;
+  const initialValues: Partial<TemplateFormValues> | undefined = crud.entity
+    ? {
+        name: crud.entity.name,
+        defaultCapacity: crud.entity.defaultCapacity,
+        defaultShape: crud.entity.defaultShape,
+        defaultColor: crud.entity.defaultColor ?? semantic.brand,
+        defaultPriceCents: centsToDollars(crud.entity.defaultPriceCents),
+      }
+    : undefined;
 
   return (
-    <div className="spring-up">
-      <PageHeader 
-        title="Table Templates" 
-        subtitle={[
-          "Define reusable configurations for your event layouts.",
-          "Standardize seating, pricing, and visual styles across venues.",
-          "Consistency is the bedrock of premium guest experiences."
-        ]}
-        rotateSubtitle
-        extra={
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />} 
-            onClick={openCreate}
-            style={{
-              borderRadius: 'var(--radius-full)',
-              height: 48,
-              padding: '0 32px',
-              fontWeight: 700,
-              boxShadow: 'var(--shadow-md)'
-            }}
-          >
-            Add Template
-          </Button>
-        }
-      />
-
-      {/* Mobile view using HumanCards */}
-      <div className="mobile-only-block" style={{ marginBottom: 40 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
-          {types.map((tt) => (
-            <HumanCard
-              key={tt.id}
-              className="human-noise"
-              style={{
-                opacity: tt.isActive ? 1 : 0.7,
-                border: tt.isActive ? '1px solid var(--border)' : '1px dashed var(--border)',
-              }}
-              title={tt.name}
-              subtitle={`${tt.defaultShape} • ${tt.defaultCapacity} seats`}
-              extra={<Switch checked={tt.isActive} onChange={() => handleToggleActive(tt)} size="small" />}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div className="tt-swatch" style={{ background: tt.defaultColor || 'var(--primary)', width: 24, height: 24, borderRadius: 6 }} />
-                  <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>
-                    {centsToUSD(tt.defaultPriceCents)}
-                  </span>
-                </div>
-                <Button 
-                  size="small"
-                  icon={<EditOutlined />} 
-                  onClick={() => openEdit(tt)}
-                  style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
-                >
-                  Edit
-                </Button>
-              </div>
-            </HumanCard>
-          ))}
-        </div>
-      </div>
-
-      {/* Desktop view using responsive table */}
-      <div className="desktop-only-block" style={{ marginBottom: 40 }}>
-        <div className="glass-card" style={{ padding: '0px', overflow: 'hidden' }}>
-          <div className="responsive-table">
-            <Table 
-              dataSource={types} 
-              columns={columns} 
-              rowKey="id" 
-              pagination={false}
-              style={{ background: 'transparent' }}
-            />
-          </div>
-        </div>
-      </div>
-
-      <Modal 
-        title={editingId ? 'Edit Table Template' : 'Create New Template'} 
-        open={modalOpen}
-        onCancel={() => setModalOpen(false)} 
-        onOk={handleSave} 
-        confirmLoading={saving}
-        width="100%"
-        style={{ top: 16, maxWidth: 520 }}
-        okText="Save Configuration"
-        cancelText="Discard"
-        className="human-modal"
-        okButtonProps={{
-          style: { borderRadius: 'var(--radius-full)', fontWeight: 700, padding: '0 24px' }
-        }}
-        cancelButtonProps={{
-          style: { borderRadius: 'var(--radius-full)', fontWeight: 600 }
+    <PageShell
+      title="Table Templates"
+      subtitle={[
+        'Define reusable configurations for your event layouts.',
+        'Standardize seating, pricing, and visual styles across venues.',
+        'Consistency is the bedrock of premium guest experiences.',
+      ]}
+      rotateSubtitle
+      extra={
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={crud.openCreate}
+          style={{
+            borderRadius: 'var(--radius-full)',
+            height: 48,
+            padding: '0 32px',
+            fontWeight: 700,
+            boxShadow: 'var(--shadow-md)',
+          }}
+        >
+          Add Template
+        </Button>
+      }
+    >
+      <LoadingBoundary
+        loading={loading}
+        data={types}
+        skeleton="card"
+        empty={{
+          title: 'No templates yet',
+          description: 'Create your first table template to standardize layouts.',
+          actionLabel: 'Add Template',
+          onAction: crud.openCreate,
         }}
       >
-        <div style={{ padding: '8px 0' }}>
-          <Form form={form} layout="vertical" requiredMark={false}>
-            <Form.Item name="name" label="Template Name" rules={[{ required: true }]}><Input placeholder="e.g. VIP Circular" /></Form.Item>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <Form.Item name="defaultCapacity" label="Guest Capacity" rules={[{ required: true }]}>
-                <InputNumber min={1} style={{ width: '100%' }} />
-              </Form.Item>
-              <Form.Item name="defaultShape" label="Table Shape" rules={[{ required: true }]}>
-                <Select options={['Round', 'Rectangle', 'Square', 'Cocktail'].map((s) => ({ label: s, value: s }))} />
-              </Form.Item>
-            </div>
+        {(items) => (
+          <DataTableSection<TableTemplate>
+            data={items}
+            total={items.length}
+            page={1}
+            pageSize={items.length || 10}
+            loading={false}
+            onPageChange={() => {}}
+            rowKey="id"
+            showSizeChanger={false}
+            columns={[
+              {
+                title: 'Template',
+                key: 'type',
+                render: (_: unknown, record: TableTemplate) => (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div
+                      className="tt-swatch human-noise"
+                      style={{
+                        background: record.defaultColor || 'var(--primary)',
+                        width: 40,
+                        height: 40,
+                        borderRadius: 10,
+                        boxShadow: 'var(--shadow-sm)',
+                      }}
+                    />
+                    <div>
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          color: 'var(--text-primary)',
+                          fontSize: 16,
+                          fontFamily: "'Playfair Display', serif",
+                        }}
+                      >
+                        {record.name}
+                      </div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{record.defaultShape}</div>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                title: 'Capacity',
+                dataIndex: 'defaultCapacity',
+                key: 'defaultCapacity',
+                width: 120,
+                render: (v: number) => (
+                  <span style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
+                    <TeamOutlined style={{ color: 'var(--primary)' }} />
+                    {v} seats
+                  </span>
+                ),
+              },
+              {
+                title: 'Default Price',
+                dataIndex: 'defaultPriceCents',
+                key: 'defaultPriceCents',
+                width: 140,
+                render: (v: number) => (
+                  <span style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: 15 }}>{centsToUSD(v)}</span>
+                ),
+              },
+              {
+                title: 'Status',
+                key: 'isActive',
+                width: 120,
+                render: (_: unknown, record: TableTemplate) => (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: record.isActive ? 'var(--accent-green)' : 'var(--text-muted)',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {record.isActive ? 'Active' : 'Off'}
+                    </span>
+                    <Switch checked={record.isActive} onChange={() => { void toggle.run(record); }} size="small" />
+                  </div>
+                ),
+              },
+              {
+                title: 'Actions',
+                key: 'actions',
+                width: 100,
+                render: (_: unknown, record: TableTemplate) => (
+                  <Tooltip title="Edit Template">
+                    <Button
+                      shape="circle"
+                      icon={<EditOutlined />}
+                      onClick={() => crud.openEdit(record)}
+                      style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}
+                    />
+                  </Tooltip>
+                ),
+              },
+            ]}
+            mobileCard={(tt) => (
+              <HumanCard
+                className="human-noise"
+                style={{
+                  opacity: tt.isActive ? 1 : 0.7,
+                  border: tt.isActive ? '1px solid var(--border)' : '1px dashed var(--border)',
+                }}
+                title={tt.name}
+                subtitle={`${tt.defaultShape} • ${tt.defaultCapacity} seats`}
+                extra={<Switch checked={tt.isActive} onChange={() => { void toggle.run(tt); }} size="small" />}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div className="tt-swatch" style={{ background: tt.defaultColor || 'var(--primary)', width: 24, height: 24, borderRadius: 6 }} />
+                    <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>{centsToUSD(tt.defaultPriceCents)}</span>
+                  </div>
+                  <Button
+                    size="small"
+                    icon={<EditOutlined />}
+                    onClick={() => crud.openEdit(tt)}
+                    style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
+                  >
+                    Edit
+                  </Button>
+                </div>
+              </HumanCard>
+            )}
+          />
+        )}
+      </LoadingBoundary>
 
+      <CrudModal<TemplateFormValues>
+        open={crud.open}
+        mode={crud.mode}
+        onClose={crud.close}
+        saving={save.loading}
+        initialValues={initialValues}
+        onSubmit={async (v) => { await save.run(v); }}
+        titles={{ create: 'Create New Template', edit: 'Edit Table Template' }}
+        submitLabel={{ create: 'Create', edit: 'Save Configuration' }}
+        cancelLabel="Discard"
+      >
+        {(form) => (
+          <>
+            <FormField name="name" label="Template Name" required>
+              <Input placeholder="e.g. VIP Circular" />
+            </FormField>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <Form.Item name="defaultPriceCents" label="Default Price (USD)">
+              <FormField name="defaultCapacity" label="Guest Capacity" required>
+                <InputNumber min={1} style={{ width: '100%' }} />
+              </FormField>
+              <FormField name="defaultShape" label="Table Shape" required>
+                <Select options={['Round', 'Rectangle', 'Square', 'Cocktail'].map((s) => ({ label: s, value: s }))} />
+              </FormField>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <FormField name="defaultPriceCents" label="Default Price (USD)">
                 <InputNumber min={0} step={0.01} precision={2} placeholder="0.00" prefix="$" style={{ width: '100%' }} />
-              </Form.Item>
-              <Form.Item name="defaultColor" label="Visual Marker">
+              </FormField>
+              <FormField name="defaultColor" label="Visual Marker">
                 <ColorPicker
                   format="hex"
                   onChange={(color) => form.setFieldValue('defaultColor', color.toHexString())}
                   showText
-                  presets={[
-                    {
-                      label: 'Theme Colors',
-                      colors: [...tablePickerPresets],
-                    },
-                  ]}
+                  presets={[{ label: 'Theme Colors', colors: [...tablePickerPresets] }]}
                 />
-              </Form.Item>
+              </FormField>
             </div>
-          </Form>
-        </div>
-      </Modal>
-    </div>
+          </>
+        )}
+      </CrudModal>
+    </PageShell>
   );
 }
