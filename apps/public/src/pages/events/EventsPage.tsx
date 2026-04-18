@@ -97,41 +97,40 @@ export default function EventsPage() {
       animate="animate"
       style={{ minHeight: '100vh', paddingBottom: 100 }}
     >
-      <Helmet><title>Events - Code829</title></Helmet>
-      {/* Page Header with hero background */}
-      <section className="hero-section" style={{ minHeight: 'auto', padding: '120px 20px 60px' }}>
-        <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>
+      <Helmet><title>All events — Code829</title></Helmet>
+
+      {/* Page Header — editorial, left-aligned */}
+      <section style={{ padding: '120px 32px 0' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <motion.div variants={itemVariants}>
-            <div style={{ color: 'var(--accent-rose)', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 16 }}>
-              The Collection
-            </div>
-            <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: 900, color: 'var(--text-primary)', marginBottom: 20, letterSpacing: '-2.5px' }}>
-              Explore Experiences
+            <h1
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: 'clamp(2.4rem, 6vw, 3.5rem)',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                letterSpacing: '-0.03em',
+                margin: '0 0 8px',
+                lineHeight: 1.1,
+              }}
+            >
+              All events
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 18, maxWidth: 600, margin: '0 auto', fontWeight: 500, lineHeight: 1.6 }}>
-              Discover an exclusive selection of upcoming events. Secure your spot in the future of entertainment.
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: 0 }}>
+              {total} {total === 1 ? 'evening' : 'evenings'} across the season
             </p>
           </motion.div>
         </div>
       </section>
 
-      <div className="page-container">
-        <motion.div variants={itemVariants} style={{ marginBottom: 48 }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px' }}>
+        <motion.div variants={itemVariants} style={{ marginBottom: 32 }}>
           <EventFilters
             facets={facets}
             values={filters}
             onChange={handleFilterChange}
           />
         </motion.div>
-
-        {!loading && (events?.length ?? 0) > 0 && (
-          <motion.div variants={itemVariants} style={{ marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 1, background: 'var(--border)' }} />
-            <span style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
-              {total} results found
-            </span>
-          </motion.div>
-        )}
 
         {loading ? (
           <Row gutter={[32, 32]}>

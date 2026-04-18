@@ -1,36 +1,39 @@
 /**
- * Dark Plum — centralized color palette (restored original brand theme).
+ * Premium Concierge — centralized color palette.
  *
  * This file is the single source of truth for every color used in the site.
  * CSS files and inline styles are forbidden from containing hex / rgb / hsl
  * literals — they must reference the CSS custom properties this module
  * injects via `applyThemeVars()`, or import the semantic tokens directly.
  *
- * The palette matches the pre-refactor brand identity: dark plum charcoal
- * surfaces, light lavender text, violet brand spectrum, warm accents. Only
- * the distribution mechanism (`applyThemeVars()` + TS source of truth) is
- * new — the colors themselves are the originals from master.
+ * Palette direction from the Code829 design handoff:
+ *   warmer aubergine-plum surfaces, cream (not lavender) text, rose as the
+ *   default brand accent. Violet is kept as a named secondary accent so
+ *   existing `var(--accent-violet)` references continue to resolve.
  */
 
 export const palette = {
-  // Dark plum charcoal surfaces
-  bgPage: '#120F1A',
-  bgSurface: '#1D1727',
-  bgElevated: '#251E32',
-  bgNav: '#171320',
+  // Aubergine-plum surfaces (richer than the prior dark plum)
+  bgPage: '#0F0B1A',
+  bgSurface: '#1B1530',
+  bgElevated: '#251B3D',
+  bgNav: '#140F25',
 
-  // Light lavender text
-  textLight: '#F5F2FA',
-  textMid: '#B8AFC9',
-  textDim: '#948AA8',
+  // Cream text (warmer than prior lavender)
+  textLight: '#FBF5EA',
+  textMid: '#C9BDE0',
+  textDim: '#9A8BB8',
 
-  // Violet brand spectrum
-  violet: '#7C5CFF',
-  violetLight: '#9B82FF',
-  violetDark: '#5A3CD6',
-
-  // Accents
+  // Rose brand spectrum (new default accent)
   rose: '#F46DB2',
+  roseLight: '#FBA6D0',
+  roseDark: '#C83F87',
+
+  // Secondary accents — violet retained for backwards-compat references
+  violet: '#9B6DFF',
+  violetLight: '#B89BFF',
+  violetDark: '#6B3FD6',
+
   gold: '#FBBF24',
   green: '#10B981',
   redSoft: '#F87171',
@@ -45,41 +48,41 @@ export const status = {
 } as const;
 
 export const semantic = {
-  brand: palette.violet,
-  brandHover: palette.violetLight,
-  brandLight: palette.violetLight,
-  brandDark: palette.violetDark,
-  brandOn: palette.textLight,
+  brand: palette.rose,
+  brandHover: palette.roseLight,
+  brandLight: palette.roseLight,
+  brandDark: palette.roseDark,
+  brandOn: '#FFFFFF',
 
   surface: {
     page: palette.bgPage,
     surface: palette.bgSurface,
     elevated: palette.bgElevated,
     nav: palette.bgNav,
-    soft: 'rgba(124, 92, 255, 0.08)',
-    muted: 'rgba(124, 92, 255, 0.15)',
-    pressed: 'rgba(124, 92, 255, 0.22)',
-    overlay: 'rgba(18, 15, 26, 0.82)',
+    soft: 'rgba(244, 109, 178, 0.10)',
+    muted: 'rgba(244, 109, 178, 0.16)',
+    pressed: 'rgba(244, 109, 178, 0.24)',
+    overlay: 'rgba(15, 11, 26, 0.82)',
   },
 
   text: {
     primary: palette.textLight,
     secondary: palette.textMid,
     muted: palette.textDim,
-    disabled: 'rgba(255, 255, 255, 0.25)',
-    onBrand: palette.textLight,
+    disabled: 'rgba(251, 245, 234, 0.28)',
+    onBrand: '#FFFFFF',
   },
 
   border: {
-    default: 'rgba(255, 255, 255, 0.10)',
-    subtle: 'rgba(255, 255, 255, 0.06)',
-    strong: 'rgba(255, 255, 255, 0.18)',
+    default: 'rgba(251, 245, 234, 0.10)',
+    subtle: 'rgba(251, 245, 234, 0.06)',
+    strong: 'rgba(251, 245, 234, 0.20)',
   },
 
   shadow: {
-    soft: 'rgba(0, 0, 0, 0.15)',
-    medium: 'rgba(0, 0, 0, 0.25)',
-    strong: 'rgba(0, 0, 0, 0.40)',
+    soft: 'rgba(0, 0, 0, 0.20)',
+    medium: 'rgba(0, 0, 0, 0.32)',
+    strong: 'rgba(0, 0, 0, 0.48)',
   },
 
   statusBg: {
@@ -94,8 +97,8 @@ export const semantic = {
 } as const;
 
 export const chartPalette = [
-  palette.violet,
   palette.rose,
+  palette.violet,
   palette.gold,
   palette.green,
   status.info,
@@ -107,20 +110,21 @@ export const chartPalette = [
  * Use via `var(--gradient-*)` in CSS / inline styles, or import `gradients.*`.
  */
 export const gradients = {
-  brand: `linear-gradient(135deg, ${palette.violet} 0%, ${palette.rose} 100%)`,
-  brandVertical: `linear-gradient(180deg, ${palette.violet}, ${palette.rose})`,
-  brandToGold: `linear-gradient(90deg, ${palette.violet}, ${palette.gold})`,
-  heroFallback: `linear-gradient(135deg, ${palette.violetDark} 0%, ${palette.bgSurface} 100%)`,
-  bannerBrand: `linear-gradient(90deg, rgba(124, 92, 255, 0.12), rgba(245, 158, 11, 0.08))`,
+  brand: `linear-gradient(135deg, ${palette.rose} 0%, ${palette.roseLight} 100%)`,
+  brandVertical: `linear-gradient(180deg, ${palette.rose}, ${palette.roseDark})`,
+  brandToGold: `linear-gradient(90deg, ${palette.rose}, ${palette.gold})`,
+  brandShimmer: `linear-gradient(120deg, ${palette.rose} 0%, ${palette.roseLight} 50%, ${palette.rose} 100%)`,
+  heroFallback: `linear-gradient(135deg, ${palette.roseDark} 0%, ${palette.bgSurface} 100%)`,
+  bannerBrand: `linear-gradient(90deg, rgba(244, 109, 178, 0.14), rgba(155, 109, 255, 0.10))`,
   bannerSuccess: `linear-gradient(90deg, rgba(16, 185, 129, 0.10), rgba(16, 185, 129, 0.04))`,
-  avatarTint: `linear-gradient(135deg, rgba(124, 92, 255, 0.20), rgba(245, 158, 11, 0.15))`,
+  avatarTint: `linear-gradient(135deg, rgba(244, 109, 178, 0.22), rgba(251, 191, 36, 0.14))`,
 } as const;
 
 export const shadows = {
   antToken: `0 4px 16px ${semantic.shadow.strong}`,
   antCard: `0 2px 12px ${semantic.shadow.medium}`,
   card: `0 2px 4px ${semantic.shadow.strong}, 0 8px 24px ${semantic.shadow.medium}, 0 16px 48px ${semantic.shadow.soft}`,
-  hover: `0 16px 40px rgba(38, 19, 98, 0.18), 0 4px 12px rgba(27, 12, 69, 0.08)`,
+  hover: `0 16px 40px rgba(200, 63, 135, 0.22), 0 4px 12px rgba(15, 11, 26, 0.40)`,
   elevated: `0 4px 20px ${semantic.shadow.strong}`,
   overlay: `0 10px 30px ${semantic.shadow.strong}`,
   soft: `0 1px 2px ${semantic.shadow.soft}`,
@@ -129,10 +133,10 @@ export const shadows = {
 
 /** Original 12-hue swatch set for user-selectable table fill colors. */
 export const tablePickerPresets = [
-  '#7C3AED',
-  '#5B21B6',
-  '#2563EB',
-  '#0EA5E9',
+  '#F46DB2',
+  '#C83F87',
+  '#9B6DFF',
+  '#6B3FD6',
   '#10B981',
   '#F59E0B',
   '#EF4444',
@@ -154,11 +158,13 @@ export const cssVars: Record<string, string> = {
   'primary-light': semantic.brandLight,
   'primary-dark': semantic.brandDark,
   'primary-soft': semantic.surface.soft,
-  'primary-tint': 'rgba(124, 92, 255, 0.03)',
+  'primary-tint': 'rgba(244, 109, 178, 0.04)',
   'primary-muted': semantic.surface.muted,
 
-  'accent-gold': palette.gold,
   'accent-rose': palette.rose,
+  'accent-rose-light': palette.roseLight,
+  'accent-rose-dark': palette.roseDark,
+  'accent-gold': palette.gold,
   'accent-green': palette.green,
   'accent-violet': palette.violet,
   'accent-violet-light': palette.violetLight,
@@ -198,20 +204,21 @@ export const cssVars: Record<string, string> = {
   'shadow-color-medium': semantic.shadow.medium,
   'shadow-color-strong': semantic.shadow.strong,
 
-  'nav-bg': 'rgba(28, 21, 38, 0.82)',
+  'nav-bg': 'rgba(20, 15, 37, 0.85)',
   'nav-border': semantic.border.default,
 
-  'glass-bg': 'rgba(29, 23, 39, 0.75)',
-  'glass-border': 'rgba(255, 255, 255, 0.08)',
+  'glass-bg': 'rgba(27, 21, 48, 0.75)',
+  'glass-border': 'rgba(251, 245, 234, 0.08)',
 
   'card-shadow':
-    '0 2px 4px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25), 0 16px 48px rgba(0, 0, 0, 0.15)',
+    '0 2px 4px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.28), 0 16px 48px rgba(0, 0, 0, 0.18)',
   'shadow-hover':
-    '0 16px 40px rgba(38, 19, 98, 0.18), 0 4px 12px rgba(27, 12, 69, 0.08)',
+    '0 16px 40px rgba(200, 63, 135, 0.22), 0 4px 12px rgba(15, 11, 26, 0.40)',
 
   'gradient-brand': gradients.brand,
   'gradient-brand-vertical': gradients.brandVertical,
   'gradient-brand-to-gold': gradients.brandToGold,
+  'gradient-brand-shimmer': gradients.brandShimmer,
   'gradient-hero-fallback': gradients.heroFallback,
   'gradient-banner-brand': gradients.bannerBrand,
   'gradient-banner-success': gradients.bannerSuccess,

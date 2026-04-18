@@ -1,5 +1,5 @@
-import { Tag, Space } from 'antd';
-import { CalendarOutlined, EnvironmentOutlined, ArrowRightOutlined, AppstoreOutlined } from '@ant-design/icons';
+import type { CSSProperties } from 'react';
+import { CalendarOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { EventSummary } from '@code829/shared/types/event';
 import { formatEventDate } from '@code829/shared/utils/date';
@@ -9,25 +9,50 @@ interface Props {
   event: EventSummary;
 }
 
+type CSSVars = CSSProperties & { '--c829-sold': number; '--c829-cap': number };
+
 export default function EventCard({ event }: Props) {
   const navigate = useNavigate();
 
   const priceLabel = event.displayFromFormatted ?? 'Free';
+  const isTableLayout = event.layoutMode === 'Grid';
+  const pillKind = event.isSoldOut ? 'soldout' : isTableLayout ? 'published' : 'completed';
+  const pillLabel = event.isSoldOut ? 'Sold out' : isTableLayout ? 'Table' : 'Open';
+
+  const venueName = event.venueName || event.venue?.name || 'Virtual';
+  const venueCity = event.venueCity || event.venue?.city;
+  const venueLine = venueCity ? `${venueName} · ${venueCity}` : venueName;
+
+  // CSS vars drive the capacity bar so no arithmetic happens in JSX.
+  const cardVars: CSSVars = {
+    '--c829-sold': event.totalSold || 0,
+    '--c829-cap': event.totalCapacity || 1,
+  };
 
   return (
-    <div 
-      className="glass-card hover-lift"
+    <div
       onClick={() => navigate(`/events/${event.slug}`)}
       style={{
-        borderRadius: 24,
+        ...cardVars,
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)',
         overflow: 'hidden',
         cursor: 'pointer',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        boxShadow: 'var(--shadow-sm)',
       }}
     >
-      <div style={{ position: 'relative', height: 240, overflow: 'hidden' }}>
+      <div
+        style={{
+          position: 'relative',
+          height: 200,
+          overflow: 'hidden',
+          borderBottom: '1px solid var(--border)',
+        }}
+      >
         {event.imageUrl ? (
           <img
             src={event.imageUrl}
@@ -37,81 +62,145 @@ export default function EventCard({ event }: Props) {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
+              transition: 'transform 0.5s var(--ease-human)',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.04)')}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           />
         ) : (
           <EventImageFallback category={event.category} title={event.title} />
         )}
-        
-        <div style={{
-          position: 'absolute',
-          top: 16,
-          right: 16,
-          zIndex: 2,
-        }}>
-          <Tag 
-            style={{ 
-              borderRadius: 10, 
-              border: 'none', 
-              background: 'var(--bg-overlay)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              color: 'var(--text-on-brand)',
-              fontWeight: 700, 
-              padding: '4px 12px' 
-            }}
-          >
-            {event.category}
-          </Tag>
-        </div>
       </div>
 
-      <div style={{ padding: 24, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12, lineHeight: 1.2 }}>
-          {event.title}
-        </h3>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-          <Space style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-            <CalendarOutlined style={{ color: 'var(--accent-rose)' }} />
-            {formatEventDate(event.startDate)}
-          </Space>
-          <Space style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-            <EnvironmentOutlined style={{ color: 'var(--accent-violet)' }} />
-            {(() => {
-              const name = event.venueName || event.venue?.name || 'Virtual';
-              const city = event.venueCity || event.venue?.city;
-              return city ? `${city}, ${name}` : name;
-            })()}
-          </Space>
-          {event.layoutMode === 'Grid' && (
-            <Space style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-              <AppstoreOutlined style={{ color: 'var(--accent-violet)' }} />
-              {event.noOfAvailableTables} tables available
-            </Space>
-          )}
+      <div
+        style={{
+          padding: 20,
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            gap: 12,
+            marginBottom: 8,
+          }}
+        >
+          <h3
+            style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: 20,
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              lineHeight: 1.2,
+              margin: 0,
+              flex: 1,
+            }}
+          >
+            {event.title}
+          </h3>
+          <span className={`status-pill status-${pillKind}`} style={{ flexShrink: 0 }}>
+            <span className="status-pill-dot" />
+            {pillLabel}
+          </span>
         </div>
 
-        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div
+          style={{
+            fontSize: 13,
+            color: 'var(--text-secondary)',
+            marginBottom: 14,
+            lineHeight: 1.5,
+            minHeight: 20,
+          }}
+        >
+          {event.category}
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            gap: 14,
+            flexWrap: 'wrap',
+            fontSize: 12,
+            color: 'var(--text-muted)',
+            marginBottom: 16,
+          }}
+        >
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <CalendarOutlined style={{ fontSize: 13 }} />
+            {formatEventDate(event.startDate)}
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <EnvironmentOutlined style={{ fontSize: 13 }} />
+            {venueLine}
+          </span>
+        </div>
+
+        <div
+          style={{
+            marginTop: 'auto',
+            paddingTop: 14,
+            borderTop: '1px solid var(--border-subtle)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 16,
+          }}
+        >
           <div>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 700 }}>Starting at</span>
-            <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--accent-violet)' }}>
+            <div
+              style={{
+                fontSize: 10,
+                color: 'var(--text-muted)',
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+                fontWeight: 600,
+              }}
+            >
+              From
+            </div>
+            <div
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: 20,
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+              }}
+            >
               {priceLabel}
             </div>
           </div>
-          <div style={{ 
-            width: 44, 
-            height: 44, 
-            borderRadius: 12, 
-            background: 'var(--gradient-brand)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--text-on-brand)',
-            fontSize: 20,
-            boxShadow: 'var(--shadow-hover)'
-          }}>
-            <ArrowRightOutlined />
+          <div style={{ flex: 1, textAlign: 'right' }}>
+            <div
+              style={{
+                fontSize: 11,
+                color: 'var(--text-muted)',
+                marginBottom: 4,
+              }}
+            >
+              {event.totalSold} of {event.totalCapacity} seated
+            </div>
+            <div
+              style={{
+                height: 4,
+                background: 'var(--bg-muted)',
+                borderRadius: 99,
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  width: 'calc(var(--c829-sold) / var(--c829-cap) * 100%)',
+                  height: '100%',
+                  background: 'var(--gradient-brand)',
+                  transition: 'width 0.4s var(--ease-human)',
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

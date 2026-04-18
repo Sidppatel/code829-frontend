@@ -1,6 +1,6 @@
 import { motion, type Variants } from 'framer-motion';
-import { Typography, Button, Space } from 'antd';
-import { ShareAltOutlined, MessageOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
+import { ShareAltOutlined } from '@ant-design/icons';
 import type { EventDetail } from '@code829/shared/types/event';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 
@@ -13,81 +13,173 @@ interface EventSidebarProps {
   itemVariants: Variants;
 }
 
-export default function EventSidebar({ event, isSoldOut, remaining, handleBookNow, isStartingBooking, itemVariants }: EventSidebarProps) {
+export default function EventSidebar({
+  event,
+  isSoldOut,
+  remaining,
+  handleBookNow,
+  isStartingBooking,
+  itemVariants,
+}: EventSidebarProps) {
   const isMobile = useIsMobile();
+  const availabilityLabel = !isSoldOut
+    ? event.layoutMode === 'Grid'
+      ? `${event.noOfAvailableTables} tables available`
+      : `${remaining} spots remaining`
+    : 'Sold out';
 
   return (
-    <>
-      <motion.div variants={itemVariants} style={{ position: isMobile ? 'relative' : 'sticky', top: isMobile ? 0 : 130 }}>
-        <div className="glass-card" style={{ padding: isMobile ? '24px 32px' : 48, borderRadius: 32 }}>
-          <div style={{ marginBottom: isMobile ? 24 : 40 }}>
-            <Typography.Text style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 800, fontSize: 11 }}>Starting at</Typography.Text>
-            <div style={{
-              fontSize: isMobile ? 'clamp(24px, 8vw, 36px)' : 48,
-              fontWeight: 900,
+    <motion.div
+      variants={itemVariants}
+      style={{ position: isMobile ? 'relative' : 'sticky', top: isMobile ? 0 : 90 }}
+    >
+      <div
+        style={{
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
+          padding: isMobile ? 20 : 28,
+          boxShadow: 'var(--shadow-sm)',
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontSize: 20,
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            marginBottom: 4,
+          }}
+        >
+          {event.layoutMode === 'Grid' ? 'Your tables' : 'Select tickets'}
+        </div>
+        <div
+          style={{
+            fontSize: 12,
+            color: 'var(--text-muted)',
+            marginBottom: 20,
+          }}
+        >
+          Held for 10 minutes once you continue
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <div
+            style={{
+              fontSize: 11,
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+              letterSpacing: 1.5,
+              fontWeight: 600,
+              marginBottom: 4,
+            }}
+          >
+            From
+          </div>
+          <div
+            style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: 36,
+              fontWeight: 700,
               color: 'var(--text-primary)',
-              marginTop: 8,
-              letterSpacing: '-1px',
-              lineHeight: 1.1
-            }}>
-              {event.displayFromFormatted ?? 'Complimentary'}
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <Button
-              type="primary"
-              size="large"
-              block
-              onClick={handleBookNow}
-              loading={isStartingBooking}
-              disabled={isSoldOut || isStartingBooking}
-              style={{
-                height: 72,
-                borderRadius: 18,
-                fontSize: 18,
-                fontWeight: 800,
-                background: isSoldOut ? 'var(--bg-soft)' : 'var(--gradient-brand)',
-                border: 'none',
-                boxShadow: isSoldOut ? 'none' : 'var(--shadow-hover)',
-                color: isSoldOut ? 'var(--text-muted)' : 'var(--text-on-brand)'
-              }}
-            >
-              {isSoldOut ? 'Sold Out' : 'Reserve tickets'}
-            </Button>
-
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 10,
-              color: 'var(--text-secondary)',
-              fontSize: 14,
-              fontWeight: 600
-            }}>
-              <div style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: !isSoldOut ? 'var(--status-success)' : 'var(--status-danger)'
-              }} />
-              {!isSoldOut
-                ? (event.layoutMode === 'Grid'
-                  ? `${event.noOfAvailableTables} tables available`
-                  : `${remaining} spots remaining`)
-                : 'Sold Out'}
-            </div>
-          </div>
-
-          <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
-            <Typography.Text style={{ color: 'var(--text-muted)', fontWeight: 800, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1.5, display: 'block', marginBottom: 20 }}>Spread the Word</Typography.Text>
-            <Space size={16}>
-              <Button shape="circle" icon={<ShareAltOutlined />} style={{ width: 44, height: 44, borderRadius: 12, border: '1px solid var(--border)', background: 'transparent' }} className="hover-lift" />
-              <Button shape="circle" icon={<MessageOutlined />} style={{ width: 44, height: 44, borderRadius: 12, border: '1px solid var(--border)', background: 'transparent' }} className="hover-lift" />
-            </Space>
+              lineHeight: 1.1,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            {event.displayFromFormatted ?? 'Complimentary'}
           </div>
         </div>
-      </motion.div>
-    </>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            fontSize: 13,
+            color: isSoldOut ? 'var(--status-danger)' : 'var(--text-secondary)',
+            fontWeight: 500,
+            marginBottom: 20,
+          }}
+        >
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: isSoldOut ? 'var(--status-danger)' : 'var(--status-success)',
+            }}
+          />
+          {availabilityLabel}
+        </div>
+
+        <Button
+          type="primary"
+          size="large"
+          block
+          onClick={handleBookNow}
+          loading={isStartingBooking}
+          disabled={isSoldOut || isStartingBooking}
+          style={{
+            height: 56,
+            borderRadius: 'var(--radius-md)',
+            fontSize: 15,
+            fontWeight: 600,
+            background: isSoldOut ? 'var(--bg-muted)' : 'var(--primary)',
+            border: 'none',
+            boxShadow: isSoldOut ? 'none' : '0 6px 20px rgba(244, 109, 178, 0.30)',
+            color: isSoldOut ? 'var(--text-muted)' : 'var(--text-on-brand)',
+          }}
+        >
+          {isSoldOut ? 'Sold out' : event.layoutMode === 'Grid' ? 'Reserve & pay' : 'Continue to payment'}
+        </Button>
+
+        <div
+          style={{
+            textAlign: 'center',
+            marginTop: 12,
+            fontSize: 11,
+            color: 'var(--text-muted)',
+            letterSpacing: 0.4,
+          }}
+        >
+          Seats held for 10:00 once you continue
+        </div>
+
+        <div
+          style={{
+            marginTop: 24,
+            paddingTop: 20,
+            borderTop: '1px solid var(--border-subtle)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span
+            style={{
+              color: 'var(--text-muted)',
+              fontSize: 11,
+              textTransform: 'uppercase',
+              letterSpacing: 1.5,
+              fontWeight: 600,
+            }}
+          >
+            Share
+          </span>
+          <Button
+            shape="circle"
+            icon={<ShareAltOutlined />}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              border: '1px solid var(--border)',
+              background: 'transparent',
+              color: 'var(--text-secondary)',
+            }}
+          />
+        </div>
+      </div>
+    </motion.div>
   );
 }
