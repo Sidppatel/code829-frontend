@@ -30,7 +30,7 @@ export default function StripePaymentForm({ onSuccess, onCancel, confirming, set
     const { error: confirmError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/bookings`,
+        return_url: `${window.location.origin}/purchases`,
       },
       redirect: 'if_required',
     });

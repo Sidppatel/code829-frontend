@@ -33,7 +33,7 @@ test.describe('@happy-path grid booking', () => {
 
     await page.getByRole('button', { name: /proceed to checkout/i }).click();
     await expect(page).toHaveURL(/[?&]step=checkout/);
-    await expect(page).toHaveURL(/bookingId=/);
+    await expect(page).toHaveURL(/purchaseId=/);
 
     // Stripe Elements loads in an iframe; fill the test card
     const stripeFrame = page.frameLocator('iframe[name^="__privateStripeFrame"]').first();

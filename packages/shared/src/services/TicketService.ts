@@ -11,20 +11,20 @@ export class TicketService extends BaseService {
   }
 
   getForBooking = (bookingId: string) =>
-    this.get<PurchaseTicket[]>(`/bookings/${bookingId}/tickets`);
+    this.get<PurchaseTicket[]>(`/purchases/${bookingId}/tickets`);
 
   getTicketQr = (bookingId: string, ticketId: string) =>
-    this.get(`/bookings/${bookingId}/tickets/${ticketId}/qr`, { responseType: 'blob' });
+    this.get(`/purchases/${bookingId}/tickets/${ticketId}/qr`, { responseType: 'blob' });
 
   invite = (bookingId: string, ticketId: string, email: string, guestName?: string) =>
-    this.post(`/bookings/${bookingId}/tickets/${ticketId}/invite`, { email, guestName });
+    this.post(`/purchases/${bookingId}/tickets/${ticketId}/invite`, { email, guestName });
 
   revoke = (bookingId: string, ticketId: string) =>
-    this.post(`/bookings/${bookingId}/tickets/${ticketId}/revoke`);
+    this.post(`/purchases/${bookingId}/tickets/${ticketId}/revoke`);
 
   claimSelf = (bookingId: string, ticketId: string) =>
     this.post<{ message: string; ticketId: string }>(
-      `/bookings/${bookingId}/tickets/${ticketId}/claim-self`,
+      `/purchases/${bookingId}/tickets/${ticketId}/claim-self`,
     );
 
   getClaimInfo = (token: string) =>

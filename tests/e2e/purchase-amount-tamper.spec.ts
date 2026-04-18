@@ -30,7 +30,7 @@ test.describe('@security amount tamper', () => {
     const event = await ev.json();
     test.skip(event.layoutMode !== 'Open', 'This test expects an Open-capacity event');
 
-    const create = await request.post(`${BACKEND}/bookings`, {
+    const create = await request.post(`${BACKEND}/purchases`, {
       headers: { Authorization: `Bearer ${token}` },
       data: { eventId: event.id, seatsReserved: 1 },
     });

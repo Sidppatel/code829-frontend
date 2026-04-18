@@ -30,48 +30,48 @@ export class PurchaseService extends BaseService {
   }
 
   // ── User purchases ──────────────────────────────
-  create = (request: CreatePurchaseRequest) => this.post<Purchase>('/bookings', request);
+  create = (request: CreatePurchaseRequest) => this.post<Purchase>('/purchases', request);
 
-  confirmPayment = (id: string) => this.post<Purchase>(`/bookings/${id}/confirm`);
+  confirmPayment = (id: string) => this.post<Purchase>(`/purchases/${id}/confirm`);
 
   confirmByPaymentIntent = (paymentIntentId: string) =>
-    this.post<Purchase>('/bookings/confirm-by-intent', { paymentIntentId });
+    this.post<Purchase>('/purchases/confirm-by-intent', { paymentIntentId });
 
-  cancel = (id: string) => this.post<Purchase>(`/bookings/${id}/cancel`);
+  cancel = (id: string) => this.post<Purchase>(`/purchases/${id}/cancel`);
 
-  getById = (id: string) => this.get<Purchase>(`/bookings/${id}`);
+  getById = (id: string) => this.get<Purchase>(`/purchases/${id}`);
 
   getMine = (page = 1, pageSize = 20, search?: string) =>
-    this.get<PagedResponse<Purchase>>('/bookings/mine', {
+    this.get<PagedResponse<Purchase>>('/purchases/mine', {
       params: { page, pageSize, search: search || undefined },
     });
 
   getQrCode = (id: string) =>
-    this.get(`/bookings/${id}/qr`, { responseType: 'blob' });
+    this.get(`/purchases/${id}/qr`, { responseType: 'blob' });
 
   getStripeConfig = () =>
-    this.get<{ publishableKey: string; mode: 'live' | 'test' }>('/bookings/stripe-config');
+    this.get<{ publishableKey: string; mode: 'live' | 'test' }>('/purchases/stripe-config');
 
   getQuote = (request: PricingQuoteRequest) =>
-    this.post<PricingQuote>('/bookings/quote', request);
+    this.post<PricingQuote>('/purchases/quote', request);
 
   // ── Admin purchases ─────────────────────────────
   adminList = (params?: AdminPurchaseListParams) =>
-    this.get<PagedResponse<Purchase>>('/admin/bookings', { params });
+    this.get<PagedResponse<Purchase>>('/admin/purchases', { params });
 
   adminGetStats = (eventId?: string) =>
-    this.get('/admin/bookings/stats', { params: eventId ? { eventId } : {} });
+    this.get('/admin/purchases/stats', { params: eventId ? { eventId } : {} });
 
-  refund = (id: string) => this.post(`/admin/bookings/${id}/refund`);
+  refund = (id: string) => this.post(`/admin/purchases/${id}/refund`);
 
   exportCsv = (eventId?: string) =>
-    this.get('/admin/bookings/export/csv', {
+    this.get('/admin/purchases/export/csv', {
       params: eventId ? { eventId } : {},
       responseType: 'blob',
     });
 
   exportXlsx = (eventId?: string) =>
-    this.get('/admin/bookings/export/xlsx', {
+    this.get('/admin/purchases/export/xlsx', {
       params: eventId ? { eventId } : {},
       responseType: 'blob',
     });
