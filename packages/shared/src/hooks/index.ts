@@ -20,3 +20,6 @@ export { useExport } from './useExport';
 export type { UseExportFetchers, UseExportResult } from './useExport';
 export { useQrCode } from './useQrCode';
 export type { QrFetcher, UseQrCodeResult } from './useQrCode';
+export { usePaymentIntentConfirmation } from './usePaymentIntentConfirmation';
+export { useGuestTickets } from './useGuestTickets';
+export type { UseGuestTicketsResult } from './useGuestTickets';

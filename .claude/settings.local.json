@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm run:*)",
       "Bash(git checkout *)",
-      "Bash(pnpm --filter @code829/shared build)"
+      "Bash(pnpm --filter @code829/shared build)",
+      "Bash(pnpm -r build)"
     ]
   }
 }

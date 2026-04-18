@@ -21,6 +21,9 @@ export { useExport } from './hooks/useExport';
 export type { UseExportFetchers, UseExportResult } from './hooks/useExport';
 export { useQrCode } from './hooks/useQrCode';
 export type { QrFetcher, UseQrCodeResult } from './hooks/useQrCode';
+export { usePaymentIntentConfirmation } from './hooks/usePaymentIntentConfirmation';
+export { useGuestTickets } from './hooks/useGuestTickets';
+export type { UseGuestTicketsResult } from './hooks/useGuestTickets';
 
 // Context
 export { ThemeProvider } from './context/ThemeContext';
