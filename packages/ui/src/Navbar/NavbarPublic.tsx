@@ -44,7 +44,7 @@ export function NavbarPublic({ items = [], user, onLogout, actions }: NavbarProp
     <nav className="ui-navbar ui-navbar--public" aria-label="Primary">
       <div className="ui-navbar__inner">
         <NavLink to="/" className="ui-navbar__brand" aria-label="Home">
-          <img src="/logo.jpg" alt="" className="ui-navbar__brand-mark" />
+          <img src="/logo.svg" alt="" className="ui-navbar__brand-mark" />
           <span className="ui-navbar__brand-name">Code829</span>
         </NavLink>
 
