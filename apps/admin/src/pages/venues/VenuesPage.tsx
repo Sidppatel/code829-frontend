@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Pagination, Switch } from 'antd';
-import { EditOutlined, EnvironmentOutlined, PlusOutlined, TableOutlined } from '@ant-design/icons';
+import { EditOutlined, EnvironmentOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { adminVenuesApi } from '../../services/api';
 import type { Venue } from '@code829/shared/types/venue';
@@ -50,37 +50,20 @@ export default function VenuesPage() {
       ]}
       rotateSubtitle
       extra={
-        <div style={{ display: 'flex', gap: 12 }}>
-          <Button
-            icon={<TableOutlined />}
-            onClick={() => navigate('/table-types')}
-            style={{
-              borderRadius: 'var(--radius-full)',
-              height: 48,
-              padding: '0 24px',
-              fontWeight: 600,
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
-              background: 'var(--bg-surface)',
-            }}
-          >
-            Table Templates
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => navigate('/venues/new')}
-            style={{
-              borderRadius: 'var(--radius-full)',
-              height: 48,
-              padding: '0 32px',
-              fontWeight: 700,
-              boxShadow: 'var(--shadow-md)',
-            }}
-          >
-            Add Venue
-          </Button>
-        </div>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => navigate('/venues/new')}
+          style={{
+            borderRadius: 'var(--radius-full)',
+            height: 48,
+            padding: '0 32px',
+            fontWeight: 700,
+            boxShadow: 'var(--shadow-md)',
+          }}
+        >
+          Add Venue
+        </Button>
       }
     >
       <LoadingBoundary
@@ -165,33 +148,7 @@ export default function VenuesPage() {
                     <EnvironmentOutlined style={{ color: 'var(--primary)' }} />
                     {v.city}, {v.state}
                   </div>
-                  <div
-                    style={{
-                      background: 'var(--bg-soft)',
-                      padding: '16px',
-                      borderRadius: 'var(--radius-md)',
-                      marginBottom: 24,
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
-                      gap: 12,
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
-                        Capacity
-                      </div>
-                      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
-                        {v.totalSeats || '800+'}
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
-                        Layout
-                      </div>
-                      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>Grid Base</div>
-                    </div>
-                  </div>
-                  <div style={{ marginTop: 'auto' }}>
+<div style={{ marginTop: 'auto' }}>
                     <Button
                       type="primary"
                       block

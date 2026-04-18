@@ -16,6 +16,7 @@ export class ImageService extends BaseService {
     return this.post<ImageUploadResponse>('/admin/images/upload', fd, {
       params: { entityType, entityId },
       timeout: 60000,
+      headers: { 'Content-Type': undefined },
     });
   };
 
@@ -32,7 +33,7 @@ export class ImageService extends BaseService {
   uploadAvatar = (file: File) => {
     const fd = new FormData();
     fd.append('file', file);
-    return this.post<ImageUploadResponse>('/auth/me/avatar', fd, { timeout: 60000 });
+    return this.post<ImageUploadResponse>('/auth/me/avatar', fd, { timeout: 60000, headers: { 'Content-Type': undefined } });
   };
 
   deleteAvatar = () => this.delete('/auth/me/avatar');
@@ -40,7 +41,7 @@ export class ImageService extends BaseService {
   uploadLogo = (file: File) => {
     const fd = new FormData();
     fd.append('file', file);
-    return this.post<ImageUploadResponse>('/developer/logo', fd, { timeout: 60000 });
+    return this.post<ImageUploadResponse>('/developer/logo', fd, { timeout: 60000, headers: { 'Content-Type': undefined } });
   };
 
   getLogo = () => this.get<ImageDto>('/developer/logo');
