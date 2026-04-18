@@ -3,21 +3,37 @@ import { useAuthStore } from '../stores/authStore';
 import apiClient from '../lib/axios';
 
 /**
- * On mount, if no JWT is in memory but the session cookie might still be valid,
- * attempt to restore the session by calling /auth/me.
- * DeviceSessionMiddleware will authenticate via the cookie and return the user.
+ * On mount, restores auth state and validates the session against the backend.
  *
- * Always flips {@link useAuthStore.isHydrated} to `true` once finished — guards wait
- * for that flag so they don't redirect during the probe.
+ * If token/user were persisted in localStorage (from a previous session), the UI is
+ * unblocked immediately — isHydrated is set to true right away so ProtectedRoute
+ * doesn't flash the login page. A background probe to /auth/me then validates the
+ * session cookie; if it returns 401 the axios interceptor calls logout() and the
+ * persisted store is cleared, redirecting the user to login.
+ *
+ * If there is no cached token, the probe runs first and isHydrated flips only after
+ * it completes, preserving the original loading-spinner behaviour.
  */
 export function useSessionRefresh(meEndpoint = '/auth/me') {
   const token = useAuthStore((s) => s.token);
   const setAuth = useAuthStore((s) => s.setAuth);
+  const setUser = useAuthStore((s) => s.setUser);
   const setHydrated = useAuthStore((s) => s.setHydrated);
 
   useEffect(() => {
     if (token) {
+      // Restore from cache immediately — no loading spinner for returning users.
+      // Then validate in the background; the 401 interceptor handles session expiry.
       setHydrated(true);
+      const validate = async () => {
+        try {
+          const { data } = await apiClient.get(meEndpoint, { _skipAuthRetry: true } as never);
+          if (data?.id) setUser(data);
+        } catch {
+          // 401 → axios interceptor already called logout() and cleared the store
+        }
+      };
+      void validate();
       return;
     }
 
@@ -25,8 +41,6 @@ export function useSessionRefresh(meEndpoint = '/auth/me') {
       try {
         const { data } = await apiClient.get(meEndpoint);
         if (data?.id) {
-          // Session cookie was valid — restore auth state
-          // We don't get a JWT back, but the session cookie will authenticate future requests
           setAuth('session-cookie', data);
         }
       } catch {

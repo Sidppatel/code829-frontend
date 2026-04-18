@@ -253,6 +253,14 @@ export default function EventWizardPage() {
         return;
       }
     }
+    // Open seating: require at least one ticket tier before moving past the seating step
+    if (step === 1 && layoutMode === 'Open') {
+      const tiers = form.getFieldValue('ticketTypes') ?? [];
+      if (tiers.length === 0) {
+        message.error('Add at least one ticket tier before continuing');
+        return;
+      }
+    }
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   };
 
@@ -341,12 +349,51 @@ export default function EventWizardPage() {
                 </Form.Item>
               </Col>
               <Col xs={12} sm={6}>
-                <Form.Item name="endDate" label="End date" rules={[{ required: true, message: 'Required' }]}>
+                <Form.Item
+                  name="endDate"
+                  label="End date"
+                  rules={[
+                    { required: true, message: 'Required' },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        const startDate = getFieldValue('startDate');
+                        if (!value || !startDate) return Promise.resolve();
+                        if (value.isBefore(startDate, 'day')) {
+                          return Promise.reject(new Error('End date must be on or after start date'));
+                        }
+                        return Promise.resolve();
+                      },
+                    }),
+                  ]}
+                >
                   <DatePicker format="MMM D, YYYY" placeholder="Pick date" style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
               <Col xs={12} sm={6}>
-                <Form.Item name="endTime" label="End time" rules={[{ required: true, message: 'Required' }]}>
+                <Form.Item
+                  name="endTime"
+                  label="End time"
+                  rules={[
+                    { required: true, message: 'Required' },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        const startDate = getFieldValue('startDate');
+                        const endDate = getFieldValue('endDate');
+                        const startTime = getFieldValue('startTime');
+                        if (!value || !startTime || !startDate || !endDate) return Promise.resolve();
+                        const isSameDay = endDate.isSame(startDate, 'day');
+                        if (isSameDay) {
+                          const startMinutes = startTime.hour() * 60 + startTime.minute();
+                          const endMinutes = value.hour() * 60 + value.minute();
+                          if (endMinutes <= startMinutes) {
+                            return Promise.reject(new Error('End time must be after start time'));
+                          }
+                        }
+                        return Promise.resolve();
+                      },
+                    }),
+                  ]}
+                >
                   <TimePicker use12Hours format="h:mm a" placeholder="Pick time" minuteStep={5} needConfirm={false} style={{ width: '100%' }} />
                 </Form.Item>
               </Col>

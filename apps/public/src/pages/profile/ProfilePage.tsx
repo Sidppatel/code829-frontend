@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, Form, Input, Switch, Button, App, Row, Col } from 'antd';
+import { Card, Form, Input, Button, App, Row, Col } from 'antd';
 import { Helmet } from 'react-helmet-async';
 import { createLogger } from '@code829/shared/lib/logger';
 import { authApi, imagesApi } from '../../services/api';
@@ -140,14 +140,6 @@ export default function ProfilePage() {
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item
-            name="optInLocationEmail"
-            label="Receive emails about events near you"
-            valuePropName="checked"
-            tooltip="Coming soon"
-          >
-            <Switch disabled />
-          </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={saving}>
               Save Changes

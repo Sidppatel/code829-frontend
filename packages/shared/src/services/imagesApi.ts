@@ -7,7 +7,6 @@ export const imagesApi = {
     fd.append('file', file);
     return apiClient.post<ImageUploadResponse>('/admin/images/upload', fd, {
       params: { entityType, entityId },
-      headers: { 'Content-Type': 'multipart/form-data' },
       timeout: 60000,
     });
   },
@@ -28,7 +27,6 @@ export const imagesApi = {
     const fd = new FormData();
     fd.append('file', file);
     return apiClient.post<ImageUploadResponse>('/auth/me/avatar', fd, {
-      headers: { 'Content-Type': 'multipart/form-data' },
       timeout: 60000,
     });
   },
@@ -40,7 +38,6 @@ export const imagesApi = {
     const fd = new FormData();
     fd.append('file', file);
     return apiClient.post<ImageUploadResponse>('/developer/logo', fd, {
-      headers: { 'Content-Type': 'multipart/form-data' },
       timeout: 60000,
     });
   },

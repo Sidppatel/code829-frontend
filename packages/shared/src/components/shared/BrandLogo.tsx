@@ -37,7 +37,7 @@ export default function BrandLogo({
       style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         gap: isLg ? 12 : 8,
         textDecoration: 'none',
         ...style,
