@@ -12,13 +12,11 @@ import {
   Col,
   InputNumber,
   App,
-  Segmented,
 } from 'antd';
 import {
   EditOutlined,
   AppstoreOutlined,
   InfoCircleOutlined,
-  TeamOutlined,
   PlusOutlined,
   MinusCircleOutlined,
 } from '@ant-design/icons';
@@ -348,42 +346,40 @@ export default function EventWizardPage() {
             </Col>
           </Row>
 
-          {/* Seating Type Toggle */}
+          {/* Seating Type Toggle — Tables vs Open selectable cards (design handoff pattern) */}
           <div className="admin-section" style={{ marginTop: 0 }}>
             <div className="admin-section-title">
               <AppstoreOutlined />
-              Seating Type
+              Seating type
             </div>
 
-            <Segmented
-              block
-              value={layoutMode}
-              disabled={layoutLocked}
-              onChange={(val) => setLayoutMode(val as 'Grid' | 'Open')}
-              options={[
-                {
-                  label: (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '4px 0' }}>
-                      <AppstoreOutlined style={{ fontSize: 15 }} />
-                      <span style={{ fontWeight: 600, fontSize: 13 }}>Table Seating</span>
-                    </div>
-                  ),
-                  value: 'Grid',
-                },
-                {
-                  label: (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '4px 0' }}>
-                      <TeamOutlined style={{ fontSize: 15 }} />
-                      <span style={{ fontWeight: 600, fontSize: 13 }}>Open Seating</span>
-                    </div>
-                  ),
-                  value: 'Open',
-                },
-              ]}
-              style={{ marginBottom: 16 }}
-            />
+            <Row gutter={[14, 14]} style={{ marginBottom: 16 }}>
+              <Col xs={24} sm={12}>
+                <SeatingModeCard
+                  active={layoutMode === 'Grid'}
+                  disabled={layoutLocked}
+                  onClick={() => !layoutLocked && setLayoutMode('Grid')}
+                  title="Tables"
+                  subtitle="Assigned seating with table-level pricing tiers. Guests pick a specific table."
+                  icon={<SeatingIconTables active={layoutMode === 'Grid'} />}
+                  meta="Grid-based floor plan · per-table price"
+                />
+              </Col>
+              <Col xs={24} sm={12}>
+                <SeatingModeCard
+                  active={layoutMode === 'Open'}
+                  disabled={layoutLocked}
+                  onClick={() => !layoutLocked && setLayoutMode('Open')}
+                  title="Open"
+                  subtitle="General admission. Sell by ticket tier with no fixed assignments."
+                  icon={<SeatingIconOpen active={layoutMode === 'Open'} />}
+                  meta="Ticket tiers · capacity-based"
+                />
+              </Col>
+            </Row>
+
             {layoutLocked && (
-              <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: -8, marginBottom: 12 }}>
+              <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: -4, marginBottom: 12 }}>
                 Seating type cannot be changed — this event has active bookings or locked tables.
               </div>
             )}
@@ -568,5 +564,133 @@ export default function EventWizardPage() {
         </Form>
       </Card>
     </div>
+  );
+}
+
+// ── Seating mode selectable card (design handoff) ─────────────────
+interface SeatingModeCardProps {
+  active: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  meta: string;
+}
+
+function SeatingModeCard({
+  active,
+  disabled,
+  onClick,
+  title,
+  subtitle,
+  icon,
+  meta,
+}: SeatingModeCardProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        width: '100%',
+        textAlign: 'left',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        padding: 18,
+        border: 'none',
+        borderRadius: 'var(--radius-lg)',
+        background: active ? 'var(--primary-soft)' : 'var(--bg-soft)',
+        outline: active ? '2px solid var(--primary)' : '1px solid var(--border-subtle)',
+        outlineOffset: active ? -2 : -1,
+        display: 'flex',
+        gap: 16,
+        alignItems: 'flex-start',
+        opacity: disabled ? 0.55 : 1,
+        transition: 'background 0.18s var(--ease-human), outline-color 0.18s var(--ease-human)',
+      }}
+    >
+      <div
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: 'var(--radius-md)',
+          flexShrink: 0,
+          background: active ? 'var(--bg-surface)' : 'var(--bg-muted)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {icon}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <div
+            style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: 18,
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+            }}
+          >
+            {title}
+          </div>
+          {active && (
+            <span
+              style={{
+                fontSize: 10,
+                padding: '2px 8px',
+                borderRadius: 99,
+                background: 'var(--primary)',
+                color: 'var(--text-on-brand)',
+                fontWeight: 700,
+                letterSpacing: 1,
+                textTransform: 'uppercase',
+              }}
+            >
+              Selected
+            </span>
+          )}
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 8 }}>
+          {subtitle}
+        </div>
+        <div
+          style={{
+            fontSize: 11,
+            color: 'var(--text-muted)',
+            fontWeight: 600,
+            letterSpacing: 0.5,
+          }}
+        >
+          {meta}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function SeatingIconTables({ active }: { active: boolean }) {
+  const c = active ? 'var(--primary)' : 'var(--text-muted)';
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <circle cx="8" cy="8" r="3.5" stroke={c} strokeWidth="1.6" />
+      <circle cx="24" cy="8" r="3.5" stroke={c} strokeWidth="1.6" />
+      <circle cx="8" cy="24" r="3.5" stroke={c} strokeWidth="1.6" />
+      <circle cx="24" cy="24" r="3.5" stroke={c} strokeWidth="1.6" />
+      <circle cx="16" cy="16" r="3.5" fill={c} opacity="0.25" />
+      <circle cx="16" cy="16" r="3.5" stroke={c} strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+function SeatingIconOpen({ active }: { active: boolean }) {
+  const c = active ? 'var(--primary)' : 'var(--text-muted)';
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <rect x="3" y="6" width="26" height="5" rx="1.5" stroke={c} strokeWidth="1.6" />
+      <rect x="3" y="13.5" width="26" height="5" rx="1.5" stroke={c} strokeWidth="1.6" fill={c} fillOpacity="0.25" />
+      <rect x="3" y="21" width="26" height="5" rx="1.5" stroke={c} strokeWidth="1.6" />
+    </svg>
   );
 }
