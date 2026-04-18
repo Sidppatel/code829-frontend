@@ -87,7 +87,10 @@ export function NavbarPublic({ items = [], user, onLogout, actions }: NavbarProp
                     My purchases
                   </Link>
                   <Link to="/tickets" role="menuitem" className="ui-navbar__menu-item" onClick={() => setMenuOpen(false)}>
-                    My tickets
+                    My entries
+                  </Link>
+                  <Link to="/guest-tickets" role="menuitem" className="ui-navbar__menu-item" onClick={() => setMenuOpen(false)}>
+                    Guest tickets
                   </Link>
                   {onLogout && (
                     <>
@@ -148,6 +151,23 @@ export function NavbarPublic({ items = [], user, onLogout, actions }: NavbarProp
                 {item.label}
               </NavLink>
             ))}
+            {user && (
+              <>
+                <div className="ui-navbar__menu-sep" style={{ margin: 'var(--space-2) var(--space-4)' }} />
+                <NavLink to="/purchases" onClick={() => setMobileMenuOpen(false)} className="ui-navbar__mobile-link">
+                  My purchases
+                </NavLink>
+                <NavLink to="/tickets" onClick={() => setMobileMenuOpen(false)} className="ui-navbar__mobile-link">
+                  My entries
+                </NavLink>
+                <NavLink to="/guest-tickets" onClick={() => setMobileMenuOpen(false)} className="ui-navbar__mobile-link">
+                  Guest tickets
+                </NavLink>
+                <NavLink to="/profile" onClick={() => setMobileMenuOpen(false)} className="ui-navbar__mobile-link">
+                  Profile
+                </NavLink>
+              </>
+            )}
             {!user && (
               <NavLink
                 to="/login"

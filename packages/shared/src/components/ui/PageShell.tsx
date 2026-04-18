@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 import PageHeader from '../shared/PageHeader';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -16,6 +16,7 @@ interface Props {
   children: ReactNode;
   padding?: 'default' | 'compact' | 'none';
   className?: string;
+  loading?: boolean;
 }
 
 const PADDING_VARS: Record<NonNullable<Props['padding']>, number> = {
@@ -37,6 +38,7 @@ export default function PageShell({
   children,
   padding = 'default',
   className,
+  loading,
 }: Props) {
   const isMobile = useIsMobile();
   const spacing = PADDING_VARS[padding];
@@ -59,19 +61,25 @@ export default function PageShell({
           rotateSubtitle={rotateSubtitle}
         />
       )}
-      <div
-        style={{
-          maxWidth: 1200,
-          margin: '0 auto',
-          paddingLeft: horizontalPadding,
-          paddingRight: horizontalPadding,
-          paddingBottom: 80,
-        }}
-      >
-        {stats && <div style={{ marginBottom: spacing }}>{stats}</div>}
-        {toolbar}
-        {children}
-      </div>
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+          <div className="pulse-soft" style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--primary)' }} />
+        </div>
+      ) : (
+        <div
+          style={{
+            maxWidth: 1200,
+            margin: '0 auto',
+            paddingLeft: horizontalPadding,
+            paddingRight: horizontalPadding,
+            paddingBottom: 80,
+          }}
+        >
+          {stats && <div style={{ marginBottom: spacing }}>{stats}</div>}
+          {toolbar}
+          {children}
+        </div>
+      )}
     </div>
   );
 }

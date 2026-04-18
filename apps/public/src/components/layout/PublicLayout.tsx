@@ -12,6 +12,7 @@ import {
   QrcodeOutlined,
   MessageOutlined,
   LoginOutlined,
+  GiftOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Avatar, Grid } from 'antd';

@@ -3,15 +3,13 @@ import { Alert, Button, Card, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   CalendarOutlined,
-  EnvironmentOutlined,
   GiftOutlined,
   QrcodeOutlined,
   SendOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { purchasesApi, ticketsApi } from '../../services/api';
+import { purchasesApi } from '../../services/api';
 import type { Purchase } from '@code829/shared/types/purchase';
-import type { GuestTicket } from '@code829/shared/types/ticket';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
 import {
   useAsyncAction,
