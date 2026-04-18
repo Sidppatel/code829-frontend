@@ -205,7 +205,6 @@ export default function AdminLayout() {
         <Header
           style={{
             height: 72,
-            lineHeight: '72px',
             background: 'var(--nav-bg)',
             borderBottom: '1px solid var(--nav-border)',
             padding: '0 24px',

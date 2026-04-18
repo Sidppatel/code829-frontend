@@ -14,8 +14,8 @@ interface TopHeaderProps {
 
 export default function TopHeader({ isMobile, title, user, userMenuItems, showMetrics = false }: TopHeaderProps) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', height: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, height: '100%' }}>
         {isMobile && (
           <BrandLogo size="sm" />
         )}

@@ -46,11 +46,22 @@ export default function BrandLogo({
         width: iconSize,
         height: iconSize,
         flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
       }}>
         <img
           src={BRAND_LOGO_URL}
           alt={BRAND_NAME}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          style={{ 
+            maxWidth: '100%', 
+            maxHeight: '100%', 
+            width: 'auto', 
+            height: 'auto', 
+            display: 'block',
+            objectFit: 'contain'
+          }}
         />
       </div>
 
