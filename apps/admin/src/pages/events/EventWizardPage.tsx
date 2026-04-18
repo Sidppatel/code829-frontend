@@ -344,7 +344,8 @@ export default function EventWizardPage() {
                     format="MMM D, YYYY"
                     placeholder="Pick date"
                     style={{ width: '100%' }}
-                    getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+                    getPopupContainer={() => document.body}
+                    placement="bottomLeft"
                   />
                 </Form.Item>
               </Col>
@@ -357,7 +358,8 @@ export default function EventWizardPage() {
                     minuteStep={5}
                     needConfirm={false}
                     style={{ width: '100%' }}
-                    getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+                    getPopupContainer={() => document.body}
+                    placement="bottomLeft"
                   />
                 </Form.Item>
               </Col>
@@ -383,7 +385,8 @@ export default function EventWizardPage() {
                     format="MMM D, YYYY"
                     placeholder="Pick date"
                     style={{ width: '100%' }}
-                    getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+                    getPopupContainer={() => document.body}
+                    placement="bottomLeft"
                   />
                 </Form.Item>
               </Col>
@@ -419,7 +422,8 @@ export default function EventWizardPage() {
                     minuteStep={5}
                     needConfirm={false}
                     style={{ width: '100%' }}
-                    getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+                    getPopupContainer={() => document.body}
+                    placement="bottomLeft"
                   />
                 </Form.Item>
               </Col>
