@@ -50,7 +50,7 @@ export default function BrandLogo({
         background: 'var(--primary)',
       }}>
         <img
-          src="/logo.jpg"
+          src="/logo.svg"
           alt={BRAND_NAME}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />

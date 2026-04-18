@@ -125,10 +125,10 @@ export default function LoginPage() {
               overflow: 'hidden',
               boxShadow: 'var(--shadow-hover)'
             }}>
-              <img 
-                src="/logo.jpg" 
-                alt="Code829 Logo" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              <img
+                src="/logo.svg"
+                alt="Code829 Logo"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
             <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 12, letterSpacing: '-1.5px' }}>
