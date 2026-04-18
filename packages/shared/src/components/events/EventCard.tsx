@@ -41,7 +41,7 @@ export default function EventCard({ event, onClick, variant = 'default' }: Props
   };
 
   return (
-    <div onClick={onClick} style={cardStyle}>
+    <div onClick={onClick} className="c829-card-hover" style={cardStyle}>
       <div
         style={{
           position: 'relative',
