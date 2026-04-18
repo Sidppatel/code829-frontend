@@ -87,6 +87,34 @@ export {
   developerApi,
 } from './services';
 
+// Controllers — singletons over services, emit domain events
+export {
+  BaseController,
+  AuthController, authController,
+  EventController, eventController,
+  BookingController, bookingController,
+  TicketController, ticketController,
+  CheckInController, checkInController,
+  VenueController, venueController,
+  LayoutController, layoutController,
+} from './controllers';
+
+// ViewModels — class + hook pairs consumed via useSyncExternalStore
+export {
+  BaseViewModel,
+  useVMState,
+  EventListViewModel, useEventListVM,
+  EventDetailViewModel, useEventDetailVM,
+  BookingQuoteViewModel, useBookingQuoteVM,
+  AuthViewModel, useAuthVM,
+} from './viewmodels';
+export type {
+  UseEventListVMResult,
+  UseEventDetailVMResult,
+  UseBookingQuoteVMResult,
+  UseAuthVMResult,
+} from './viewmodels';
+
 // Theme
 export { STATUS_COLORS, EVENT_STATUS_COLORS, LOG_SEVERITY_COLORS, EMAIL_STATUS_COLORS } from './theme/statusColors';
 export { portalCardStyle, portalPanelStyle, portalElevatedStyle } from './theme/portalStyles';
