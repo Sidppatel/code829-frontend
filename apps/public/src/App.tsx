@@ -12,12 +12,12 @@ const HomePage = lazy(() => import('./pages/home/HomePage'));
 const EventsPage = lazy(() => import('./pages/events/EventsPage'));
 const EventDetailPage = lazy(() => import('./pages/event-detail/EventDetailPage'));
 const LoginPage = lazy(() => import('./pages/login/LoginPage'));
-const MyBookingsPage = lazy(() => import('./pages/bookings/MyBookingsPage'));
+const MyPurchasesPage = lazy(() => import('./pages/purchases/MyPurchasesPage'));
 const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
 const VerifyMagicLinkPage = lazy(() => import('./pages/auth/VerifyMagicLinkPage'));
 const OnboardingPage = lazy(() => import('./pages/auth/OnboardingPage'));
-const BookingDetailPage = lazy(() => import('./pages/bookings/BookingDetailPage'));
-const BookingTicketsPage = lazy(() => import('./pages/bookings/BookingTicketsPage'));
+const PurchaseDetailPage = lazy(() => import('./pages/purchases/PurchaseDetailPage'));
+const PurchaseTicketsPage = lazy(() => import('./pages/purchases/PurchaseTicketsPage'));
 const MyTicketsPage = lazy(() => import('./pages/tickets/MyTicketsPage'));
 const TicketClaimPage = lazy(() => import('./pages/tickets/TicketClaimPage'));
 const FeedbackPage = lazy(() => import('./pages/feedback/FeedbackPage'));
@@ -40,9 +40,9 @@ function AppContent() {
 
         {/* Authenticated Users */}
         <Route element={<ProtectedRoute />}>
-          <Route path="bookings" element={<MyBookingsPage />} />
-          <Route path="bookings/:bookingId" element={<BookingDetailPage />} />
-          <Route path="bookings/:bookingId/tickets" element={<BookingTicketsPage />} />
+          <Route path="purchases" element={<MyPurchasesPage />} />
+          <Route path="purchases/:purchaseId" element={<PurchaseDetailPage />} />
+          <Route path="purchases/:purchaseId/tickets" element={<PurchaseTicketsPage />} />
           <Route path="tickets" element={<MyTicketsPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>

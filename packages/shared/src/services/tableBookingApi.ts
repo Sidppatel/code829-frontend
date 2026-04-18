@@ -1,7 +1,2 @@
-import { bookingService } from './BookingService';
-
-export const tableBookingApi = {
-  lockTable: bookingService.lockTable,
-  releaseTable: bookingService.releaseTable,
-  getMyLocks: bookingService.getMyLocks,
-};
+// Renamed to tablePurchaseApi — re-exported for backwards compatibility
+export { tablePurchaseApi as tableBookingApi } from './tablePurchaseApi';

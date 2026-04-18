@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { bookingsApi, ticketsApi } from '../../services/api';
-import type { Booking } from '@code829/shared/types/booking';
+import type { Purchase } from '@code829/shared/types/purchase';
 import type { GuestTicket } from '@code829/shared/types/ticket';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
 import {
@@ -22,7 +22,7 @@ import {
 } from '@code829/shared/hooks';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
-import BookingStatusTag from '../../components/bookings/BookingStatusTag';
+import PurchaseStatusTag from '../../components/purchases/PurchaseStatusTag';
 import PagePreamble from '../../components/layout/PagePreamble';
 import {
   DataTableSection,
@@ -32,19 +32,19 @@ import {
 } from '@code829/shared/components/ui';
 import { createLogger } from '@code829/shared/lib/logger';
 
-const log = createLogger('Public/MyBookingsPage');
+const log = createLogger('Public/MyPurchasesPage');
 
 type BookingFilters = Record<string, unknown> & {
   search?: string;
 };
 
-function bookingDetails(record: Booking): string {
+function bookingDetails(record: Purchase): string {
   if (record.tableLabel) return `Table ${record.tableLabel}`;
   if (record.seatsReserved) return `${record.seatsReserved} seat${record.seatsReserved !== 1 ? 's' : ''}`;
   return '-';
 }
 
-export default function MyBookingsPage() {
+export default function MyPurchasesPage() {
   const navigate = useNavigate();
   const confirm = useConfirm();
 
@@ -53,7 +53,7 @@ export default function MyBookingsPage() {
       bookingsApi.getMine(params.page, params.pageSize, params.search),
     [],
   );
-  const paged = usePagedTable<Booking, BookingFilters>({ fetcher });
+  const paged = usePagedTable<Purchase, BookingFilters>({ fetcher });
 
   usePaymentIntentConfirmation({ onConfirmed: paged.refresh });
   const guestTickets = useGuestTickets();
@@ -64,17 +64,17 @@ export default function MyBookingsPage() {
   const cancel = useAsyncAction(
     (id: string) => bookingsApi.cancel(id),
     {
-      successMessage: 'Booking cancelled',
+      successMessage: 'Purchase cancelled',
       onSuccess: () => {
-        log.info('Booking cancelled');
+        log.info('Purchase cancelled');
         paged.refresh();
       },
     },
   );
 
-  const columns: ColumnsType<Booking> = [
+  const columns: ColumnsType<Purchase> = [
     {
-      title: 'Booking #',
+      title: 'Purchase #',
       dataIndex: 'bookingNumber',
       key: 'bookingNumber',
       width: 140,
@@ -90,13 +90,13 @@ export default function MyBookingsPage() {
       key: 'eventTitle',
       render: (title: string, record) => <a onClick={() => navigate(`/bookings/${record.id}`)}>{title}</a>,
     },
-    { title: 'Details', key: 'details', width: 160, render: (_: unknown, r: Booking) => bookingDetails(r) },
+    { title: 'Details', key: 'details', width: 160, render: (_: unknown, r: Purchase) => bookingDetails(r) },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
       width: 120,
-      render: (status) => <BookingStatusTag status={status} />,
+      render: (status) => <PurchaseStatusTag status={status} />,
     },
     {
       title: 'Total',
@@ -143,10 +143,10 @@ export default function MyBookingsPage() {
               danger
               onClick={() =>
                 confirm({
-                  title: 'Cancel Booking',
-                  description: 'Are you sure you want to cancel this booking? This action cannot be undone.',
+                  title: 'Cancel Purchase',
+                  description: 'Are you sure you want to cancel this purchase? This action cannot be undone.',
                   tone: 'danger',
-                  confirmLabel: 'Cancel Booking',
+                  confirmLabel: 'Cancel Purchase',
                   onConfirm: () => cancel.run(record.id),
                 })
               }
@@ -161,24 +161,24 @@ export default function MyBookingsPage() {
 
   return (
     <PageShell
-      documentTitle="My Bookings - Code829"
+      documentTitle="My Purchases - Code829"
       preamble={
         <PagePreamble
           kicker="Your evenings"
-          title="My bookings"
+          title="My purchases"
           subtitle="Review, manage, and share tickets for every reservation you've made."
         />
       }
     >
       <FilterBar
         search={{
-          placeholder: 'Search by event name, booking # or status...',
+          placeholder: 'Search by event name, purchase # or status...',
           onChange: (v) => paged.setFilters({ search: v }),
           width: 480,
         }}
       />
 
-      <DataTableSection<Booking>
+      <DataTableSection<Purchase>
         data={paged.data}
         total={paged.total}
         page={paged.page}
@@ -213,7 +213,7 @@ export default function MyBookingsPage() {
                 </div>
                 <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>#{booking.bookingNumber}</div>
               </div>
-              <BookingStatusTag status={booking.status} />
+              <PurchaseStatusTag status={booking.status} />
             </div>
             <div
               style={{
@@ -258,10 +258,10 @@ export default function MyBookingsPage() {
                   danger
                   onClick={() =>
                     confirm({
-                      title: 'Cancel Booking',
-                      description: 'Cancel this booking? This action cannot be undone.',
+                      title: 'Cancel Purchase',
+                      description: 'Cancel this purchase? This action cannot be undone.',
                       tone: 'danger',
-                      confirmLabel: 'Cancel Booking',
+                      confirmLabel: 'Cancel Purchase',
                       onConfirm: () => cancel.run(booking.id),
                     })
                   }
@@ -272,7 +272,7 @@ export default function MyBookingsPage() {
             </div>
           </Card>
         )}
-        empty={{ title: 'No bookings yet', description: 'Your reservations will appear here.' }}
+        empty={{ title: 'No purchases yet', description: 'Your reservations will appear here.' }}
       />
 
       {guestTickets.error && (
@@ -342,7 +342,7 @@ export default function MyBookingsPage() {
         onClose={bookingQr.hide}
         qrUrl={bookingQr.url}
         loading={bookingQr.loading}
-        title="Booking QR Code"
+        title="Purchase QR Code"
         downloadFileName="booking-qr.png"
       />
       <QrModal

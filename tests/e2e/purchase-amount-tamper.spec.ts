@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 /**
- * Confirms the backend rejects a /bookings/{id}/confirm call when the PaymentIntent's
+ * Confirms the backend rejects a /purchases/{id}/confirm call when the PaymentIntent's
  * amount doesn't match the booking total (the Phase 1 amount-validation fix).
  *
  * This test talks to the API directly — no UI needed. It:
@@ -38,7 +38,7 @@ test.describe('@security amount tamper', () => {
     const booking = await create.json();
 
     // No payment performed — confirm must fail.
-    const confirm = await request.post(`${BACKEND}/bookings/${booking.id}/confirm`, {
+    const confirm = await request.post(`${BACKEND}/purchases/${booking.id}/confirm`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     expect(confirm.status()).toBe(400);
@@ -46,7 +46,7 @@ test.describe('@security amount tamper', () => {
     expect(body.message).toMatch(/amount|succeeded|payment/i);
 
     // Clean up
-    await request.post(`${BACKEND}/bookings/${booking.id}/cancel`, {
+    await request.post(`${BACKEND}/purchases/${booking.id}/cancel`, {
       headers: { Authorization: `Bearer ${token}` },
     });
   });

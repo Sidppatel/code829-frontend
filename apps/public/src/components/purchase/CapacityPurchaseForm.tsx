@@ -14,7 +14,7 @@ interface Props {
   onProceed: (seats: number, ticketTypeId?: string) => void;
 }
 
-export default function CapacityBookingForm({
+export default function CapacityPurchaseForm({
   eventId,
   maxCapacity,
   availableCount,

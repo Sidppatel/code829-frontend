@@ -42,6 +42,6 @@ test.describe('@happy-path grid booking', () => {
     await stripeFrame.locator('[name="cvc"]').fill('123');
 
     await page.getByRole('button', { name: /pay now|confirm/i }).click();
-    await expect(page).toHaveURL(/\/bookings/);
+    await expect(page).toHaveURL(/\/purchases/);
   });
 });

@@ -13,22 +13,22 @@ import {
   ArrowLeftOutlined,
 } from '@ant-design/icons';
 import { ticketsApi } from '../../services/api';
-import type { BookingTicket } from '@code829/shared/types/ticket';
+import type { PurchaseTicket } from '@code829/shared/types/ticket';
 import PagePreamble from '../../components/layout/PagePreamble';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import { formatEventDate } from '@code829/shared/utils/date';
 import { createLogger } from '@code829/shared/lib/logger';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 
-const log = createLogger('Public/BookingTicketsPage');
+const log = createLogger('Public/PurchaseTicketsPage');
 
-export default function BookingTicketsPage() {
-  const { bookingId } = useParams<{ bookingId: string }>();
+export default function PurchaseTicketsPage() {
+  const { purchaseId } = useParams<{ purchaseId: string }>();
   const navigate = useNavigate();
   const { message } = App.useApp();
   const currentUserId = useAuthStore((s) => s.user?.id);
 
-  const [tickets, setTickets] = useState<BookingTicket[]>([]);
+  const [tickets, setTickets] = useState<PurchaseTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [qrSeat, setQrSeat] = useState<number | null>(null);
@@ -38,27 +38,27 @@ export default function BookingTicketsPage() {
   const [sending, setSending] = useState(false);
 
   const loadTickets = useCallback(async () => {
-    if (!bookingId) return;
+    if (!purchaseId) return;
     try {
-      const { data } = await ticketsApi.getForBooking(bookingId);
+      const { data } = await ticketsApi.getForBooking(purchaseId);
       setTickets(data);
-      log.info('Loaded tickets for booking', { bookingId, count: data.length });
+      log.info('Loaded tickets for booking', { purchaseId, count: data.length });
     } catch (err) {
       log.error('Failed to load tickets', err);
       message.error('Failed to load tickets');
     } finally {
       setLoading(false);
     }
-  }, [bookingId, message]);
+  }, [purchaseId, message]);
 
   useEffect(() => {
     void loadTickets();
   }, [loadTickets]);
 
   const handleShowQr = async (ticketId: string, seatNumber: number) => {
-    if (!bookingId) return;
+    if (!purchaseId) return;
     try {
-      const { data: blob } = await ticketsApi.getTicketQr(bookingId, ticketId);
+      const { data: blob } = await ticketsApi.getTicketQr(purchaseId, ticketId);
       const url = URL.createObjectURL(blob as Blob);
       setQrUrl(url);
       setQrSeat(seatNumber);
@@ -75,11 +75,11 @@ export default function BookingTicketsPage() {
   };
 
   const handleInvite = async () => {
-    if (!bookingId || !inviteModal || !inviteEmail.trim()) return;
+    if (!purchaseId || !inviteModal || !inviteEmail.trim()) return;
     setSending(true);
     try {
-      await ticketsApi.invite(bookingId, inviteModal, inviteEmail.trim(), inviteName.trim() || undefined);
-      log.info('Ticket invite sent', { bookingId, ticketId: inviteModal, email: inviteEmail.trim() });
+      await ticketsApi.invite(purchaseId, inviteModal, inviteEmail.trim(), inviteName.trim() || undefined);
+      log.info('Ticket invite sent', { purchaseId, ticketId: inviteModal, email: inviteEmail.trim() });
       message.success(`Invite sent to ${inviteEmail}`);
       setInviteModal(null);
       setInviteEmail('');
@@ -94,10 +94,10 @@ export default function BookingTicketsPage() {
   };
 
   const handleClaimSelf = async (ticketId: string) => {
-    if (!bookingId) return;
+    if (!purchaseId) return;
     try {
-      await ticketsApi.claimSelf(bookingId, ticketId);
-      log.info('Ticket self-claimed', { bookingId, ticketId });
+      await ticketsApi.claimSelf(purchaseId, ticketId);
+      log.info('Ticket self-claimed', { purchaseId, ticketId });
       message.success('Ticket claimed — it now appears in your My Tickets');
       void loadTickets();
     } catch (err) {
@@ -107,7 +107,7 @@ export default function BookingTicketsPage() {
   };
 
   const handleRevoke = (ticketId: string) => {
-    if (!bookingId) return;
+    if (!purchaseId) return;
     Modal.confirm({
       title: 'Revoke Invitation',
       content: 'Are you sure you want to revoke this ticket invitation? The guest will lose access.',
@@ -115,8 +115,8 @@ export default function BookingTicketsPage() {
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
-          await ticketsApi.revoke(bookingId, ticketId);
-          log.info('Ticket invite revoked', { bookingId, ticketId });
+          await ticketsApi.revoke(purchaseId, ticketId);
+          log.info('Ticket invite revoked', { purchaseId, ticketId });
           message.success('Invite revoked');
           void loadTickets();
         } catch (err) {
@@ -147,7 +147,7 @@ export default function BookingTicketsPage() {
       <PagePreamble
         kicker="Your evening"
         title="Manage tickets"
-        subtitle={first ? `${first.eventTitle} · ${first.bookingNumber}` : 'Booking tickets'}
+        subtitle={first ? `${first.eventTitle} · ${first.bookingNumber}` : 'Purchase tickets'}
         rightSlot={
           <Button
             type="text"

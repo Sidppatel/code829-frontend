@@ -1,6 +1,6 @@
 export type TicketStatus = 'Unassigned' | 'Invited' | 'Claimed' | 'CheckedIn';
 
-export interface BookingTicket {
+export interface PurchaseTicket {
   id: string;
   ticketCode: string;
   seatNumber: number;
@@ -44,3 +44,6 @@ export interface TicketClaimInfo {
   inviterName: string;
   alreadyClaimed: boolean;
 }
+
+/** @deprecated Use PurchaseTicket */
+export type BookingTicket = PurchaseTicket;

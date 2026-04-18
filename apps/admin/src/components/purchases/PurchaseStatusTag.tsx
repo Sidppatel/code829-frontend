@@ -1,7 +1,7 @@
 import { Tag } from 'antd';
-import type { BookingStatus } from '@code829/shared/types/booking';
+import type { PurchaseStatus } from '@code829/shared/types/purchase';
 
-const STATUS_COLORS: Record<BookingStatus, string> = {
+const STATUS_COLORS: Record<PurchaseStatus, string> = {
   Pending: 'orange',
   Paid: 'green',
   CheckedIn: 'blue',
@@ -11,9 +11,9 @@ const STATUS_COLORS: Record<BookingStatus, string> = {
 };
 
 interface Props {
-  status: BookingStatus;
+  status: PurchaseStatus;
 }
 
-export default function BookingStatusTag({ status }: Props) {
+export default function PurchaseStatusTag({ status }: Props) {
   return <Tag color={STATUS_COLORS[status]}>{status}</Tag>;
 }

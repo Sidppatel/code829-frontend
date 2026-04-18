@@ -1,15 +1,3 @@
-import { bookingService } from './BookingService';
-
-export type { CreateBookingRequest } from './BookingService';
-
-export const bookingsApi = {
-  create: bookingService.create,
-  confirmPayment: bookingService.confirmPayment,
-  confirmByPaymentIntent: bookingService.confirmByPaymentIntent,
-  cancel: bookingService.cancel,
-  getById: bookingService.getById,
-  getMine: bookingService.getMine,
-  getQrCode: bookingService.getQrCode,
-  getStripeConfig: bookingService.getStripeConfig,
-  getQuote: bookingService.getQuote,
-};
+// Renamed to purchasesApi — re-exported for backwards compatibility
+export { purchasesApi as bookingsApi } from './purchasesApi';
+export type { CreatePurchaseRequest } from './purchasesApi';

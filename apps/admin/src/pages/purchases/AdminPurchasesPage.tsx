@@ -1,13 +1,13 @@
 import { Button } from 'antd';
 import { DollarOutlined, UndoOutlined, UserOutlined } from '@ant-design/icons';
-import { adminBookingsApi } from '../../services/api';
+import { adminPurchasesApi } from '../../services/api';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
 import { useAsyncAction, useConfirm, useExport } from '@code829/shared/hooks';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
-import type { Booking, BookingStatus } from '@code829/shared/types/booking';
-import type { AdminBookingListParams } from '@code829/shared/services/adminBookingsApi';
-import BookingStatusTag from '../../components/bookings/BookingStatusTag';
+import type { Purchase, PurchaseStatus } from '@code829/shared/types/purchase';
+import type { AdminPurchaseListParams } from '@code829/shared/services/adminPurchasesApi';
+import PurchaseStatusTag from '../../components/purchases/PurchaseStatusTag';
 import {
   DataTableSection,
   ExportButtons,
@@ -17,22 +17,22 @@ import {
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import { createLogger } from '@code829/shared/lib/logger';
 
-const log = createLogger('Admin/BookingsPage');
+const log = createLogger('Admin/PurchasesPage');
 
-const STATUS_CHIPS: BookingStatus[] = ['Pending', 'Paid', 'CheckedIn', 'Refunded'];
+const STATUS_CHIPS: PurchaseStatus[] = ['Pending', 'Paid', 'CheckedIn', 'Refunded'];
 
-export default function AdminBookingsPage() {
-  const paged = usePagedTable<Booking, AdminBookingListParams>({
-    fetcher: adminBookingsApi.list,
+export default function AdminPurchasesPage() {
+  const paged = usePagedTable<Purchase, AdminPurchaseListParams>({
+    fetcher: adminPurchasesApi.list,
     defaultPageSize: 15,
   });
 
   const refund = useAsyncAction(
-    (id: string) => adminBookingsApi.refund(id),
+    (id: string) => adminPurchasesApi.refund(id),
     {
-      successMessage: 'Booking refunded',
+      successMessage: 'Purchase refunded',
       onSuccess: () => {
-        log.info('Booking refunded');
+        log.info('Purchase refunded');
         paged.refresh();
       },
     },
@@ -40,16 +40,16 @@ export default function AdminBookingsPage() {
   const confirm = useConfirm();
 
   const exporter = useExport({
-    csv: () => adminBookingsApi.exportCsv().then((r) => r.data as Blob),
-    xlsx: () => adminBookingsApi.exportXlsx().then((r) => r.data as Blob),
-    filenameBase: 'bookings',
+    csv: () => adminPurchasesApi.exportCsv().then((r) => r.data as Blob),
+    xlsx: () => adminPurchasesApi.exportXlsx().then((r) => r.data as Blob),
+    filenameBase: 'purchases',
   });
 
   return (
     <PageShell
       title="Sales"
       subtitle={[
-        'Track and manage every guest booking with ease.',
+        'Track and manage every guest purchase with ease.',
         'Process refunds and oversee entry status in real-time.',
         'Monitor your revenue and guest list at a glance.',
       ]}
@@ -58,7 +58,7 @@ export default function AdminBookingsPage() {
     >
       <FilterBar
         search={{
-          placeholder: 'Search customer or booking number...',
+          placeholder: 'Search customer or purchase number...',
           onChange: (v) => paged.setFilters({ search: v }),
         }}
         chips={STATUS_CHIPS.map((status) => ({
@@ -69,7 +69,7 @@ export default function AdminBookingsPage() {
             paged.setFilters({ status: paged.filters.status === status ? undefined : status }),
         }))}
       />
-      <DataTableSection<Booking>
+      <DataTableSection<Purchase>
         data={paged.data}
         total={paged.total}
         page={paged.page}
@@ -79,14 +79,14 @@ export default function AdminBookingsPage() {
         rowKey="id"
         scrollX={600}
         columns={[
-          { title: 'Booking #', dataIndex: 'bookingNumber', key: 'bookingNumber' },
+          { title: 'Purchase #', dataIndex: 'bookingNumber', key: 'bookingNumber' },
           { title: 'Event', dataIndex: 'eventTitle', key: 'eventTitle' },
           { title: 'Customer', dataIndex: 'userName', key: 'userName' },
           {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-            render: (status: BookingStatus) => <BookingStatusTag status={status} />,
+            render: (status: PurchaseStatus) => <PurchaseStatusTag status={status} />,
           },
           {
             title: 'Total',
@@ -103,14 +103,14 @@ export default function AdminBookingsPage() {
           {
             title: 'Actions',
             key: 'actions',
-            render: (_: unknown, record: Booking) =>
+            render: (_: unknown, record: Purchase) =>
               record.status === 'Paid' ? (
                 <Button
                   size="small"
                   icon={<UndoOutlined />}
                   onClick={() =>
                     confirm({
-                      title: 'Refund this booking?',
+                      title: 'Refund this purchase?',
                       description: `Refund ${centsToUSD(record.totalCents)} to ${record.userName}?`,
                       tone: 'danger',
                       confirmLabel: 'Refund',
@@ -146,7 +146,7 @@ export default function AdminBookingsPage() {
                   #{booking.bookingNumber}
                 </div>
               </div>
-              <BookingStatusTag status={booking.status} />
+              <PurchaseStatusTag status={booking.status} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-secondary)' }}>
@@ -171,7 +171,7 @@ export default function AdminBookingsPage() {
                   style={{ fontWeight: 600 }}
                   onClick={() =>
                     confirm({
-                      title: 'Refund this booking?',
+                      title: 'Refund this purchase?',
                       description: `Refund ${centsToUSD(booking.totalCents)} to ${booking.userName}?`,
                       tone: 'danger',
                       confirmLabel: 'Refund',
@@ -186,7 +186,7 @@ export default function AdminBookingsPage() {
           </HumanCard>
         )}
         empty={{
-          title: 'No bookings found',
+          title: 'No purchases found',
           description: "It looks like no one has reserved a spot under these filters yet.",
           actionLabel: 'Clear Filters',
           onAction: () => paged.setFilters({}),

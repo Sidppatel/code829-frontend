@@ -195,7 +195,7 @@ export default function AdminDashboardPage() {
                     <DisplayHeading as="div" size="sm" style={{ marginBottom: 12 }}>
                       At a glance
                     </DisplayHeading>
-                    <ActivityRow label="Paid bookings" value={nextEvent.paidBookings} />
+                    <ActivityRow label="Paid purchases" value={nextEvent.paidBookings} />
                     <ActivityRow label="Pending" value={nextEvent.pendingBookings} />
                     <ActivityRow label="Cancelled" value={nextEvent.cancelledBookings} />
                     <ActivityRow label="Refunded" value={nextEvent.refundedBookings} />

@@ -53,7 +53,7 @@ Examples of violations:
 - Or add a backend stats endpoint (e.g., `GET /admin/events/{id}/stats`) backed by a view/SP.
 - Never shortcut by doing the math in the component.
 
-**Authoritative pricing pattern:** `packages/shared/src/hooks/useBookingQuote.ts` calls `POST /bookings/quote` whenever selections change and returns `PricingQuote` with pre-computed `subtotalCents`, `feeCents`, `taxCents`, `totalCents`, `formattedTotal`. Mirror this pattern for any new priced flow.
+**Authoritative pricing pattern:** `packages/shared/src/hooks/usePurchaseQuote.ts` calls `POST /bookings/quote` whenever selections change and returns `PricingQuote` with pre-computed `subtotalCents`, `feeCents`, `taxCents`, `totalCents`, `formattedTotal`. Mirror this pattern for any new priced flow.
 
 **PR checklist:** reviewer confirms no new arithmetic on `*Cents`/`*Count`/`*Capacity`/etc. in `.tsx` files, except the narrow allowed exceptions above.
 

@@ -4,7 +4,7 @@ import type { Stripe } from '@stripe/stripe-js';
 import type { EventDetail } from '@code829/shared/types/event';
 import type { TableLock } from '@code829/shared/types/layout';
 import type { PricingQuote } from '@code829/shared/types/pricing';
-import CheckoutPanel from '../../../components/booking/CheckoutPanel';
+import CheckoutPanel from '../../../components/purchase/CheckoutPanel';
 
 interface GridProps {
   mode: 'grid';
@@ -47,7 +47,7 @@ export default function CheckoutStep(props: Props) {
   return (
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
       <Button icon={<ArrowLeftOutlined />} onClick={props.onCancel}>{backLabel}</Button>
-      <Typography.Title level={3}>Complete Your Booking &mdash; {props.event.title}</Typography.Title>
+      <Typography.Title level={3}>Complete Your Purchase &mdash; {props.event.title}</Typography.Title>
       <Row gutter={[24, 24]} justify="center">
         <Col xs={24} sm={16} md={12} lg={8}>
           {props.mode === 'grid' ? (

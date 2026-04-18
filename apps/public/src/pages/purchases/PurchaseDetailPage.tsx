@@ -18,47 +18,47 @@ import {
   AppstoreOutlined,
 } from '@ant-design/icons';
 import { bookingsApi } from '../../services/api';
-import type { Booking } from '@code829/shared/types/booking';
+import type { Purchase } from '@code829/shared/types/purchase';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
-import BookingStatusTag from '../../components/bookings/BookingStatusTag';
+import PurchaseStatusTag from '../../components/purchases/PurchaseStatusTag';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import PagePreamble from '../../components/layout/PagePreamble';
 import { createLogger } from '@code829/shared/lib/logger';
 
-const log = createLogger('Public/BookingDetailPage');
+const log = createLogger('Public/PurchaseDetailPage');
 
-export default function BookingDetailPage() {
-  const { bookingId } = useParams<{ bookingId: string }>();
+export default function PurchaseDetailPage() {
+  const { purchaseId } = useParams<{ purchaseId: string }>();
   const navigate = useNavigate();
   const { message } = App.useApp();
 
-  const [booking, setBooking] = useState<Booking | null>(null);
+  const [booking, setBooking] = useState<Purchase | null>(null);
   const [loading, setLoading] = useState(true);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!bookingId) return;
+    if (!purchaseId) return;
     const load = async () => {
       try {
-        const { data } = await bookingsApi.getById(bookingId);
+        const { data } = await bookingsApi.getById(purchaseId);
         setBooking(data);
-        log.info('Loaded booking details', { bookingId, bookingNumber: data.bookingNumber });
+        log.info('Loaded purchase details', { purchaseId, bookingNumber: data.bookingNumber });
       } catch (err) {
-        log.error('Failed to load booking details', err);
-        message.error('Failed to load booking details');
+        log.error('Failed to load purchase details', err);
+        message.error('Failed to load purchase details');
         navigate('/bookings', { replace: true });
       } finally {
         setLoading(false);
       }
     };
     void load();
-  }, [bookingId, message, navigate]);
+  }, [purchaseId, message, navigate]);
 
   const handleShowQr = async () => {
-    if (!bookingId) return;
+    if (!purchaseId) return;
     try {
-      const { data: blob } = await bookingsApi.getQrCode(bookingId);
+      const { data: blob } = await bookingsApi.getQrCode(purchaseId);
       setQrUrl(URL.createObjectURL(blob as Blob));
     } catch (err) {
       log.error('Failed to load QR code', err);
@@ -67,22 +67,22 @@ export default function BookingDetailPage() {
   };
 
   const handleCancel = () => {
-    if (!bookingId) return;
+    if (!purchaseId) return;
     Modal.confirm({
-      title: 'Cancel Booking',
-      content: 'Are you sure you want to cancel this booking? This action cannot be undone.',
-      okText: 'Cancel Booking',
+      title: 'Cancel Purchase',
+      content: 'Are you sure you want to cancel this purchase? This action cannot be undone.',
+      okText: 'Cancel Purchase',
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
-          await bookingsApi.cancel(bookingId);
-          log.info('Booking cancelled', { bookingId });
-          message.success('Booking cancelled');
-          const { data } = await bookingsApi.getById(bookingId);
+          await bookingsApi.cancel(purchaseId);
+          log.info('Purchase cancelled', { purchaseId });
+          message.success('Purchase cancelled');
+          const { data } = await bookingsApi.getById(purchaseId);
           setBooking(data);
         } catch (err) {
-          log.error('Failed to cancel booking', err);
-          message.error('Failed to cancel booking');
+          log.error('Failed to cancel purchase', err);
+          message.error('Failed to cancel purchase');
         }
       },
     });
@@ -127,14 +127,14 @@ export default function BookingDetailPage() {
 
   return (
     <div>
-      <Helmet><title>Booking details — Code829</title></Helmet>
+      <Helmet><title>Purchase details — Code829</title></Helmet>
       <PagePreamble
-        kicker={`Booking #${booking.bookingNumber}`}
+        kicker={`Purchase #${booking.bookingNumber}`}
         title={booking.eventTitle}
         subtitle={formatEventDate(booking.eventDate)}
         rightSlot={
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <BookingStatusTag status={booking.status} />
+            <PurchaseStatusTag status={booking.status} />
             <Button
               type="text"
               icon={<ArrowLeftOutlined />}
@@ -183,10 +183,10 @@ export default function BookingDetailPage() {
         {booking.eventCategory && infoRow(<AppstoreOutlined />, 'Category', <Tag>{booking.eventCategory}</Tag>)}
       </Card>
 
-      {/* Booking Details */}
+      {/* Purchase Details */}
       <Card size="small" style={{ marginBottom: 12, borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
-        {sectionTitle('Booking Info')}
-        {infoRow(<NumberOutlined />, 'Booking Number', booking.bookingNumber)}
+        {sectionTitle('Purchase Info')}
+        {infoRow(<NumberOutlined />, 'Purchase Number', booking.bookingNumber)}
         {infoRow(<ClockCircleOutlined />, 'Booked On', formatEventDate(booking.createdAt))}
         {booking.tableLabel && infoRow(<TagOutlined />, 'Table', `Table ${booking.tableLabel}`)}
         {booking.seatsReserved && infoRow(<TeamOutlined />, 'Seats Reserved', `${booking.seatsReserved} seat${booking.seatsReserved !== 1 ? 's' : ''}`)}
@@ -249,11 +249,11 @@ export default function BookingDetailPage() {
           )}
           {booking.status === 'Pending' && (
             <Button danger onClick={handleCancel}>
-              Cancel Booking
+              Cancel Purchase
             </Button>
           )}
-          <Button onClick={() => navigate('/bookings')}>
-            Back to Bookings
+          <Button onClick={() => navigate('/purchases')}>
+            Back to Purchases
           </Button>
         </Space>
       </Card>
@@ -266,12 +266,12 @@ export default function BookingDetailPage() {
           setQrUrl(null);
         }}
         footer={null}
-        title="Booking QR Code"
+        title="Purchase QR Code"
         centered
       >
         {qrUrl && (
           <div style={{ textAlign: 'center', padding: 16 }}>
-            <Image src={qrUrl} alt="Booking QR Code" width={240} preview={false} />
+            <Image src={qrUrl} alt="Purchase QR Code" width={240} preview={false} />
             <div style={{ marginTop: 12, color: 'var(--text-muted)', fontSize: 13 }}>
               Show this QR code at the venue for check-in
             </div>

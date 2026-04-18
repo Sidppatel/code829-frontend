@@ -1,7 +1,7 @@
 import { Button, Col, Row, Skeleton, Space, Typography } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import type { EventDetail, EventTicketType } from '@code829/shared/types/event';
-import CapacityBookingForm from '../../../components/booking/CapacityBookingForm';
+import CapacityPurchaseForm from '../../../components/purchase/CapacityPurchaseForm';
 
 interface Props {
   event: EventDetail;
@@ -21,7 +21,7 @@ export default function CapacityStep({ event, ticketTypes, ticketTypesLoading, o
           {ticketTypesLoading ? (
             <Skeleton active paragraph={{ rows: 4 }} />
           ) : (
-            <CapacityBookingForm
+            <CapacityPurchaseForm
               eventId={event.id}
               maxCapacity={event.maxCapacity ?? 0}
               availableCount={event.availableCount}

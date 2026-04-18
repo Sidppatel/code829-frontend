@@ -35,7 +35,7 @@ const navGroups = [
     title: 'Events',
     items: [
       { key: '/events', shortLabel: 'Events', label: 'Events List', icon: <CalendarOutlined /> },
-      { key: '/bookings', shortLabel: 'Sales', label: 'Bookings', icon: <BookOutlined /> },
+      { key: '/purchases', shortLabel: 'Sales', label: 'Purchases', icon: <BookOutlined /> },
     ]
   },
   {

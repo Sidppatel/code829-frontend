@@ -17,7 +17,7 @@ const EventWizardPage = lazy(() => import('./pages/events/EventWizardPage'));
 const EventManagePage = lazy(() => import('./pages/events/EventManagePage'));
 const VenuesPage = lazy(() => import('./pages/venues/VenuesPage'));
 const VenueFormPage = lazy(() => import('./pages/venues/VenueFormPage'));
-const AdminBookingsPage = lazy(() => import('./pages/bookings/AdminBookingsPage'));
+const AdminPurchasesPage = lazy(() => import('./pages/purchases/AdminPurchasesPage'));
 const TableTypesPage = lazy(() => import('./pages/table-types/TableTypesPage'));
 const LayoutEditorPage = lazy(() => import('./pages/layout-editor/LayoutEditorPage'));
 const CheckInSelectPage = lazy(() => import('./pages/checkin/CheckInSelectPage'));
@@ -49,7 +49,7 @@ export default function App() {
               <Route path="venues" element={<VenuesPage />} />
               <Route path="venues/new" element={<VenueFormPage />} />
               <Route path="venues/:id" element={<VenueFormPage />} />
-              <Route path="bookings" element={<AdminBookingsPage />} />
+              <Route path="purchases" element={<AdminPurchasesPage />} />
               <Route path="table-types" element={<TableTypesPage />} />
               <Route path="layout/:eventId" element={<LayoutEditorPage />} />
               <Route path="analytics" element={<AnalyticsPage />} />

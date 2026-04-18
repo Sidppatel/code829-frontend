@@ -1,5 +1,5 @@
 import { BaseService } from './BaseService';
-import type { BookingTicket, GuestTicket, TicketClaimInfo } from '../types/ticket';
+import type { PurchaseTicket, GuestTicket, TicketClaimInfo } from '../types/ticket';
 
 export class TicketService extends BaseService {
   private static _instance: TicketService | null = null;
@@ -11,7 +11,7 @@ export class TicketService extends BaseService {
   }
 
   getForBooking = (bookingId: string) =>
-    this.get<BookingTicket[]>(`/bookings/${bookingId}/tickets`);
+    this.get<PurchaseTicket[]>(`/bookings/${bookingId}/tickets`);
 
   getTicketQr = (bookingId: string, ticketId: string) =>
     this.get(`/bookings/${bookingId}/tickets/${ticketId}/qr`, { responseType: 'blob' });

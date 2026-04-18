@@ -1,7 +1,7 @@
 import { Button, Col, Row, Skeleton, Space, Typography } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import type { EventDetail, EventTableDto, EventTablesResponse } from '@code829/shared/types/event';
-import TableSelectionCanvas from '../../../components/booking/TableSelectionCanvas';
+import TableSelectionCanvas from '../../../components/purchase/TableSelectionCanvas';
 
 interface Props {
   event: EventDetail;

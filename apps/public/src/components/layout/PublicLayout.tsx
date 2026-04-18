@@ -41,7 +41,7 @@ const PUBLIC_FOOTER_COLUMNS = [
   {
     title: 'Account',
     links: [
-      { label: 'My bookings', to: '/bookings' },
+      { label: 'My purchases', to: '/purchases' },
       { label: 'My tickets', to: '/tickets' },
       { label: 'Profile', to: '/profile' },
     ],
@@ -90,7 +90,7 @@ export default function PublicLayout() {
 
 
   const userMenuItems: MenuProps['items'] = [
-    { key: 'bookings', label: 'My Bookings', icon: <BookOutlined />, onClick: () => navigate('/bookings') },
+    { key: 'bookings', label: 'My Purchases', icon: <BookOutlined />, onClick: () => navigate('/purchases') },
     { key: 'tickets', label: 'My Tickets', icon: <QrcodeOutlined />, onClick: () => navigate('/tickets') },
     { key: 'profile', label: 'Profile', icon: <UserOutlined />, onClick: () => navigate('/profile') },
     { type: 'divider' as const },
@@ -100,7 +100,7 @@ export default function PublicLayout() {
   const bottomNavItems = [
     { key: '/', icon: <HomeOutlined />, label: 'Home', action: 'navigate' as const },
     { key: '/events', icon: <CalendarOutlined />, label: 'Events', action: 'navigate' as const },
-    { key: '/bookings', icon: <BookOutlined />, label: 'Bookings', action: 'navigate' as const },
+    { key: '/purchases', icon: <BookOutlined />, label: 'Purchases', action: 'navigate' as const },
     { key: 'menu', icon: <MenuOutlined />, label: 'Menu', action: 'drawer' as const },
   ];
 
@@ -231,7 +231,7 @@ export default function PublicLayout() {
               { key: '/events', label: <Link to="/events">Events</Link>, icon: <CalendarOutlined /> },
               { key: '/feedback', label: <Link to="/feedback">Feedback</Link>, icon: <MessageOutlined /> },
               ...(isAuthenticated ? [
-                { key: '/bookings', label: <Link to="/bookings">My Bookings</Link>, icon: <BookOutlined /> },
+                { key: '/purchases', label: <Link to="/purchases">My Purchases</Link>, icon: <BookOutlined /> },
                 { key: '/profile', label: <Link to="/profile">Profile</Link>, icon: <UserOutlined /> },
               ] : []),
             ]}

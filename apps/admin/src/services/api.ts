@@ -1,6 +1,7 @@
 export { imagesApi } from '@code829/shared/services/imagesApi';
 export { checkInApi } from '@code829/shared/services/checkInApi';
 export { adminEventsApi } from '@code829/shared/services/adminEventsApi';
+export { adminPurchasesApi } from '@code829/shared/services/adminPurchasesApi';
 export { adminBookingsApi } from '@code829/shared/services/adminBookingsApi';
 export { adminVenuesApi } from '@code829/shared/services/adminVenuesApi';
 export { adminLayoutApi } from '@code829/shared/services/adminLayoutApi';

@@ -42,9 +42,9 @@ const itemVariants = {
   }
 };
 
-type BookingStep = 'info' | 'select-table' | 'checkout' | 'capacity' | 'checkout-open';
+type PurchaseStep = 'info' | 'select-table' | 'checkout' | 'capacity' | 'checkout-open';
 
-const VALID_STEPS: BookingStep[] = ['info', 'select-table', 'checkout', 'capacity', 'checkout-open'];
+const VALID_STEPS: PurchaseStep[] = ['info', 'select-table', 'checkout', 'capacity', 'checkout-open'];
 
 export default function EventDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -72,10 +72,10 @@ export default function EventDetailPage() {
 
   // Booking flow state — step lives in the URL so browser back and refresh both work
   const rawStep = searchParams.get('step');
-  const step: BookingStep = (rawStep && VALID_STEPS.includes(rawStep as BookingStep))
-    ? rawStep as BookingStep
+  const step: PurchaseStep = (rawStep && VALID_STEPS.includes(rawStep as PurchaseStep))
+    ? rawStep as PurchaseStep
     : 'info';
-  const setStep = (next: BookingStep) => {
+  const setStep = (next: PurchaseStep) => {
     setSearchParams(prev => {
       const params = new URLSearchParams(prev);
       if (next === 'info') params.delete('step');
@@ -95,24 +95,24 @@ export default function EventDetailPage() {
 
   // Stripe state
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const bookingIdParam = searchParams.get('bookingId');
-  const [bookingId, setBookingIdState] = useState<string | null>(bookingIdParam);
-  const setBookingId = (next: string | null) => {
-    setBookingIdState(next);
+  const purchaseIdParam = searchParams.get('purchaseId');
+  const [purchaseId, setPurchaseIdState] = useState<string | null>(purchaseIdParam);
+  const setPurchaseId = (next: string | null) => {
+    setPurchaseIdState(next);
     setSearchParams(prev => {
       const params = new URLSearchParams(prev);
-      if (next) params.set('bookingId', next);
-      else params.delete('bookingId');
+      if (next) params.set('purchaseId', next);
+      else params.delete('purchaseId');
       return params;
     }, { replace: true });
   };
   const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
   const [paymentUnavailable, setPaymentUnavailable] = useState(false);
-  const [isStartingBooking, setIsStartingBooking] = useState(false);
+  const [isStartingPurchase, setIsStartingPurchase] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   // Backend-authoritative pricing quote — never compute totals in the browser.
-  // Memoized so an unrelated re-render doesn't fire a new /bookings/quote request.
+  // Memoized so an unrelated re-render doesn't fire a new /purchases/quote request.
   const quoteSelection: PricingQuoteRequest | null = useMemo(() => {
     if (!event) return null;
     if (step === 'checkout' && tableLocks.length > 0) {
@@ -128,11 +128,11 @@ export default function EventDetailPage() {
   // Refs for cleanup
   const tableLocksRef = useRef<TableLock[]>([]);
   const eventRef = useRef<EventDetail | null>(null);
-  const bookingIdRef = useRef<string | null>(null);
+  const purchaseIdRef = useRef<string | null>(null);
 
   useEffect(() => { tableLocksRef.current = tableLocks; }, [tableLocks]);
   useEffect(() => { eventRef.current = event; }, [event]);
-  useEffect(() => { bookingIdRef.current = bookingId; }, [bookingId]);
+  useEffect(() => { purchaseIdRef.current = purchaseId; }, [purchaseId]);
 
   // Release table lock and cancel pending booking on page leave
   useEffect(() => {
@@ -142,11 +142,11 @@ export default function EventDetailPage() {
       if (!jwt) return;
 
       // Cancel pending booking (also releases table lock via sp_cancel_booking)
-      const bid = bookingIdRef.current;
+      const bid = purchaseIdRef.current;
       if (bid) {
-        const payload = JSON.stringify({ bookingId: bid, token: jwt });
+        const payload = JSON.stringify({ purchaseId: bid, token: jwt });
         const blob = new Blob([payload], { type: 'application/json' });
-        navigator.sendBeacon(`${apiUrl}/bookings/cancel-beacon`, blob);
+        navigator.sendBeacon(`${apiUrl}/purchases/cancel-beacon`, blob);
         return; // sp_cancel_booking handles the table release
       }
 
@@ -173,7 +173,7 @@ export default function EventDetailPage() {
   // Per-step cleanup: when the user navigates back (browser back button changes `step` in the URL)
   // away from a critical step, release any held locks and cancel pending bookings server-side.
   // Cancellation is best-effort via the regular (non-beacon) APIs so we see errors in logs.
-  const prevStepRef = useRef<BookingStep>(step);
+  const prevStepRef = useRef<PurchaseStep>(step);
   useEffect(() => {
     const prev = prevStepRef.current;
     prevStepRef.current = step;
@@ -182,7 +182,7 @@ export default function EventDetailPage() {
     // Left select-table or checkout while still holding a locks-based booking
     const leftLockFlow = (prev === 'select-table' || prev === 'checkout') && step !== 'checkout';
     if (leftLockFlow && event) {
-      const bid = bookingIdRef.current;
+      const bid = purchaseIdRef.current;
       const locks = tableLocksRef.current;
       void (async () => {
         if (bid) {
@@ -196,19 +196,19 @@ export default function EventDetailPage() {
       })();
       setTableLocks([]);
       setClientSecret(null);
-      if (bid) setBookingIdState(null);
+      if (bid) setPurchaseIdState(null);
     }
 
     // Left checkout-open with a pending booking
     if (prev === 'checkout-open' && step !== 'checkout-open') {
-      const bid = bookingIdRef.current;
+      const bid = purchaseIdRef.current;
       if (bid) {
         void (async () => {
           try { await bookingsApi.cancel(bid); }
           catch (err) { log.warn('Step-change cleanup: cancel open booking failed', { bid, err }); }
         })();
         setClientSecret(null);
-        setBookingIdState(null);
+        setPurchaseIdState(null);
       }
     }
   }, [step, event]);
@@ -267,30 +267,30 @@ export default function EventDetailPage() {
 
   // Restore booking context when landing on checkout via refresh or deep link.
   useEffect(() => {
-    if (!bookingIdParam || clientSecret) return;
+    if (!purchaseIdParam || clientSecret) return;
     if (step !== 'checkout' && step !== 'checkout-open') return;
 
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await bookingsApi.getById(bookingIdParam);
+        const { data } = await bookingsApi.getById(purchaseIdParam);
         if (cancelled) return;
         if (data.status !== 'Pending') {
           // Stale booking — start over on the info step
           setSearchParams(new URLSearchParams(), { replace: true });
-          setBookingIdState(null);
+          setPurchaseIdState(null);
           return;
         }
-        setBookingIdState(data.id);
+        setPurchaseIdState(data.id);
         setClientSecret(data.clientSecret ?? null);
       } catch (err) {
-        log.warn('Failed to restore booking from URL', { bookingIdParam, err });
+        log.warn('Failed to restore booking from URL', { purchaseIdParam, err });
         setSearchParams(new URLSearchParams(), { replace: true });
-        setBookingIdState(null);
+        setPurchaseIdState(null);
       }
     })();
     return () => { cancelled = true; };
-  }, [bookingIdParam, clientSecret, step, setSearchParams]);
+  }, [purchaseIdParam, clientSecret, step, setSearchParams]);
 
   // Load ticket types for Open events.
   // If the endpoint returns 5xx we show a user-visible error so we don't silently fall back
@@ -333,7 +333,7 @@ export default function EventDetailPage() {
   }, [event, message]);
 
   const handleBookNow = async () => {
-    if (isStartingBooking) return; // guard against mobile double-tap
+    if (isStartingPurchase) return; // guard against mobile double-tap
     if (paymentUnavailable) {
       message.error('Payment service is currently unavailable. Please try again in a moment.');
       return;
@@ -346,7 +346,7 @@ export default function EventDetailPage() {
     // click Book Now they're guaranteed to be signed in.
     if (!event) return;
 
-    setIsStartingBooking(true);
+    setIsStartingPurchase(true);
     try {
       if (event.layoutMode === 'Grid') {
         const [tablesRes, locksRes] = await Promise.all([
@@ -363,7 +363,7 @@ export default function EventDetailPage() {
       log.error('Failed to start booking', { err });
       message.error('Could not start booking — please try again');
     } finally {
-      setIsStartingBooking(false);
+      setIsStartingPurchase(false);
     }
   };
 
@@ -405,7 +405,7 @@ export default function EventDetailPage() {
         eventId: event.id,
         tableIds: tableLocks.map(l => l.tableId),
       });
-      setBookingId(booking.id);
+      setPurchaseId(booking.id);
       setClientSecret(booking.clientSecret ?? null);
       setStep('checkout');
     } catch (err: unknown) {
@@ -417,9 +417,9 @@ export default function EventDetailPage() {
   };
 
   const handlePaymentSuccess = async () => {
-    if (!bookingId) return;
+    if (!purchaseId) return;
     try {
-      await bookingsApi.confirmPayment(bookingId);
+      await bookingsApi.confirmPayment(purchaseId);
       message.success('Booking confirmed!');
       navigate('/bookings');
     } catch (err: unknown) {
@@ -431,9 +431,9 @@ export default function EventDetailPage() {
 
   const handleCancelLock = async () => {
     if (!event) return;
-    if (bookingId) {
-      try { await bookingsApi.cancel(bookingId); }
-      catch (err) { log.warn('Failed to cancel booking during lock cleanup', { bookingId, err }); }
+    if (purchaseId) {
+      try { await bookingsApi.cancel(purchaseId); }
+      catch (err) { log.warn('Failed to cancel booking during lock cleanup', { purchaseId, err }); }
     }
     for (const lock of tableLocks) {
       try {
@@ -445,7 +445,7 @@ export default function EventDetailPage() {
     setTableLocks([]);
     setCheckoutError(null);
     setClientSecret(null);
-    setBookingId(null);
+    setPurchaseId(null);
     if (step === 'checkout') setStep('select-table');
     await loadTables();
   };
@@ -455,7 +455,7 @@ export default function EventDetailPage() {
     setTableLocks([]);
     setCheckoutError(null);
     setClientSecret(null);
-    setBookingId(null);
+    setPurchaseId(null);
     if (step === 'checkout') setStep('select-table');
     void loadTables();
   };
@@ -469,7 +469,7 @@ export default function EventDetailPage() {
 
   useEffect(() => {
     if (step !== 'checkout-open' || !event || clientSecret) return;
-    const createBooking = async () => {
+    const createPurchase = async () => {
       setConfirming(true);
       setCheckoutError(null);
       try {
@@ -478,7 +478,7 @@ export default function EventDetailPage() {
           seatsReserved: seatCount,
           ...(selectedTicketTypeId ? { eventTicketTypeId: selectedTicketTypeId } : {}),
         });
-        setBookingId(booking.id);
+        setPurchaseId(booking.id);
         setClientSecret(booking.clientSecret ?? null);
       } catch (err: unknown) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
@@ -488,17 +488,17 @@ export default function EventDetailPage() {
         setConfirming(false);
       }
     };
-    void createBooking();
+    void createPurchase();
   }, [step, event, seatCount, selectedTicketTypeId, clientSecret]);
 
   const handleCancelOpen = async () => {
-    if (bookingId) {
-      try { await bookingsApi.cancel(bookingId); }
-      catch (err) { log.warn('Failed to cancel booking during cleanup', { bookingId, err }); }
+    if (purchaseId) {
+      try { await bookingsApi.cancel(purchaseId); }
+      catch (err) { log.warn('Failed to cancel booking during cleanup', { purchaseId, err }); }
     }
     setCheckoutError(null);
     setClientSecret(null);
-    setBookingId(null);
+    setPurchaseId(null);
     setStep('capacity');
   };
 
@@ -615,7 +615,7 @@ export default function EventDetailPage() {
               isSoldOut={isSoldOut}
               remaining={remaining}
               handleBookNow={handleBookNow}
-              isStartingBooking={isStartingBooking}
+              isStartingPurchase={isStartingPurchase}
               itemVariants={itemVariants}
             />
           </Col>
@@ -655,8 +655,8 @@ export default function EventDetailPage() {
             <Button
               type="primary"
               onClick={handleBookNow}
-              loading={isStartingBooking}
-              disabled={isStartingBooking || paymentUnavailable}
+              loading={isStartingPurchase}
+              disabled={isStartingPurchase || paymentUnavailable}
               style={{
                 height: 48,
                 padding: '0 32px',

@@ -1,11 +1,4 @@
-import { bookingService } from './BookingService';
-
-export type { AdminBookingListParams } from './BookingService';
-
-export const adminBookingsApi = {
-  list: bookingService.adminList,
-  getStats: bookingService.adminGetStats,
-  refund: bookingService.refund,
-  exportCsv: bookingService.exportCsv,
-  exportXlsx: bookingService.exportXlsx,
-};
+// Renamed to adminPurchasesApi — re-exported for backwards compatibility
+export { adminPurchasesApi as adminBookingsApi } from './adminPurchasesApi';
+export type { AdminPurchaseListParams } from './adminPurchasesApi';
+export type { AdminPurchaseListParams as AdminBookingListParams } from './adminPurchasesApi';
