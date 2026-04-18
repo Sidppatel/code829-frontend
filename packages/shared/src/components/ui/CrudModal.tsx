@@ -60,7 +60,7 @@ export default function CrudModal<V extends object = Record<string, unknown>>({
       destroyOnHidden
       maskClosable={false}
     >
-      <Form<V> form={form} layout="vertical" preserve={false}>
+      <Form<V> form={form} layout="vertical" preserve={false} initialValues={initialValues as V}>
         {children(form)}
       </Form>
     </Modal>
