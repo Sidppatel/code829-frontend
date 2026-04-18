@@ -26,7 +26,7 @@ function formatTs(ts: string) {
 interface FullDevLog extends DevLogEntry {
   exceptionType?: string;
   stackTrace?: string;
-  userId?: string;
+  adminUserId?: string;
   ipAddress?: string;
   correlationId?: string;
   metadataJson?: string;
@@ -76,8 +76,8 @@ function buildLogDescriptions(selected: FullDevLog): DescriptionsItemType[] {
     {
       key: 'user',
       label: 'Execution User',
-      children: selected.userId ? (
-        <span style={{ fontFamily: 'monospace' }}>{selected.userId}</span>
+      children: selected.adminUserId ? (
+        <span style={{ fontFamily: 'monospace' }}>{selected.adminUserId}</span>
       ) : (
         'Anonymous'
       ),

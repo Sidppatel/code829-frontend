@@ -23,7 +23,7 @@ interface SystemLog {
   entityId?: string;
   beforeJson?: string;
   afterJson?: string;
-  actorId?: string;
+  adminUserId?: string;
   correlationId?: string;
   durationMs?: number;
   metadataJson?: string;
@@ -284,7 +284,7 @@ export default function SystemLogsPage() {
               </Descriptions.Item>
               <Descriptions.Item label="Source" span={2}>{selected.source ?? '—'}</Descriptions.Item>
               <Descriptions.Item label="Actor ID">
-                <span style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>{selected.actorId ?? '—'}</span>
+                <span style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>{selected.adminUserId ?? '—'}</span>
               </Descriptions.Item>
               <Descriptions.Item label="Correlation ID">
                 <span style={{ fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all' }}>{selected.correlationId ?? '—'}</span>
