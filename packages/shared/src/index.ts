@@ -8,6 +8,19 @@ export { useHoldTimer } from './hooks/useHoldTimer';
 export { useIsMobile } from './hooks/useIsMobile';
 export { usePagedTable } from './hooks/usePagedTable';
 export { useTheme } from './hooks/useTheme';
+export { useConfirm } from './hooks/useConfirm';
+export { useCrudModal } from './hooks/useCrudModal';
+export type { CrudMode, UseCrudModalResult } from './hooks/useCrudModal';
+export { useAsyncAction } from './hooks/useAsyncAction';
+export type { UseAsyncActionResult } from './hooks/useAsyncAction';
+export { useAsyncResource } from './hooks/useAsyncResource';
+export type { UseAsyncResourceResult } from './hooks/useAsyncResource';
+export { useDebouncedSearch } from './hooks/useDebouncedSearch';
+export type { UseDebouncedSearchResult } from './hooks/useDebouncedSearch';
+export { useExport } from './hooks/useExport';
+export type { UseExportFetchers, UseExportResult } from './hooks/useExport';
+export { useQrCode } from './hooks/useQrCode';
+export type { QrFetcher, UseQrCodeResult } from './hooks/useQrCode';
 
 // Context
 export { ThemeProvider } from './context/ThemeContext';
