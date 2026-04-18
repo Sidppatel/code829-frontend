@@ -17,6 +17,7 @@ interface UsePagedTableResult<T, P> {
   error: string | null;
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
+  onPageChange: (page: number, pageSize: number) => void;
   setFilters: (filters: Partial<P>) => void;
   filters: Partial<P>;
   refresh: () => void;
@@ -61,6 +62,11 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
     setPage(1);
   }, []);
 
+  const onPageChange = useCallback((p: number, ps: number) => {
+    setPage(p);
+    setPageSize(ps);
+  }, []);
+
   return {
     data,
     total,
@@ -70,6 +76,7 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
     error,
     setPage,
     setPageSize,
+    onPageChange,
     setFilters: handleSetFilters,
     filters,
     refresh: () => setRefreshKey((k) => k + 1),
