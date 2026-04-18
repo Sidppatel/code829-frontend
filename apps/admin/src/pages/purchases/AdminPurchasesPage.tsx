@@ -79,7 +79,7 @@ export default function AdminPurchasesPage() {
         rowKey="id"
         scrollX={600}
         columns={[
-          { title: 'Purchase #', dataIndex: 'bookingNumber', key: 'bookingNumber' },
+          { title: 'Purchase #', dataIndex: 'purchaseNumber', key: 'purchaseNumber' },
           { title: 'Event', dataIndex: 'eventTitle', key: 'eventTitle' },
           { title: 'Customer', dataIndex: 'userName', key: 'userName' },
           {
@@ -143,7 +143,7 @@ export default function AdminPurchasesPage() {
                   {booking.eventTitle}
                 </div>
                 <div style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 500 }}>
-                  #{booking.bookingNumber}
+                  #{booking.purchaseNumber}
                 </div>
               </div>
               <PurchaseStatusTag status={booking.status} />

@@ -1,10 +1,10 @@
 export interface DashboardStats {
   totalEvents: number;
-  totalBookings: number;
+  totalPurchases: number;
   totalRevenueCents: number;
   totalUsers: number;
   upcomingEvents: number;
-  recentBookings: number;
+  recentPurchases: number;
 }
 
 export interface NextEventDashboard {
@@ -22,15 +22,15 @@ export interface NextEventDashboard {
   imagePath: string | null;
   layoutMode: string;
   daysUntil: number;
-  totalBookings: number;
-  paidBookings: number;
-  checkedInBookings: number;
-  pendingBookings: number;
-  cancelledBookings: number;
-  refundedBookings: number;
+  totalPurchases: number;
+  paidPurchases: number;
+  checkedInPurchases: number;
+  pendingPurchases: number;
+  cancelledPurchases: number;
+  refundedPurchases: number;
   revenueCents: number;
   potentialRevenueCents: number;
   totalCapacity: number;
   soldCount: number;
-  recentBookings: unknown[];
+  recentPurchases: unknown[];
 }

@@ -27,8 +27,6 @@ export type {
 
 export { PurchaseService, purchaseService } from './PurchaseService';
 export type { CreatePurchaseRequest, AdminPurchaseListParams } from './PurchaseService';
-export { BookingService, bookingService } from './BookingService';
-export type { CreateBookingRequest, AdminBookingListParams } from './BookingService';
 
 export { TicketService, ticketService } from './TicketService';
 
@@ -74,9 +72,6 @@ export { adminEventsApi } from './adminEventsApi';
 export { purchasesApi } from './purchasesApi';
 export { adminPurchasesApi } from './adminPurchasesApi';
 export { tablePurchaseApi } from './tablePurchaseApi';
-export { bookingsApi } from './bookingsApi';
-export { adminBookingsApi } from './adminBookingsApi';
-export { tableBookingApi } from './tableBookingApi';
 export { ticketsApi } from './ticketsApi';
 export { checkInApi } from './checkInApi';
 export { adminVenuesApi } from './adminVenuesApi';

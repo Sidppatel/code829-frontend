@@ -8,7 +8,7 @@ import {
   floorPlanLabelFor,
 } from '@code829/shared/components/floorplan';
 import TableLockTimer from './TableLockTimer';
-import { useBookingQuote } from '@code829/shared/hooks/useBookingQuote';
+import { usePurchaseQuote } from '@code829/shared/hooks/usePurchaseQuote';
 
 interface Props {
   eventId: string;
@@ -46,7 +46,7 @@ export default function TableSelectionCanvas({
         : null,
     [eventId, lockedTables],
   );
-  const { quote } = useBookingQuote(quoteSelection);
+  const { quote } = usePurchaseQuote(quoteSelection);
 
   return (
     <div className="ts-wrapper">

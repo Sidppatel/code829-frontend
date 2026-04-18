@@ -5,8 +5,8 @@ export interface PurchaseTicket {
   ticketCode: string;
   seatNumber: number;
   status: TicketStatus;
-  bookingId: string;
-  bookingNumber: string;
+  purchaseId: string;
+  purchaseNumber: string;
   eventId: string;
   eventTitle: string;
   eventDate: string;
@@ -29,7 +29,7 @@ export interface GuestTicket {
   eventDate: string;
   venueName: string;
   tableLabel?: string;
-  bookingNumber: string;
+  purchaseNumber: string;
   claimedAt?: string;
 }
 
@@ -44,6 +44,3 @@ export interface TicketClaimInfo {
   inviterName: string;
   alreadyClaimed: boolean;
 }
-
-/** @deprecated Use PurchaseTicket */
-export type BookingTicket = PurchaseTicket;

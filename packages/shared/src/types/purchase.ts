@@ -1,6 +1,6 @@
 export interface Purchase {
   id: string;
-  bookingNumber: string;
+  purchaseNumber: string;
   status: PurchaseStatus;
   userId: string;
   userName: string;

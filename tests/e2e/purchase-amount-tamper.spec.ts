@@ -20,7 +20,7 @@ test.describe('@security amount tamper', () => {
 
   test('confirm without completed payment is rejected', async ({ request }) => {
     const login = await request.post(`${BACKEND}/auth/dev-login`, {
-      data: { email: 'e2e-tamper@example.com', firstName: 'Tamper', lastName: 'Test' },
+      data: { email: process.env.E2E_LOGIN_EMAIL ?? 'user@code829.local', firstName: 'Tamper', lastName: 'Test' },
     });
     expect(login.ok()).toBeTruthy();
     const { token, user } = await login.json();
@@ -30,9 +30,13 @@ test.describe('@security amount tamper', () => {
     const event = await ev.json();
     test.skip(event.layoutMode !== 'Open', 'This test expects an Open-capacity event');
 
+    const ttRes = await request.get(`${BACKEND}/events/${event.id}/ticket-types`);
+    const ttBody = ttRes.ok() ? await ttRes.json() : { ticketTypes: [] };
+    const ticketTypeId = ttBody.ticketTypes?.[0]?.id;
+
     const create = await request.post(`${BACKEND}/purchases`, {
       headers: { Authorization: `Bearer ${token}` },
-      data: { eventId: event.id, seatsReserved: 1 },
+      data: { eventId: event.id, seatsReserved: 1, ...(ticketTypeId ? { eventTicketTypeId: ticketTypeId } : {}) },
     });
     expect(create.status(), await create.text()).toBe(201);
     const booking = await create.json();

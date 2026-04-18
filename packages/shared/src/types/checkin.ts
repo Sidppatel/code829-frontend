@@ -1,7 +1,7 @@
 export interface ScanResponse {
   success: boolean;
   message: string;
-  bookingNumber?: string;
+  purchaseNumber?: string;
   userName?: string;
   eventTitle?: string;
   status?: string;

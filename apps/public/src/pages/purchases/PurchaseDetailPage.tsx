@@ -17,7 +17,7 @@ import {
   TeamOutlined,
   AppstoreOutlined,
 } from '@ant-design/icons';
-import { bookingsApi } from '../../services/api';
+import { purchasesApi } from '../../services/api';
 import type { Purchase } from '@code829/shared/types/purchase';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
@@ -41,13 +41,13 @@ export default function PurchaseDetailPage() {
     if (!purchaseId) return;
     const load = async () => {
       try {
-        const { data } = await bookingsApi.getById(purchaseId);
+        const { data } = await purchasesApi.getById(purchaseId);
         setBooking(data);
-        log.info('Loaded purchase details', { purchaseId, bookingNumber: data.bookingNumber });
+        log.info('Loaded purchase details', { purchaseId, purchaseNumber: data.purchaseNumber });
       } catch (err) {
         log.error('Failed to load purchase details', err);
         message.error('Failed to load purchase details');
-        navigate('/bookings', { replace: true });
+        navigate('/purchases', { replace: true });
       } finally {
         setLoading(false);
       }
@@ -58,7 +58,7 @@ export default function PurchaseDetailPage() {
   const handleShowQr = async () => {
     if (!purchaseId) return;
     try {
-      const { data: blob } = await bookingsApi.getQrCode(purchaseId);
+      const { data: blob } = await purchasesApi.getQrCode(purchaseId);
       setQrUrl(URL.createObjectURL(blob as Blob));
     } catch (err) {
       log.error('Failed to load QR code', err);
@@ -75,10 +75,10 @@ export default function PurchaseDetailPage() {
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
-          await bookingsApi.cancel(purchaseId);
+          await purchasesApi.cancel(purchaseId);
           log.info('Purchase cancelled', { purchaseId });
           message.success('Purchase cancelled');
-          const { data } = await bookingsApi.getById(purchaseId);
+          const { data } = await purchasesApi.getById(purchaseId);
           setBooking(data);
         } catch (err) {
           log.error('Failed to cancel purchase', err);
@@ -129,7 +129,7 @@ export default function PurchaseDetailPage() {
     <div>
       <Helmet><title>Purchase details — Code829</title></Helmet>
       <PagePreamble
-        kicker={`Purchase #${booking.bookingNumber}`}
+        kicker={`Purchase #${booking.purchaseNumber}`}
         title={booking.eventTitle}
         subtitle={formatEventDate(booking.eventDate)}
         rightSlot={
@@ -138,7 +138,7 @@ export default function PurchaseDetailPage() {
             <Button
               type="text"
               icon={<ArrowLeftOutlined />}
-              onClick={() => navigate('/bookings')}
+              onClick={() => navigate('/purchases')}
               style={{ color: 'var(--text-secondary)', fontWeight: 500 }}
             >
               Back
@@ -186,7 +186,7 @@ export default function PurchaseDetailPage() {
       {/* Purchase Details */}
       <Card size="small" style={{ marginBottom: 12, borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
         {sectionTitle('Purchase Info')}
-        {infoRow(<NumberOutlined />, 'Purchase Number', booking.bookingNumber)}
+        {infoRow(<NumberOutlined />, 'Purchase Number', booking.purchaseNumber)}
         {infoRow(<ClockCircleOutlined />, 'Booked On', formatEventDate(booking.createdAt))}
         {booking.tableLabel && infoRow(<TagOutlined />, 'Table', `Table ${booking.tableLabel}`)}
         {booking.seatsReserved && infoRow(<TeamOutlined />, 'Seats Reserved', `${booking.seatsReserved} seat${booking.seatsReserved !== 1 ? 's' : ''}`)}
@@ -235,7 +235,7 @@ export default function PurchaseDetailPage() {
               <Button
                 type="primary"
                 icon={<SendOutlined />}
-                onClick={() => navigate(`/bookings/${booking.id}/tickets`)}
+                onClick={() => navigate(`/purchases/${booking.id}/tickets`)}
               >
                 Manage Tickets
               </Button>

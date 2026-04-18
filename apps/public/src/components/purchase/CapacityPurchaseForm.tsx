@@ -3,7 +3,7 @@ import { Button, Card, InputNumber, Space, Typography, Divider, Radio } from 'an
 import { TeamOutlined, TagOutlined } from '@ant-design/icons';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import type { EventTicketType } from '@code829/shared/types/event';
-import { useBookingQuote } from '@code829/shared/hooks/useBookingQuote';
+import { usePurchaseQuote } from '@code829/shared/hooks/usePurchaseQuote';
 
 interface Props {
   eventId: string;
@@ -39,7 +39,7 @@ export default function CapacityPurchaseForm({
     () => ({ eventId, seatCount: seats, eventTicketTypeId: selectedTicketTypeId }),
     [eventId, seats, selectedTicketTypeId]
   );
-  const { quote, isLoading: quoteLoading } = useBookingQuote(quoteSelection);
+  const { quote, isLoading: quoteLoading } = usePurchaseQuote(quoteSelection);
 
   return (
     <Card title="Reserve Seats" styles={{ header: { borderBottom: 'none' } }}>

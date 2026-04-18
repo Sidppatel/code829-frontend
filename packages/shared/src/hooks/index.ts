@@ -1,5 +1,4 @@
 export { useAuth } from './useAuth';
-export { useBookingQuote } from './useBookingQuote';
 export { useBreakpoint } from './useBreakpoint';
 export { useHoldTimer } from './useHoldTimer';
 export { useIsMobile } from './useIsMobile';

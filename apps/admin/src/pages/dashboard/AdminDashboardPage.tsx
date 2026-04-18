@@ -86,7 +86,7 @@ export default function AdminDashboardPage() {
         {({ stats, nextEvent }) => {
           const kpis: StatsCell[] = [
             { label: 'Revenue (30d)', value: centsToUSD(stats.totalRevenueCents) },
-            { label: 'Tickets sold', value: stats.totalBookings.toLocaleString() },
+            { label: 'Tickets sold', value: stats.totalPurchases.toLocaleString() },
             { label: 'Events live', value: String(stats.upcomingEvents) },
             { label: 'Active users', value: stats.totalUsers.toLocaleString() },
           ];
@@ -146,7 +146,7 @@ export default function AdminDashboardPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 18 }}>
                       <MiniStat label="Sold" value={`${nextEvent.soldCount} / ${nextEvent.totalCapacity}`} />
                       <MiniStat label="Revenue" value={centsToUSD(nextEvent.revenueCents)} />
-                      <MiniStat label="Checked in" value={nextEvent.checkedInBookings} />
+                      <MiniStat label="Checked in" value={nextEvent.checkedInPurchases} />
                     </div>
                     <div style={progressVars}>
                       <div style={{ height: 8, background: 'var(--bg-muted)', borderRadius: 99, overflow: 'hidden' }}>
@@ -195,10 +195,10 @@ export default function AdminDashboardPage() {
                     <DisplayHeading as="div" size="sm" style={{ marginBottom: 12 }}>
                       At a glance
                     </DisplayHeading>
-                    <ActivityRow label="Paid purchases" value={nextEvent.paidBookings} />
-                    <ActivityRow label="Pending" value={nextEvent.pendingBookings} />
-                    <ActivityRow label="Cancelled" value={nextEvent.cancelledBookings} />
-                    <ActivityRow label="Refunded" value={nextEvent.refundedBookings} />
+                    <ActivityRow label="Paid purchases" value={nextEvent.paidPurchases} />
+                    <ActivityRow label="Pending" value={nextEvent.pendingPurchases} />
+                    <ActivityRow label="Cancelled" value={nextEvent.cancelledPurchases} />
+                    <ActivityRow label="Refunded" value={nextEvent.refundedPurchases} />
                     <ActivityRow label="Projected" value={centsToUSD(nextEvent.potentialRevenueCents)} last />
                   </div>
                 </div>

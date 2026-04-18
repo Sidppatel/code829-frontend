@@ -17,8 +17,6 @@ export type { UseEventDetailVMResult } from './EventDetailViewModel';
 
 export { PurchaseQuoteViewModel, usePurchaseQuoteVM } from './PurchaseQuoteViewModel';
 export type { UsePurchaseQuoteVMResult } from './PurchaseQuoteViewModel';
-export { BookingQuoteViewModel, useBookingQuoteVM } from './BookingQuoteViewModel';
-export type { UseBookingQuoteVMResult } from './BookingQuoteViewModel';
 
 export { AuthViewModel, useAuthVM } from './AuthViewModel';
 export type { UseAuthVMResult } from './AuthViewModel';

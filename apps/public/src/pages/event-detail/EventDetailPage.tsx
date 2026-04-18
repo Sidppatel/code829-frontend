@@ -8,7 +8,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import type { Stripe } from '@stripe/stripe-js';
 
 import { createLogger } from '@code829/shared/lib/logger';
-import { eventsApi, tableBookingApi, bookingsApi } from '../../services/api';
+import { eventsApi, tablePurchaseApi, purchasesApi } from '../../services/api';
 import type { EventDetail, EventTableDto, EventTablesResponse, EventTicketType } from '@code829/shared/types/event';
 
 const log = createLogger('Public/EventDetailPage');
@@ -16,7 +16,7 @@ import type { TableLock } from '@code829/shared/types/layout';
 import type { PricingQuoteRequest } from '@code829/shared/types/pricing';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import { useAuthStore } from '@code829/shared/stores/authStore';
-import { useBookingQuote } from '@code829/shared/hooks/useBookingQuote';
+import { usePurchaseQuote } from '@code829/shared/hooks/usePurchaseQuote';
 
 import EventHero from './components/EventHero';
 import EventAbout from './components/EventAbout';
@@ -123,7 +123,7 @@ export default function EventDetailPage() {
     }
     return null;
   }, [event, step, tableLocks, seatCount, selectedTicketTypeId]);
-  const { quote, isLoading: quoteLoading, error: quoteError } = useBookingQuote(quoteSelection);
+  const { quote, isLoading: quoteLoading, error: quoteError } = usePurchaseQuote(quoteSelection);
 
   // Refs for cleanup
   const tableLocksRef = useRef<TableLock[]>([]);
@@ -186,11 +186,11 @@ export default function EventDetailPage() {
       const locks = tableLocksRef.current;
       void (async () => {
         if (bid) {
-          try { await bookingsApi.cancel(bid); }
+          try { await purchasesApi.cancel(bid); }
           catch (err) { log.warn('Step-change cleanup: cancel booking failed', { bid, err }); }
         }
         for (const lock of locks) {
-          try { await tableBookingApi.releaseTable(event.id, lock.tableId); }
+          try { await tablePurchaseApi.releaseTable(event.id, lock.tableId); }
           catch (err) { log.warn('Step-change cleanup: release table failed', { tableId: lock.tableId, err }); }
         }
       })();
@@ -204,7 +204,7 @@ export default function EventDetailPage() {
       const bid = purchaseIdRef.current;
       if (bid) {
         void (async () => {
-          try { await bookingsApi.cancel(bid); }
+          try { await purchasesApi.cancel(bid); }
           catch (err) { log.warn('Step-change cleanup: cancel open booking failed', { bid, err }); }
         })();
         setClientSecret(null);
@@ -231,7 +231,7 @@ export default function EventDetailPage() {
   useEffect(() => {
     const init = async () => {
       try {
-        const { data } = await bookingsApi.getStripeConfig();
+        const { data } = await purchasesApi.getStripeConfig();
         if (!data.publishableKey) {
           log.error('Stripe config missing publishable key');
           setPaymentUnavailable(true);
@@ -273,7 +273,7 @@ export default function EventDetailPage() {
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await bookingsApi.getById(purchaseIdParam);
+        const { data } = await purchasesApi.getById(purchaseIdParam);
         if (cancelled) return;
         if (data.status !== 'Pending') {
           // Stale booking — start over on the info step
@@ -351,7 +351,7 @@ export default function EventDetailPage() {
       if (event.layoutMode === 'Grid') {
         const [tablesRes, locksRes] = await Promise.all([
           eventsApi.getTables(event.id),
-          tableBookingApi.getMyLocks(event.id),
+          tablePurchaseApi.getMyLocks(event.id),
         ]);
         setTablesData(tablesRes.data);
         if (locksRes.data.length > 0) setTableLocks(locksRes.data);
@@ -371,7 +371,7 @@ export default function EventDetailPage() {
     if (!event) return;
     setLockingTableId(table.id);
     try {
-      const { data } = await tableBookingApi.lockTable(event.id, table.id);
+      const { data } = await tablePurchaseApi.lockTable(event.id, table.id);
       setTableLocks(prev => [...prev, data]);
       setCheckoutError(null);
       await loadTables();
@@ -386,7 +386,7 @@ export default function EventDetailPage() {
   const handleUnlockTable = async (table: EventTableDto) => {
     if (!event) return;
     try {
-      await tableBookingApi.releaseTable(event.id, table.id);
+      await tablePurchaseApi.releaseTable(event.id, table.id);
       setTableLocks(prev => prev.filter(l => l.tableId !== table.id));
       await loadTables();
     } catch (err) {
@@ -401,13 +401,18 @@ export default function EventDetailPage() {
     setConfirming(true);
     setCheckoutError(null);
     try {
-      const { data: booking } = await bookingsApi.create({
+      const { data: booking } = await purchasesApi.create({
         eventId: event.id,
         tableIds: tableLocks.map(l => l.tableId),
       });
-      setPurchaseId(booking.id);
+      setPurchaseIdState(booking.id);
       setClientSecret(booking.clientSecret ?? null);
-      setStep('checkout');
+      setSearchParams(prev => {
+        const params = new URLSearchParams(prev);
+        params.set('purchaseId', booking.id);
+        params.set('step', 'checkout');
+        return params;
+      }, { replace: false });
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       setCheckoutError(axiosErr?.response?.data?.message ?? 'Failed to create booking');
@@ -419,9 +424,9 @@ export default function EventDetailPage() {
   const handlePaymentSuccess = async () => {
     if (!purchaseId) return;
     try {
-      await bookingsApi.confirmPayment(purchaseId);
+      await purchasesApi.confirmPayment(purchaseId);
       message.success('Booking confirmed!');
-      navigate('/bookings');
+      navigate('/purchases');
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       setCheckoutError(axiosErr?.response?.data?.message ?? 'Failed to confirm booking');
@@ -432,12 +437,12 @@ export default function EventDetailPage() {
   const handleCancelLock = async () => {
     if (!event) return;
     if (purchaseId) {
-      try { await bookingsApi.cancel(purchaseId); }
+      try { await purchasesApi.cancel(purchaseId); }
       catch (err) { log.warn('Failed to cancel booking during lock cleanup', { purchaseId, err }); }
     }
     for (const lock of tableLocks) {
       try {
-        await tableBookingApi.releaseTable(event.id, lock.tableId);
+        await tablePurchaseApi.releaseTable(event.id, lock.tableId);
       } catch (err) {
         log.warn('Failed to release table lock during cleanup', { tableId: lock.tableId, err });
       }
@@ -473,7 +478,7 @@ export default function EventDetailPage() {
       setConfirming(true);
       setCheckoutError(null);
       try {
-        const { data: booking } = await bookingsApi.create({
+        const { data: booking } = await purchasesApi.create({
           eventId: event.id,
           seatsReserved: seatCount,
           ...(selectedTicketTypeId ? { eventTicketTypeId: selectedTicketTypeId } : {}),
@@ -493,7 +498,7 @@ export default function EventDetailPage() {
 
   const handleCancelOpen = async () => {
     if (purchaseId) {
-      try { await bookingsApi.cancel(purchaseId); }
+      try { await purchasesApi.cancel(purchaseId); }
       catch (err) { log.warn('Failed to cancel booking during cleanup', { purchaseId, err }); }
     }
     setCheckoutError(null);

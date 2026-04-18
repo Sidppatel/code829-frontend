@@ -9,7 +9,7 @@ import {
   SendOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { bookingsApi, ticketsApi } from '../../services/api';
+import { purchasesApi, ticketsApi } from '../../services/api';
 import type { Purchase } from '@code829/shared/types/purchase';
 import type { GuestTicket } from '@code829/shared/types/ticket';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
@@ -50,7 +50,7 @@ export default function MyPurchasesPage() {
 
   const fetcher = useCallback(
     (params: BookingFilters & { page?: number; pageSize?: number }) =>
-      bookingsApi.getMine(params.page, params.pageSize, params.search),
+      purchasesApi.getMine(params.page, params.pageSize, params.search),
     [],
   );
   const paged = usePagedTable<Purchase, BookingFilters>({ fetcher });
@@ -62,7 +62,7 @@ export default function MyPurchasesPage() {
   const guestQr = useQrCode();
 
   const cancel = useAsyncAction(
-    (id: string) => bookingsApi.cancel(id),
+    (id: string) => purchasesApi.cancel(id),
     {
       successMessage: 'Purchase cancelled',
       onSuccess: () => {
@@ -75,11 +75,11 @@ export default function MyPurchasesPage() {
   const columns: ColumnsType<Purchase> = [
     {
       title: 'Purchase #',
-      dataIndex: 'bookingNumber',
-      key: 'bookingNumber',
+      dataIndex: 'purchaseNumber',
+      key: 'purchaseNumber',
       width: 140,
       render: (num: string, record) => (
-        <a onClick={() => navigate(`/bookings/${record.id}`)} style={{ fontWeight: 600 }}>
+        <a onClick={() => navigate(`/purchases/${record.id}`)} style={{ fontWeight: 600 }}>
           {num}
         </a>
       ),
@@ -88,7 +88,7 @@ export default function MyPurchasesPage() {
       title: 'Event',
       dataIndex: 'eventTitle',
       key: 'eventTitle',
-      render: (title: string, record) => <a onClick={() => navigate(`/bookings/${record.id}`)}>{title}</a>,
+      render: (title: string, record) => <a onClick={() => navigate(`/purchases/${record.id}`)}>{title}</a>,
     },
     { title: 'Details', key: 'details', width: 160, render: (_: unknown, r: Purchase) => bookingDetails(r) },
     {
@@ -123,7 +123,7 @@ export default function MyPurchasesPage() {
               <Button
                 size="small"
                 icon={<SendOutlined />}
-                onClick={() => navigate(`/bookings/${record.id}/tickets`)}
+                onClick={() => navigate(`/purchases/${record.id}/tickets`)}
               >
                 Tickets
               </Button>
@@ -131,7 +131,7 @@ export default function MyPurchasesPage() {
                 size="small"
                 icon={<QrcodeOutlined />}
                 loading={bookingQr.loading}
-                onClick={() => bookingQr.show(() => bookingsApi.getQrCode(record.id).then((r) => r.data as Blob))}
+                onClick={() => bookingQr.show(() => purchasesApi.getQrCode(record.id).then((r) => r.data as Blob))}
               >
                 QR
               </Button>
@@ -193,7 +193,7 @@ export default function MyPurchasesPage() {
             key={booking.id}
             size="small"
             hoverable
-            onClick={() => navigate(`/bookings/${booking.id}`)}
+            onClick={() => navigate(`/purchases/${booking.id}`)}
             style={{ marginBottom: 0, cursor: 'pointer' }}
             styles={{ body: { padding: 16 } }}
           >
@@ -211,7 +211,7 @@ export default function MyPurchasesPage() {
                 >
                   {booking.eventTitle}
                 </div>
-                <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>#{booking.bookingNumber}</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>#{booking.purchaseNumber}</div>
               </div>
               <PurchaseStatusTag status={booking.status} />
             </div>
@@ -238,7 +238,7 @@ export default function MyPurchasesPage() {
                   <Button
                     size="small"
                     icon={<SendOutlined />}
-                    onClick={() => navigate(`/bookings/${booking.id}/tickets`)}
+                    onClick={() => navigate(`/purchases/${booking.id}/tickets`)}
                   >
                     Manage Tickets
                   </Button>
@@ -246,7 +246,7 @@ export default function MyPurchasesPage() {
                     size="small"
                     icon={<QrcodeOutlined />}
                     loading={bookingQr.loading}
-                    onClick={() => bookingQr.show(() => bookingsApi.getQrCode(booking.id).then((r) => r.data as Blob))}
+                    onClick={() => bookingQr.show(() => purchasesApi.getQrCode(booking.id).then((r) => r.data as Blob))}
                   >
                     QR Code
                   </Button>

@@ -71,6 +71,6 @@ export interface TableStatusInfo {
   color?: string;
   status: 'Available' | 'Held' | 'Booked';
   seatsSold: number;
-  bookingCount: number;
+  purchaseCount: number;
   bookers: string[];
 }

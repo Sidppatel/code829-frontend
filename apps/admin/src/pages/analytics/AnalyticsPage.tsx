@@ -47,7 +47,7 @@ export default function AnalyticsPage() {
         </Col>
         <Col xs={24} sm={12} lg={8}>
           <Card className="stat-card">
-            <Statistic title="Total Purchases" value={stats.totalBookings} prefix={<ShoppingCartOutlined />} />
+            <Statistic title="Total Purchases" value={stats.totalPurchases} prefix={<ShoppingCartOutlined />} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={8}>
@@ -67,7 +67,7 @@ export default function AnalyticsPage() {
         </Col>
         <Col xs={24} sm={12} lg={8}>
           <Card className="stat-card">
-            <Statistic title="Recent Purchases" value={stats.recentBookings} prefix={<ClockCircleOutlined />} />
+            <Statistic title="Recent Purchases" value={stats.recentPurchases} prefix={<ClockCircleOutlined />} />
           </Card>
         </Col>
       </Row>

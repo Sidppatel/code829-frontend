@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { App } from 'antd';
-import { bookingsApi } from '../services/bookingsApi';
+import { purchasesApi } from '../services/purchasesApi';
 import { createLogger } from '../lib/logger';
 
 const log = createLogger('usePaymentIntentConfirmation');
@@ -24,12 +24,12 @@ export function usePaymentIntentConfirmation(options: Options = {}) {
     confirmedRef.current = true;
     const confirm = async () => {
       try {
-        await bookingsApi.confirmByPaymentIntent(paymentIntent);
+        await purchasesApi.confirmByPaymentIntent(paymentIntent);
         log.info('Payment confirmed via Stripe redirect', { paymentIntent });
         void message.success('Payment confirmed!');
       } catch (err) {
         log.error('Failed to confirm payment intent', err);
-        void message.warning('Payment received — booking will update shortly');
+        void message.warning('Payment received — purchase will update shortly');
       }
       setSearchParams({}, { replace: true });
       options.onConfirmed?.();

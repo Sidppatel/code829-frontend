@@ -147,12 +147,12 @@ export default function PurchaseTicketsPage() {
       <PagePreamble
         kicker="Your evening"
         title="Manage tickets"
-        subtitle={first ? `${first.eventTitle} · ${first.bookingNumber}` : 'Purchase tickets'}
+        subtitle={first ? `${first.eventTitle} · ${first.purchaseNumber}` : 'Purchase tickets'}
         rightSlot={
           <Button
             type="text"
             icon={<ArrowLeftOutlined />}
-            onClick={() => navigate('/bookings')}
+            onClick={() => navigate('/purchases')}
             style={{ color: 'var(--text-secondary)', fontWeight: 500 }}
           >
             Back

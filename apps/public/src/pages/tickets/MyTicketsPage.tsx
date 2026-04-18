@@ -90,7 +90,7 @@ export default function MyTicketsPage() {
                 <span><CalendarOutlined style={{ marginRight: 6 }} />{formatEventDate(ticket.eventDate)}</span>
                 <span><EnvironmentOutlined style={{ marginRight: 6 }} />{ticket.venueName}</span>
                 {ticket.tableLabel && <span>Table {ticket.tableLabel} • Seat #{ticket.seatNumber}</span>}
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ticket.ticketCode} • {ticket.bookingNumber}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ticket.ticketCode} • {ticket.purchaseNumber}</span>
               </div>
 
               <Button
