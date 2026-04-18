@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Kicker from '../ui/Kicker';
 import DisplayHeading from '../ui/DisplayHeading';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface Props {
   kicker?: string;
@@ -10,11 +11,14 @@ interface Props {
 }
 
 export default function PagePreamble({ kicker, title, subtitle, rightSlot }: Props) {
+  const isMobile = useIsMobile();
+  const px = isMobile ? 20 : 32;
+
   return (
     <section
       style={{
         position: 'relative',
-        padding: '120px 32px 40px',
+        padding: `120px ${px}px 40px`,
         overflow: 'hidden',
       }}
     >

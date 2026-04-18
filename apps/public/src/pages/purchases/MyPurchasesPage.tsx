@@ -195,7 +195,7 @@ export default function MyPurchasesPage() {
             hoverable
             onClick={() => navigate(`/purchases/${booking.id}`)}
             style={{ marginBottom: 0, cursor: 'pointer' }}
-            styles={{ body: { padding: 16 } }}
+            styles={{ body: { padding: 20 } }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -286,53 +286,18 @@ export default function MyPurchasesPage() {
       )}
 
       {guestTickets.tickets.length > 0 && (
-        <div style={{ marginTop: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <GiftOutlined style={{ fontSize: 18, color: 'var(--accent-violet)' }} />
-            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>Guest Tickets</h3>
-          </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: 12,
-            }}
-          >
-            {guestTickets.tickets.map((ticket: GuestTicket) => (
-              <Card key={ticket.id} size="small" style={{ borderRadius: 12 }} styles={{ body: { padding: 16 } }}>
-                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{ticket.eventTitle}</div>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 4,
-                    fontSize: 13,
-                    color: 'var(--text-secondary)',
-                    marginBottom: 12,
-                  }}
-                >
-                  <span>
-                    <CalendarOutlined style={{ marginRight: 6 }} />
-                    {formatEventDate(ticket.eventDate)}
-                  </span>
-                  <span>
-                    <EnvironmentOutlined style={{ marginRight: 6 }} />
-                    {ticket.venueName}
-                  </span>
-                  <span>
-                    Seat #{ticket.seatNumber}
-                    {ticket.tableLabel ? ` • Table ${ticket.tableLabel}` : ''}
-                  </span>
-                </div>
-                <Button
-                  size="small"
-                  icon={<QrcodeOutlined />}
-                  onClick={() => guestQr.show(() => ticketsApi.getMyTicketQr(ticket.id).then((r) => r.data as Blob))}
-                >
-                  QR Code
-                </Button>
-              </Card>
-            ))}
+        <div style={{ marginTop: 40, textAlign: 'center', padding: '32px 20px', background: 'var(--bg-soft)', borderRadius: 24, border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            <GiftOutlined style={{ fontSize: 24, color: 'var(--primary)' }} />
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>You have {guestTickets.tickets.length} guest tickets</h3>
+            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>View and manage entries shared with you by others.</p>
+            <Button 
+              type="primary" 
+              onClick={() => navigate('/guest-tickets')}
+              style={{ marginTop: 8, borderRadius: 12, height: 42, padding: '0 24px', fontWeight: 600 }}
+            >
+              View Guest Tickets
+            </Button>
           </div>
         </div>
       )}

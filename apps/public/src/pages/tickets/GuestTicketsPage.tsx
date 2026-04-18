@@ -5,6 +5,7 @@ import {
   EnvironmentOutlined,
   CheckCircleOutlined,
   UserOutlined,
+  GiftOutlined,
 } from '@ant-design/icons';
 import { ticketsApi } from '../../services/api';
 import type { GuestTicket } from '@code829/shared/types/ticket';
@@ -13,7 +14,7 @@ import { PageShell, QrModal } from '@code829/shared/components/ui';
 import PagePreamble from '../../components/layout/PagePreamble';
 import { useAsyncResource, useQrCode } from '@code829/shared/hooks';
 
-export default function MyTicketsPage() {
+export default function GuestTicketsPage() {
   const { data: tickets, loading, error } = useAsyncResource<GuestTicket[]>(
     () => ticketsApi.getMine().then(r => r.data),
     []
@@ -27,13 +28,13 @@ export default function MyTicketsPage() {
 
   return (
     <PageShell
-      documentTitle="My Entries — Code829"
+      documentTitle="Guest Tickets — Code829"
       loading={loading}
       preamble={
         <PagePreamble
           kicker="Admissions"
-          title="My entries"
-          subtitle="Every event ticket and invitation, in one place."
+          title="Guest tickets"
+          subtitle="All tickets shared with you or assigned for your attendance."
         />
       }
     >
@@ -46,7 +47,7 @@ export default function MyTicketsPage() {
       {!loading && !error && (!tickets || tickets.length === 0) ? (
         <Empty 
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description="You don't have any tickets yet." 
+          description="You don't have any guest tickets yet." 
           style={{ padding: '64px 0', background: 'var(--bg-soft)', borderRadius: 24 }} 
         />
       ) : (
@@ -80,7 +81,7 @@ export default function MyTicketsPage() {
                 {ticket.status === 'CheckedIn' ? (
                   <Tag color="green" icon={<CheckCircleOutlined />} style={{ borderRadius: 6 }}>In</Tag>
                 ) : (
-                  <Tag color="blue" icon={<UserOutlined />} style={{ borderRadius: 6 }}>Entry</Tag>
+                  <Tag color="blue" icon={<GiftOutlined />} style={{ borderRadius: 6 }}>Guest</Tag>
                 )}
               </div>
 
@@ -121,7 +122,7 @@ export default function MyTicketsPage() {
                   border: 'none'
                 }}
               >
-                Show QR Code
+                Show QR Entry
               </Button>
             </Card>
           ))}
@@ -133,11 +134,10 @@ export default function MyTicketsPage() {
         onClose={qr.hide}
         qrUrl={qr.url}
         loading={qr.loading}
-        title="Ticket QR Code"
+        title="Ticket Ticket QR"
         caption="Show this code at the venue for check-in"
-        downloadFileName="entry-ticket-qr.png"
+        downloadFileName="guest-ticket-qr.png"
       />
     </PageShell>
   );
 }
-

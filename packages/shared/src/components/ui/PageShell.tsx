@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 import PageHeader from '../shared/PageHeader';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface Props {
   title?: string;
@@ -17,10 +18,10 @@ interface Props {
   className?: string;
 }
 
-const PADDING: Record<NonNullable<Props['padding']>, CSSProperties> = {
-  default: { padding: 0 },
-  compact: { padding: 0 },
-  none: { padding: 0 },
+const PADDING_VARS: Record<NonNullable<Props['padding']>, number> = {
+  default: 24,
+  compact: 16,
+  none: 0,
 };
 
 export default function PageShell({
@@ -37,10 +38,12 @@ export default function PageShell({
   padding = 'default',
   className,
 }: Props) {
-  const spacing = padding === 'compact' ? 16 : padding === 'none' ? 0 : 24;
+  const isMobile = useIsMobile();
+  const spacing = PADDING_VARS[padding];
+  const horizontalPadding = isMobile ? (padding === 'none' ? 0 : 20) : spacing;
 
   return (
-    <div className={`spring-up${className ? ' ' + className : ''}`} style={PADDING[padding]}>
+    <div className={`spring-up${className ? ' ' + className : ''}`}>
       {documentTitle && (
         <Helmet>
           <title>{documentTitle}</title>
@@ -56,9 +59,19 @@ export default function PageShell({
           rotateSubtitle={rotateSubtitle}
         />
       )}
-      {stats && <div style={{ marginBottom: spacing }}>{stats}</div>}
-      {toolbar}
-      {children}
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: '0 auto',
+          paddingLeft: horizontalPadding,
+          paddingRight: horizontalPadding,
+          paddingBottom: 80,
+        }}
+      >
+        {stats && <div style={{ marginBottom: spacing }}>{stats}</div>}
+        {toolbar}
+        {children}
+      </div>
     </div>
   );
 }

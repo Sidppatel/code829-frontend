@@ -19,6 +19,7 @@ const OnboardingPage = lazy(() => import('./pages/auth/OnboardingPage'));
 const PurchaseDetailPage = lazy(() => import('./pages/purchases/PurchaseDetailPage'));
 const PurchaseTicketsPage = lazy(() => import('./pages/purchases/PurchaseTicketsPage'));
 const MyTicketsPage = lazy(() => import('./pages/tickets/MyTicketsPage'));
+const GuestTicketsPage = lazy(() => import('./pages/tickets/GuestTicketsPage'));
 const TicketClaimPage = lazy(() => import('./pages/tickets/TicketClaimPage'));
 const FeedbackPage = lazy(() => import('./pages/feedback/FeedbackPage'));
 
@@ -44,6 +45,7 @@ function AppContent() {
           <Route path="purchases/:purchaseId" element={<PurchaseDetailPage />} />
           <Route path="purchases/:purchaseId/tickets" element={<PurchaseTicketsPage />} />
           <Route path="tickets" element={<MyTicketsPage />} />
+          <Route path="guest-tickets" element={<GuestTicketsPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
       </Route>

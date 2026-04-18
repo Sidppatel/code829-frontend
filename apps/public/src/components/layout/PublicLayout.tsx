@@ -42,7 +42,8 @@ const PUBLIC_FOOTER_COLUMNS = [
     title: 'Account',
     links: [
       { label: 'My purchases', to: '/purchases' },
-      { label: 'My tickets', to: '/tickets' },
+      { label: 'My entries', to: '/tickets' },
+      { label: 'Guest tickets', to: '/guest-tickets' },
       { label: 'Profile', to: '/profile' },
     ],
   },
@@ -91,7 +92,8 @@ export default function PublicLayout() {
 
   const userMenuItems: MenuProps['items'] = [
     { key: 'bookings', label: 'My Purchases', icon: <BookOutlined />, onClick: () => navigate('/purchases') },
-    { key: 'tickets', label: 'My Tickets', icon: <QrcodeOutlined />, onClick: () => navigate('/tickets') },
+    { key: 'tickets', label: 'My Entries', icon: <QrcodeOutlined />, onClick: () => navigate('/tickets') },
+    { key: 'guest-tickets', label: 'Guest Tickets', icon: <GiftOutlined />, onClick: () => navigate('/guest-tickets') },
     { key: 'profile', label: 'Profile', icon: <UserOutlined />, onClick: () => navigate('/profile') },
     { type: 'divider' as const },
     { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, onClick: logout },
@@ -232,6 +234,8 @@ export default function PublicLayout() {
               { key: '/feedback', label: <Link to="/feedback">Feedback</Link>, icon: <MessageOutlined /> },
               ...(isAuthenticated ? [
                 { key: '/purchases', label: <Link to="/purchases">My Purchases</Link>, icon: <BookOutlined /> },
+                { key: '/tickets', label: <Link to="/tickets">My Entries</Link>, icon: <QrcodeOutlined /> },
+                { key: '/guest-tickets', label: <Link to="/guest-tickets">Guest Tickets</Link>, icon: <GiftOutlined /> },
                 { key: '/profile', label: <Link to="/profile">Profile</Link>, icon: <UserOutlined /> },
               ] : []),
             ]}
