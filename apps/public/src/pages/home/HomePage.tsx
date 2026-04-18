@@ -2,15 +2,19 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { useHomepageEvents } from '@code829/shared/hooks';
+import { useEventListVM } from '@code829/shared/viewmodels';
+import { Button, Skeleton } from '@code829/ui';
 import EventCard from '../../components/events/EventCard';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { featured, upcoming, loading } = useHomepageEvents();
+  const { events, loading } = useEventListVM({ pageSize: 6 });
+
+  const featured = events.filter((e) => e.isFeatured);
+  const display = featured.length > 0 ? featured : events;
 
   const stats = [
-    { n: `${upcoming.length || 6}`, l: 'Events this season' },
+    { n: `${events.length || 6}`, l: 'Events this season' },
     { n: '12', l: 'Partner venues' },
     { n: '4.9', l: 'Guest rating' },
   ];
@@ -45,7 +49,7 @@ export default function HomePage() {
               position: 'absolute',
               inset: 0,
               opacity: 0.06,
-              backgroundImage: 'radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)',
+              backgroundImage: 'radial-gradient(circle at 1px 1px, var(--text-primary) 1px, transparent 0)',
               backgroundSize: '3px 3px',
             }}
           />
@@ -74,7 +78,7 @@ export default function HomePage() {
                 alignItems: 'center',
                 gap: 8,
                 padding: '5px 14px',
-                background: 'rgba(251, 245, 234, 0.08)',
+                background: 'var(--bg-overlay)',
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
                 color: 'var(--primary-light)',
@@ -143,42 +147,12 @@ export default function HomePage() {
               transition={{ duration: 0.7, delay: 0.35 }}
               style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}
             >
-              <button
-                onClick={() => navigate('/events')}
-                className="c829-btn-primary"
-                style={{
-                  background: 'var(--primary)',
-                  color: 'var(--text-on-brand)',
-                  border: 'none',
-                  padding: '13px 22px',
-                  fontSize: 15,
-                  fontWeight: 600,
-                  borderRadius: 'var(--radius-md)',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  boxShadow: 'var(--shadow-hover)',
-                  transition: 'transform 0.18s var(--ease-human), box-shadow 0.18s var(--ease-human)',
-                }}
-              >
-                Browse events <ArrowRightOutlined />
-              </button>
-              <button
-                onClick={() => navigate('/events')}
-                style={{
-                  background: 'var(--bg-surface)',
-                  color: 'var(--text-primary)',
-                  border: '1px solid var(--border-strong)',
-                  padding: '13px 22px',
-                  fontSize: 15,
-                  fontWeight: 600,
-                  borderRadius: 'var(--radius-md)',
-                  cursor: 'pointer',
-                }}
-              >
+              <Button variant="primary" size="md" onClick={() => navigate('/events')} trailingIcon={<ArrowRightOutlined />}>
+                Browse events
+              </Button>
+              <Button variant="secondary" size="md" onClick={() => navigate('/events')}>
                 Upcoming schedule
-              </button>
+              </Button>
             </motion.div>
 
             <motion.div
@@ -229,7 +203,7 @@ export default function HomePage() {
                 borderRadius: 'var(--radius-lg)',
                 overflow: 'hidden',
                 aspectRatio: '4 / 5',
-                boxShadow: '0 30px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--primary-muted)',
+                boxShadow: 'var(--shadow-hover), 0 0 0 1px var(--primary-muted)',
                 transform: 'rotate(1deg)',
               }}
             >
@@ -331,19 +305,9 @@ export default function HomePage() {
           >
             Next in season
           </h2>
-          <button
-            onClick={() => navigate('/events')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--primary)',
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigate('/events')}>
             View all →
-          </button>
+          </Button>
         </div>
 
         {loading ? (
@@ -355,15 +319,7 @@ export default function HomePage() {
             }}
           >
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                style={{
-                  height: 400,
-                  borderRadius: 'var(--radius-lg)',
-                  background: 'var(--bg-surface)',
-                  animation: 'pulse 2s infinite',
-                }}
-              />
+              <Skeleton key={i} shape="rect" height={400} style={{ borderRadius: 'var(--radius-lg)' }} />
             ))}
           </div>
         ) : (
@@ -375,7 +331,7 @@ export default function HomePage() {
               gap: 20,
             }}
           >
-            {(featured.length > 0 ? featured : upcoming).slice(0, 6).map((event) => (
+            {display.slice(0, 6).map((event) => (
               <div key={event.id} className="c829-fade-up c829-card-hover">
                 <EventCard event={event} />
               </div>
