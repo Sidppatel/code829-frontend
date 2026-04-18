@@ -5,7 +5,6 @@ import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
 import PulseIndicator from '@code829/shared/components/shared/PulseIndicator';
-import PageHeader from '@code829/shared/components/shared/PageHeader';
 import dayjs from 'dayjs';
 
 interface SystemLog {
@@ -122,16 +121,23 @@ export default function SystemLogsPage() {
   ];
 
   return (
-    <div className="spring-up">
-      <PageHeader
-        title="System Update"
-        subtitle={[
-          "Audit trail and system events across all nodes.",
-          "Monitoring API latency and background worker health.",
-          "Live stream of operational changes and migrations."
-        ]}
-        rotateSubtitle
-      />
+    <div style={{ padding: isMobile ? 20 : '32px 40px' }}>
+      <div style={{ marginBottom: 8, fontSize: 13, color: 'var(--text-muted)' }}>
+        Live stream · operational changes & migrations
+      </div>
+      <h1
+        style={{
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontSize: isMobile ? 26 : 34,
+          fontWeight: 700,
+          color: 'var(--text-primary)',
+          letterSpacing: '-0.025em',
+          margin: '0 0 24px',
+          lineHeight: 1.1,
+        }}
+      >
+        System logs
+      </h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 24 }}>
         <HumanCard className="human-noise" style={{ padding: '16px 20px' }}>

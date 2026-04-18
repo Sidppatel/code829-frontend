@@ -5,7 +5,6 @@ import { developerApi } from '../../services/api';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { formatEventDate } from '@code829/shared/utils/date';
 import type { DevUser } from '@code829/shared/services/developerApi';
-import PageHeader from '@code829/shared/components/shared/PageHeader';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
 import { createLogger } from '@code829/shared/lib/logger';
@@ -135,11 +134,23 @@ export default function DevUsersPage() {
   ];
 
   return (
-    <div className="spring-up" style={{ padding: isMobile ? 12 : 24 }}>
-      <PageHeader
-        title="Customer Management"
-        subtitle="Review and manage all non-administrative accounts."
-      />
+    <div style={{ padding: isMobile ? 20 : '32px 40px' }}>
+      <div style={{ marginBottom: 8, fontSize: 13, color: 'var(--text-muted)' }}>
+        {total.toLocaleString()} non-administrative accounts
+      </div>
+      <h1
+        style={{
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontSize: isMobile ? 26 : 34,
+          fontWeight: 700,
+          color: 'var(--text-primary)',
+          letterSpacing: '-0.025em',
+          margin: '0 0 24px',
+          lineHeight: 1.1,
+        }}
+      >
+        Customers
+      </h1>
 
       <div style={{
         display: 'flex',

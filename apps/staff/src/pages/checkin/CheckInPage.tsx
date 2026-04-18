@@ -1,17 +1,58 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Input, App, Button } from 'antd';
-import { ScanOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import {
+  ScanOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ArrowLeftOutlined,
+} from '@ant-design/icons';
 import { checkInApi } from '../../services/api';
 
 import type { CheckInStats, ScanResponse } from '@code829/shared/types/checkin';
-import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import QrCameraScanner from '../../components/checkin/QrCameraScanner';
-import HumanCard from '@code829/shared/components/shared/HumanCard';
+import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { createLogger } from '@code829/shared/lib/logger';
 
 const log = createLogger('Staff/CheckInPage');
+
+function MiniStat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div
+      style={{
+        padding: 14,
+        background: 'var(--bg-soft)',
+        borderRadius: 'var(--radius-md)',
+        border: '1px solid var(--border-subtle)',
+        textAlign: 'center',
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontSize: 22,
+          fontWeight: 700,
+          color: 'var(--text-primary)',
+        }}
+      >
+        {value}
+      </div>
+      <div
+        style={{
+          fontSize: 10,
+          color: 'var(--text-muted)',
+          letterSpacing: 1,
+          textTransform: 'uppercase',
+          marginTop: 4,
+          fontWeight: 600,
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
 
 export default function CheckInPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -22,13 +63,18 @@ export default function CheckInPage() {
   const [scanning, setScanning] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
   const { message } = App.useApp();
+  const isMobile = useIsMobile();
 
   const loadStats = useCallback(async () => {
     if (!eventId) return;
     try {
       const { data } = await checkInApi.getStats(eventId);
       setStats(data);
-      log.info('Check-in stats loaded', { eventId, checkedIn: data.checkedIn, total: data.totalTicketsSold });
+      log.info('Check-in stats loaded', {
+        eventId,
+        checkedIn: data.checkedIn,
+        total: data.totalTicketsSold,
+      });
     } catch (err) {
       log.error('Failed to load check-in stats', err);
       message.error('Failed to load check-in stats');
@@ -37,170 +83,270 @@ export default function CheckInPage() {
     }
   }, [eventId, message]);
 
-  useEffect(() => { void loadStats(); }, [loadStats]);
+  useEffect(() => {
+    void loadStats();
+  }, [loadStats]);
 
-  const handleScan = useCallback(async (value: string) => {
-    if (!value.trim() || scanning) return;
-    setScanning(true);
-    setScanResult(null);
-    try {
-      const { data } = await checkInApi.scan(value.trim());
-      setScanResult(data);
-      if (data.success) {
-        log.info('Check-in scan succeeded', { userName: data.userName, itemCount: data.itemCount });
-        message.success(data.message);
-        void loadStats();
-      } else {
-        log.info('Check-in scan rejected', { message: data.message });
-        message.error(data.message);
+  const handleScan = useCallback(
+    async (value: string) => {
+      if (!value.trim() || scanning) return;
+      setScanning(true);
+      setScanResult(null);
+      try {
+        const { data } = await checkInApi.scan(value.trim());
+        setScanResult(data);
+        if (data.success) {
+          log.info('Check-in scan succeeded', {
+            userName: data.userName,
+            itemCount: data.itemCount,
+          });
+          message.success(data.message);
+          void loadStats();
+        } else {
+          log.info('Check-in scan rejected', { message: data.message });
+          message.error(data.message);
+        }
+      } catch (err) {
+        log.error('Check-in scan failed', err);
+        message.error('Scan failed');
+      } finally {
+        setScanning(false);
       }
-    } catch (err) {
-      log.error('Check-in scan failed', err);
-      message.error('Scan failed');
-    } finally {
-      setScanning(false);
-    }
-  }, [scanning, message, loadStats]);
+    },
+    [scanning, message, loadStats]
+  );
 
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="spring-up">
-      <PageHeader 
-        title="Check-In" 
-        subtitle={[
-          stats?.eventTitle ?? 'Event check-in',
-          "Scan QR code to welcome your guests.",
-          "Keep the camera steady for fastest scanning."
-        ]}
-        rotateSubtitle
-        onBack={() => navigate('/checkin/select')}
-      />
-
-      {stats && (
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
-            <div>
-              <div style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Event Progress</div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{stats.checkedIn} <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-secondary)' }}>of {stats.totalTicketsSold} present</span></div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--primary)' }}>{Math.round(stats.percentage)}%</div>
-            </div>
-          </div>
-          <div style={{ height: 12, width: '100%', background: 'var(--bg-soft)', borderRadius: 99, overflow: 'hidden', border: '1px solid var(--border)' }}>
-            <div style={{ 
-              height: '100%', 
-              width: `${stats.percentage}%`, 
-              background: 'linear-gradient(90deg, var(--primary) 0%, var(--accent-green) 100%)',
-              transition: 'width 0.5s var(--ease-human)'
-            }} />
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16, marginTop: 24 }}>
-            <HumanCard style={{ padding: '20px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Remaining</div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--accent-gold)' }}>{stats.remaining}</div>
-            </HumanCard>
-            <HumanCard style={{ padding: '20px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Last Seen</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
-                {stats.lastCheckIn ? new Date(stats.lastCheckIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Never'}
-              </div>
-            </HumanCard>
-          </div>
-        </div>
-      )}
-
-      <HumanCard 
-        title="Ready to Scan" 
-        className="human-noise"
-        style={{ marginBottom: 32, padding: cameraActive ? 12 : 32 }}
+    <div style={{ padding: isMobile ? 20 : '32px 40px', maxWidth: 960, margin: '0 auto' }}>
+      <Button
+        type="text"
+        icon={<ArrowLeftOutlined />}
+        onClick={() => navigate('/checkin/select')}
+        style={{
+          color: 'var(--text-secondary)',
+          fontWeight: 500,
+          padding: 0,
+          marginBottom: 12,
+        }}
       >
-        <QrCameraScanner
-          active={cameraActive}
-          onScan={handleScan}
-          onToggle={() => setCameraActive((prev) => !prev)}
-        />
+        Back
+      </Button>
 
-        {!cameraActive && (
-          <>
-            <div style={{ margin: '32px 0', borderTop: '1px solid var(--border)', position: 'relative' }}>
-              <span style={{ 
-                position: 'absolute', 
-                top: '50%', 
-                left: '50%', 
-                transform: 'translate(-50%, -50%)', 
-                background: 'var(--bg-surface)', 
-                padding: '0 16px',
-                fontSize: 12,
-                color: 'var(--text-muted)',
-                fontWeight: 600,
-                textTransform: 'uppercase'
-              }}>
-                or manual entry
-              </span>
-            </div>
+      <div style={{ marginBottom: 8, fontSize: 13, color: 'var(--text-muted)' }}>
+        {stats?.eventTitle ?? 'Event check-in'}
+      </div>
+      <h1
+        style={{
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontSize: isMobile ? 26 : 34,
+          fontWeight: 700,
+          color: 'var(--text-primary)',
+          letterSpacing: '-0.025em',
+          margin: '0 0 24px',
+          lineHeight: 1.1,
+        }}
+      >
+        Check-in
+      </h1>
 
-            <div style={{ display: 'flex', gap: 12 }}>
-              <Input
-                placeholder="Enter QR token manually..."
-                size="large"
-                style={{ borderRadius: 'var(--radius-full)', border: '1px solid var(--border)' }}
-                onChange={(e) => { if (e.target.value.length === 8) handleScan(e.target.value); }}
-              />
-              <Button 
-                type="primary" 
-                size="large" 
-                icon={<ScanOutlined />} 
-                loading={scanning}
-                onClick={() => { /* Placeholder for manual trigger if needed */ }}
-                style={{ borderRadius: 'var(--radius-full)', padding: '0 24px' }}
-              >
-                Scan
-              </Button>
-            </div>
-          </>
-        )}
-      </HumanCard>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.2fr) minmax(0, 1fr)',
+          gap: 20,
+        }}
+      >
+        {/* Scanner column */}
+        <div>
+          <div
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-lg)',
+              overflow: 'hidden',
+              boxShadow: 'var(--shadow-sm)',
+              padding: cameraActive ? 0 : 20,
+            }}
+          >
+            <QrCameraScanner
+              active={cameraActive}
+              onScan={handleScan}
+              onToggle={() => setCameraActive((prev) => !prev)}
+            />
 
-      {scanResult && (
-        <HumanCard 
-          style={{ 
-            borderLeft: `8px solid ${scanResult.success ? 'var(--accent-green)' : 'var(--accent-rose)'}`,
-            background: scanResult.success ? 'var(--status-success-bg)' : 'var(--status-danger-bg)'
-          }}
-          className="spring-up"
-        >
-          <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-            <div style={{ 
-              width: 64, 
-              height: 64, 
-              borderRadius: '50%', 
-              background: scanResult.success ? 'var(--accent-green)' : 'var(--accent-rose)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              color: 'white',
-              fontSize: 32
-            }}>
-              {scanResult.success ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', fontFamily: "'Playfair Display', serif" }}>
-                {scanResult.message}
-              </div>
-              {scanResult.success && (
-                <div style={{ marginTop: 8, fontSize: 16, color: 'var(--text-secondary)', fontWeight: 500 }}>
-                  Welcome, <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{scanResult.userName}</span> 
-                  <span style={{ margin: '0 8px', color: 'var(--border)' }}>•</span>
-                  {scanResult.itemCount} tickets
+            {!cameraActive && (
+              <>
+                <div
+                  style={{
+                    margin: '20px 0',
+                    borderTop: '1px solid var(--border-subtle)',
+                    position: 'relative',
+                  }}
+                >
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      background: 'var(--bg-surface)',
+                      padding: '0 14px',
+                      fontSize: 11,
+                      color: 'var(--text-muted)',
+                      fontWeight: 600,
+                      letterSpacing: 1.5,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    or manual entry
+                  </span>
                 </div>
-              )}
-            </div>
+
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <Input
+                    placeholder="Enter QR token…"
+                    size="large"
+                    style={{
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border)',
+                    }}
+                    onChange={(e) => {
+                      if (e.target.value.length === 8) handleScan(e.target.value);
+                    }}
+                  />
+                  <Button
+                    type="primary"
+                    size="large"
+                    icon={<ScanOutlined />}
+                    loading={scanning}
+                    style={{
+                      borderRadius: 'var(--radius-md)',
+                      padding: '0 22px',
+                      background: 'var(--primary)',
+                      border: 'none',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Scan
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
-        </HumanCard>
-      )}
+
+          {stats && (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: 10,
+                marginTop: 14,
+              }}
+            >
+              <MiniStat label="Checked in" value={stats.checkedIn} />
+              <MiniStat label="Expected" value={stats.totalTicketsSold} />
+              <MiniStat label="Remaining" value={stats.remaining} />
+            </div>
+          )}
+        </div>
+
+        {/* Recent scans column */}
+        <div>
+          <div
+            style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: 16,
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              marginBottom: 10,
+            }}
+          >
+            Most recent scan
+          </div>
+
+          {scanResult ? (
+            <div
+              className="c829-fade-up"
+              style={{
+                background: 'var(--bg-surface)',
+                border: `1px solid ${
+                  scanResult.success ? 'var(--status-success)' : 'var(--status-danger)'
+                }`,
+                borderRadius: 'var(--radius-lg)',
+                padding: 18,
+                boxShadow: 'var(--shadow-sm)',
+              }}
+            >
+              <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    background: scanResult.success
+                      ? 'var(--status-success-bg)'
+                      : 'var(--status-danger-bg)',
+                    color: scanResult.success ? 'var(--status-success)' : 'var(--status-danger)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 18,
+                    flexShrink: 0,
+                  }}
+                >
+                  {scanResult.success ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      fontSize: 14,
+                    }}
+                  >
+                    {scanResult.success ? scanResult.userName : scanResult.message}
+                  </div>
+                  {scanResult.success && (
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {scanResult.itemCount} ticket{scanResult.itemCount === 1 ? '' : 's'} ·{' '}
+                      {new Date().toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div
+              style={{
+                padding: '28px 20px',
+                textAlign: 'center',
+                background: 'var(--bg-soft)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px dashed var(--border)',
+                color: 'var(--text-muted)',
+                fontSize: 13,
+              }}
+            >
+              No scans yet.
+            </div>
+          )}
+
+          {stats?.lastCheckIn && (
+            <div style={{ marginTop: 12, fontSize: 11, color: 'var(--text-muted)' }}>
+              Last confirmed scan:{' '}
+              {new Date(stats.lastCheckIn).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
