@@ -17,6 +17,8 @@ import { useAuth } from '@code829/shared/hooks/useAuth';
 import { useBreakpoint } from '@code829/shared/hooks/useBreakpoint';
 import SidebarNav from '@code829/shared/components/layout/SidebarNav';
 import TopHeader from '@code829/shared/components/layout/TopHeader';
+import { USE_NEW_SHELL } from '@code829/shared/lib/featureFlags';
+import { Navbar, Footer as UIFooter, type NavItem } from '@code829/ui';
 
 const { Sider, Header, Content } = Layout;
 
@@ -54,11 +56,40 @@ const navGroups = [
 
 const navItems = navGroups.flatMap(g => g.items);
 
+const NEW_SHELL_NAV_ITEMS: NavItem[] = navGroups.flatMap((g) =>
+  g.items.map((item) => ({
+    key: `${g.title}:${item.key}`,
+    to: item.key,
+    label: item.label,
+    icon: item.icon,
+    group: g.title,
+    end: item.key === '/',
+  })),
+);
+
 export default function DeveloperLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const bp = useBreakpoint();
+
+  if (USE_NEW_SHELL) {
+    const navUser = user
+      ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Developer' }
+      : null;
+    const handleLogout = () => { logout(); navigate('/login'); };
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--bg-page)' }}>
+        <Navbar variant="developer" items={NEW_SHELL_NAV_ITEMS} user={navUser} onLogout={handleLogout} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          <main style={{ flex: 1, padding: 32, maxWidth: 1600, margin: '0 auto', width: '100%' }}>
+            <Outlet />
+          </main>
+          <UIFooter variant="developer" />
+        </div>
+      </div>
+    );
+  }
 
   const isMobile = bp === 'mobile';
   const isTablet = bp === 'tablet';

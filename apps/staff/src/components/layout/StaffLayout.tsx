@@ -3,6 +3,8 @@ import { Layout, Button, Typography } from 'antd';
 import { LogoutOutlined } from '@ant-design/icons';
 import BrandLogo from '@code829/shared/components/shared/BrandLogo';
 import { useAuth } from '@code829/shared/hooks/useAuth';
+import { USE_NEW_SHELL } from '@code829/shared/lib/featureFlags';
+import { Navbar, Footer as UIFooter } from '@code829/ui';
 
 const { Header, Content } = Layout;
 
@@ -14,6 +16,21 @@ export default function StaffLayout() {
     logout();
     navigate('/login');
   };
+
+  if (USE_NEW_SHELL) {
+    const navUser = user
+      ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Staff' }
+      : null;
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg-page)', display: 'flex', flexDirection: 'column' }}>
+        <Navbar variant="staff" user={navUser} onLogout={handleLogout} />
+        <main style={{ flex: 1, padding: 24, maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+          <Outlet />
+        </main>
+        <UIFooter variant="staff" />
+      </div>
+    );
+  }
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>

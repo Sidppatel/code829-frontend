@@ -18,9 +18,54 @@ import { Avatar, Grid } from 'antd';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import BrandLogo from '@code829/shared/components/shared/BrandLogo';
 import { motion, AnimatePresence } from 'framer-motion';
+import { USE_NEW_SHELL } from '@code829/shared/lib/featureFlags';
+import { Navbar, Footer as UIFooter } from '@code829/ui';
 
 const { Header, Content, Footer } = Layout;
 const { useBreakpoint } = Grid;
+
+const PUBLIC_NAV_ITEMS = [
+  { key: 'home', to: '/', label: 'Experience', end: true },
+  { key: 'events', to: '/events', label: 'Events' },
+  { key: 'feedback', to: '/feedback', label: 'Feedback' },
+];
+
+const PUBLIC_FOOTER_COLUMNS = [
+  {
+    title: 'Experience',
+    links: [
+      { label: 'Events', to: '/events' },
+      { label: 'Feedback', to: '/feedback' },
+    ],
+  },
+  {
+    title: 'Account',
+    links: [
+      { label: 'My bookings', to: '/bookings' },
+      { label: 'My tickets', to: '/tickets' },
+      { label: 'Profile', to: '/profile' },
+    ],
+  },
+];
+
+function NewPublicShell({ user, onLogout }: { user: ReturnType<typeof useAuth>['user']; onLogout: () => void }) {
+  const navUser = user
+    ? { firstName: user.firstName, lastName: user.lastName, email: user.email }
+    : null;
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg-page)', display: 'flex', flexDirection: 'column' }}>
+      <Navbar variant="public" items={PUBLIC_NAV_ITEMS} user={navUser} onLogout={onLogout} />
+      <main style={{ flex: 1 }}>
+        <Outlet />
+      </main>
+      <UIFooter
+        variant="public"
+        columns={PUBLIC_FOOTER_COLUMNS}
+        tagline="Curated evenings, thoughtfully seated."
+      />
+    </div>
+  );
+}
 
 export default function PublicLayout() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -29,6 +74,10 @@ export default function PublicLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const screens = useBreakpoint();
   const isMobile = !screens.md;
+
+  if (USE_NEW_SHELL) {
+    return <NewPublicShell user={user} onLogout={logout} />;
+  }
 
   const navLinks = [
     { path: '/', label: 'Experience' },
