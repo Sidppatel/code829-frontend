@@ -49,10 +49,10 @@ export function Footer({
       <footer className="ui-footer ui-footer--public" aria-label="Site footer">
         <div className="ui-footer__inner">
           <div className="ui-footer__brand-col">
-            <div className="ui-footer__brand">
-              <span className="ui-footer__brand-mark" aria-hidden="true" />
+            <Link to="/" className="ui-footer__brand">
+              <img src="/logo.jpg" alt="" className="ui-footer__brand-mark" />
               <span className="ui-footer__brand-name">Code829</span>
-            </div>
+            </Link>
             {tagline && <p className="ui-footer__tagline">{tagline}</p>}
             {socials.length > 0 && (
               <ul className="ui-footer__socials">
