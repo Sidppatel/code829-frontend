@@ -23,6 +23,7 @@ import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
 import BookingStatusTag from '../../components/bookings/BookingStatusTag';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
+import PagePreamble from '../../components/layout/PagePreamble';
 import { createLogger } from '@code829/shared/lib/logger';
 
 const log = createLogger('Public/BookingDetailPage');
@@ -125,22 +126,27 @@ export default function BookingDetailPage() {
   );
 
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto' }}>
-      <Helmet><title>Booking Details - Code829</title></Helmet>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-        <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/bookings')}
-          style={{ padding: '4px 8px' }}
-        />
-        <div style={{ flex: 1 }}>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>Booking Details</h2>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>#{booking.bookingNumber}</div>
-        </div>
-        <BookingStatusTag status={booking.status} />
-      </div>
+    <div>
+      <Helmet><title>Booking details — Code829</title></Helmet>
+      <PagePreamble
+        kicker={`Booking #${booking.bookingNumber}`}
+        title={booking.eventTitle}
+        subtitle={formatEventDate(booking.eventDate)}
+        rightSlot={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <BookingStatusTag status={booking.status} />
+            <Button
+              type="text"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate('/bookings')}
+              style={{ color: 'var(--text-secondary)', fontWeight: 500 }}
+            >
+              Back
+            </Button>
+          </div>
+        }
+      />
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 32px 64px' }}>
 
       {/* Event Banner */}
       {booking.eventImagePath && (
@@ -272,6 +278,7 @@ export default function BookingDetailPage() {
           </div>
         )}
       </Modal>
+      </div>
     </div>
   );
 }

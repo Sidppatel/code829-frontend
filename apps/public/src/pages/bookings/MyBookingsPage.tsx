@@ -12,7 +12,7 @@ import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
 import BookingStatusTag from '../../components/bookings/BookingStatusTag';
-import PageHeader from '@code829/shared/components/shared/PageHeader';
+import PagePreamble from '../../components/layout/PagePreamble';
 import { createLogger } from '@code829/shared/lib/logger';
 
 const log = createLogger('Public/MyBookingsPage');
@@ -296,7 +296,11 @@ export default function MyBookingsPage() {
   return (
     <>
       <Helmet><title>My Bookings - Code829</title></Helmet>
-      <PageHeader title="My Bookings" subtitle="View and manage your event bookings" />
+      <PagePreamble
+        kicker="Your evenings"
+        title="My bookings"
+        subtitle="Review, manage, and share tickets for every reservation you've made."
+      />
 
       <Input.Search
         placeholder="Search by event name, booking # or status..."

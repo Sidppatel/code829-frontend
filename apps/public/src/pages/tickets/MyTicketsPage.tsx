@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 import { ticketsApi } from '../../services/api';
 import type { GuestTicket } from '@code829/shared/types/ticket';
-import PageHeader from '@code829/shared/components/shared/PageHeader';
+import PagePreamble from '../../components/layout/PagePreamble';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import { formatEventDate } from '@code829/shared/utils/date';
 
@@ -55,9 +55,14 @@ export default function MyTicketsPage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
-      <Helmet><title>My Tickets - Code829</title></Helmet>
-      <PageHeader title="My Tickets" subtitle="Your event tickets and invitations" />
+    <div>
+      <Helmet><title>My tickets — Code829</title></Helmet>
+      <PagePreamble
+        kicker="Your admissions"
+        title="My tickets"
+        subtitle="Every event ticket and invitation, in one place."
+      />
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 32px 64px' }}>
 
       {tickets.length === 0 ? (
         <Empty description="No tickets yet" style={{ padding: '48px 0' }} />
@@ -117,6 +122,7 @@ export default function MyTicketsPage() {
           </div>
         )}
       </Modal>
+      </div>
     </div>
   );
 }

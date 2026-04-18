@@ -11,6 +11,7 @@ import type { EventListParams } from '@code829/shared/services/eventsApi';
 const log = createLogger('Public/EventsPage');
 import EventCard from '../../components/events/EventCard';
 import EventFilters from '../../components/events/EventFilters';
+import PagePreamble from '../../components/layout/PagePreamble';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
 
 export default function EventsPage() {
@@ -99,29 +100,11 @@ export default function EventsPage() {
     >
       <Helmet><title>All events — Code829</title></Helmet>
 
-      {/* Page Header — editorial, left-aligned */}
-      <section style={{ padding: '120px 32px 0' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <motion.div variants={itemVariants}>
-            <h1
-              style={{
-                fontFamily: "'Playfair Display', Georgia, serif",
-                fontSize: 'clamp(2.4rem, 6vw, 3.5rem)',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                letterSpacing: '-0.03em',
-                margin: '0 0 8px',
-                lineHeight: 1.1,
-              }}
-            >
-              All events
-            </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: 0 }}>
-              {total} {total === 1 ? 'evening' : 'evenings'} across the season
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PagePreamble
+        kicker="The Collection"
+        title="All events"
+        subtitle={`${total} ${total === 1 ? 'evening' : 'evenings'} across the season — curated and held with care.`}
+      />
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px' }}>
         <motion.div variants={itemVariants} style={{ marginBottom: 32 }}>

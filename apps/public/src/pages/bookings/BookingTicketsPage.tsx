@@ -10,10 +10,11 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   MailOutlined,
+  ArrowLeftOutlined,
 } from '@ant-design/icons';
 import { ticketsApi } from '../../services/api';
 import type { BookingTicket } from '@code829/shared/types/ticket';
-import PageHeader from '@code829/shared/components/shared/PageHeader';
+import PagePreamble from '../../components/layout/PagePreamble';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import { formatEventDate } from '@code829/shared/utils/date';
 import { createLogger } from '@code829/shared/lib/logger';
@@ -141,13 +142,25 @@ export default function BookingTicketsPage() {
   const first = tickets[0];
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
-      <Helmet><title>Manage Tickets - Code829</title></Helmet>
-      <PageHeader
-        title="Manage Tickets"
-        subtitle={first ? `${first.eventTitle} • ${first.bookingNumber}` : 'Booking tickets'}
-        onBack={() => navigate('/bookings')}
+    <div>
+      <Helmet><title>Manage tickets — Code829</title></Helmet>
+      <PagePreamble
+        kicker="Your evening"
+        title="Manage tickets"
+        subtitle={first ? `${first.eventTitle} · ${first.bookingNumber}` : 'Booking tickets'}
+        rightSlot={
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate('/bookings')}
+            style={{ color: 'var(--text-secondary)', fontWeight: 500 }}
+          >
+            Back
+          </Button>
+        }
       />
+
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 32px 64px' }}>
 
       {first && (
         <Card size="small" style={{ marginBottom: 16 }}>
@@ -300,6 +313,7 @@ export default function BookingTicketsPage() {
           </div>
         </div>
       </Modal>
+      </div>
     </div>
   );
 }

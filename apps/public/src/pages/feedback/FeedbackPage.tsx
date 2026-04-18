@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons';
 import { feedbackApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
+import PagePreamble from '../../components/layout/PagePreamble';
 import { createLogger } from '@code829/shared/lib/logger';
 
 const log = createLogger('Public/FeedbackPage');
@@ -207,26 +208,11 @@ export default function FeedbackPage() {
       variants={containerVariants}
       style={{ paddingBottom: 150 }}
     >
-      {/* Immersive Page Header */}
-      <section className="hero-section" style={{
-        minHeight: 'auto',
-        padding: '160px 20px 80px',
-        marginBottom: 60,
-      }}>
-        <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>
-          <motion.div variants={itemVariants}>
-            <div style={{ color: 'var(--accent-rose)', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: 2.5, marginBottom: 20 }}>
-              Curating Perfection
-            </div>
-            <h1 style={{ fontSize: 'clamp(3rem, 7vw, 5rem)', fontWeight: 900, color: 'var(--text-primary)', marginBottom: 24, letterSpacing: '-0.06em', lineHeight: 1 }}>
-              Help us <span className="gradient-text">Shape</span> <br /> the Next Epoch.
-            </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 18, maxWidth: 650, fontWeight: 500, lineHeight: 1.6 }}>
-              We're building the future of elite event experiences. Your feedback is what fuels our innovation and commitment to excellence.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PagePreamble
+        kicker="Curating perfection"
+        title="Help us shape the next evening"
+        subtitle="Every note you share sharpens the room we set tomorrow. Your feedback fuels the next curtain."
+      />
 
       <div className="page-container">
         <Row justify="center">

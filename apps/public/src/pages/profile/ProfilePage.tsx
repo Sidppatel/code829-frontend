@@ -7,7 +7,7 @@ import { useAuthStore } from '@code829/shared/stores/authStore';
 
 const log = createLogger('Public/ProfilePage');
 import type { UserProfile } from '@code829/shared/types/auth';
-import PageHeader from '@code829/shared/components/shared/PageHeader';
+import PagePreamble from '../../components/layout/PagePreamble';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import AddressAutocomplete from '@code829/shared/components/shared/AddressAutocomplete';
 import type { AddressParts } from '@code829/shared/components/shared/AddressAutocomplete';
@@ -76,9 +76,14 @@ export default function ProfilePage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <Helmet><title>Profile - Code829</title></Helmet>
-      <PageHeader title="Profile" subtitle="Manage your account information" />
+    <div>
+      <Helmet><title>Profile — Code829</title></Helmet>
+      <PagePreamble
+        kicker="Your account"
+        title="Profile"
+        subtitle="Manage your contact details, preferences, and avatar."
+      />
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 32px 64px' }}>
       <Card>
         <AvatarUpload
           currentUrl={avatarUrl}
@@ -150,6 +155,7 @@ export default function ProfilePage() {
           </Form.Item>
         </Form>
       </Card>
+      </div>
     </div>
   );
 }
