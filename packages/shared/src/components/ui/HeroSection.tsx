@@ -39,7 +39,7 @@ export default function HeroSection({
         minHeight: 420,
         width: '100%',
         overflow: 'hidden',
-        color: '#fff',
+        color: 'var(--text-on-brand)',
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: alignment === 'center' ? 'center' : 'flex-start',
@@ -71,7 +71,7 @@ export default function HeroSection({
               letterSpacing: 2.5,
               fontSize: 11,
               fontWeight: 700,
-              color: '#fff',
+              color: 'var(--text-on-brand)',
               opacity: 0.85,
               marginBottom: 16,
             }}
@@ -87,7 +87,7 @@ export default function HeroSection({
             lineHeight: 1.05,
             margin: 0,
             letterSpacing: '-0.02em',
-            color: '#fff',
+            color: 'var(--text-on-brand)',
             textWrap: 'balance',
           }}
         >
@@ -102,7 +102,7 @@ export default function HeroSection({
               maxWidth: 620,
               lineHeight: 1.5,
               fontWeight: 500,
-              color: '#fff',
+              color: 'var(--text-on-brand)',
             }}
           >
             {subtitle}

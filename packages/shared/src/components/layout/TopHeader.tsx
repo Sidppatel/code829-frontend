@@ -79,7 +79,7 @@ export default function TopHeader({ isMobile, title, user, userMenuItems, showMe
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: 'white',
+              color: 'var(--text-on-brand)',
               fontSize: 11
             }}>
               {user?.firstName?.[0]}

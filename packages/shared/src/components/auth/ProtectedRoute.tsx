@@ -11,7 +11,7 @@ const ROLE_LEVEL: Record<UserRole, number> = {
 };
 
 interface Props {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   minRole?: UserRole;
 }
 

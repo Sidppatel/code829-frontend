@@ -127,7 +127,7 @@ export default function SidebarNav({
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px' }}>
             <div style={{
               width: 40, height: 40, borderRadius: '50%', background: 'var(--primary)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-on-brand)', fontWeight: 700
             }}>
               {user.firstName?.[0]}
             </div>

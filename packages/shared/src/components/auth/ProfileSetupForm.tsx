@@ -79,8 +79,8 @@ export default function ProfileSetupForm({ isInitial = false }: { isInitial?: bo
               position: 'absolute', 
               bottom: 0, 
               right: 0, 
-              background: 'var(--ant-primary-color)', 
-              color: 'white', 
+              background: 'var(--ant-primary-color)',
+              color: 'var(--text-on-brand)',
               borderRadius: '50%', 
               padding: 8,
               boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
@@ -105,15 +105,15 @@ export default function ProfileSetupForm({ isInitial = false }: { isInitial?: bo
       >
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <Form.Item name="firstName" label="First Name" rules={[{ required: true, message: 'Required' }]}>
-            <Input prefix={<UserOutlined style={{ color: '#bfbfbf' }} />} placeholder="John" />
+            <Input prefix={<UserOutlined style={{ color: 'var(--text-muted)' }} />} placeholder="John" />
           </Form.Item>
           <Form.Item name="lastName" label="Last Name" rules={[{ required: true, message: 'Required' }]}>
-            <Input prefix={<UserOutlined style={{ color: '#bfbfbf' }} />} placeholder="Doe" />
+            <Input prefix={<UserOutlined style={{ color: 'var(--text-muted)' }} />} placeholder="Doe" />
           </Form.Item>
         </div>
 
         <Form.Item name="phone" label="Phone Number" rules={[{ required: false }]}>
-          <Input prefix={<PhoneOutlined style={{ color: '#bfbfbf' }} />} placeholder="+1 (555) 000-0000" />
+          <Input prefix={<PhoneOutlined style={{ color: 'var(--text-muted)' }} />} placeholder="+1 (555) 000-0000" />
         </Form.Item>
 
         <Form.Item style={{ marginTop: 24 }}>
