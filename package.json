@@ -14,7 +14,6 @@
     "build:staff": "pnpm --filter @code829/staff build",
     "build:developer": "pnpm --filter @code829/developer build",
     "lint": "pnpm -r lint",
-    "sync-logo": "node scripts/sync-logo.mjs",
     "preview:public": "pnpm --filter @code829/public preview",
     "preview:admin": "pnpm --filter @code829/admin preview",
     "preview:staff": "pnpm --filter @code829/staff preview",
