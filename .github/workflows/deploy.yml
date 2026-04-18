@@ -1,19 +1,84 @@
-name: Deploy to Cloudflare Pages
+name: Deploy to Cloudflare Workers
 
 on:
   push:
     branches: [master]
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: "Comma-separated list of apps to deploy (e.g. public,admin). Leave blank to deploy all."
+        required: false
+        default: ""
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 concurrency:
-  group: deploy-cloudflare-pages-${{ github.ref }}
+  group: deploy-cloudflare-workers-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect changed apps
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.resolve.outputs.apps }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v4.1.7
+
+      - name: Detect path changes
+        id: filter
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        with:
+          filters: |
+            public:
+              - 'apps/public/**'
+              - 'packages/shared/**'
+              - 'tools/cf-worker/**'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - '.github/workflows/deploy.yml'
+            admin:
+              - 'apps/admin/**'
+              - 'packages/shared/**'
+              - 'tools/cf-worker/**'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - '.github/workflows/deploy.yml'
+            developer:
+              - 'apps/developer/**'
+              - 'packages/shared/**'
+              - 'tools/cf-worker/**'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - '.github/workflows/deploy.yml'
+            staff:
+              - 'apps/staff/**'
+              - 'packages/shared/**'
+              - 'tools/cf-worker/**'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - '.github/workflows/deploy.yml'
+
+      - name: Resolve apps to deploy
+        id: resolve
+        env:
+          MANUAL_APPS: ${{ github.event.inputs.apps }}
+          CHANGED_APPS: ${{ steps.filter.outputs.changes }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "$MANUAL_APPS" ]; then
+            apps=$(echo "$MANUAL_APPS" | tr ',' '\n' | awk 'NF' | jq -R . | jq -sc .)
+          else
+            apps="$CHANGED_APPS"
+          fi
+          echo "apps=$apps" >> "$GITHUB_OUTPUT"
+          echo "Resolved apps: $apps"
+
   validate:
     name: Validate workspace
+    needs: changes
+    if: needs.changes.outputs.apps != '[]' && needs.changes.outputs.apps != ''
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,32 +103,13 @@ jobs:
 
   deploy:
     name: Deploy ${{ matrix.app }}
-    needs: validate
+    needs: [changes, validate]
+    if: needs.changes.outputs.apps != '[]' && needs.changes.outputs.apps != ''
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - app: public
-            package: "@code829/public"
-            dist: apps/public/dist
-            project: code829-public
-            domain: code829.com
-          - app: admin
-            package: "@code829/admin"
-            dist: apps/admin/dist
-            project: code829-admin
-            domain: admin.code829.com
-          - app: developer
-            package: "@code829/developer"
-            dist: apps/developer/dist
-            project: code829-developer
-            domain: developer.code829.com
-          - app: staff
-            package: "@code829/staff"
-            dist: apps/staff/dist
-            project: code829-staff
-            domain: staff.code829.com
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
     env:
       VITE_API_URL: ${{ secrets.VITE_API_URL }}
       VITE_APP_NAME: code829
@@ -87,13 +133,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build ${{ matrix.app }}
-        run: pnpm --filter "${{ matrix.package }}" build
+        run: pnpm --filter "@code829/${{ matrix.app }}" build
 
-      - name: Install Wrangler CLI
-        run: npm install --global wrangler@4
-
-      - name: Deploy ${{ matrix.domain }}
+      - name: Deploy ${{ matrix.app }} to Cloudflare Workers
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: wrangler pages deploy ${{ matrix.dist }} --project-name=${{ matrix.project }}
+        run: |
+          pnpm dlx wrangler@4 deploy \
+            --config "apps/${{ matrix.app }}/wrangler.toml" \
+            --var "VITE_API_URL:${{ secrets.VITE_API_URL }}"
