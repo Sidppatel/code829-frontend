@@ -74,13 +74,14 @@ export default function AdminDashboardPage() {
           onClick={() => navigate('/events/new')}
           style={{
             borderRadius: 'var(--radius-md)',
-            height: isMobile ? 40 : 44,
-            padding: '0 22px',
+            height: isMobile ? 38 : 44,
+            padding: isMobile ? '0 16px' : '0 22px',
             fontWeight: 600,
             boxShadow: 'var(--shadow-hover)',
+            fontSize: isMobile ? 13 : 14,
           }}
         >
-          Create event
+          {isMobile ? 'New event' : 'Create event'}
         </Button>
       }
     >
@@ -89,7 +90,7 @@ export default function AdminDashboardPage() {
           const kpis: StatsCell[] = [
             { label: 'Revenue (30d)', value: centsToUSD(stats.totalRevenueCents) },
             { label: 'Tickets sold', value: stats.totalPurchases.toLocaleString() },
-            { label: 'Events live', value: String(stats.upcomingEvents) },
+            { label: 'Events live', value: String(stats.publishedEvents) },
             { label: 'Active users', value: stats.totalUsers.toLocaleString() },
           ];
 
@@ -102,14 +103,19 @@ export default function AdminDashboardPage() {
 
           return (
             <>
-              <StatsRow items={kpis} variant="kpi" columns={isMobile ? 2 : 4} style={{ marginBottom: 28 }} />
+              <StatsRow 
+                items={kpis} 
+                variant="kpi" 
+                columns={isMobile ? 2 : 4} 
+                style={{ marginBottom: isMobile ? 16 : 28 }} 
+              />
               {nextEvent ? (
                 <div
                   style={{
                     display: 'grid',
                     gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.6fr) minmax(0, 1fr)',
-                    gap: 20,
-                    marginBottom: 28,
+                    gap: isMobile ? 16 : 20,
+                    marginBottom: isMobile ? 16 : 28,
                   }}
                 >
                   <div
@@ -117,7 +123,7 @@ export default function AdminDashboardPage() {
                       background: 'var(--bg-surface)',
                       border: '1px solid var(--border)',
                       borderRadius: 'var(--radius-lg)',
-                      padding: 28,
+                      padding: isMobile ? 20 : 28,
                       boxShadow: 'var(--shadow-sm)',
                       cursor: 'pointer',
                     }}

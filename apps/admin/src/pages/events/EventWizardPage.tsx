@@ -39,7 +39,6 @@ import {
   SeatingIconOpen,
   Stepper,
   SoftCard,
-  MiniStat,
 } from '@code829/shared/components/ui';
 import { FloorPlan, TierLegend } from '@code829/shared/components/floorplan';
 import { createLogger } from '@code829/shared/lib/logger';
@@ -60,14 +59,12 @@ const categories = [
 const STEPS = [
   { key: 'details', label: 'Details' },
   { key: 'seating', label: 'Seating' },
-  { key: 'review', label: 'Review' },
 ] as const;
 
 // Which form fields must be valid to leave a given step.
 const STEP_FIELDS: Record<number, string[]> = {
   0: ['title', 'category', 'venueId', 'startDate', 'startTime', 'endDate', 'endTime'],
   1: [],
-  2: [],
 };
 
 export default function EventWizardPage() {
@@ -89,10 +86,6 @@ export default function EventWizardPage() {
   const { message } = App.useApp();
   const navigate = useNavigate();
   const ticketTypes = Form.useWatch('ticketTypes', form) || [];
-  const watchedTitle = Form.useWatch('title', form);
-  const watchedCategory = Form.useWatch('category', form);
-  const watchedVenueId = Form.useWatch('venueId', form);
-  const watchedStart = Form.useWatch('startDate', form);
 
   useEffect(() => {
     const loadVenues = async () => {
@@ -276,7 +269,6 @@ export default function EventWizardPage() {
 
   const showFloorPlanPreview = layoutMode === 'Grid' && isEditMode && existingTables.length > 0;
   const isLast = step === STEPS.length - 1;
-  const venueLabel = venues.find((v) => v.id === watchedVenueId)?.name ?? '—';
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto', padding: 24 }}>
@@ -644,43 +636,6 @@ export default function EventWizardPage() {
               </div>
             </SoftCard>
           )}
-        </div>
-
-        {/* ── Step 3: Review ──────────────────────────────────────── */}
-        <div style={{ display: step === 2 ? 'block' : 'none' }}>
-          <SoftCard padding={24}>
-            <Kicker style={{ marginBottom: 8 }}>Ready to {isEditMode ? 'save' : 'publish'}</Kicker>
-            <DisplayHeading as="h2" size="lg" style={{ marginBottom: 16 }}>
-              {watchedTitle || 'Untitled event'}
-            </DisplayHeading>
-            <Row gutter={[16, 16]}>
-              <Col xs={24} sm={8}>
-                <MiniStat label="Category" value={watchedCategory || '—'} />
-              </Col>
-              <Col xs={24} sm={8}>
-                <MiniStat label="Venue" value={venueLabel} />
-              </Col>
-              <Col xs={24} sm={8}>
-                <MiniStat
-                  label="Start"
-                  value={watchedStart ? dayjs(watchedStart).format('MMM D, YYYY') : '—'}
-                />
-              </Col>
-              <Col xs={24} sm={8}>
-                <MiniStat
-                  label="Seating"
-                  value={layoutMode === 'Grid' ? 'Tables' : 'Open'}
-                  tone="brand"
-                />
-              </Col>
-              <Col xs={24} sm={8}>
-                <MiniStat
-                  label="Tiers"
-                  value={layoutMode === 'Open' ? ticketTypes.length : existingTiers.length}
-                />
-              </Col>
-            </Row>
-          </SoftCard>
         </div>
 
         {/* ── Navigation ──────────────────────────────────────────── */}
