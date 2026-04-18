@@ -6,6 +6,7 @@ import type { EventDetail } from '@code829/shared/types/event';
 import { formatDateRange } from '@code829/shared/utils/date';
 import EventImageFallback from '../../../components/events/EventImageFallback';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
+import { DisplayHeading } from '@code829/shared/components/ui';
 
 interface EventHeroProps {
   event: EventDetail;
@@ -88,20 +89,13 @@ export default function EventHero({ event, itemVariants }: EventHeroProps) {
               </span>
             </div>
 
-            <h1
-              style={{
-                fontFamily: "'Playfair Display', Georgia, serif",
-                fontSize: isMobile ? 'clamp(1.9rem, 9vw, 2.6rem)' : 'clamp(2.6rem, 6vw, 4rem)',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                margin: '0 0 8px',
-                letterSpacing: '-0.03em',
-                lineHeight: 1.05,
-                textWrap: 'balance',
-              }}
+            <DisplayHeading
+              as="h1"
+              size={isMobile ? 'lg' : 'xl'}
+              style={{ margin: '0 0 8px' }}
             >
               {event.title}
-            </h1>
+            </DisplayHeading>
             {event.description && (
               <p
                 style={{

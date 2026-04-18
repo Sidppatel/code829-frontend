@@ -13,46 +13,10 @@ import type { CheckInStats, ScanResponse } from '@code829/shared/types/checkin';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import QrCameraScanner from '../../components/checkin/QrCameraScanner';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
+import { DisplayHeading, MiniStat } from '@code829/shared/components/ui';
 import { createLogger } from '@code829/shared/lib/logger';
 
 const log = createLogger('Staff/CheckInPage');
-
-function MiniStat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div
-      style={{
-        padding: 14,
-        background: 'var(--bg-soft)',
-        borderRadius: 'var(--radius-md)',
-        border: '1px solid var(--border-subtle)',
-        textAlign: 'center',
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: 22,
-          fontWeight: 700,
-          color: 'var(--text-primary)',
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          fontSize: 10,
-          color: 'var(--text-muted)',
-          letterSpacing: 1,
-          textTransform: 'uppercase',
-          marginTop: 4,
-          fontWeight: 600,
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
 
 export default function CheckInPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -137,19 +101,9 @@ export default function CheckInPage() {
       <div style={{ marginBottom: 8, fontSize: 13, color: 'var(--text-muted)' }}>
         {stats?.eventTitle ?? 'Event check-in'}
       </div>
-      <h1
-        style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: isMobile ? 26 : 34,
-          fontWeight: 700,
-          color: 'var(--text-primary)',
-          letterSpacing: '-0.025em',
-          margin: '0 0 24px',
-          lineHeight: 1.1,
-        }}
-      >
+      <DisplayHeading as="h1" size={isMobile ? 'md' : 'lg'} style={{ margin: '0 0 24px' }}>
         Check-in
-      </h1>
+      </DisplayHeading>
 
       <div
         style={{
@@ -254,17 +208,9 @@ export default function CheckInPage() {
 
         {/* Recent scans column */}
         <div>
-          <div
-            style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: 16,
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              marginBottom: 10,
-            }}
-          >
+          <DisplayHeading as="h2" size="sm" style={{ marginBottom: 10 }}>
             Most recent scan
-          </div>
+          </DisplayHeading>
 
           {scanResult ? (
             <div

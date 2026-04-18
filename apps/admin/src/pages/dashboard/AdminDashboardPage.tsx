@@ -12,6 +12,7 @@ import { centsToUSD } from '@code829/shared/utils/currency';
 import type { DashboardStats, NextEventDashboard } from '@code829/shared/types/developer';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import EmptyState from '@code829/shared/components/shared/EmptyState';
+import { DisplayHeading, MiniStat, SoftCard } from '@code829/shared/components/ui';
 import { createLogger } from '@code829/shared/lib/logger';
 
 const log = createLogger('Admin/DashboardPage');
@@ -26,15 +27,7 @@ function greetingForHour(hour: number): string {
 
 function Kpi({ label, value, trend }: { label: string; value: string; trend?: string }) {
   return (
-    <div
-      style={{
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-lg)',
-        padding: 20,
-        boxShadow: 'var(--shadow-sm)',
-      }}
-    >
+    <SoftCard padding={20}>
       <div
         style={{
           fontSize: 11,
@@ -47,18 +40,9 @@ function Kpi({ label, value, trend }: { label: string; value: string; trend?: st
       >
         {label}
       </div>
-      <div
-        style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: 28,
-          fontWeight: 700,
-          color: 'var(--text-primary)',
-          lineHeight: 1,
-          letterSpacing: '-0.02em',
-        }}
-      >
+      <DisplayHeading as="div" size="md" style={{ lineHeight: 1 }}>
         {value}
-      </div>
+      </DisplayHeading>
       {trend && (
         <div
           style={{
@@ -71,44 +55,7 @@ function Kpi({ label, value, trend }: { label: string; value: string; trend?: st
           {trend}
         </div>
       )}
-    </div>
-  );
-}
-
-function MiniStat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div
-      style={{
-        padding: 14,
-        background: 'var(--bg-soft)',
-        borderRadius: 'var(--radius-md)',
-        border: '1px solid var(--border-subtle)',
-        textAlign: 'center',
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: 20,
-          fontWeight: 700,
-          color: 'var(--text-primary)',
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          fontSize: 10,
-          color: 'var(--text-muted)',
-          letterSpacing: 1,
-          textTransform: 'uppercase',
-          marginTop: 4,
-          fontWeight: 600,
-        }}
-      >
-        {label}
-      </div>
-    </div>
+    </SoftCard>
   );
 }
 
@@ -178,19 +125,9 @@ export default function AdminDashboardPage() {
           marginBottom: 28,
         }}
       >
-        <h1
-          style={{
-            fontFamily: "'Playfair Display', Georgia, serif",
-            fontSize: isMobile ? 28 : 38,
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-            letterSpacing: '-0.025em',
-            margin: 0,
-            lineHeight: 1.1,
-          }}
-        >
+        <DisplayHeading as="h1" size={isMobile ? 'lg' : 'xl'}>
           {greeting}, {firstName}.
-        </h1>
+        </DisplayHeading>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -270,18 +207,9 @@ export default function AdminDashboardPage() {
                 <span className="status-pill-dot" /> Published
               </span>
             </div>
-            <div
-              style={{
-                fontFamily: "'Playfair Display', Georgia, serif",
-                fontSize: isMobile ? 24 : 30,
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                letterSpacing: '-0.025em',
-                lineHeight: 1.15,
-              }}
-            >
+            <DisplayHeading as="div" size={isMobile ? 'md' : 'lg'}>
               {nextEvent.title}
-            </div>
+            </DisplayHeading>
             <div
               style={{
                 fontSize: 14,
@@ -375,17 +303,9 @@ export default function AdminDashboardPage() {
               boxShadow: 'var(--shadow-sm)',
             }}
           >
-            <div
-              style={{
-                fontFamily: "'Playfair Display', Georgia, serif",
-                fontSize: 17,
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                marginBottom: 12,
-              }}
-            >
+            <DisplayHeading as="div" size="sm" style={{ marginBottom: 12 }}>
               At a glance
-            </div>
+            </DisplayHeading>
             <ActivityRow label="Paid bookings" value={nextEvent.paidBookings} />
             <ActivityRow label="Pending" value={nextEvent.pendingBookings} />
             <ActivityRow label="Cancelled" value={nextEvent.cancelledBookings} />

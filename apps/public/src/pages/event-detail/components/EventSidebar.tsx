@@ -3,6 +3,7 @@ import { Button } from 'antd';
 import { ShareAltOutlined } from '@ant-design/icons';
 import type { EventDetail } from '@code829/shared/types/event';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
+import { DisplayHeading, Kicker } from '@code829/shared/components/ui';
 
 interface EventSidebarProps {
   event: EventDetail;
@@ -42,17 +43,9 @@ export default function EventSidebar({
           boxShadow: 'var(--shadow-sm)',
         }}
       >
-        <div
-          style={{
-            fontFamily: "'Playfair Display', Georgia, serif",
-            fontSize: 20,
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-            marginBottom: 4,
-          }}
-        >
+        <DisplayHeading as="div" size="sm" style={{ marginBottom: 4 }}>
           {event.layoutMode === 'Grid' ? 'Your tables' : 'Select tickets'}
-        </div>
+        </DisplayHeading>
         <div
           style={{
             fontSize: 12,
@@ -64,30 +57,10 @@ export default function EventSidebar({
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <div
-            style={{
-              fontSize: 11,
-              color: 'var(--text-muted)',
-              textTransform: 'uppercase',
-              letterSpacing: 1.5,
-              fontWeight: 600,
-              marginBottom: 4,
-            }}
-          >
-            From
-          </div>
-          <div
-            style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: 36,
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              lineHeight: 1.1,
-              letterSpacing: '-0.02em',
-            }}
-          >
+          <Kicker color="var(--text-muted)" style={{ marginBottom: 4 }}>From</Kicker>
+          <DisplayHeading as="div" size="lg">
             {event.displayFromFormatted ?? 'Complimentary'}
-          </div>
+          </DisplayHeading>
         </div>
 
         <div
