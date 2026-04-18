@@ -18,6 +18,8 @@ import {
 } from '@ant-design/icons';
 import { adminEventsApi } from '../../services/api';
 import { formatDateRange } from '@code829/shared/utils/date';
+import { centsToUSD } from '@code829/shared/utils/currency';
+import { computeProjectedRevenueCents } from '../../utils/revenueHelpers';
 import type { EventDetail } from '@code829/shared/types/event';
 import type { EventStats } from '@code829/shared/services/adminEventsApi';
 import EventPricingTiersTable from '../../components/events/EventPricingTiersTable';
@@ -119,11 +121,14 @@ export default function EventManagePage() {
           const calculatedMaxCapacity = stats?.maxCapacity ?? 0;
           const available = isGrid ? (event.noOfAvailableTables ?? 0) : Math.max(calculatedMaxCapacity - totalSold, 0);
           const fillRate = stats?.fillRatePct ?? 0;
+          const projectedRevenueCents = computeProjectedRevenueCents(pricingRows);
 
           const salesStats: StatsCell[] = [
             { label: 'Sold', value: String(totalSold) },
             { label: 'Available', value: String(available) },
             { label: 'Fill Rate', value: `${fillRate}%` },
+            { label: 'Revenue Generated', value: centsToUSD(stats?.grossRevenueCents ?? 0) },
+            { label: 'Projected Revenue', value: centsToUSD(projectedRevenueCents) },
           ];
 
           return (
