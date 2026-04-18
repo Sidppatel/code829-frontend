@@ -1,14 +1,7 @@
-import apiClient from '../lib/axios';
+import { feedbackService } from './FeedbackService';
 
-export interface SubmitFeedbackRequest {
-  name: string;
-  email?: string;
-  type: string;
-  message: string;
-  rating: number;
-}
+export type { SubmitFeedbackRequest } from './FeedbackService';
 
 export const feedbackApi = {
-  submit: (request: SubmitFeedbackRequest) =>
-    apiClient.post<{ message: string }>('/feedback', request),
+  submit: feedbackService.submit,
 };

@@ -1,10 +1,6 @@
-import apiClient from '../lib/axios';
-import type { ScanResponse, CheckInStats } from '../types/checkin';
+import { checkInService } from './CheckInService';
 
 export const checkInApi = {
-  scan: (qrToken: string) =>
-    apiClient.post<ScanResponse>('/checkin/scan', { qrToken }),
-
-  getStats: (eventId: string) =>
-    apiClient.get<CheckInStats>(`/checkin/events/${eventId}/stats`),
+  scan: checkInService.scan,
+  getStats: checkInService.getStats,
 };

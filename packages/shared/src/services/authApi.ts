@@ -1,30 +1,11 @@
-import apiClient from '../lib/axios';
-import type { AuthResponse, UserProfile } from '../types/auth';
+import { authService } from './AuthService';
 
-export interface UpdateProfilePayload {
-  firstName?: string;
-  lastName?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
-  phone?: string;
-  optInLocationEmail?: boolean;
-}
+export type { UpdateProfilePayload } from './AuthService';
 
 export const authApi = {
-  requestMagicLink: (email: string, returnUrl?: string, frontendOrigin?: string) =>
-    apiClient.post('/auth/magic-link', { email, returnUrl, frontendOrigin }),
-
-  verifyMagicLink: (token: string) =>
-    apiClient.post<AuthResponse>('/auth/magic-link/verify', { token }),
-
-  devLogin: (email: string) =>
-    apiClient.post<AuthResponse>('/auth/dev-login', { email }),
-
-  getMe: () =>
-    apiClient.get<UserProfile>('/auth/me'),
-
-  updateProfile: (data: UpdateProfilePayload) =>
-    apiClient.put('/auth/profile', data),
+  requestMagicLink: authService.requestMagicLink,
+  verifyMagicLink: authService.verifyMagicLink,
+  devLogin: authService.devLogin,
+  getMe: authService.getMe,
+  updateProfile: authService.updateProfile,
 };

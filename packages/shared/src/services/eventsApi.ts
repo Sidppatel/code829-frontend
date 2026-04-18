@@ -1,44 +1,15 @@
-import apiClient from '../lib/axios';
-import type { EventSummary, EventDetail, EventFacets, EventTablesResponse, EventTicketTypesResponse } from '../types/event';
-import type { PagedResponse } from '../types/shared';
+import { eventService } from './EventService';
 
-export interface EventListParams {
-  search?: string;
-  category?: string;
-  city?: string;
-  dateFilter?: 'today' | 'this-week' | 'this-month';
-  minPrice?: number;
-  maxPrice?: number;
-  venueId?: string;
-  page?: number;
-  pageSize?: number;
-}
+export type { EventListParams } from './EventService';
 
 export const eventsApi = {
-  list: (params?: EventListParams) =>
-    apiClient.get<PagedResponse<EventSummary>>('/events', { params }),
-
-  getById: (id: string) =>
-    apiClient.get<EventDetail>(`/events/${id}`),
-
-  getBySlug: (slug: string) =>
-    apiClient.get<EventDetail>(`/events/by-slug/${slug}`),
-
-  getFacets: () =>
-    apiClient.get<EventFacets>('/events/facets'),
-
-  getTables: (id: string) =>
-    apiClient.get<EventTablesResponse>(`/events/${id}/tables`),
-
-  getSchemaOrg: (id: string) =>
-    apiClient.get(`/events/${id}/schema`),
-
-  getSeoMeta: (id: string) =>
-    apiClient.get(`/events/${id}/seo`),
-
-  getItemListSchema: () =>
-    apiClient.get('/events/schema-list'),
-
-  getTicketTypes: (id: string) =>
-    apiClient.get<EventTicketTypesResponse>(`/events/${id}/ticket-types`),
+  list: eventService.list,
+  getById: eventService.getById,
+  getBySlug: eventService.getBySlug,
+  getFacets: eventService.getFacets,
+  getTables: eventService.getTables,
+  getSchemaOrg: eventService.getSchemaOrg,
+  getSeoMeta: eventService.getSeoMeta,
+  getItemListSchema: eventService.getItemListSchema,
+  getTicketTypes: eventService.getTicketTypes,
 };

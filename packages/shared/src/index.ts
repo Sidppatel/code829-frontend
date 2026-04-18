@@ -43,22 +43,49 @@ export { createLogger } from './lib/logger';
 export { default as logger } from './lib/logger';
 export { initGlobalErrorListeners } from './lib/globalErrors';
 
-// Services
-export { authApi } from './services/authApi';
-export { adminAuthApi } from './services/adminAuthApi';
-export { imagesApi } from './services/imagesApi';
-export { checkInApi } from './services/checkInApi';
-export { eventsApi } from './services/eventsApi';
-export { bookingsApi } from './services/bookingsApi';
-export { ticketsApi } from './services/ticketsApi';
-export { tableBookingApi } from './services/tableBookingApi';
-export { feedbackApi } from './services/feedbackApi';
-export { adminEventsApi } from './services/adminEventsApi';
-export { adminBookingsApi } from './services/adminBookingsApi';
-export { adminVenuesApi } from './services/adminVenuesApi';
-export { adminLayoutApi } from './services/adminLayoutApi';
-export { adminDashboardApi } from './services/adminDashboardApi';
-export { developerApi } from './services/developerApi';
+// Services — class-based singletons (BaseService → XService → xService)
+// plus legacy functional exports (authApi, eventsApi, …) kept for back-compat
+// until page-level callers migrate in Phase 2.
+export {
+  BaseService,
+  AuthService,
+  authService,
+  EventService,
+  eventService,
+  BookingService,
+  bookingService,
+  TicketService,
+  ticketService,
+  CheckInService,
+  checkInService,
+  VenueService,
+  venueService,
+  LayoutService,
+  layoutService,
+  DashboardService,
+  dashboardService,
+  ImageService,
+  imageService,
+  FeedbackService,
+  feedbackService,
+  DeveloperService,
+  developerService,
+  authApi,
+  adminAuthApi,
+  eventsApi,
+  adminEventsApi,
+  bookingsApi,
+  adminBookingsApi,
+  tableBookingApi,
+  ticketsApi,
+  checkInApi,
+  adminVenuesApi,
+  adminLayoutApi,
+  adminDashboardApi,
+  imagesApi,
+  feedbackApi,
+  developerApi,
+} from './services';
 
 // Theme
 export { STATUS_COLORS, EVENT_STATUS_COLORS, LOG_SEVERITY_COLORS, EMAIL_STATUS_COLORS } from './theme/statusColors';

@@ -1,10 +1,6 @@
-import apiClient from '../lib/axios';
-import type { DashboardStats, NextEventDashboard } from '../types/developer';
+import { dashboardService } from './DashboardService';
 
 export const adminDashboardApi = {
-  getStats: () =>
-    apiClient.get<DashboardStats>('/admin/dashboard'),
-
-  getNextEvent: () =>
-    apiClient.get<{ hasUpcoming: boolean; data?: NextEventDashboard }>('/admin/dashboard/next-event'),
+  getStats: dashboardService.getStats,
+  getNextEvent: dashboardService.getNextEvent,
 };
