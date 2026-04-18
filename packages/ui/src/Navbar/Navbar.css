@@ -12,11 +12,12 @@
 }
 
 .ui-navbar__brand-mark {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-sm);
-  background: var(--gradient-brand);
+  object-fit: cover;
   flex-shrink: 0;
+  display: block;
 }
 
 .ui-navbar__brand-name {
@@ -99,9 +100,84 @@
 }
 
 .ui-navbar__user {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+.ui-navbar__user-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+
+.ui-navbar__user-trigger:hover {
+  background: var(--bg-soft);
+}
+
+.ui-navbar__caret {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.ui-navbar__menu {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  min-width: 200px;
+  padding: var(--space-1);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-color-strong) 0 16px 40px;
+  display: flex;
+  flex-direction: column;
+  z-index: 60;
+}
+
+.ui-navbar__menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.ui-navbar__menu-item:hover,
+.ui-navbar__menu-item:focus-visible {
+  background: var(--bg-soft);
+  outline: none;
+}
+
+.ui-navbar__menu-item--danger {
+  color: var(--status-danger);
+}
+
+.ui-navbar__menu-sep {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: var(--space-1) 0;
 }
 
 .ui-navbar__avatar {
