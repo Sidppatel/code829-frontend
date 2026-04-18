@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { adminDashboardApi } from '../../services/api';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import { useAsyncResource } from '@code829/shared/hooks';
+import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { formatEventDate } from '@code829/shared/utils/date';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import type { DashboardStats, NextEventDashboard } from '@code829/shared/types/developer';
@@ -38,6 +39,7 @@ function greetingForHour(hour: number): string {
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
 
   const fetchDashboard = useCallback(async (): Promise<DashboardData> => {
     const [statsRes, nextRes] = await Promise.all([
@@ -72,7 +74,7 @@ export default function AdminDashboardPage() {
           onClick={() => navigate('/events/new')}
           style={{
             borderRadius: 'var(--radius-md)',
-            height: 44,
+            height: isMobile ? 40 : 44,
             padding: '0 22px',
             fontWeight: 600,
             boxShadow: 'var(--shadow-hover)',
@@ -100,12 +102,12 @@ export default function AdminDashboardPage() {
 
           return (
             <>
-              <StatsRow items={kpis} variant="kpi" columns={4} style={{ marginBottom: 28 }} />
+              <StatsRow items={kpis} variant="kpi" columns={isMobile ? 2 : 4} style={{ marginBottom: 28 }} />
               {nextEvent ? (
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)',
+                    gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.6fr) minmax(0, 1fr)',
                     gap: 20,
                     marginBottom: 28,
                   }}

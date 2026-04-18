@@ -7,6 +7,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { adminEventsApi } from '../../services/api';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
+import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { formatEventDate } from '@code829/shared/utils/date';
 import type { EventDetail } from '@code829/shared/types/event';
 import type { AdminEventListParams } from '@code829/shared/services/adminEventsApi';
@@ -62,6 +63,7 @@ function StatusBadge({ status }: { status: string }) {
 
 export default function EventsListPage() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const paged = usePagedTable<EventDetail, AdminEventListParams>({
     fetcher: adminEventsApi.list,
     defaultPageSize: 12,
@@ -84,8 +86,8 @@ export default function EventsListPage() {
           onClick={() => navigate('/events/new')}
           style={{
             borderRadius: 'var(--radius-full)',
-            height: 48,
-            padding: '0 32px',
+            height: isMobile ? 40 : 48,
+            padding: isMobile ? '0 20px' : '0 32px',
             fontWeight: 700,
             boxShadow: 'var(--shadow-md)',
           }}
