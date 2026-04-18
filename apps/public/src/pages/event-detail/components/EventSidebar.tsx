@@ -126,7 +126,7 @@ export default function EventSidebar({
             fontWeight: 600,
             background: isSoldOut ? 'var(--bg-muted)' : 'var(--primary)',
             border: 'none',
-            boxShadow: isSoldOut ? 'none' : '0 6px 20px rgba(244, 109, 178, 0.30)',
+            boxShadow: isSoldOut ? 'none' : 'var(--shadow-hover)',
             color: isSoldOut ? 'var(--text-muted)' : 'var(--text-on-brand)',
           }}
         >

@@ -202,7 +202,7 @@ export default function AdminDashboardPage() {
             fontWeight: 600,
             background: 'var(--primary)',
             border: 'none',
-            boxShadow: '0 6px 20px rgba(244, 109, 178, 0.30)',
+            boxShadow: 'var(--shadow-hover)',
           }}
         >
           Create event

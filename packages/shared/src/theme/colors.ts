@@ -7,9 +7,9 @@
  * injects via `applyThemeVars()`, or import the semantic tokens directly.
  *
  * Palette direction from the Code829 design handoff:
- *   warmer aubergine-plum surfaces, cream (not lavender) text, rose as the
- *   default brand accent. Violet is kept as a named secondary accent so
- *   existing `var(--accent-violet)` references continue to resolve.
+ *   warmer aubergine-plum surfaces, cream (not lavender) text, and a violet
+ *   brand spectrum. Rose is kept as a named secondary accent so
+ *   `var(--accent-rose)` references continue to resolve.
  */
 
 export const palette = {
@@ -24,15 +24,15 @@ export const palette = {
   textMid: '#C9BDE0',
   textDim: '#9A8BB8',
 
-  // Rose brand spectrum (new default accent)
-  rose: '#F46DB2',
-  roseLight: '#FBA6D0',
-  roseDark: '#C83F87',
-
-  // Secondary accents — violet retained for backwards-compat references
+  // Violet brand spectrum (default accent)
   violet: '#9B6DFF',
   violetLight: '#B89BFF',
   violetDark: '#6B3FD6',
+
+  // Secondary accents — rose retained for backwards-compat references
+  rose: '#F46DB2',
+  roseLight: '#FBA6D0',
+  roseDark: '#C83F87',
 
   gold: '#FBBF24',
   green: '#10B981',
@@ -48,10 +48,10 @@ export const status = {
 } as const;
 
 export const semantic = {
-  brand: palette.rose,
-  brandHover: palette.roseLight,
-  brandLight: palette.roseLight,
-  brandDark: palette.roseDark,
+  brand: palette.violet,
+  brandHover: palette.violetLight,
+  brandLight: palette.violetLight,
+  brandDark: palette.violetDark,
   brandOn: '#FFFFFF',
 
   surface: {
@@ -59,9 +59,9 @@ export const semantic = {
     surface: palette.bgSurface,
     elevated: palette.bgElevated,
     nav: palette.bgNav,
-    soft: 'rgba(244, 109, 178, 0.10)',
-    muted: 'rgba(244, 109, 178, 0.16)',
-    pressed: 'rgba(244, 109, 178, 0.24)',
+    soft: 'rgba(155, 109, 255, 0.10)',
+    muted: 'rgba(155, 109, 255, 0.16)',
+    pressed: 'rgba(155, 109, 255, 0.24)',
     overlay: 'rgba(15, 11, 26, 0.82)',
   },
 
@@ -97,8 +97,8 @@ export const semantic = {
 } as const;
 
 export const chartPalette = [
-  palette.rose,
   palette.violet,
+  palette.rose,
   palette.gold,
   palette.green,
   status.info,
@@ -110,21 +110,21 @@ export const chartPalette = [
  * Use via `var(--gradient-*)` in CSS / inline styles, or import `gradients.*`.
  */
 export const gradients = {
-  brand: `linear-gradient(135deg, ${palette.rose} 0%, ${palette.roseLight} 100%)`,
-  brandVertical: `linear-gradient(180deg, ${palette.rose}, ${palette.roseDark})`,
-  brandToGold: `linear-gradient(90deg, ${palette.rose}, ${palette.gold})`,
-  brandShimmer: `linear-gradient(120deg, ${palette.rose} 0%, ${palette.roseLight} 50%, ${palette.rose} 100%)`,
-  heroFallback: `linear-gradient(135deg, ${palette.roseDark} 0%, ${palette.bgSurface} 100%)`,
-  bannerBrand: `linear-gradient(90deg, rgba(244, 109, 178, 0.14), rgba(155, 109, 255, 0.10))`,
+  brand: `linear-gradient(135deg, ${palette.violet} 0%, ${palette.violetLight} 100%)`,
+  brandVertical: `linear-gradient(180deg, ${palette.violet}, ${palette.violetDark})`,
+  brandToGold: `linear-gradient(90deg, ${palette.violet}, ${palette.gold})`,
+  brandShimmer: `linear-gradient(120deg, ${palette.violet} 0%, ${palette.violetLight} 50%, ${palette.violet} 100%)`,
+  heroFallback: `linear-gradient(135deg, ${palette.violetDark} 0%, ${palette.bgSurface} 100%)`,
+  bannerBrand: `linear-gradient(90deg, rgba(155, 109, 255, 0.14), rgba(244, 109, 178, 0.10))`,
   bannerSuccess: `linear-gradient(90deg, rgba(16, 185, 129, 0.10), rgba(16, 185, 129, 0.04))`,
-  avatarTint: `linear-gradient(135deg, rgba(244, 109, 178, 0.22), rgba(251, 191, 36, 0.14))`,
+  avatarTint: `linear-gradient(135deg, rgba(155, 109, 255, 0.22), rgba(251, 191, 36, 0.14))`,
 } as const;
 
 export const shadows = {
   antToken: `0 4px 16px ${semantic.shadow.strong}`,
   antCard: `0 2px 12px ${semantic.shadow.medium}`,
   card: `0 2px 4px ${semantic.shadow.strong}, 0 8px 24px ${semantic.shadow.medium}, 0 16px 48px ${semantic.shadow.soft}`,
-  hover: `0 16px 40px rgba(200, 63, 135, 0.22), 0 4px 12px rgba(15, 11, 26, 0.40)`,
+  hover: `0 16px 40px rgba(107, 63, 214, 0.28), 0 4px 12px rgba(15, 11, 26, 0.40)`,
   elevated: `0 4px 20px ${semantic.shadow.strong}`,
   overlay: `0 10px 30px ${semantic.shadow.strong}`,
   soft: `0 1px 2px ${semantic.shadow.soft}`,
@@ -133,10 +133,10 @@ export const shadows = {
 
 /** Original 12-hue swatch set for user-selectable table fill colors. */
 export const tablePickerPresets = [
-  '#F46DB2',
-  '#C83F87',
   '#9B6DFF',
   '#6B3FD6',
+  '#F46DB2',
+  '#C83F87',
   '#10B981',
   '#F59E0B',
   '#EF4444',
@@ -158,7 +158,7 @@ export const cssVars: Record<string, string> = {
   'primary-light': semantic.brandLight,
   'primary-dark': semantic.brandDark,
   'primary-soft': semantic.surface.soft,
-  'primary-tint': 'rgba(244, 109, 178, 0.04)',
+  'primary-tint': 'rgba(155, 109, 255, 0.04)',
   'primary-muted': semantic.surface.muted,
 
   'accent-rose': palette.rose,
@@ -213,7 +213,7 @@ export const cssVars: Record<string, string> = {
   'card-shadow':
     '0 2px 4px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.28), 0 16px 48px rgba(0, 0, 0, 0.18)',
   'shadow-hover':
-    '0 16px 40px rgba(200, 63, 135, 0.22), 0 4px 12px rgba(15, 11, 26, 0.40)',
+    '0 16px 40px rgba(107, 63, 214, 0.28), 0 4px 12px rgba(15, 11, 26, 0.40)',
 
   'gradient-brand': gradients.brand,
   'gradient-brand-vertical': gradients.brandVertical,
