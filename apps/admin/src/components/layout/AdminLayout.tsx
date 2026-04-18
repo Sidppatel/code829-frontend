@@ -175,7 +175,7 @@ export default function AdminLayout() {
                 <span style={{ 
                   fontSize: 18, 
                   background: active ? 'var(--primary-soft)' : 'transparent',
-                  padding: '4px 10px',
+                  padding: '4px 8px',
                   borderRadius: 12,
                   transition: 'all 0.2s ease',
                   display: 'inline-flex',

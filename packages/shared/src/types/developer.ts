@@ -3,7 +3,7 @@ export interface DashboardStats {
   totalPurchases: number;
   totalRevenueCents: number;
   totalUsers: number;
-  upcomingEvents: number;
+  publishedEvents: number;
   recentPurchases: number;
 }
 

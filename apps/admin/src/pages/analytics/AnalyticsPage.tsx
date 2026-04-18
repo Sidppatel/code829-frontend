@@ -62,7 +62,7 @@ export default function AnalyticsPage() {
         </Col>
         <Col xs={24} sm={12} lg={8}>
           <Card className="stat-card">
-            <Statistic title="Upcoming Events" value={stats.upcomingEvents} prefix={<RiseOutlined />} />
+            <Statistic title="Upcoming Events" value={stats.publishedEvents} prefix={<RiseOutlined />} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={8}>

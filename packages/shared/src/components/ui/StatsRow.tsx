@@ -72,7 +72,7 @@ export default function StatsRow({ items, columns, variant = 'mini', style, clas
               <div
                 style={{
                   fontFamily: "'Playfair Display', Georgia, serif",
-                  fontSize: 28,
+                  fontSize: 'clamp(20px, 6vw, 28px)',
                   fontWeight: 700,
                   color: 'var(--text-primary)',
                   letterSpacing: '-0.01em',
