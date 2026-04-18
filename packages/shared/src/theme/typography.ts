@@ -90,3 +90,5 @@ export function applyTypographyVars(): void {
     .join('\n');
   el.textContent = `:root {\n${rules}\n}`;
 }
+
+applyTypographyVars();

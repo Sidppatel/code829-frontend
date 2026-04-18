@@ -17,3 +17,20 @@ export const radiiCssVars: Record<string, string> = {
   '--radius-2xl': radii['2xl'],
   '--radius-full': radii.full,
 };
+
+export function applyRadiiVars(): void {
+  if (typeof document === 'undefined') return;
+  const id = 'app-theme-radii';
+  let el = document.getElementById(id) as HTMLStyleElement | null;
+  if (!el) {
+    el = document.createElement('style');
+    el.id = id;
+    document.head.appendChild(el);
+  }
+  const rules = Object.entries(radiiCssVars)
+    .map(([k, v]) => `  ${k}: ${v};`)
+    .join('\n');
+  el.textContent = `:root {\n${rules}\n}`;
+}
+
+applyRadiiVars();

@@ -1,6 +1,11 @@
 import type { ReactNode } from 'react';
 import { ConfigProvider, App as AntApp, theme as antTheme } from 'antd';
 import { semantic, status, shadows, applyThemeVars } from '../theme/colors';
+// Side-effect imports: each module self-injects its CSS vars at parse time.
+import '../theme/typography';
+import '../theme/spacing';
+import '../theme/radii';
+import '../theme/motion';
 
 applyThemeVars();
 

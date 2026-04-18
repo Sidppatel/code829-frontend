@@ -4,7 +4,8 @@
       "Bash(npm run:*)",
       "Bash(git checkout *)",
       "Bash(pnpm --filter @code829/shared build)",
-      "Bash(pnpm -r build)"
+      "Bash(pnpm -r build)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }

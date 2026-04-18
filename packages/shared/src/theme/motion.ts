@@ -23,3 +23,20 @@ export const motionCssVars: Record<string, string> = {
   '--ease-decelerate': easing.decelerate,
   '--ease-spring': easing.spring,
 };
+
+export function applyMotionVars(): void {
+  if (typeof document === 'undefined') return;
+  const id = 'app-theme-motion';
+  let el = document.getElementById(id) as HTMLStyleElement | null;
+  if (!el) {
+    el = document.createElement('style');
+    el.id = id;
+    document.head.appendChild(el);
+  }
+  const rules = Object.entries(motionCssVars)
+    .map(([k, v]) => `  ${k}: ${v};`)
+    .join('\n');
+  el.textContent = `:root {\n${rules}\n}`;
+}
+
+applyMotionVars();
