@@ -1,0 +1,32 @@
+.ui-skel {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--bg-soft) 0%,
+    var(--bg-muted) 50%,
+    var(--bg-soft) 100%
+  );
+  background-size: 200% 100%;
+  animation: ui-skel-shimmer 1.4s var(--ease-standard) infinite;
+  border-radius: var(--radius-md);
+}
+
+.ui-skel--rect { min-height: 12px; }
+
+.ui-skel--text {
+  height: 0.9em;
+  border-radius: var(--radius-sm);
+  margin: 4px 0;
+}
+
+.ui-skel--circle { border-radius: var(--radius-full); }
+
+.ui-skel__stack {
+  display: block;
+  width: 100%;
+}
+
+@keyframes ui-skel-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}

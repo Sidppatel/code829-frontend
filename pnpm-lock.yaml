@@ -443,6 +443,28 @@ importers:
         specifier: ^8.0.1
         version: 8.0.8(@types/node@24.12.2)(esbuild@0.27.3)
 
+  packages/ui:
+    dependencies:
+      '@code829/shared':
+        specifier: workspace:*
+        version: link:../shared
+      react:
+        specifier: ^19.0.0
+        version: 19.2.5
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.5(react@19.2.5)
+      react-router-dom:
+        specifier: ^7.0.0
+        version: 7.14.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+
 packages:
 
   '@ant-design/colors@8.0.1':

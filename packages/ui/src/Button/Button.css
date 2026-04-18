@@ -1,0 +1,118 @@
+.ui-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  cursor: pointer;
+  transition: background-color var(--duration-base) var(--ease-standard),
+    border-color var(--duration-base) var(--ease-standard),
+    color var(--duration-base) var(--ease-standard),
+    box-shadow var(--duration-base) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.ui-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.ui-btn:disabled,
+.ui-btn[aria-busy='true'] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.ui-btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.ui-btn--full {
+  width: 100%;
+}
+
+.ui-btn--sm {
+  height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.ui-btn--md {
+  height: 40px;
+  padding: 0 var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+.ui-btn--lg {
+  height: 48px;
+  padding: 0 var(--space-6);
+  font-size: var(--font-size-base);
+}
+
+.ui-btn--primary {
+  background: var(--gradient-brand);
+  color: var(--text-on-brand);
+  box-shadow: 0 1px 2px var(--shadow-color-soft);
+}
+
+.ui-btn--primary:not(:disabled):hover {
+  box-shadow: var(--shadow-hover);
+  filter: brightness(1.05);
+}
+
+.ui-btn--secondary {
+  background: var(--bg-soft);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+.ui-btn--secondary:not(:disabled):hover {
+  background: var(--bg-muted);
+  border-color: var(--border-strong);
+}
+
+.ui-btn--ghost {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.ui-btn--ghost:not(:disabled):hover {
+  background: var(--bg-soft);
+}
+
+.ui-btn--danger {
+  background: var(--status-danger);
+  color: var(--text-on-brand);
+}
+
+.ui-btn--danger:not(:disabled):hover {
+  filter: brightness(1.08);
+}
+
+.ui-btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-btn__spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: ui-btn-spin 0.7s linear infinite;
+}
+
+@keyframes ui-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
