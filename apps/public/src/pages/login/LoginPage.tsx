@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Form, Input, Button, Typography, App } from 'antd';
+import { Form, Input, Button, App } from 'antd';
 import { MailOutlined, LoginOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
@@ -8,6 +8,8 @@ import { AxiosError } from 'axios';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import { safeReturnUrl } from '@code829/shared/lib/safeRedirect';
+import Text from '@code829/shared/components/shared/Text';
+import { strings, textTemplates } from '@code829/shared/theme/strings';
 
 
 export default function LoginPage() {
@@ -54,14 +56,14 @@ export default function LoginPage() {
     try {
       await authApi.requestMagicLink(values.email, returnUrl ?? undefined, window.location.origin);
       setMagicLinkSent(true);
-      message.success('Check your email for the login link');
+      message.success(strings.errors.magicLinkSuccess.text);
     } catch (err) {
       const axiosErr = err as AxiosError<{ retryAfterSeconds?: number }>;
       if (axiosErr.response?.status === 429 && axiosErr.response.data?.retryAfterSeconds) {
         startCooldown(axiosErr.response.data.retryAfterSeconds);
-        message.warning('Please wait before requesting another link');
+        message.warning(strings.errors.magicLinkRateLimited.text);
       } else {
-        message.error('Failed to send magic link');
+        message.error(strings.errors.magicLinkFailed.text);
       }
     } finally {
       setLoading(false);
@@ -73,10 +75,10 @@ export default function LoginPage() {
     try {
       const { data } = await authApi.devLogin(values.email);
       setAuth(data.token, data.user);
-      message.success(`Logged in as ${data.user.firstName}`);
+      message.success(textTemplates.loggedInAs(data.user.firstName).text);
       navigate(safeReturnUrl(returnUrl));
     } catch {
-      message.error('Dev login failed');
+      message.error(strings.errors.devLoginFailed.text);
     } finally {
       setLoading(false);
     }
@@ -92,7 +94,7 @@ export default function LoginPage() {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      <Helmet><title>Sign In - Code829</title></Helmet>
+      <Helmet><title>{strings.auth.signInPageTitle.text}</title></Helmet>
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -131,12 +133,14 @@ export default function LoginPage() {
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
-            <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 12, letterSpacing: '-1.5px' }}>
-              Welcome back
-            </h1>
-            <Typography.Text style={{ color: 'var(--text-secondary)', fontSize: 16, fontWeight: 500 }}>
-              Sign in to your premium account.
-            </Typography.Text>
+            <Text
+              token="auth.welcomeBack"
+              style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 12, letterSpacing: '-1.5px' }}
+            />
+            <Text
+              token="auth.signInSubtitle"
+              style={{ color: 'var(--text-secondary)', fontSize: 16, fontWeight: 500, margin: 0 }}
+            />
           </div>
 
           {magicLinkSent ? (
@@ -153,17 +157,20 @@ export default function LoginPage() {
               }}>
                 <MailOutlined style={{ fontSize: 32, color: 'var(--accent-violet)' }} />
               </div>
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>Check your mail</h2>
-              <Typography.Paragraph style={{ color: 'var(--text-secondary)', fontSize: 15, lineHeight: 1.6 }}>
-                We've sent a magic login link to your inbox. <br />
-                Please click the link to sign in securely.
-              </Typography.Paragraph>
+              <Text
+                token="auth.checkYourMail"
+                style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}
+              />
+              <Text
+                token="auth.magicLinkSent"
+                style={{ color: 'var(--text-secondary)', fontSize: 15, lineHeight: 1.6 }}
+              />
               <Button
                 type="link"
                 onClick={() => setMagicLinkSent(false)}
                 style={{ marginTop: 24, color: 'var(--accent-violet)', fontWeight: 700 }}
               >
-                Use a different email
+                <Text token="common.useDifferentEmail" />
               </Button>
             </div>
           ) : (
@@ -171,8 +178,8 @@ export default function LoginPage() {
               <Form.Item
                 name="email"
                 rules={[
-                  { required: true, message: 'Email is required' },
-                  { type: 'email', message: 'Enter a valid email' },
+                  { required: true, message: strings.validation.emailRequired.text },
+                  { type: 'email', message: strings.validation.emailInvalid.text },
                 ]}
               >
                 <Input
@@ -210,7 +217,9 @@ export default function LoginPage() {
                     marginTop: 12,
                   }}
                 >
-                  {cooldown > 0 ? `Retry in ${formatCooldown(cooldown)}` : 'Continue with Email'}
+                  {cooldown > 0
+                    ? textTemplates.retryInCooldown(formatCooldown(cooldown)).text
+                    : <Text token="common.continueWithEmail" />}
                 </Button>
               </Form.Item>
             </Form>
@@ -219,7 +228,10 @@ export default function LoginPage() {
 
         <div style={{ textAlign: 'center', marginTop: 32 }}>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14, fontWeight: 500 }}>
-            New to the platform? <Link to="/events" style={{ color: 'var(--accent-violet)', fontWeight: 700 }}>Explore experiences</Link>
+            <Text token="common.newToPlatform" />{' '}
+            <Link to="/events" style={{ color: 'var(--accent-violet)', fontWeight: 700 }}>
+              <Text token="common.exploreExperiences" />
+            </Link>
           </p>
         </div>
 
@@ -234,14 +246,15 @@ export default function LoginPage() {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
               <div style={{ width: 4, height: 16, background: 'var(--accent-rose)', borderRadius: 2 }} />
-              <Typography.Text style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5 }}>
-                Developer Access
-              </Typography.Text>
+              <Text
+                token="auth.developerAccess"
+                style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5 }}
+              />
             </div>
             <Form form={devForm} layout="vertical" onFinish={handleDevLogin} style={{ marginTop: 12 }}>
               <Form.Item
                 name="email"
-                rules={[{ required: true, message: 'Email is required' }]}
+                rules={[{ required: true, message: strings.validation.emailRequired.text }]}
                 style={{ marginBottom: 20 }}
               >
                 <Input
@@ -258,7 +271,7 @@ export default function LoginPage() {
                   block 
                   style={{ borderRadius: 14, height: 50, fontWeight: 700, border: '1px solid var(--border)', background: 'transparent' }}
                 >
-                  Bypass with Dev Login
+                  <Text token="auth.devLogin" />
                 </Button>
               </Form.Item>
             </Form>
