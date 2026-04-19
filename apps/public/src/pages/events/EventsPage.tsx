@@ -4,6 +4,7 @@ import { Row, Col, Pagination, App, Skeleton } from 'antd';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { createLogger } from '@code829/shared/lib/logger';
+import { strings, textTemplates } from '@code829/shared/theme/strings';
 import { eventsApi } from '../../services/api';
 import type { EventSummary, EventFacets } from '@code829/shared/types/event';
 import type { EventListParams } from '@code829/shared/services/eventsApi';
@@ -34,7 +35,7 @@ export default function EventsPage() {
       log.info('Loaded events', { count: data?.items?.length ?? 0, total: data?.totalCount ?? 0 });
     } catch (err) {
       log.error('Failed to load events', err);
-      message.error('Failed to load events');
+      message.error(strings.errors.loadEventsFailed.text);
     } finally {
       setLoading(false);
     }
@@ -98,12 +99,12 @@ export default function EventsPage() {
       animate="animate"
       style={{ minHeight: '100vh', paddingBottom: 100 }}
     >
-      <Helmet><title>All events — Code829</title></Helmet>
+      <Helmet><title>{strings.events.eventsPageTitle.text}</title></Helmet>
 
       <PagePreamble
-        kicker="The Collection"
-        title="All events"
-        subtitle={`${total} ${total === 1 ? 'evening' : 'evenings'} across the season — curated and held with care.`}
+        kicker={strings.events.collectionKicker.text}
+        title={strings.events.allEvents.text}
+        subtitle={textTemplates.eveningsAcrossSeason(total).text}
       />
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px' }}>
@@ -166,7 +167,7 @@ export default function EventsPage() {
           </Row>
         ) : (events?.length ?? 0) === 0 ? (
           <div style={{ padding: '100px 0' }}>
-            <EmptyState description="No events found matching your current filters" />
+            <EmptyState description={strings.events.noEventsFound.text} />
           </div>
         ) : (
           <>
