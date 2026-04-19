@@ -3,6 +3,8 @@ import { ArrowRightOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useEventListVM } from '@code829/shared/viewmodels';
+import Text from '@code829/shared/components/shared/Text';
+import { strings } from '@code829/shared/theme/strings';
 import { Button, Skeleton } from '@code829/ui';
 import EventCard from '../../components/events/EventCard';
 
@@ -14,14 +16,14 @@ export default function HomePage() {
   const display = featured.length > 0 ? featured : events;
 
   const stats = [
-    { n: `${events.length || 6}`, l: 'Events this season' },
-    { n: '12', l: 'Partner venues' },
-    { n: '4.9', l: 'Guest rating' },
+    { n: `${events.length || 6}`, token: 'events.statEventsLabel' as const },
+    { n: '12', token: 'events.statVenuesLabel' as const },
+    { n: '4.9', token: 'events.statRatingLabel' as const },
   ];
 
   return (
     <div style={{ minHeight: '100vh', position: 'relative' }}>
-      <Helmet><title>Curated evenings, thoughtfully seated — Code829</title></Helmet>
+      <Helmet><title>{strings.events.homePageTitle.text}</title></Helmet>
 
       <section className="c829-hero" style={{ position: 'relative', overflow: 'hidden', padding: '120px 32px 110px' }}>
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
@@ -100,7 +102,7 @@ export default function HomePage() {
                   boxShadow: '0 0 12px var(--primary)',
                 }}
               />
-              Spring / Summer 2026
+              <Text token="events.seasonTagline" />
             </motion.div>
 
             <motion.h1
@@ -119,27 +121,33 @@ export default function HomePage() {
                 paddingBottom: 4,
               }}
             >
-              Curated evenings,<br />
-              <em className="c829-shimmer" style={{ fontStyle: 'italic', fontWeight: 400 }}>
-                thoughtfully seated.
-              </em>
+              <Text token="events.heroHeadingLine1" /><br />
+              <Text token="events.heroHeadingLine2">
+                <em className="c829-shimmer" style={{ fontStyle: 'italic', fontWeight: 400 }}>
+                  {strings.events.heroHeadingLine2.text}
+                </em>
+              </Text>
             </motion.h1>
 
-            <motion.p
+            <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.25 }}
               style={{
-                fontSize: 'clamp(0.95rem, 1.5vw, 1.1rem)',
-                color: 'var(--text-secondary)',
                 margin: '32px 0',
                 maxWidth: 460,
-                lineHeight: 1.6,
               }}
             >
-              A private bookings platform for chamber music, tasting dinners, and intimate benefits.
-              Every seat held until payment; every table, claimed with care.
-            </motion.p>
+              <Text
+                token="events.heroSubheading"
+                style={{
+                  fontSize: 'clamp(0.95rem, 1.5vw, 1.1rem)',
+                  color: 'var(--text-secondary)',
+                  margin: 0,
+                  lineHeight: 1.6,
+                }}
+              />
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -148,10 +156,10 @@ export default function HomePage() {
               style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}
             >
               <Button variant="primary" size="md" onClick={() => navigate('/events')} trailingIcon={<ArrowRightOutlined />}>
-                Browse events
+                <Text token="common.browseEvents" />
               </Button>
               <Button variant="secondary" size="md" onClick={() => navigate('/events')}>
-                Upcoming schedule
+                <Text token="common.upcomingSchedule" />
               </Button>
             </motion.div>
 
@@ -162,7 +170,7 @@ export default function HomePage() {
               style={{ marginTop: 48, display: 'flex', gap: 40, flexWrap: 'wrap' }}
             >
               {stats.map((x) => (
-                <div key={x.l}>
+                <div key={x.token}>
                   <div
                     style={{
                       fontFamily: "'Playfair Display', Georgia, serif",
@@ -174,7 +182,8 @@ export default function HomePage() {
                   >
                     {x.n}
                   </div>
-                  <div
+                  <Text
+                    token={x.token}
                     style={{
                       fontSize: 12,
                       color: 'var(--text-muted)',
@@ -182,9 +191,7 @@ export default function HomePage() {
                       letterSpacing: 1,
                       marginTop: 6,
                     }}
-                  >
-                    {x.l}
-                  </div>
+                  />
                 </div>
               ))}
             </motion.div>
@@ -234,7 +241,8 @@ export default function HomePage() {
                     border: '1px solid var(--border)',
                   }}
                 >
-                  <div
+                  <Text
+                    token="events.yourHostsKicker"
                     style={{
                       fontSize: 10,
                       fontWeight: 600,
@@ -243,19 +251,16 @@ export default function HomePage() {
                       color: 'var(--primary-light)',
                       marginBottom: 3,
                     }}
-                  >
-                    Your hosts
-                  </div>
-                  <div
+                  />
+                  <Text
+                    token="events.yourHostsName"
                     style={{
                       fontFamily: "'Playfair Display', Georgia, serif",
                       fontSize: 15,
                       color: 'var(--text-primary)',
                       fontStyle: 'italic',
                     }}
-                  >
-                    The Code 829 Collective
-                  </div>
+                  />
                 </div>
                 <button
                   onClick={() => navigate('/events')}
@@ -293,7 +298,8 @@ export default function HomePage() {
             gap: 12,
           }}
         >
-          <h2
+          <Text
+            token="events.nextInSeason"
             style={{
               fontFamily: "'Playfair Display', Georgia, serif",
               fontSize: 'clamp(1.8rem, 4vw, 2.4rem)',
@@ -302,11 +308,9 @@ export default function HomePage() {
               letterSpacing: '-0.02em',
               margin: 0,
             }}
-          >
-            Next in season
-          </h2>
+          />
           <Button variant="ghost" size="sm" onClick={() => navigate('/events')}>
-            View all →
+            <Text token="common.viewAll" />
           </Button>
         </div>
 
