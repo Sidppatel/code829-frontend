@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, Tag, Button, Empty } from 'antd';
 import {
   QrcodeOutlined,
@@ -21,8 +22,10 @@ export default function GuestTicketsPage() {
   );
 
   const qr = useQrCode();
+  const [activeTicket, setActiveTicket] = useState<GuestTicket | null>(null);
 
   const showQr = (ticket: GuestTicket) => {
+    setActiveTicket(ticket);
     qr.show(() => ticketsApi.getMyTicketQr(ticket.purchaseTicketId).then(r => r.data as Blob));
   };
 
@@ -137,6 +140,7 @@ export default function GuestTicketsPage() {
         title="Ticket Ticket QR"
         caption="Show this code at the venue for check-in"
         downloadFileName="guest-ticket-qr.png"
+        manualCode={activeTicket?.ticketCode}
       />
     </PageShell>
   );

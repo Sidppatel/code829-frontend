@@ -9,6 +9,7 @@ interface Props {
   title?: string;
   caption?: string;
   downloadFileName?: string;
+  manualCode?: string;
 }
 
 export default function QrModal({
@@ -19,6 +20,7 @@ export default function QrModal({
   title = 'Ticket QR',
   caption,
   downloadFileName = 'ticket.png',
+  manualCode,
 }: Props) {
   const handleDownload = () => {
     if (!qrUrl) return;
@@ -62,6 +64,26 @@ export default function QrModal({
             {caption && (
               <div style={{ fontSize: 13, color: 'var(--text-secondary)', textAlign: 'center', maxWidth: 320 }}>
                 {caption}
+              </div>
+            )}
+            {manualCode && (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 4 }}>
+                  Can't scan? Enter code
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-mono, monospace)',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  letterSpacing: 1,
+                  padding: '6px 14px',
+                  background: 'var(--bg-soft)',
+                  borderRadius: 8,
+                  border: '1px solid var(--border-subtle)',
+                  userSelect: 'all',
+                }}>
+                  {manualCode}
+                </div>
               </div>
             )}
             <Button icon={<DownloadOutlined />} onClick={handleDownload}>
