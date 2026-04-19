@@ -6,8 +6,8 @@ import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import { safeReturnUrl } from '@code829/shared/lib/safeRedirect';
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 3000;
+const MAX_RETRIES = 8;       // up to ~48s total — covers Render cold start (30-60s)
+const RETRY_DELAY_MS = 6000; // 6s between retries
 
 export default function VerifyMagicLinkPage() {
   const [searchParams] = useSearchParams();
