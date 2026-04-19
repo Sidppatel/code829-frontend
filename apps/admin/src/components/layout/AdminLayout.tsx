@@ -13,6 +13,7 @@ import {
   SendOutlined,
   ScanOutlined,
   SettingOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@code829/shared/hooks/useAuth';
@@ -62,6 +63,7 @@ const navGroups = [
   {
     title: 'Settings',
     items: [
+      { key: '/feedback', shortLabel: 'Feedback', label: 'Feedback', icon: <MessageOutlined /> },
       { key: '/settings', shortLabel: 'Settings', label: 'Settings', icon: <UserOutlined /> },
     ]
   }

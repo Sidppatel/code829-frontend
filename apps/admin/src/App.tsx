@@ -28,6 +28,7 @@ const AnalyticsPage = lazy(() => import('./pages/analytics/AnalyticsPage'));
 const StaffManagementPage = lazy(() => import('./pages/staff/StaffManagementPage'));
 const InvitationsPage = lazy(() => import('./pages/invitations/InvitationsPage'));
 const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
+const FeedbackPage = lazy(() => import('./pages/feedback/FeedbackPage'));
 
 export default function App() {
   useSessionRefresh('/admin/auth/me');
@@ -60,6 +61,7 @@ export default function App() {
               <Route path="staff" element={<StaffManagementPage />} />
               <Route path="invitations" element={<InvitationsPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="feedback" element={<FeedbackPage />} />
               <Route path="profile" element={<ProfilePage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
