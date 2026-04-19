@@ -525,7 +525,9 @@ export default function EventDetailPage() {
     setCheckoutError(null);
     setClientSecret(null);
     setPurchaseId(null);
-    setStep('capacity');
+    setSeatCount(0);
+    setSelectedTicketTypeId(undefined);
+    setStep('info');
   };
 
   if (loading) {
