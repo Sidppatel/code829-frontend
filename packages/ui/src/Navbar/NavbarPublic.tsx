@@ -187,6 +187,18 @@ export function NavbarPublic({ items = [], user, onLogout, actions }: NavbarProp
                 Sign In
               </NavLink>
             )}
+            {user && onLogout && (
+              <button
+                type="button"
+                className="ui-navbar__mobile-link ui-navbar__mobile-signout"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onLogout();
+                }}
+              >
+                Sign out
+              </button>
+            )}
           </div>
         </div>
       )}
