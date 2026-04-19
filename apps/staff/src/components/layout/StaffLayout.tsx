@@ -21,9 +21,15 @@ export default function StaffLayout() {
     const navUser = user
       ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Staff', avatarUrl: user.avatarUrl }
       : null;
+    const navItems = [
+      { key: 'checkin', to: '/checkin/select', label: 'Check-in' },
+    ];
+    const menuItems = [
+      { key: 'profile', to: '/profile', label: 'Profile' },
+    ];
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg-page)', display: 'flex', flexDirection: 'column' }}>
-        <Navbar variant="staff" user={navUser} onLogout={handleLogout} />
+        <Navbar variant="public" items={navItems} menuItems={menuItems} user={navUser} onLogout={handleLogout} />
         <main style={{ flex: 1, padding: 24, maxWidth: 1200, margin: '0 auto', width: '100%' }}>
           <Outlet />
         </main>

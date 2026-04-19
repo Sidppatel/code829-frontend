@@ -23,9 +23,17 @@ export interface NavbarUser {
   avatarUrl?: string;
 }
 
+export interface NavbarMenuItem {
+  key: string;
+  to: string;
+  label: string;
+  icon?: React.ReactNode;
+}
+
 export interface NavbarProps {
   variant: NavbarVariant;
   items?: NavItem[];
+  menuItems?: NavbarMenuItem[];
   user?: NavbarUser | null;
   onLogout?: () => void;
   collapsed?: boolean;

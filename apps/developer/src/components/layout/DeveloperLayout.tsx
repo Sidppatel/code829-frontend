@@ -56,16 +56,25 @@ const navGroups = [
 
 const navItems = navGroups.flatMap(g => g.items);
 
-const NEW_SHELL_NAV_ITEMS: NavItem[] = navGroups.flatMap((g) =>
-  g.items.map((item) => ({
-    key: `${g.title}:${item.key}`,
+const PILL_PRIMARY_KEYS = ['/', '/email-logs', '/admins', '/staff', '/settings'];
+const DEVELOPER_PILL_ITEMS: NavItem[] = navGroups
+  .flatMap((g) => g.items)
+  .filter((item) => PILL_PRIMARY_KEYS.includes(item.key))
+  .map((item) => ({
+    key: item.key,
     to: item.key,
     label: item.label,
     icon: item.icon,
-    group: g.title,
     end: item.key === '/',
-  })),
-);
+  }));
+
+const DEVELOPER_MENU_ITEMS = [
+  { key: 'profile', to: '/profile', label: 'Profile' },
+  { key: 'system-logs', to: '/system-logs', label: 'System Health' },
+  { key: 'invitations', to: '/invitations', label: 'Invitations' },
+  { key: 'users', to: '/users', label: 'User Roles' },
+  { key: 'events', to: '/events', label: 'Platform Fees' },
+];
 
 export default function DeveloperLayout() {
   const location = useLocation();
@@ -79,14 +88,18 @@ export default function DeveloperLayout() {
       : null;
     const handleLogout = () => { logout(); navigate('/login'); };
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--bg-page)' }}>
-        <Navbar variant="developer" items={NEW_SHELL_NAV_ITEMS} user={navUser} onLogout={handleLogout} />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          <main style={{ flex: 1, padding: 32, maxWidth: 1600, margin: '0 auto', width: '100%' }}>
-            <Outlet />
-          </main>
-          <UIFooter variant="developer" />
-        </div>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-page)', display: 'flex', flexDirection: 'column' }}>
+        <Navbar
+          variant="public"
+          items={DEVELOPER_PILL_ITEMS}
+          menuItems={DEVELOPER_MENU_ITEMS}
+          user={navUser}
+          onLogout={handleLogout}
+        />
+        <main style={{ flex: 1, padding: 32, maxWidth: 1600, margin: '0 auto', width: '100%' }}>
+          <Outlet />
+        </main>
+        <UIFooter variant="developer" />
       </div>
     );
   }

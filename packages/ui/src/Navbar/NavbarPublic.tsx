@@ -1,8 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import type { NavbarProps } from './Navbar';
+import type { NavbarMenuItem, NavbarProps } from './Navbar';
 
-export function NavbarPublic({ items = [], user, onLogout, actions }: NavbarProps) {
+const DEFAULT_PUBLIC_MENU: NavbarMenuItem[] = [
+  { key: 'profile', to: '/profile', label: 'Profile' },
+  { key: 'purchases', to: '/purchases', label: 'My purchases' },
+  { key: 'tickets', to: '/tickets', label: 'My entries' },
+  { key: 'guest-tickets', to: '/guest-tickets', label: 'Guest tickets' },
+];
+
+export function NavbarPublic({ items = [], menuItems, user, onLogout, actions }: NavbarProps) {
+  const resolvedMenu = menuItems ?? DEFAULT_PUBLIC_MENU;
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const userRef = useRef<HTMLDivElement>(null);
@@ -90,18 +98,18 @@ export function NavbarPublic({ items = [], user, onLogout, actions }: NavbarProp
               </button>
               {menuOpen && (
                 <div className="ui-navbar__menu" role="menu">
-                  <Link to="/profile" role="menuitem" className="ui-navbar__menu-item" onClick={() => setMenuOpen(false)}>
-                    Profile
-                  </Link>
-                  <Link to="/purchases" role="menuitem" className="ui-navbar__menu-item" onClick={() => setMenuOpen(false)}>
-                    My purchases
-                  </Link>
-                  <Link to="/tickets" role="menuitem" className="ui-navbar__menu-item" onClick={() => setMenuOpen(false)}>
-                    My entries
-                  </Link>
-                  <Link to="/guest-tickets" role="menuitem" className="ui-navbar__menu-item" onClick={() => setMenuOpen(false)}>
-                    Guest tickets
-                  </Link>
+                  {resolvedMenu.map((mi) => (
+                    <Link
+                      key={mi.key}
+                      to={mi.to}
+                      role="menuitem"
+                      className="ui-navbar__menu-item"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {mi.icon && <span className="ui-navbar__link-icon">{mi.icon}</span>}
+                      {mi.label}
+                    </Link>
+                  ))}
                   {onLogout && (
                     <>
                       <div className="ui-navbar__menu-sep" role="separator" />
@@ -169,18 +177,17 @@ export function NavbarPublic({ items = [], user, onLogout, actions }: NavbarProp
             {user && (
               <>
                 <div className="ui-navbar__menu-sep" style={{ margin: 'var(--space-2) var(--space-4)' }} />
-                <NavLink to="/purchases" onClick={() => setMobileMenuOpen(false)} className="ui-navbar__mobile-link">
-                  My purchases
-                </NavLink>
-                <NavLink to="/tickets" onClick={() => setMobileMenuOpen(false)} className="ui-navbar__mobile-link">
-                  My entries
-                </NavLink>
-                <NavLink to="/guest-tickets" onClick={() => setMobileMenuOpen(false)} className="ui-navbar__mobile-link">
-                  Guest tickets
-                </NavLink>
-                <NavLink to="/profile" onClick={() => setMobileMenuOpen(false)} className="ui-navbar__mobile-link">
-                  Profile
-                </NavLink>
+                {resolvedMenu.map((mi) => (
+                  <NavLink
+                    key={mi.key}
+                    to={mi.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="ui-navbar__mobile-link"
+                  >
+                    {mi.icon && <span className="ui-navbar__mobile-link-icon">{mi.icon}</span>}
+                    {mi.label}
+                  </NavLink>
+                ))}
               </>
             )}
             {!user && (
