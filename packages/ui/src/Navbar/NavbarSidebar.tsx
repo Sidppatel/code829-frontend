@@ -62,7 +62,11 @@ export function NavbarSidebar({
         {user && !collapsed && (
           <div className="ui-navbar__user">
             <span className="ui-navbar__avatar" aria-hidden="true">
-              {user.firstName?.[0] ?? user.email?.[0] ?? '?'}
+              {user.avatarUrl ? (
+                <img src={user.avatarUrl} alt="" className="ui-navbar__avatar-img" />
+              ) : (
+                user.firstName?.[0] ?? user.email?.[0] ?? '?'
+              )}
             </span>
             <div className="ui-navbar__user-text">
               <div className="ui-navbar__user-name">

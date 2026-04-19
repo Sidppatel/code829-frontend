@@ -20,6 +20,7 @@ export interface NavbarUser {
   lastName?: string;
   email?: string;
   roleLabel?: string;
+  avatarUrl?: string;
 }
 
 export interface NavbarProps {

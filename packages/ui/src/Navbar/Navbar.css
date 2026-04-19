@@ -197,6 +197,15 @@
   justify-content: center;
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ui-navbar__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .ui-navbar__user-text {

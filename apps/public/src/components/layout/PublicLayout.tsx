@@ -52,7 +52,7 @@ const PUBLIC_FOOTER_COLUMNS = [
 
 function NewPublicShell({ user, onLogout }: { user: ReturnType<typeof useAuth>['user']; onLogout: () => void }) {
   const navUser = user
-    ? { firstName: user.firstName, lastName: user.lastName, email: user.email }
+    ? { firstName: user.firstName, lastName: user.lastName, email: user.email, avatarUrl: user.avatarUrl }
     : null;
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)', display: 'flex', flexDirection: 'column' }}>

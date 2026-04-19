@@ -19,7 +19,7 @@ export default function StaffLayout() {
 
   if (USE_NEW_SHELL) {
     const navUser = user
-      ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Staff' }
+      ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Staff', avatarUrl: user.avatarUrl }
       : null;
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg-page)', display: 'flex', flexDirection: 'column' }}>

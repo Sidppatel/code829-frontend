@@ -75,7 +75,7 @@ export default function DeveloperLayout() {
 
   if (USE_NEW_SHELL) {
     const navUser = user
-      ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Developer' }
+      ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Developer', avatarUrl: user.avatarUrl }
       : null;
     const handleLogout = () => { logout(); navigate('/login'); };
     return (

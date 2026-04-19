@@ -81,7 +81,7 @@ const NEW_SHELL_NAV_ITEMS: NavItem[] = navGroups.flatMap((g) =>
 
 function NewAdminShell({ user, onLogout }: { user: ReturnType<typeof useAuth>['user']; onLogout: () => void }) {
   const navUser = user
-    ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Admin' }
+    ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Admin', avatarUrl: user.avatarUrl }
     : null;
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--bg-page)' }}>
