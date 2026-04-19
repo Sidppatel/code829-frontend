@@ -115,6 +115,13 @@ export default function EventWizardPage() {
         const mode = data.layoutMode === 'Open' ? 'Open' : 'Grid';
         setLayoutMode(mode);
 
+        if (data.venue) {
+          const eventVenue = data.venue as Venue;
+          setVenues((prev) =>
+            prev.some((v) => v.id === eventVenue.id) ? prev : [eventVenue, ...prev],
+          );
+        }
+
         try {
           const { data: lockData } = await adminEventsApi.checkLayoutLocked(id);
           setLayoutLocked(lockData.locked);
@@ -155,7 +162,7 @@ export default function EventWizardPage() {
           startTime: dayjs(data.startDate),
           endDate: dayjs(data.endDate),
           endTime: dayjs(data.endDate),
-          venueId: data.venueId,
+          venueId: data.venue?.id ?? data.venueId,
           isFeatured: data.isFeatured,
           maxCapacity: data.maxCapacity,
           pricePerPerson: data.pricePerPersonCents != null

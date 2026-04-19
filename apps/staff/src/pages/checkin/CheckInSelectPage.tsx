@@ -29,11 +29,11 @@ export default function CheckInSelectPage() {
       try {
         const { data } = await eventsApi.list({ page: 1, pageSize: 50, search: search || undefined });
         setEvents(data.items);
-        const statsResults = await Promise.allSettled(data.items.map((ev) => checkInApi.getStats(ev.id)));
+        const statsResults = await Promise.allSettled(data.items.map((ev) => checkInApi.getStats(ev.eventId)));
         const map: Record<string, CheckInStats> = {};
         statsResults.forEach((result, i) => {
           if (result.status === 'fulfilled') {
-            map[data.items[i].id] = result.value.data;
+            map[data.items[i].eventId] = result.value.data;
           }
         });
         setStatsMap(map);
@@ -85,16 +85,16 @@ export default function CheckInSelectPage() {
         {(items) => (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 40 }}>
             {items.map((ev) => {
-              const s = statsMap[ev.id];
+              const s = statsMap[ev.eventId];
               const now = new Date();
               const start = new Date(ev.startDate);
               const isSoon = start.getTime() - now.getTime() < 1000 * 60 * 60 * 4;
 
               return (
                 <HumanCard
-                  key={ev.id}
+                  key={ev.eventId}
                   className="human-noise"
-                  onClick={() => navigate(`/checkin/${ev.id}`)}
+                  onClick={() => navigate(`/checkin/${ev.eventId}`)}
                   style={{ cursor: 'pointer' }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

@@ -268,7 +268,7 @@ export default function EventsListPage() {
                 style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(`/events/${record.id}`);
+                  navigate(`/events/${record.eventId}`);
                 }}
               >
                 View Details

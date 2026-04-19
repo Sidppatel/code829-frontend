@@ -307,11 +307,11 @@ export default function EventDetailPage() {
       } catch (err) {
         const status = (err as { response?: { status?: number } })?.response?.status;
         if (status === 404) {
-          log.info('Event has no ticket types', { eventId: event.id });
+          log.info('Event has no ticket types', { eventId: event.eventId });
           setTicketTypes([]);
           setTicketTypesError(false);
         } else {
-          log.error('Failed to load ticket types', { eventId: event.id, err });
+          log.error('Failed to load ticket types', { eventId: event.eventId, err });
           setTicketTypes([]);
           setTicketTypesError(true);
         }

@@ -6,7 +6,7 @@ export interface SitemapEnv {
 }
 
 interface EventItem {
-  id?: string | number;
+  eventId?: string | number;
   slug?: string;
 }
 
@@ -27,7 +27,7 @@ export async function handleSitemap(request: Request, env: SitemapEnv): Promise<
         const data = (await response.json()) as EventsResponse;
         if (data?.items?.length) {
           dynamicUrls = data.items
-            .map((event) => event.slug ?? event.id)
+            .map((event) => event.slug ?? event.eventId)
             .filter((v): v is string | number => v !== undefined)
             .map((v) => `/events/${v}`);
         }

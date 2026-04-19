@@ -30,13 +30,13 @@ test.describe('@security amount tamper', () => {
     const event = await ev.json();
     test.skip(event.layoutMode !== 'Open', 'This test expects an Open-capacity event');
 
-    const ttRes = await request.get(`${BACKEND}/events/${event.id}/ticket-types`);
+    const ttRes = await request.get(`${BACKEND}/events/${event.eventId}/ticket-types`);
     const ttBody = ttRes.ok() ? await ttRes.json() : { ticketTypes: [] };
     const ticketTypeId = ttBody.ticketTypes?.[0]?.id;
 
     const create = await request.post(`${BACKEND}/purchases`, {
       headers: { Authorization: `Bearer ${token}` },
-      data: { eventId: event.id, seatsReserved: 1, ...(ticketTypeId ? { eventTicketTypeId: ticketTypeId } : {}) },
+      data: { eventId: event.eventId, seatsReserved: 1, ...(ticketTypeId ? { eventTicketTypeId: ticketTypeId } : {}) },
     });
     expect(create.status(), await create.text()).toBe(201);
     const booking = await create.json();
