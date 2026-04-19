@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Descriptions, Select, Tag } from 'antd';
 import { developerApi } from '../../services/api';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
@@ -117,20 +117,20 @@ export default function SystemLogsPage() {
   const [entityType, setEntityType] = useState<string>();
   const [selected, setSelected] = useState<SystemLog | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data } = await developerApi.getSystemLogs({ pageSize: 100, category, entityType });
-      const items = (data as { items?: SystemLog[] }).items ?? (Array.isArray(data) ? (data as SystemLog[]) : []);
-      setLogs(items);
-    } finally {
-      setLoading(false);
-    }
-  }, [category, entityType]);
-
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+    Promise.resolve()
+      .then(() => { if (!cancelled) setLoading(true); })
+      .then(() => developerApi.getSystemLogs({ pageSize: 100, category, entityType }))
+      .then(({ data }) => {
+        if (!cancelled) {
+          const items = (data as { items?: SystemLog[] }).items ?? (Array.isArray(data) ? (data as SystemLog[]) : []);
+          setLogs(items);
+        }
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [category, entityType]);
 
   return (
     <PageShell

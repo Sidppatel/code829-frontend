@@ -57,7 +57,7 @@ export default function EventDetailPage() {
   const isHydrated = useAuthStore((s) => s.isHydrated);
   const storeToken = useAuthStore((s) => s.token);
   const tokenRef = useRef(storeToken);
-  tokenRef.current = storeToken;
+  useEffect(() => { tokenRef.current = storeToken; }, [storeToken]);
   const isMobile = useIsMobile();
 
   // Event detail requires auth (Q3 = b). Redirect anonymous visitors to /login as soon as
@@ -106,7 +106,7 @@ export default function EventDetailPage() {
       return params;
     }, { replace: true });
   };
-  const stripePromiseRef = useRef<Promise<Stripe | null> | null>(null);
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [paymentUnavailable, setPaymentUnavailable] = useState(false);
   const [isStartingPurchase, setIsStartingPurchase] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
@@ -237,7 +237,7 @@ export default function EventDetailPage() {
           setPaymentUnavailable(true);
           return;
         }
-        stripePromiseRef.current = loadStripe(data.publishableKey);
+        setStripePromise(loadStripe(data.publishableKey));
         setPaymentUnavailable(false);
       } catch (err) {
         log.error('Failed to load Stripe config', { err });
@@ -298,8 +298,8 @@ export default function EventDetailPage() {
   const [ticketTypesError, setTicketTypesError] = useState(false);
   useEffect(() => {
     if (!event || event.layoutMode !== 'Open') return;
-    setTicketTypesLoading(true);
     const loadTicketTypes = async () => {
+      setTicketTypesLoading(true);
       try {
         const { data } = await eventsApi.getTicketTypes(event.eventId);
         setTicketTypes(data.ticketTypes);
@@ -553,7 +553,7 @@ export default function EventDetailPage() {
         setConfirming={setConfirming}
         error={checkoutError}
         clientSecret={clientSecret}
-        stripePromise={stripePromiseRef.current}
+        stripePromise={stripePromise}
         quote={quote}
         quoteLoading={quoteLoading}
         quoteError={quoteError}
@@ -586,7 +586,7 @@ export default function EventDetailPage() {
         setConfirming={setConfirming}
         error={checkoutError}
         clientSecret={clientSecret}
-        stripePromise={stripePromiseRef.current}
+        stripePromise={stripePromise}
         quote={quote}
         quoteLoading={quoteLoading}
         quoteError={quoteError}

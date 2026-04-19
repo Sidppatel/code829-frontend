@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Row, Col, Pagination, App, Skeleton } from 'antd';
 import { motion } from 'framer-motion';
@@ -26,30 +26,28 @@ export default function EventsPage() {
   const [filters, setFilters] = useState<EventListParams>({});
   const { message } = App.useApp();
 
-  const fetchEvents = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data } = await eventsApi.list({ ...filters, page, pageSize });
-      setEvents(data?.items ?? []);
-      setTotal(data?.totalCount ?? 0);
-      log.info('Loaded events', { count: data?.items?.length ?? 0, total: data?.totalCount ?? 0 });
-    } catch (err) {
-      log.error('Failed to load events', err);
-      message.error(strings.errors.loadEventsFailed.text);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    let cancelled = false;
+    Promise.resolve()
+      .then(() => { if (!cancelled) setLoading(true); })
+      .then(() => eventsApi.list({ ...filters, page, pageSize }))
+      .then(({ data }) => {
+        if (!cancelled) {
+          setEvents(data?.items ?? []);
+          setTotal(data?.totalCount ?? 0);
+          log.info('Loaded events', { count: data?.items?.length ?? 0, total: data?.totalCount ?? 0 });
+        }
+      })
+      .catch((err) => { if (!cancelled) { log.error('Failed to load events', err); message.error(strings.errors.loadEventsFailed.text); } })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [filters, page, pageSize, message]);
 
   useEffect(() => {
-    void fetchEvents();
-  }, [fetchEvents]);
-
-  useEffect(() => {
     const pageParam = parseInt(searchParams.get('page') ?? '1', 10);
-    if (pageParam !== page) {
-      setPage(pageParam);
-    }
+    Promise.resolve().then(() => {
+      if (pageParam !== page) setPage(pageParam);
+    });
   }, [searchParams, page]);
 
   useEffect(() => {

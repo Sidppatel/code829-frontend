@@ -27,7 +27,7 @@ export default function SettingsPage() {
     }
   }, [message]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { Promise.resolve().then(() => load()); }, [load]);
 
   const handleSave = async (values: { firstName: string; lastName: string; phone: string }) => {
     setSaving(true);

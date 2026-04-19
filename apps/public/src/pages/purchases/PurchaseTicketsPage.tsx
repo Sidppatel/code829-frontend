@@ -52,7 +52,7 @@ export default function PurchaseTicketsPage() {
   }, [purchaseId, message]);
 
   useEffect(() => {
-    void loadTickets();
+    Promise.resolve().then(() => loadTickets());
   }, [loadTickets]);
 
   const handleShowQr = async (ticketId: string, seatNumber: number) => {

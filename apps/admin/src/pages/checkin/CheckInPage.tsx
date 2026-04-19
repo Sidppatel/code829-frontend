@@ -37,7 +37,7 @@ export default function CheckInPage() {
     }
   }, [eventId, message]);
 
-  useEffect(() => { void loadStats(); }, [loadStats]);
+  useEffect(() => { Promise.resolve().then(() => loadStats()); }, [loadStats]);
 
   const handleScan = useCallback(async (value: string) => {
     if (!value.trim() || scanning) return;

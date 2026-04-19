@@ -110,9 +110,7 @@ export default function LayoutEditorPage() {
     }
   }, [eventId, message]);
 
-  useEffect(() => {
-    void loadAll();
-  }, [loadAll]);
+  useEffect(() => { Promise.resolve().then(() => loadAll()); }, [loadAll]);
 
   // Debounced draft auto-save
   useEffect(() => {

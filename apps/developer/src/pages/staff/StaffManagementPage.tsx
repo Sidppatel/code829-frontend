@@ -35,7 +35,16 @@ export default function StaffManagementPage() {
     finally { setLoading(false); }
   }, [page, search, message]);
 
-  useEffect(() => { void fetchStaff(); }, [fetchStaff]);
+  useEffect(() => {
+    let cancelled = false;
+    Promise.resolve()
+      .then(() => { if (!cancelled) setLoading(true); })
+      .then(() => apiClient.get('/admin/staff', { params: { page, pageSize: 25, search: search || undefined } }))
+      .then(({ data }) => { if (!cancelled) { setStaff(data.items); setTotal(data.totalCount); } })
+      .catch(() => { if (!cancelled) message.error('Failed to load staff'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [page, search, message]);
 
   const toggleActive = async (id: string, isActive: boolean) => {
     try {

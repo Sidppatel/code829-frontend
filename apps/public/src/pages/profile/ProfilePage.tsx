@@ -49,7 +49,8 @@ export default function ProfilePage() {
 
   const handleSubmit = async () => {
     try {
-      const { email, ...values } = await form.validateFields();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { email: _email, ...values } = await form.validateFields();
       setSaving(true);
       await authApi.updateProfile(values);
       const { data } = await authApi.getMe();

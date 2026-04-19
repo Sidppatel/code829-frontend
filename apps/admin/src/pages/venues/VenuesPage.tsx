@@ -33,7 +33,7 @@ export default function VenuesPage() {
     }
   }, [page, pageSize]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { Promise.resolve().then(() => load()); }, [load]);
 
   const toggle = useAsyncAction(
     (v: Venue) => adminVenuesApi.update(v.venueId, { isActive: !v.isActive }),

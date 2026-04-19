@@ -31,23 +31,20 @@ export default function TicketClaimPage() {
   const claimedRef = useRef(false);
 
   useEffect(() => {
+    let cancelled = false;
     if (!token) {
-      setError('No invite token provided');
-      setLoading(false);
-      return;
+      Promise.resolve().then(() => {
+        if (!cancelled) { setError('No invite token provided'); setLoading(false); }
+      });
+      return () => { cancelled = true; };
     }
-    const load = async () => {
-      try {
-        const { data } = await ticketsApi.getClaimInfo(token);
-        setInfo(data);
-        if (data.alreadyClaimed) setClaimed(true);
-      } catch {
-        setError('This invite link is invalid or has expired.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    void load();
+    ticketsApi.getClaimInfo(token)
+      .then(({ data }) => {
+        if (!cancelled) { setInfo(data); if (data.alreadyClaimed) setClaimed(true); }
+      })
+      .catch(() => { if (!cancelled) setError('This invite link is invalid or has expired.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [token]);
 
   // Auto-claim when user is authenticated and ticket not yet claimed
