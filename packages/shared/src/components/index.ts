@@ -38,6 +38,7 @@ export { default as LoadingSpinner } from './shared/LoadingSpinner';
 export { default as NotFoundPage } from './shared/NotFoundPage';
 export { default as PageHeader } from './shared/PageHeader';
 export { default as PulseIndicator } from './shared/PulseIndicator';
+export { default as Text } from './shared/Text';
 export { default as ThemeToggle } from './shared/ThemeToggle';
 
 // Root
