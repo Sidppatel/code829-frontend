@@ -18,11 +18,14 @@ interface Props {
   isInitial?: boolean;
 }
 
+interface ProfileFields { firstName: string; lastName: string; email: string; phone: string }
+
 export default function AdminProfilePage({ imagesApi, isInitial = false }: Props) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [initialFields, setInitialFields] = useState<ProfileFields | null>(null);
   const { message } = App.useApp();
   const setUser = useAuthStore((s) => s.setUser);
 
@@ -37,7 +40,7 @@ export default function AdminProfilePage({ imagesApi, isInitial = false }: Props
       try {
         const { data } = await adminAuthApi.getMe();
         setImageUrl(data.imageUrl ?? null);
-        form.setFieldsValue({
+        setInitialFields({
           firstName: data.firstName,
           lastName: data.lastName,
           email: data.email,
@@ -51,7 +54,14 @@ export default function AdminProfilePage({ imagesApi, isInitial = false }: Props
       }
     };
     void load();
-  }, [form, message]);
+  }, [message]);
+
+  // Set form values only after the <Form> is in the tree (loading=false)
+  useEffect(() => {
+    if (!loading && initialFields) {
+      form.setFieldsValue(initialFields);
+    }
+  }, [loading, initialFields, form]);
 
   const handleSubmit = async () => {
     try {
@@ -104,12 +114,18 @@ export default function AdminProfilePage({ imagesApi, isInitial = false }: Props
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item name="email" label="Email Address">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="phone" label="Phone">
-            <Input />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col xs={24} sm={12}>
+              <Form.Item name="email" label="Email Address">
+                <Input disabled />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item name="phone" label="Phone">
+                <Input placeholder="+1 (555) 000-0000" />
+              </Form.Item>
+            </Col>
+          </Row>
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={saving}>
               {isInitial ? 'Get Started' : 'Save Changes'}
