@@ -21,7 +21,7 @@ export interface PurchaseTicket {
 }
 
 export interface GuestTicket {
-  id: string;
+  purchaseTicketId: string;
   ticketCode: string;
   seatNumber: number;
   status: TicketStatus;
