@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { AxiosResponse } from 'axios';
 import type { PagedResponse } from '../types/shared';
 
@@ -28,6 +28,11 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
 ): UsePagedTableResult<T, P> {
   const { fetcher, defaultParams, defaultPageSize = 20 } = options;
 
+  // Store fetcher in a ref so inline arrow functions don't cause fetchData to
+  // be recreated on every render (which would trigger an infinite request loop).
+  const fetcherRef = useRef(fetcher);
+  fetcherRef.current = fetcher;
+
   const [data, setData] = useState<T[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -42,7 +47,7 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
     setError(null);
     try {
       const params = { ...filters, page, pageSize } as unknown as P;
-      const res = await fetcher(params);
+      const res = await fetcherRef.current(params);
       setData(res.data.items);
       setTotal(res.data.totalCount);
     } catch (err) {
@@ -51,7 +56,7 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
     } finally {
       setLoading(false);
     }
-  }, [fetcher, filters, page, pageSize]);
+  }, [filters, page, pageSize]);
 
   useEffect(() => {
     void fetchData();
