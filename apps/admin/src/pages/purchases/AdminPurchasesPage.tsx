@@ -1,8 +1,7 @@
-import { Button } from 'antd';
-import { DollarOutlined, UndoOutlined, UserOutlined } from '@ant-design/icons';
+import { DollarOutlined, UserOutlined } from '@ant-design/icons';
 import { adminPurchasesApi } from '../../services/api';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
-import { useAsyncAction, useConfirm, useExport } from '@code829/shared/hooks';
+import { useExport } from '@code829/shared/hooks';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
 import type { Purchase, PurchaseStatus } from '@code829/shared/types/purchase';
@@ -27,17 +26,7 @@ export default function AdminPurchasesPage() {
     defaultPageSize: 15,
   });
 
-  const refund = useAsyncAction(
-    (id: string) => adminPurchasesApi.refund(id),
-    {
-      successMessage: 'Purchase refunded',
-      onSuccess: () => {
-        log.info('Purchase refunded');
-        paged.refresh();
-      },
-    },
-  );
-  const confirm = useConfirm();
+
 
   const exporter = useExport({
     csv: () => adminPurchasesApi.exportCsv().then((r) => r.data as Blob),
