@@ -71,19 +71,27 @@ export default function TopHeader({ isMobile, title, user, userMenuItems, showMe
             }}
             className="hover-lift"
           >
-            <div style={{
-              width: 24,
-              height: 24,
-              borderRadius: '50%',
-              background: 'var(--primary)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--text-on-brand)',
-              fontSize: 11
-            }}>
-              {user?.firstName?.[0]}
-            </div>
+            {user?.imageUrl ? (
+              <img
+                src={user.imageUrl}
+                alt={user?.firstName}
+                style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }}
+              />
+            ) : (
+              <div style={{
+                width: 24,
+                height: 24,
+                borderRadius: '50%',
+                background: 'var(--primary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--text-on-brand)',
+                fontSize: 11
+              }}>
+                {user?.firstName?.[0]}
+              </div>
+            )}
             {!isMobile && (title === 'Developer' ? 'Dev Console' : user?.firstName)}
           </Button>
         </Dropdown>
