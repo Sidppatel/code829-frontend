@@ -85,7 +85,8 @@ export default function AdminProfilePage({ imagesApi, isInitial = false }: Props
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 32px 64px' }}>
+    // <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 32px 64px' }}>
+    <div style={{ maxWidth: 720 }}>
       <Card>
         <AvatarUpload
           currentUrl={imageUrl}

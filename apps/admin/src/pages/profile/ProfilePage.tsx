@@ -8,7 +8,7 @@ export default function ProfilePage() {
   const isInitial = location.state?.setup === true;
 
   return (
-    <div style={{ padding: 24 }}>
+    <div>
       {!isInitial && <PageHeader title="Profile" subtitle="Manage your personal information and avatar." />}
       <AdminProfilePage imagesApi={imagesApi} isInitial={isInitial} />
     </div>
