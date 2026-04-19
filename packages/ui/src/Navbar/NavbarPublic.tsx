@@ -146,7 +146,12 @@ export function NavbarPublic({ items = [], user, onLogout, actions }: NavbarProp
             }
           }}
         >
-          <div className="ui-navbar__mobile-nav">
+          <div
+            className="ui-navbar__mobile-nav"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setMobileMenuOpen(false);
+            }}
+          >
             {items.map((item) => (
               <NavLink
                 key={item.key}
