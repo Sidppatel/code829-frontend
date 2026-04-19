@@ -36,7 +36,7 @@ export default function VenuesPage() {
   useEffect(() => { void load(); }, [load]);
 
   const toggle = useAsyncAction(
-    (v: Venue) => adminVenuesApi.update(v.id, { isActive: !v.isActive }),
+    (v: Venue) => adminVenuesApi.update(v.venueId, { isActive: !v.isActive }),
     { successMessage: 'Venue updated', onSuccess: load },
   );
 
@@ -89,7 +89,7 @@ export default function VenuesPage() {
             >
               {items.map((v) => (
                 <HumanCard
-                  key={v.id}
+                  key={v.venueId}
                   className="human-noise"
                   style={{
                     height: '100%',
@@ -153,7 +153,7 @@ export default function VenuesPage() {
                       type="primary"
                       block
                       icon={<EditOutlined />}
-                      onClick={() => navigate(`/venues/${v.id}`)}
+                      onClick={() => navigate(`/venues/${v.venueId}`)}
                       style={{ borderRadius: 'var(--radius-full)', fontWeight: 600, height: 40 }}
                     >
                       Manage Venue

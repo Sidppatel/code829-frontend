@@ -99,7 +99,7 @@ export default function EventWizardPage() {
         const { data } = await adminVenuesApi.list(1, 100);
         const normalized = data.items.map((v) => ({
           ...v,
-          id: v.id ?? (v as unknown as { venueId?: string }).venueId ?? '',
+          venueId: v.venueId ?? (v as unknown as { id?: string }).id ?? '',
         }));
         setVenues(normalized);
         log.info('Venues loaded for picker', { count: data.items.length });
@@ -126,13 +126,13 @@ export default function EventWizardPage() {
         setLayoutMode(mode);
         setHasSoldTickets((data.totalSold ?? 0) > 0);
 
-        const eventVenueId = data.venue?.id ?? data.venueId;
+        const eventVenueId = data.venue?.venueId ?? data.venueId;
         if (eventVenueId) {
           const eventVenueName =
             data.venue?.name ?? (data as unknown as { venueName?: string }).venueName ?? '';
-          const stubVenue = { ...(data.venue ?? {}), id: eventVenueId, name: eventVenueName } as Venue;
+          const stubVenue = { ...(data.venue ?? {}), venueId: eventVenueId, name: eventVenueName } as Venue;
           setVenues((prev) =>
-            prev.some((v) => v.id === eventVenueId) ? prev : [stubVenue, ...prev],
+            prev.some((v) => v.venueId === eventVenueId) ? prev : [stubVenue, ...prev],
           );
         }
 
@@ -176,7 +176,7 @@ export default function EventWizardPage() {
           startTime: dayjs(data.startDate),
           endDate: dayjs(data.endDate),
           endTime: dayjs(data.endDate),
-          venueId: data.venue?.id ?? data.venueId,
+          venueId: data.venue?.venueId ?? data.venueId,
           isFeatured: data.isFeatured,
           maxCapacity: data.maxCapacity,
           pricePerPerson: data.pricePerPersonCents != null
@@ -419,7 +419,7 @@ export default function EventWizardPage() {
                 >
                   <Select
                     disabled={hasSoldTickets}
-                    options={venues.map((v) => ({ label: v.name, value: v.id }))}
+                    options={venues.map((v) => ({ label: v.name, value: v.venueId }))}
                     placeholder="Select venue"
                     showSearch
                     filterOption={(input, option) =>

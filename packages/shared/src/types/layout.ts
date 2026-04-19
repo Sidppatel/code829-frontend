@@ -16,7 +16,7 @@ export interface LayoutTable {
 }
 
 export interface TableTemplate {
-  id: string;
+  tableTemplateId: string;
   name: string;
   defaultCapacity: number;
   defaultShape: string;

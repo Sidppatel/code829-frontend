@@ -53,7 +53,7 @@ export default function TableTypesPage() {
           values.defaultPriceCents != null ? Math.round(values.defaultPriceCents * 100) : undefined,
       };
       if (crud.mode === 'edit' && crud.entity) {
-        return adminLayoutApi.updateTableTemplate(crud.entity.id, payload);
+        return adminLayoutApi.updateTableTemplate(crud.entity.tableTemplateId, payload);
       }
       return adminLayoutApi.createTableTemplate(payload);
     },
@@ -65,7 +65,7 @@ export default function TableTypesPage() {
 
   const toggle = useAsyncAction(
     (r: TableTemplate) =>
-      adminLayoutApi.updateTableTemplate(r.id, {
+      adminLayoutApi.updateTableTemplate(r.tableTemplateId, {
         name: r.name,
         defaultCapacity: r.defaultCapacity,
         defaultShape: r.defaultShape,
@@ -131,7 +131,7 @@ export default function TableTypesPage() {
             pageSize={items.length || 10}
             loading={false}
             onPageChange={() => {}}
-            rowKey="id"
+            rowKey="tableTemplateId"
             showSizeChanger={false}
             columns={[
               {
