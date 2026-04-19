@@ -9,8 +9,8 @@ import { createLogger } from '../../lib/logger';
 const log = createLogger('AdminProfilePage');
 
 interface AdminImagesApi {
-  uploadAdminAvatar: (file: File) => Promise<{ data: { url: string } }>;
-  deleteAdminAvatar: () => Promise<unknown>;
+  uploadAdminImage: (file: File) => Promise<{ data: { url: string } }>;
+  deleteAdminImage: () => Promise<unknown>;
 }
 
 interface Props {
@@ -22,7 +22,7 @@ export default function AdminProfilePage({ imagesApi, isInitial = false }: Props
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const { message } = App.useApp();
   const setUser = useAuthStore((s) => s.setUser);
 
@@ -36,7 +36,7 @@ export default function AdminProfilePage({ imagesApi, isInitial = false }: Props
     const load = async () => {
       try {
         const { data } = await adminAuthApi.getMe();
-        setAvatarUrl(data.avatarUrl ?? null);
+        setImageUrl(data.imageUrl ?? null);
         form.setFieldsValue({
           firstName: data.firstName,
           lastName: data.lastName,
@@ -78,16 +78,16 @@ export default function AdminProfilePage({ imagesApi, isInitial = false }: Props
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 32px 64px' }}>
       <Card>
         <AvatarUpload
-          currentUrl={avatarUrl}
+          currentUrl={imageUrl}
           onUpload={async (file) => {
-            const { data } = await imagesApi.uploadAdminAvatar(file);
-            setAvatarUrl(data.url);
+            const { data } = await imagesApi.uploadAdminImage(file);
+            setImageUrl(data.url);
             await refetchAndSetUser();
             return data.url;
           }}
           onDelete={async () => {
-            await imagesApi.deleteAdminAvatar();
-            setAvatarUrl(null);
+            await imagesApi.deleteAdminImage();
+            setImageUrl(null);
             await refetchAndSetUser();
           }}
         />

@@ -85,8 +85,8 @@ export function NavbarPublic({ items = [], menuItems, user, onLogout, actions }:
                 onClick={() => setMenuOpen((v) => !v)}
               >
                 <span className="ui-navbar__avatar" aria-hidden="true">
-                  {user.avatarUrl ? (
-                    <img src={user.avatarUrl} alt="" className="ui-navbar__avatar-img" />
+                  {user.imageUrl ? (
+                    <img src={user.imageUrl} alt="" className="ui-navbar__avatar-img" />
                   ) : (
                     user.firstName?.[0] ?? user.email?.[0] ?? '?'
                   )}

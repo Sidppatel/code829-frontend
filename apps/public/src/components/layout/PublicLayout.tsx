@@ -52,7 +52,7 @@ const PUBLIC_FOOTER_COLUMNS = [
 
 function NewPublicShell({ user, onLogout }: { user: ReturnType<typeof useAuth>['user']; onLogout: () => void }) {
   const navUser = user
-    ? { firstName: user.firstName, lastName: user.lastName, email: user.email, avatarUrl: user.avatarUrl }
+    ? { firstName: user.firstName, lastName: user.lastName, email: user.email, imageUrl: user.imageUrl }
     : null;
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)', display: 'flex', flexDirection: 'column' }}>
@@ -167,7 +167,7 @@ export default function PublicLayout() {
           {isAuthenticated ? (
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <Avatar
-                src={user?.avatarUrl}
+                src={user?.imageUrl}
                 icon={<UserOutlined />}
                 style={{ 
                   cursor: 'pointer', 

@@ -47,21 +47,21 @@ export class ImageService extends BaseService {
   reorder = (entityType: string, entityId: string, imageIds: string[]) =>
     this.patch('/admin/images/reorder', { imageIds }, { params: { entityType, entityId } });
 
-  uploadAvatar = (file: File) => {
+  uploadImage = (file: File) => {
     const fd = new FormData();
     fd.append('file', file);
-    return this.post<ImageUploadResponse>('/auth/me/avatar', fd, { timeout: 60000, headers: { 'Content-Type': undefined } });
+    return this.post<ImageUploadResponse>('/auth/me/image', fd, { timeout: 60000, headers: { 'Content-Type': undefined } });
   };
 
-  deleteAvatar = () => this.delete('/auth/me/avatar');
+  deleteImage = () => this.delete('/auth/me/image');
 
-  uploadAdminAvatar = (file: File) => {
+  uploadAdminImage = (file: File) => {
     const fd = new FormData();
     fd.append('file', file);
-    return this.post<ImageUploadResponse>('/admin/auth/me/avatar', fd, { timeout: 60000, headers: { 'Content-Type': undefined } });
+    return this.post<ImageUploadResponse>('/admin/auth/me/image', fd, { timeout: 60000, headers: { 'Content-Type': undefined } });
   };
 
-  deleteAdminAvatar = () => this.delete('/admin/auth/me/avatar');
+  deleteAdminImage = () => this.delete('/admin/auth/me/image');
 
   uploadLogo = (file: File) => {
     const fd = new FormData();

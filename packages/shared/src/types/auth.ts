@@ -16,7 +16,7 @@ export interface UserProfile {
   zipCode?: string;
   optInLocationEmail: boolean;
   hasCompletedOnboarding: boolean;
-  avatarUrl?: string;
+  imageUrl?: string;
   createdAt: string;
 }
 
@@ -34,7 +34,7 @@ export interface AdminUserProfile {
   createdAt: string;
   lastLoginAt?: string;
   phone?: string;
-  avatarUrl?: string;
+  imageUrl?: string;
 }
 
 export interface AdminAuthResponse {

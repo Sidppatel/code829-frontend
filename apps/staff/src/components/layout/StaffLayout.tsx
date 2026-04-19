@@ -19,7 +19,7 @@ export default function StaffLayout() {
 
   if (USE_NEW_SHELL) {
     const navUser = user
-      ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Staff', avatarUrl: user.avatarUrl }
+      ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Staff', imageUrl: user.imageUrl }
       : null;
     const navItems = [
       { key: 'checkin', to: '/checkin/select', label: 'Check-in' },

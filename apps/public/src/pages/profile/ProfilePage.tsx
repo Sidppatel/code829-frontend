@@ -17,7 +17,7 @@ export default function ProfilePage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const { message } = App.useApp();
   const setUser = useAuthStore((s) => s.setUser);
 
@@ -25,7 +25,7 @@ export default function ProfilePage() {
     const load = async () => {
       try {
         const { data } = await authApi.getMe();
-        setAvatarUrl(data.avatarUrl ?? null);
+        setImageUrl(data.imageUrl ?? null);
         form.setFieldsValue({
           firstName: data.firstName,
           lastName: data.lastName,
@@ -87,17 +87,17 @@ export default function ProfilePage() {
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 32px 64px' }}>
       <Card>
         <AvatarUpload
-          currentUrl={avatarUrl}
+          currentUrl={imageUrl}
           onUpload={async (file) => {
-            const { data } = await imagesApi.uploadAvatar(file);
-            setAvatarUrl(data.url);
+            const { data } = await imagesApi.uploadImage(file);
+            setImageUrl(data.url);
             const { data: me } = await authApi.getMe();
             setUser(me as UserProfile);
             return data.url;
           }}
           onDelete={async () => {
-            await imagesApi.deleteAvatar();
-            setAvatarUrl(null);
+            await imagesApi.deleteImage();
+            setImageUrl(null);
             const { data: me } = await authApi.getMe();
             setUser(me as UserProfile);
           }}

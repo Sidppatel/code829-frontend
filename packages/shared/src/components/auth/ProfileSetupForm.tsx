@@ -72,7 +72,7 @@ export default function ProfileSetupForm({ isInitial = false }: { isInitial?: bo
             <Avatar 
               size={120} 
               icon={<UserOutlined />} 
-              src={fileList.length > 0 ? URL.createObjectURL(fileList[0].originFileObj as any) : user?.avatarUrl}
+              src={fileList.length > 0 ? URL.createObjectURL(fileList[0].originFileObj as any) : user?.imageUrl}
               style={{ border: '4px solid var(--ant-primary-color-outline)' }}
             />
             <div style={{ 
