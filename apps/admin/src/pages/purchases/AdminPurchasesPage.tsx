@@ -14,10 +14,6 @@ import {
   PageShell,
 } from '@code829/shared/components/ui';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
-import { createLogger } from '@code829/shared/lib/logger';
-
-const log = createLogger('Admin/PurchasesPage');
-
 const STATUS_CHIPS: PurchaseStatus[] = ['Pending', 'Paid', 'CheckedIn', 'Refunded'];
 
 export default function AdminPurchasesPage() {

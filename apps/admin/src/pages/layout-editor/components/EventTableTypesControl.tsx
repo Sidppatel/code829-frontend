@@ -41,7 +41,7 @@ export default function EventTableTypesControl({
   const handleAddFromTemplate = async () => {
     try {
       const values = await addForm.validateFields();
-      const template = templates.find((t) => t.id === values.templateId);
+      const template = templates.find((t) => t.tableTemplateId === values.templateId);
       const color = typeof values.color === 'string' ? values.color : values.color?.toHexString?.();
       const pending: EventTableType = {
         id: crypto.randomUUID(),
@@ -115,7 +115,7 @@ export default function EventTableTypesControl({
   };
 
   const handleTemplateSelect = (templateId: string) => {
-    const t = templates.find((tt) => tt.id === templateId);
+    const t = templates.find((tt) => tt.tableTemplateId === templateId);
     if (t) {
       addForm.setFieldsValue({
         label: t.name,
@@ -144,7 +144,7 @@ export default function EventTableTypesControl({
               const first = templates.find((t) => t.isActive);
               if (first) {
                 addForm.setFieldsValue({
-                  templateId: first.id,
+                  templateId: first.tableTemplateId,
                   label: first.name,
                   capacity: first.defaultCapacity,
                   shape: first.defaultShape,
@@ -221,7 +221,7 @@ export default function EventTableTypesControl({
               placeholder="Pick a template to pre-fill..."
               options={templates.filter((t) => t.isActive).map((t) => ({
                 label: `${t.name} (${t.defaultCapacity}p · ${centsToUSD(t.defaultPriceCents)})`,
-                value: t.id,
+                value: t.tableTemplateId,
               }))}
               onChange={handleTemplateSelect}
             />
