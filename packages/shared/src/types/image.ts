@@ -1,5 +1,5 @@
 export interface ImageDto {
-  id: string;
+  imageId: string;
   entityType: string;
   entityId: string;
   url: string;
@@ -15,7 +15,7 @@ export interface ImageDto {
 }
 
 export interface ImageUploadResponse {
-  id: string;
+  imageId: string;
   url: string;
   thumbnailUrl: string;
   cardUrl: string;

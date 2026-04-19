@@ -150,7 +150,7 @@ export default function ImageUpload({
   const handleDelete = async (imageId: string) => {
     try {
       await imagesApi.delete(imageId);
-      onImagesChange(images.filter((i) => i.id !== imageId));
+      onImagesChange(images.filter((i) => i.imageId !== imageId));
       message.success('Image deleted');
     } catch {
       message.error('Failed to delete image');
@@ -160,7 +160,7 @@ export default function ImageUpload({
   const handleSetPrimary = async (imageId: string) => {
     try {
       await imagesApi.setPrimary(imageId);
-      onImagesChange(images.map((i) => ({ ...i, isPrimary: i.id === imageId })));
+      onImagesChange(images.map((i) => ({ ...i, isPrimary: i.imageId === imageId })));
     } catch {
       message.error('Failed to set primary image');
     }
@@ -173,7 +173,7 @@ export default function ImageUpload({
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: images.length > 0 ? 12 : 0 }}>
         {images.map((img) => (
           <div
-            key={img.id}
+            key={img.imageId}
             style={{
               position: 'relative',
               width: 160,
@@ -211,13 +211,13 @@ export default function ImageUpload({
                   type="text"
                   size="small"
                   icon={img.isPrimary ? <StarFilled style={{ color: 'var(--status-warning)' }} /> : <StarOutlined />}
-                  onClick={() => handleSetPrimary(img.id)}
+                  onClick={() => handleSetPrimary(img.imageId)}
                   style={{ color: 'var(--text-on-brand)', fontSize: 12 }}
                   title="Set as primary"
                 />
                 <Popconfirm
                   title="Delete this image?"
-                  onConfirm={() => handleDelete(img.id)}
+                  onConfirm={() => handleDelete(img.imageId)}
                   okText="Delete"
                   cancelText="Cancel"
                 >
