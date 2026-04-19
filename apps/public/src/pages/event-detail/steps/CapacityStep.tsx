@@ -22,7 +22,7 @@ export default function CapacityStep({ event, ticketTypes, ticketTypesLoading, o
             <Skeleton active paragraph={{ rows: 4 }} />
           ) : (
             <CapacityPurchaseForm
-              eventId={event.id}
+              eventId={event.eventId}
               maxCapacity={event.maxCapacity ?? 0}
               availableCount={event.availableCount}
               pricePerPersonCents={event.displayFromAmountCents ?? 0}

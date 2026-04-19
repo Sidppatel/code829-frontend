@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
-import { Button } from 'antd';
+import { Button, Carousel } from 'antd';
 import { ArrowLeftOutlined, CalendarOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { EventDetail } from '@code829/shared/types/event';
+import type { ImageDto } from '@code829/shared/types/image';
+import { imagesApi } from '@code829/shared/services/imagesApi';
 import { formatDateRange } from '@code829/shared/utils/date';
 import EventImageFallback from '../../../components/events/EventImageFallback';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
@@ -16,6 +19,16 @@ interface EventHeroProps {
 export default function EventHero({ event, itemVariants }: EventHeroProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [images, setImages] = useState<ImageDto[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    imagesApi
+      .getPublicEventImages(event.eventId)
+      .then(({ data }) => { if (!cancelled) setImages(data); })
+      .catch(() => { if (!cancelled) setImages([]); });
+    return () => { cancelled = true; };
+  }, [event.eventId]);
 
   const isTableLayout = event.layoutMode === 'Grid';
   const pillKind = event.isSoldOut ? 'soldout' : isTableLayout ? 'published' : 'completed';
@@ -31,9 +44,28 @@ export default function EventHero({ event, itemVariants }: EventHeroProps) {
         overflow: 'hidden',
       }}
     >
-      {event.imageUrl ? (
+      {images.length > 1 ? (
+        <Carousel
+          autoplay
+          arrows
+          dots
+          draggable
+          style={{ width: '100%', height: '100%' }}
+        >
+          {images.map((img) => (
+            <div key={img.imageId} style={{ width: '100%', height: '100%' }}>
+              <img
+                src={img.url}
+                alt={img.originalName ?? event.title}
+                loading="lazy"
+                style={{ width: '100%', height: '58vh', minHeight: isMobile ? 340 : 420, objectFit: 'cover' }}
+              />
+            </div>
+          ))}
+        </Carousel>
+      ) : event.imageUrl || images[0]?.url ? (
         <img
-          src={event.imageUrl}
+          src={images[0]?.url ?? event.imageUrl}
           alt={event.title}
           loading="lazy"
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}

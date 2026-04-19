@@ -332,7 +332,7 @@ export default function HomePage() {
             }}
           >
             {display.slice(0, 6).map((event) => (
-              <div key={event.id} className="c829-fade-up c829-card-hover">
+              <div key={event.eventId} className="c829-fade-up c829-card-hover">
                 <EventCard event={event} />
               </div>
             ))}

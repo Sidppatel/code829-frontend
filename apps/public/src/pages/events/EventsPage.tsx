@@ -173,7 +173,7 @@ export default function EventsPage() {
             <motion.div variants={containerVariants}>
               <Row gutter={[32, 48]}>
                 {events.map((event) => (
-                  <Col xs={24} sm={12} md={8} key={event.id}>
+                  <Col xs={24} sm={12} md={8} key={event.eventId}>
                     <motion.div
                       variants={itemVariants}
                       style={{ height: '100%' }}

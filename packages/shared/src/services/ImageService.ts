@@ -37,6 +37,9 @@ export class ImageService extends BaseService {
   getByEntity = (entityType: string, entityId: string) =>
     this.get<ImageDto[]>('/admin/images', { params: { entityType, entityId } });
 
+  getPublicEventImages = (eventId: string) =>
+    this.get<ImageDto[]>(`/events/${eventId}/images`);
+
   remove = (id: string) => this.delete(`/admin/images/${id}`);
 
   setPrimary = (id: string) => this.patch(`/admin/images/${id}/primary`);
