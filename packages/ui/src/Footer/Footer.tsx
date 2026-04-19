@@ -50,7 +50,7 @@ export function Footer({
         <div className="ui-footer__inner">
           <div className="ui-footer__brand-col">
             <Link to="/" className="ui-footer__brand">
-              <img src="/logo.jpg" alt="" className="ui-footer__brand-mark" />
+              <img src="/logo.svg" alt="Code829 logo" className="ui-footer__brand-mark" />
               <span className="ui-footer__brand-name">Code829</span>
             </Link>
             {tagline && <p className="ui-footer__tagline">{tagline}</p>}
