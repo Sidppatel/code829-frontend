@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { List, Input, Button, App, Tag } from 'antd';
+import AdminSecuritySection from '@code829/shared/components/auth/AdminSecuritySection';
 import { SaveOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { developerApi, imagesApi } from '../../services/api';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
@@ -91,6 +92,11 @@ export default function DevSettingsPage() {
         ]}
         rotateSubtitle
       />
+
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 16 }}>Account Security</div>
+        <AdminSecuritySection />
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(400px, 1fr))', gap: 24, marginBottom: 48 }}>
         <HumanCard

@@ -15,6 +15,7 @@ const ResetPasswordPage = lazy(() => import('./pages/reset-password/ResetPasswor
 const CheckInSelectPage = lazy(() => import('./pages/checkin/CheckInSelectPage'));
 const CheckInPage = lazy(() => import('./pages/checkin/CheckInPage'));
 const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
+const SettingsPage = lazy(() => import('./pages/settings/SettingsPage'));
 
 export default function App() {
   useSessionRefresh('/admin/auth/me');
@@ -34,6 +35,7 @@ export default function App() {
               <Route path="checkin/select" element={<CheckInSelectPage />} />
               <Route path="checkin/:eventId" element={<CheckInPage />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path="settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

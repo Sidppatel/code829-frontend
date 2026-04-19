@@ -26,6 +26,7 @@ export default function StaffLayout() {
     ];
     const menuItems = [
       { key: 'profile', to: '/profile', label: 'Profile' },
+      { key: 'settings', to: '/settings', label: 'Settings' },
     ];
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg-page)', display: 'flex', flexDirection: 'column' }}>
