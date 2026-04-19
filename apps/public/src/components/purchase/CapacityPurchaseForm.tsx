@@ -123,7 +123,7 @@ export default function CapacityPurchaseForm({
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography.Text strong>Total</Typography.Text>
           <Typography.Text strong style={{ fontSize: 18 }}>
-            {quoteLoading || !quote ? '—' : centsToUSD(quote.totalCents)}
+            {quoteLoading || !quote ? '—' : centsToUSD(quote.displaySubtotalCents)}
           </Typography.Text>
         </div>
         <Typography.Text type="secondary" style={{ fontSize: 12 }}>

@@ -112,7 +112,8 @@ export default function AdminLayout() {
   const collapsed = isTablet;
 
   const userMenuItems: MenuProps['items'] = [
-    { key: 'profile', label: 'Profile', icon: <UserOutlined />, onClick: () => navigate('/settings') },
+    { key: 'profile', label: 'Profile', icon: <UserOutlined />, onClick: () => navigate('/profile') },
+    { key: 'settings', label: 'Settings', icon: <UserOutlined />, onClick: () => navigate('/settings') },
     { type: 'divider' as const },
     { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, onClick: () => { logout(); navigate('/login'); } },
   ];
