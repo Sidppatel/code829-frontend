@@ -79,6 +79,7 @@ export default function EventWizardPage() {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [layoutMode, setLayoutMode] = useState<'Grid' | 'Open'>('Grid');
   const [layoutLocked, setLayoutLocked] = useState(false);
+  const [hasSoldTickets, setHasSoldTickets] = useState(false);
   const [images, setImages] = useState<ImageDto[]>([]);
   const [existingTables] = useState<EventTableDto[]>([]);
   const [existingTiers, setExistingTiers] = useState<EventTableTypeInfo[]>([]);
@@ -86,12 +87,19 @@ export default function EventWizardPage() {
   const { message } = App.useApp();
   const navigate = useNavigate();
   const ticketTypes = Form.useWatch('ticketTypes', form) || [];
+  const watchedStartDate = Form.useWatch('startDate', form);
+  const watchedStartTime = Form.useWatch('startTime', form);
+  const watchedEndDate = Form.useWatch('endDate', form);
 
   useEffect(() => {
     const loadVenues = async () => {
       try {
         const { data } = await adminVenuesApi.list(1, 100);
-        setVenues(data.items);
+        const normalized = data.items.map((v) => ({
+          ...v,
+          id: v.id ?? (v as unknown as { venueId?: string }).venueId ?? '',
+        }));
+        setVenues(normalized);
         log.info('Venues loaded for picker', { count: data.items.length });
       } catch (err) {
         log.error('Failed to load venues', err);
@@ -114,11 +122,15 @@ export default function EventWizardPage() {
         }
         const mode = data.layoutMode === 'Open' ? 'Open' : 'Grid';
         setLayoutMode(mode);
+        setHasSoldTickets((data.totalSold ?? 0) > 0);
 
-        if (data.venue) {
-          const eventVenue = data.venue as Venue;
+        const eventVenueId = data.venue?.id ?? data.venueId;
+        if (eventVenueId) {
+          const eventVenueName =
+            data.venue?.name ?? (data as unknown as { venueName?: string }).venueName ?? '';
+          const stubVenue = { ...(data.venue ?? {}), id: eventVenueId, name: eventVenueName } as Venue;
           setVenues((prev) =>
-            prev.some((v) => v.id === eventVenue.id) ? prev : [eventVenue, ...prev],
+            prev.some((v) => v.id === eventVenueId) ? prev : [stubVenue, ...prev],
           );
         }
 
@@ -187,6 +199,60 @@ export default function EventWizardPage() {
     };
     void loadEvent();
   }, [id, form, message, navigate]);
+
+  const onValuesChange = (changed: any, all: any) => {
+    setIsDirty(true);
+
+    // Sync End Date with Start Date
+    if (changed.startDate && (!all.endDate || all.endDate.isBefore(changed.startDate, 'day'))) {
+      form.setFieldsValue({ endDate: changed.startDate });
+    }
+
+    // Sync End Time with Start Time
+    if (changed.startTime && !all.endTime) {
+      form.setFieldsValue({ endTime: changed.startTime.add(2, 'hour') });
+    }
+  };
+
+  const disabledStartDate = (current: dayjs.Dayjs) => {
+    return current && current.isBefore(dayjs().startOf('day'));
+  };
+
+  const disabledEndDate = (current: dayjs.Dayjs) => {
+    if (!watchedStartDate) return false;
+    return current && current.isBefore(watchedStartDate.startOf('day'));
+  };
+
+  const disabledStartTime = (current: dayjs.Dayjs | null) => {
+    if (!watchedStartDate || !watchedStartDate.isSame(dayjs(), 'day')) return {};
+
+    const now = dayjs();
+    return {
+      disabledHours: () => Array.from({ length: now.hour() }, (_, i) => i),
+      disabledMinutes: (selectedHour: number) => {
+        if (selectedHour === now.hour()) {
+          return Array.from({ length: now.minute() }, (_, i) => i);
+        }
+        return [];
+      },
+    };
+  };
+
+  const disabledEndTime = (current: dayjs.Dayjs | null) => {
+    if (!watchedStartDate || !watchedEndDate || !watchedEndDate.isSame(watchedStartDate, 'day') || !watchedStartTime) {
+      return {};
+    }
+
+    return {
+      disabledHours: () => Array.from({ length: watchedStartTime.hour() }, (_, i) => i),
+      disabledMinutes: (selectedHour: number) => {
+        if (selectedHour === watchedStartTime.hour()) {
+          return Array.from({ length: watchedStartTime.minute() + 1 }, (_, i) => i);
+        }
+        return [];
+      },
+    };
+  };
 
   const handleSubmit = async () => {
     try {
@@ -302,7 +368,18 @@ export default function EventWizardPage() {
 
       <Stepper steps={[...STEPS]} current={step} onSelect={setStep} />
 
-      <Form form={form} layout="vertical" onFinish={handleSubmit} onValuesChange={() => setIsDirty(true)}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        onValuesChange={onValuesChange}
+        initialValues={!isEditMode ? {
+          startDate: dayjs(),
+          startTime: dayjs().add(1, 'hour').startOf('hour'),
+          endDate: dayjs(),
+          endTime: dayjs().add(3, 'hour').startOf('hour'),
+        } : undefined}
+      >
         {/* ── Step 1: Details ─────────────────────────────────────── */}
         <div style={{ display: step === 0 ? 'block' : 'none' }}>
           <SoftCard padding={24}>
@@ -332,8 +409,14 @@ export default function EventWizardPage() {
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12}>
-                <Form.Item name="venueId" label="Venue" rules={[{ required: true }]}>
+                <Form.Item
+                  name="venueId"
+                  label="Venue"
+                  rules={[{ required: true }]}
+                  tooltip={hasSoldTickets ? "Venue cannot be changed because tickets have been sold" : undefined}
+                >
                   <Select
+                    disabled={hasSoldTickets}
                     options={venues.map((v) => ({ label: v.name, value: v.id }))}
                     placeholder="Select venue"
                     showSearch
@@ -346,8 +429,15 @@ export default function EventWizardPage() {
             </Row>
             <Row gutter={16}>
               <Col xs={12} sm={6}>
-                <Form.Item name="startDate" label="Start date" rules={[{ required: true, message: 'Required' }]}>
+                <Form.Item
+                  name="startDate"
+                  label="Start date"
+                  rules={[{ required: true, message: 'Required' }]}
+                  tooltip={hasSoldTickets ? "Date cannot be changed because tickets have been sold" : undefined}
+                >
                   <DatePicker
+                    disabled={hasSoldTickets}
+                    disabledDate={disabledStartDate}
                     format="MMM D, YYYY"
                     placeholder="Pick date"
                     style={{ width: '100%' }}
@@ -358,8 +448,15 @@ export default function EventWizardPage() {
                 </Form.Item>
               </Col>
               <Col xs={12} sm={6}>
-                <Form.Item name="startTime" label="Start time" rules={[{ required: true, message: 'Required' }]}>
+                <Form.Item
+                  name="startTime"
+                  label="Start time"
+                  rules={[{ required: true, message: 'Required' }]}
+                  tooltip={hasSoldTickets ? "Time cannot be changed because tickets have been sold" : undefined}
+                >
                   <TimePicker
+                    disabled={hasSoldTickets || !watchedStartDate}
+                    disabledTime={disabledStartTime}
                     use12Hours
                     format="h:mm a"
                     placeholder="Pick time"
@@ -376,6 +473,7 @@ export default function EventWizardPage() {
                 <Form.Item
                   name="endDate"
                   label="End date"
+                  tooltip={hasSoldTickets ? "Date cannot be changed because tickets have been sold" : undefined}
                   rules={[
                     { required: true, message: 'Required' },
                     ({ getFieldValue }) => ({
@@ -391,6 +489,8 @@ export default function EventWizardPage() {
                   ]}
                 >
                   <DatePicker
+                    disabled={hasSoldTickets || !watchedStartTime}
+                    disabledDate={disabledEndDate}
                     format="MMM D, YYYY"
                     placeholder="Pick date"
                     style={{ width: '100%' }}
@@ -404,6 +504,7 @@ export default function EventWizardPage() {
                 <Form.Item
                   name="endTime"
                   label="End time"
+                  tooltip={hasSoldTickets ? "Time cannot be changed because tickets have been sold" : undefined}
                   rules={[
                     { required: true, message: 'Required' },
                     ({ getFieldValue }) => ({
@@ -426,6 +527,8 @@ export default function EventWizardPage() {
                   ]}
                 >
                   <TimePicker
+                    disabled={hasSoldTickets || !watchedEndDate}
+                    disabledTime={disabledEndTime}
                     use12Hours
                     format="h:mm a"
                     placeholder="Pick time"

@@ -9,7 +9,10 @@
       "Bash(pnpm --filter @code829/admin build)",
       "Bash(pnpm --filter @code829/admin exec tsc -b)",
       "Bash(grep -v \"^$\")",
-      "Bash(pnpm exec *)"
+      "Bash(pnpm exec *)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__javascript_tool"
     ]
   }
 }
