@@ -43,6 +43,7 @@ import {
 import { FloorPlan, TierLegend } from '@code829/shared/components/floorplan';
 import { createLogger } from '@code829/shared/lib/logger';
 import { centsToDollars } from '@code829/shared/utils/currency';
+import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 
 const log = createLogger('Admin/EventWizardPage');
 
@@ -86,6 +87,7 @@ export default function EventWizardPage() {
   const [existingGrid, setExistingGrid] = useState<{ rows: number; cols: number }>({ rows: 8, cols: 10 });
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const ticketTypes = Form.useWatch('ticketTypes', form) || [];
   const watchedStartDate = Form.useWatch('startDate', form);
   const watchedStartTime = Form.useWatch('startTime', form);
@@ -756,13 +758,13 @@ export default function EventWizardPage() {
         </div>
 
         {/* ── Navigation ──────────────────────────────────────────── */}
-        <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
           {step > 0 && (
             <Button
               htmlType="button"
               icon={<ArrowLeftOutlined />}
               onClick={() => setStep((s) => Math.max(0, s - 1))}
-              style={{ height: 44, borderRadius: 10 }}
+              style={{ height: 44, borderRadius: 10, width: isMobile ? '100%' : 'auto' }}
             >
               Back
             </Button>
@@ -770,7 +772,7 @@ export default function EventWizardPage() {
           <Button
             htmlType="button"
             onClick={() => navigate(isEditMode ? `/events/${id}` : '/events')}
-            style={{ height: 44, borderRadius: 10 }}
+            style={{ height: 44, borderRadius: 10, width: isMobile ? '100%' : 'auto' }}
           >
             Cancel
           </Button>
@@ -780,7 +782,7 @@ export default function EventWizardPage() {
               onClick={handleSubmit}
               loading={saving}
               disabled={!eventLoaded}
-              style={{ height: 44, borderRadius: 10 }}
+              style={{ height: 44, borderRadius: 10, width: isMobile ? '100%' : 'auto' }}
             >
               Save changes
             </Button>
@@ -792,7 +794,12 @@ export default function EventWizardPage() {
               onClick={handleNext}
               icon={<ArrowRightOutlined />}
               iconPosition="end"
-              style={{ height: 44, borderRadius: 10, marginLeft: 'auto' }}
+              style={{
+                height: 44,
+                borderRadius: 10,
+                marginLeft: isMobile ? 0 : 'auto',
+                width: isMobile ? '100%' : 'auto',
+              }}
             >
               Continue
             </Button>
@@ -803,7 +810,12 @@ export default function EventWizardPage() {
               onClick={handleSubmit}
               loading={saving}
               disabled={!eventLoaded}
-              style={{ height: 44, borderRadius: 10, marginLeft: 'auto' }}
+              style={{
+                height: 44,
+                borderRadius: 10,
+                marginLeft: isMobile ? 0 : 'auto',
+                width: isMobile ? '100%' : 'auto',
+              }}
             >
               {isEditMode ? 'Save changes' : 'Create event'}
             </Button>
