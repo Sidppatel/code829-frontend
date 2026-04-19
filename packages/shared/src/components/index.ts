@@ -10,9 +10,9 @@ export * from './ui';
 
 // Auth
 export { default as AdminLoginForm } from './auth/AdminLoginForm';
+export { default as AdminProfilePage } from './auth/AdminProfilePage';
 export { default as ForgotPasswordForm } from './auth/ForgotPasswordForm';
 export { default as InvitationSignupForm } from './auth/InvitationSignupForm';
-export { default as ProfileSetupForm } from './auth/ProfileSetupForm';
 export { default as ProtectedRoute } from './auth/ProtectedRoute';
 export { default as ResetPasswordForm } from './auth/ResetPasswordForm';
 
