@@ -7,6 +7,8 @@ export interface SubmitFeedbackRequest {
   message: string;
   rating: number;
   diagnostics?: string;
+  pageUrl?: string;
+  stepsToReproduce?: string;
 }
 
 export class FeedbackService extends BaseService {

@@ -35,6 +35,8 @@ export default function FeedbackPage() {
   const [type, setType] = useState('General');
   const [body, setBody] = useState('');
   const [rating, setRating] = useState(0);
+  const [pageUrl, setPageUrl] = useState('');
+  const [stepsToReproduce, setStepsToReproduce] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -53,6 +55,8 @@ export default function FeedbackPage() {
         message: body.trim(),
         rating,
         diagnostics,
+        pageUrl: type === 'Bug' && pageUrl.trim() ? pageUrl.trim() : undefined,
+        stepsToReproduce: type === 'Bug' && stepsToReproduce.trim() ? stepsToReproduce.trim() : undefined,
       });
       log.info('Feedback submitted', { type, rating });
       setSubmitted(true);
@@ -107,6 +111,8 @@ export default function FeedbackPage() {
                 setBody('');
                 setRating(0);
                 setType('General');
+                setPageUrl('');
+                setStepsToReproduce('');
               }}
               style={{ 
                 height: 54, 
@@ -186,6 +192,8 @@ export default function FeedbackPage() {
                 setBody('');
                 setRating(0);
                 setType('General');
+                setPageUrl('');
+                setStepsToReproduce('');
               }}
               style={{ 
                 height: 60, 
@@ -213,9 +221,9 @@ export default function FeedbackPage() {
       style={{ paddingBottom: 150 }}
     >
       <PagePreamble
-        kicker="Curating perfection"
-        title="Help us shape the next evening"
-        subtitle="Every note you share sharpens the room we set tomorrow. Your feedback fuels the next curtain."
+        kicker="Feedback"
+        title="Tell us what you think"
+        subtitle="Found a bug? Have a suggestion? We read everything and use it to improve the platform."
       />
 
       <div className="page-container">
@@ -226,7 +234,7 @@ export default function FeedbackPage() {
                 {/* Feedback Type Selector */}
                 <div style={{ marginBottom: 48 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 24, color: 'var(--text-muted)' }}>
-                    Selection Category
+                    Category
                   </label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
                     {feedbackTypes.map((t) => (
@@ -259,7 +267,7 @@ export default function FeedbackPage() {
                 {/* Rating Input */}
                 <div style={{ marginBottom: 48 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 24, color: 'var(--text-muted)' }}>
-                    Global Satisfaction
+                    Overall Rating
                   </label>
                   <div style={{ 
                     background: 'var(--bg-soft)',
@@ -274,7 +282,7 @@ export default function FeedbackPage() {
                       style={{ fontSize: 42, color: 'var(--accent-gold)' }}
                     />
                     <div style={{ marginTop: 16, fontSize: 14, color: 'var(--text-secondary)', fontWeight: 600 }}>
-                      {rating === 0 ? 'How would you rate your journey?' : `Excellence Level: ${rating} / 5`}
+                      {rating === 0 ? 'How would you rate your experience?' : ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'][rating] + ` — ${rating} / 5`}
                     </div>
                   </div>
                 </div>
@@ -284,7 +292,7 @@ export default function FeedbackPage() {
                   <Col xs={24} sm={12}>
                     <div style={{ marginBottom: 32 }}>
                       <label style={{ display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 16, color: 'var(--text-muted)' }}>
-                        Identify Yourself
+                        Your Name
                       </label>
                       <Input
                         value={name}
@@ -306,7 +314,7 @@ export default function FeedbackPage() {
                   <Col xs={24} sm={12}>
                     <div style={{ marginBottom: 32 }}>
                       <label style={{ display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 16, color: 'var(--text-muted)' }}>
-                        Contact Point
+                        Email (optional)
                       </label>
                       <Input
                         value={email}
@@ -329,20 +337,20 @@ export default function FeedbackPage() {
                 </Row>
 
                 {/* Feedback Message */}
-                <div style={{ marginBottom: 48 }}>
+                <div style={{ marginBottom: type === 'Bug' ? 24 : 48 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 16, color: 'var(--text-muted)' }}>
-                    Detailed Perspective
+                    {type === 'Bug' ? 'What went wrong?' : 'Your message'}
                   </label>
                   <Input.TextArea
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    placeholder="Elaborate on your experience or propose an evolution..."
-                    rows={6}
-                    style={{ 
-                      borderRadius: 24, 
+                    placeholder={type === 'Bug' ? 'Describe the bug — what you saw vs. what you expected...' : 'Share your thoughts...'}
+                    rows={5}
+                    style={{
+                      borderRadius: 24,
                       background: 'var(--bg-soft)',
-                      border: '1px solid var(--border)', 
-                      color: 'var(--text-primary)', 
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
                       padding: '24px',
                       fontSize: 16,
                       lineHeight: 1.6,
@@ -350,6 +358,53 @@ export default function FeedbackPage() {
                     }}
                   />
                 </div>
+
+                {/* Bug-specific fields */}
+                {type === 'Bug' && (
+                  <>
+                    <div style={{ marginBottom: 24 }}>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 16, color: 'var(--text-muted)' }}>
+                        Page URL (where it happened)
+                      </label>
+                      <Input
+                        value={pageUrl}
+                        onChange={(e) => setPageUrl(e.target.value)}
+                        placeholder="e.g. https://code829.com/purchases"
+                        style={{
+                          height: 54,
+                          borderRadius: 18,
+                          background: 'var(--bg-soft)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text-primary)',
+                          fontSize: 15,
+                          padding: '0 20px',
+                          fontWeight: 500,
+                        }}
+                      />
+                    </div>
+                    <div style={{ marginBottom: 48 }}>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 16, color: 'var(--text-muted)' }}>
+                        Steps to reproduce
+                      </label>
+                      <Input.TextArea
+                        value={stepsToReproduce}
+                        onChange={(e) => setStepsToReproduce(e.target.value)}
+                        placeholder={"1. Go to purchases page\n2. Click 'Tickets'\n3. See error"}
+                        rows={4}
+                        style={{
+                          borderRadius: 18,
+                          background: 'var(--bg-soft)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text-primary)',
+                          padding: '16px 20px',
+                          fontSize: 15,
+                          lineHeight: 1.6,
+                          fontWeight: 500,
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
 
                 {/* Submit Action */}
                 <Button
@@ -371,7 +426,7 @@ export default function FeedbackPage() {
                     letterSpacing: 1
                   }}
                 >
-                  Post Feedback
+                  Submit Feedback
                 </Button>
               </div>
             </motion.div>
