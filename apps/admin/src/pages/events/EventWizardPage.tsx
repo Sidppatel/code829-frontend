@@ -804,7 +804,7 @@ export default function EventWizardPage() {
           >
             Cancel
           </Button>
-          {isEditMode && isDirty && (
+          {isEditMode && isDirty && !isLast && (
             <Button
               htmlType="submit"
               onClick={handleSubmit}
