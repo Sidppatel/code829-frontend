@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Typography, Button, Dropdown, Space } from 'antd';
 import type { MenuProps } from 'antd';
 import PulseIndicator from '../shared/PulseIndicator';
@@ -10,6 +11,34 @@ interface TopHeaderProps {
   user: UserProfile | AdminUserProfile | null;
   userMenuItems: MenuProps['items'];
   showMetrics?: boolean;
+}
+
+function UserAvatar({ imageUrl, firstName }: { imageUrl?: string | null; firstName?: string }) {
+  const [imgError, setImgError] = useState(false);
+  const showImage = !!imageUrl && !imgError;
+
+  return showImage ? (
+    <img
+      src={imageUrl!}
+      alt={firstName}
+      style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }}
+      onError={() => setImgError(true)}
+    />
+  ) : (
+    <div style={{
+      width: 24,
+      height: 24,
+      borderRadius: '50%',
+      background: 'var(--primary)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'var(--text-on-brand)',
+      fontSize: 11
+    }}>
+      {firstName?.[0]}
+    </div>
+  );
 }
 
 export default function TopHeader({ isMobile, title, user, userMenuItems, showMetrics = false }: TopHeaderProps) {
@@ -26,7 +55,7 @@ export default function TopHeader({ isMobile, title, user, userMenuItems, showMe
                 Welcome back, {user?.firstName}
               </Typography.Text>
               <Typography.Text style={{ color: 'var(--text-secondary)', fontSize: 12, fontWeight: 500 }}>
-                {title === 'Developer' ? 'Developer Console is ready. System load optimal.' : 'Here’s what needs your attention today.'}
+                {title === 'Developer' ? 'Developer Console is ready. System load optimal.' : "Here's what needs your attention today."}
               </Typography.Text>
             </div>
 
@@ -71,27 +100,7 @@ export default function TopHeader({ isMobile, title, user, userMenuItems, showMe
             }}
             className="hover-lift"
           >
-            {user?.imageUrl ? (
-              <img
-                src={user.imageUrl}
-                alt={user?.firstName}
-                style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }}
-              />
-            ) : (
-              <div style={{
-                width: 24,
-                height: 24,
-                borderRadius: '50%',
-                background: 'var(--primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--text-on-brand)',
-                fontSize: 11
-              }}>
-                {user?.firstName?.[0]}
-              </div>
-            )}
+            <UserAvatar imageUrl={user?.imageUrl} firstName={user?.firstName} />
             {!isMobile && (title === 'Developer' ? 'Dev Console' : user?.firstName)}
           </Button>
         </Dropdown>
