@@ -371,7 +371,6 @@ export default function EventWizardPage() {
       <Form
         form={form}
         layout="vertical"
-        onFinish={handleSubmit}
         onValuesChange={onValuesChange}
         initialValues={!isEditMode ? {
           startDate: dayjs(),
@@ -760,6 +759,7 @@ export default function EventWizardPage() {
         <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
           {step > 0 && (
             <Button
+              htmlType="button"
               icon={<ArrowLeftOutlined />}
               onClick={() => setStep((s) => Math.max(0, s - 1))}
               style={{ height: 44, borderRadius: 10 }}
@@ -768,6 +768,7 @@ export default function EventWizardPage() {
             </Button>
           )}
           <Button
+            htmlType="button"
             onClick={() => navigate(isEditMode ? `/events/${id}` : '/events')}
             style={{ height: 44, borderRadius: 10 }}
           >
@@ -775,6 +776,7 @@ export default function EventWizardPage() {
           </Button>
           {isEditMode && isDirty && (
             <Button
+              htmlType="submit"
               onClick={handleSubmit}
               loading={saving}
               disabled={!eventLoaded}
@@ -786,6 +788,7 @@ export default function EventWizardPage() {
           {!isLast ? (
             <Button
               type="primary"
+              htmlType="button"
               onClick={handleNext}
               icon={<ArrowRightOutlined />}
               iconPosition="end"
@@ -797,6 +800,7 @@ export default function EventWizardPage() {
             <Button
               type="primary"
               htmlType="submit"
+              onClick={handleSubmit}
               loading={saving}
               disabled={!eventLoaded}
               style={{ height: 44, borderRadius: 10, marginLeft: 'auto' }}
