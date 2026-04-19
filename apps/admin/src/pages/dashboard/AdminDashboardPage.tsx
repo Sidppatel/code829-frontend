@@ -96,18 +96,18 @@ export default function AdminDashboardPage() {
 
           const progressVars: NextEventVars | undefined = nextEvent
             ? {
-                '--c829-sold': nextEvent.soldCount || 0,
-                '--c829-cap': nextEvent.totalCapacity || 1,
-              }
+              '--c829-sold': nextEvent.soldCount || 0,
+              '--c829-cap': nextEvent.totalCapacity || 1,
+            }
             : undefined;
 
           return (
             <>
-              <StatsRow 
-                items={kpis} 
-                variant="kpi" 
-                columns={isMobile ? 2 : 4} 
-                style={{ marginBottom: isMobile ? 16 : 28 }} 
+              <StatsRow
+                items={kpis}
+                variant="kpi"
+                columns={isMobile ? 2 : 4}
+                style={{ marginBottom: isMobile ? 16 : 28 }}
               />
               {nextEvent ? (
                 <div
@@ -127,7 +127,7 @@ export default function AdminDashboardPage() {
                       boxShadow: 'var(--shadow-sm)',
                       cursor: 'pointer',
                     }}
-                    onClick={() => navigate(`/events/${nextEvent.slug}`)}
+                    onClick={() => navigate(`/events/${nextEvent.eventId}`)}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                       <div
@@ -174,7 +174,7 @@ export default function AdminDashboardPage() {
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/events/${nextEvent.slug}`);
+                          navigate(`/events/${nextEvent.eventId}`);
                         }}
                         style={{ borderRadius: 'var(--radius-md)', fontWeight: 600 }}
                       >
