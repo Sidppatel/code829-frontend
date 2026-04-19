@@ -46,6 +46,15 @@ function UserAvatar({ imageUrl, firstName }: { imageUrl?: string | null; firstNa
 }
 
 export default function TopHeader({ isMobile, title, user, userMenuItems, showMetrics = false }: TopHeaderProps) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Wrap each item's onClick to also close the dropdown
+  const wrappedItems = userMenuItems?.map((item) => {
+    if (!item || !('onClick' in item) || !item.onClick) return item;
+    const original = item.onClick;
+    return { ...item, onClick: (...args: Parameters<NonNullable<typeof original>>) => { setDropdownOpen(false); original(...args); } };
+  });
+
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, height: '100%' }}>
@@ -87,7 +96,13 @@ export default function TopHeader({ isMobile, title, user, userMenuItems, showMe
       </div>
 
       <Space size={16}>
-        <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
+        <Dropdown
+          menu={{ items: wrappedItems }}
+          placement="bottomRight"
+          arrow
+          open={dropdownOpen}
+          onOpenChange={setDropdownOpen}
+        >
           <Button
             type="text"
             style={{
