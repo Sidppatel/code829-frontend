@@ -12,6 +12,7 @@ import {
   TeamOutlined,
   SendOutlined,
   ScanOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@code829/shared/hooks/useAuth';
@@ -113,7 +114,7 @@ export default function AdminLayout() {
 
   const userMenuItems: MenuProps['items'] = [
     { key: 'profile', label: 'Profile', icon: <UserOutlined />, onClick: () => navigate('/profile') },
-    { key: 'settings', label: 'Settings', icon: <UserOutlined />, onClick: () => navigate('/settings') },
+    { key: 'settings', label: 'Settings', icon: <SettingOutlined />, onClick: () => navigate('/settings') },
     { type: 'divider' as const },
     { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, onClick: () => { logout(); navigate('/login'); } },
   ];
@@ -143,6 +144,8 @@ export default function AdminLayout() {
             navGroups={navGroups}
             user={user}
             userSecondaryRole="Admin"
+            userSecondaryLink="/profile"
+            userSecondaryLinkLabel="Profile"
             basePath=""
             logout={logout}
           />
