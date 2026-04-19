@@ -182,14 +182,6 @@ export default function AdminDashboardPage() {
                       >
                         Manage event
                       </Button>
-                      <Button
-                        type="text"
-                        size="small"
-                        style={{ color: 'var(--text-secondary)', fontWeight: 600 }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        Export guest list
-                      </Button>
                     </div>
                   </div>
 
