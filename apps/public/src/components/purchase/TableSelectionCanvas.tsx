@@ -113,9 +113,8 @@ export default function TableSelectionCanvas({
           return (
             <Card
               size="small"
-              title={`${lockedTables.length} Table${
-                lockedTables.length > 1 ? 's' : ''
-              } Selected — ${labels}`}
+              title={`${lockedTables.length} Table${lockedTables.length > 1 ? 's' : ''
+                } Selected — ${labels}`}
               className="ts-detail-card"
             >
               <Space orientation="vertical" size="small" style={{ width: '100%' }}>
@@ -158,7 +157,7 @@ export default function TableSelectionCanvas({
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography.Text type="secondary">Total price</Typography.Text>
                   <Typography.Text strong>
-                    {quote ? centsToUSD(quote.totalCents) : '—'}
+                    {quote ? centsToUSD(quote.displaySubtotalCents) : '—'}
                   </Typography.Text>
                 </div>
                 <Button

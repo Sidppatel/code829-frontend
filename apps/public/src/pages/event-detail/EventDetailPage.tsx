@@ -322,6 +322,27 @@ export default function EventDetailPage() {
     void loadTicketTypes();
   }, [event]);
 
+  // Restore table selection state on mount/refresh if already in selection steps.
+  useEffect(() => {
+    if (!event || event.layoutMode !== 'Grid' || tablesData) return;
+    if (step !== 'select-table' && step !== 'checkout') return;
+
+    const restore = async () => {
+      try {
+        const [tablesRes, locksRes] = await Promise.all([
+          eventsApi.getTables(event.eventId),
+          tablePurchaseApi.getMyLocks(event.eventId),
+        ]);
+        setTablesData(tablesRes.data);
+        if (locksRes.data.length > 0) setTableLocks(locksRes.data);
+        log.info('Restored table selection state from refresh', { eventId: event.eventId, locks: locksRes.data.length });
+      } catch (err) {
+        log.error('Failed to restore table state on refresh', { eventId: event.eventId, err });
+      }
+    };
+    void restore();
+  }, [event, step, tablesData]);
+
   const loadTables = useCallback(async () => {
     if (!event) return;
     try {
@@ -529,70 +550,78 @@ export default function EventDetailPage() {
 
   if (step === 'select-table') {
     return (
-      <SelectTableStep
-        event={event}
-        tablesData={tablesData}
-        lockingTableId={lockingTableId}
-        lockedTables={lockedTablesFromGrid}
-        onLockTable={handleLockTable}
-        onUnlockTable={handleUnlockTable}
-        onProceedToCheckout={handleProceedToCheckout}
-        onLockExpired={handleLockExpired}
-        onBack={() => { void handleCancelLock(); setStep('info'); }}
-      />
+      <div className="page-container" style={{ paddingTop: isMobile ? 48 : 64 }}>
+        <SelectTableStep
+          event={event}
+          tablesData={tablesData}
+          lockingTableId={lockingTableId}
+          lockedTables={lockedTablesFromGrid}
+          onLockTable={handleLockTable}
+          onUnlockTable={handleUnlockTable}
+          onProceedToCheckout={handleProceedToCheckout}
+          onLockExpired={handleLockExpired}
+          onBack={() => { void handleCancelLock(); setStep('info'); }}
+        />
+      </div>
     );
   }
 
   if (step === 'checkout' && tableLocks.length > 0) {
     return (
-      <CheckoutStep
-        mode="grid"
-        event={event}
-        tableLocks={tableLocks}
-        confirming={confirming}
-        setConfirming={setConfirming}
-        error={checkoutError}
-        clientSecret={clientSecret}
-        stripePromise={stripePromise}
-        quote={quote}
-        quoteLoading={quoteLoading}
-        quoteError={quoteError}
-        onPaymentSuccess={handlePaymentSuccess}
-        onCancel={handleCancelLock}
-        onExpired={handleLockExpired}
-      />
+      <div className="page-container" style={{ paddingTop: isMobile ? 48 : 64 }}>
+        <CheckoutStep
+          mode="grid"
+          event={event}
+          tableLocks={tableLocks}
+          confirming={confirming}
+          setConfirming={setConfirming}
+          error={checkoutError}
+          clientSecret={clientSecret}
+          stripePromise={stripePromise}
+          quote={quote}
+          quoteLoading={quoteLoading}
+          quoteError={quoteError}
+          onPaymentSuccess={handlePaymentSuccess}
+          onCancel={handleCancelLock}
+          onExpired={handleLockExpired}
+        />
+      </div>
     );
   }
 
   if (step === 'capacity') {
     return (
-      <CapacityStep
-        event={event}
-        ticketTypes={ticketTypes}
-        ticketTypesLoading={ticketTypesLoading}
-        onProceed={handleCapacityProceed}
-        onBack={() => setStep('info')}
-      />
+      <div className="page-container" style={{ paddingTop: isMobile ? 48 : 64 }}>
+        <CapacityStep
+          event={event}
+          ticketTypes={ticketTypes}
+          ticketTypesLoading={ticketTypesLoading}
+          onProceed={handleCapacityProceed}
+          onBack={() => setStep('info')}
+        />
+      </div>
     );
   }
 
   if (step === 'checkout-open') {
     return (
-      <CheckoutStep
-        mode="open"
-        event={event}
-        seatCount={seatCount}
-        confirming={confirming}
-        setConfirming={setConfirming}
-        error={checkoutError}
-        clientSecret={clientSecret}
-        stripePromise={stripePromise}
-        quote={quote}
-        quoteLoading={quoteLoading}
-        quoteError={quoteError}
-        onPaymentSuccess={handlePaymentSuccess}
-        onCancel={handleCancelOpen}
-      />
+      <div className="page-container" style={{ paddingTop: isMobile ? 48 : 64 }}>
+        <CheckoutStep
+          mode="open"
+          event={event}
+          seatCount={seatCount}
+          confirming={confirming}
+          setConfirming={setConfirming}
+          error={checkoutError}
+          clientSecret={clientSecret}
+          stripePromise={stripePromise}
+          quote={quote}
+          quoteLoading={quoteLoading}
+          quoteError={quoteError}
+          onPaymentSuccess={handlePaymentSuccess}
+          onCancel={handleCancelOpen}
+        />
+      </div>
     );
   }
 

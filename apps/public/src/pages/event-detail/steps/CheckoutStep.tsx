@@ -4,6 +4,7 @@ import type { Stripe } from '@stripe/stripe-js';
 import type { EventDetail } from '@code829/shared/types/event';
 import type { TableLock } from '@code829/shared/types/layout';
 import type { PricingQuote } from '@code829/shared/types/pricing';
+import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import CheckoutPanel from '../../../components/purchase/CheckoutPanel';
 
 interface GridProps {
@@ -42,12 +43,28 @@ interface OpenProps {
 type Props = GridProps | OpenProps;
 
 export default function CheckoutStep(props: Props) {
+  const isMobile = useIsMobile();
   const backLabel = props.mode === 'grid' ? 'Back to Table Selection' : 'Back to Seat Selection';
 
   return (
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-      <Button icon={<ArrowLeftOutlined />} onClick={props.onCancel}>{backLabel}</Button>
-      <Typography.Title level={3}>Complete Your Purchase &mdash; {props.event.title}</Typography.Title>
+      <Button 
+        type="text"
+        icon={<ArrowLeftOutlined />} 
+        onClick={props.onCancel}
+        style={{ 
+          color: 'var(--text-secondary)',
+          padding: 0,
+          height: 'auto',
+          fontWeight: 600,
+          fontSize: isMobile ? 14 : 15
+        }}
+      >
+        {backLabel}
+      </Button>
+      <Typography.Title level={isMobile ? 4 : 3} style={{ margin: 0 }}>
+        Complete Your Purchase &mdash; {props.event.title}
+      </Typography.Title>
       <Row gutter={[24, 24]} justify="center">
         <Col xs={24} sm={16} md={12} lg={8}>
           {props.mode === 'grid' ? (

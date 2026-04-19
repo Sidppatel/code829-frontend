@@ -15,7 +15,16 @@
       "mcp__Claude_in_Chrome__javascript_tool",
       "Bash(pnpm lint *)",
       "Bash(pnpm --filter @code829/public lint)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Read(//d/event-platform/code829-backend/**)",
+      "Bash(dotnet build *)",
+      "Read(//d/event-platform/**)",
+      "Bash(powershell -ExecutionPolicy Bypass -File ./stop.ps1)",
+      "Bash(docker compose *)",
+      "Bash(powershell -ExecutionPolicy Bypass -File ./start.ps1)",
+      "Bash(docker exec *)",
+      "Bash(ls api/bin/Debug/net10.0/db.dll)",
+      "Bash(dir api\\\\bin\\\\Debug\\\\net10.0\\\\db.dll)"
     ]
   }
 }

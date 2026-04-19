@@ -1,6 +1,7 @@
 import { Button, Col, Row, Skeleton, Space, Typography } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import type { EventDetail, EventTableDto, EventTablesResponse } from '@code829/shared/types/event';
+import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import TableSelectionCanvas from '../../../components/purchase/TableSelectionCanvas';
 
 interface Props {
@@ -19,10 +20,26 @@ export default function SelectTableStep({
   event, tablesData, lockingTableId, lockedTables,
   onLockTable, onUnlockTable, onProceedToCheckout, onLockExpired, onBack,
 }: Props) {
+  const isMobile = useIsMobile();
   return (
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-      <Button icon={<ArrowLeftOutlined />} onClick={onBack}>Back to Event</Button>
-      <Typography.Title level={3}>Select a Table &mdash; {event.title}</Typography.Title>
+      <Button 
+        type="text"
+        icon={<ArrowLeftOutlined />} 
+        onClick={onBack}
+        style={{ 
+          color: 'var(--text-secondary)',
+          padding: 0,
+          height: 'auto',
+          fontWeight: 600,
+          fontSize: isMobile ? 14 : 15
+        }}
+      >
+        Back to Event
+      </Button>
+      <Typography.Title level={isMobile ? 4 : 3} style={{ margin: 0 }}>
+        Select a Table &mdash; {event.title}
+      </Typography.Title>
       {!tablesData ? (
         <Row justify="center"><Col xs={24}><Skeleton.Node active style={{ width: '100%', height: 400 }} /></Col></Row>
       ) : (
