@@ -4,6 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from '@code829/shared/context/ThemeContext';
 import { ThemedApp } from '@code829/shared/components/ThemedApp';
 import { initGlobalErrorListeners } from '@code829/shared/lib/globalErrors';
+import { installConsoleBuffer } from '@code829/shared/lib/consoleBuffer';
 import { configureApiClient } from '@code829/shared/lib/axios';
 import { initWebVitals } from './lib/webVitals';
 import '@fontsource/inter/400.css';
@@ -15,6 +16,7 @@ import '@fontsource/playfair-display/700.css';
 import '@code829/shared/index.css';
 import App from './App';
 
+installConsoleBuffer();
 initGlobalErrorListeners();
 configureApiClient('user');
 

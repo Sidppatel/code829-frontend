@@ -6,6 +6,7 @@ export interface SubmitFeedbackRequest {
   type: string;
   message: string;
   rating: number;
+  diagnostics?: string;
 }
 
 export class FeedbackService extends BaseService {

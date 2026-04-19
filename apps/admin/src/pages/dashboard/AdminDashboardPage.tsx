@@ -110,16 +110,18 @@ export default function AdminDashboardPage() {
                 style={{ marginBottom: isMobile ? 16 : 28 }}
               />
               {nextEvent ? (
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.6fr) minmax(0, 1fr)',
-                    gap: isMobile ? 16 : 20,
-                    marginBottom: isMobile ? 16 : 28,
-                  }}
-                >
                   <div
                     style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      flexWrap: 'wrap',
+                      gap: isMobile ? 16 : 20,
+                      marginBottom: isMobile ? 16 : 28,
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: isMobile ? '1 1 100%' : '1.6 1 0%',
                       background: 'var(--bg-surface)',
                       border: '1px solid var(--border)',
                       borderRadius: 'var(--radius-lg)',
@@ -191,22 +193,22 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
 
-                  <div
-                    style={{
-                      background: 'var(--bg-surface)',
-                      border: '1px solid var(--border)',
-                      borderRadius: 'var(--radius-lg)',
-                      padding: 24,
-                      boxShadow: 'var(--shadow-sm)',
-                    }}
-                  >
+                    <div
+                      style={{
+                        flex: isMobile ? '1 1 100%' : '1 1 0%',
+                        background: 'var(--bg-surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius-lg)',
+                        padding: 24,
+                        boxShadow: 'var(--shadow-sm)',
+                      }}
+                    >
                     <DisplayHeading as="div" size="sm" style={{ marginBottom: 12 }}>
                       At a glance
                     </DisplayHeading>
                     <ActivityRow label="Paid purchases" value={nextEvent.paidPurchases} />
                     <ActivityRow label="Pending" value={nextEvent.pendingPurchases} />
                     <ActivityRow label="Cancelled" value={nextEvent.cancelledPurchases} />
-                    <ActivityRow label="Refunded" value={nextEvent.refundedPurchases} />
                     <ActivityRow label="Projected" value={centsToUSD(nextEvent.potentialRevenueCents)} last />
                   </div>
                 </div>

@@ -45,7 +45,7 @@ export interface EventDetail extends EventSummary {
 }
 
 export interface VenueBasic {
-  id: string;
+  venueId: string;
   name: string;
   address: string;
   city: string;

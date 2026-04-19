@@ -11,6 +11,7 @@ import {
   SendOutlined,
 } from '@ant-design/icons';
 import { feedbackApi } from '../../services/api';
+import { getDiagnostics } from '@code829/shared/lib/consoleBuffer';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import PagePreamble from '../../components/layout/PagePreamble';
 import { createLogger } from '@code829/shared/lib/logger';
@@ -43,12 +44,15 @@ export default function FeedbackPage() {
 
     setSubmitting(true);
     try {
+      // Bug reports carry a diagnostics blob (UA, URL, recent console errors) to speed triage.
+      const diagnostics = type === 'Bug' ? JSON.stringify(getDiagnostics()) : undefined;
       await feedbackApi.submit({
         name: name.trim(),
         email: email.trim() || undefined,
         type,
         message: body.trim(),
         rating,
+        diagnostics,
       });
       log.info('Feedback submitted', { type, rating });
       setSubmitted(true);
