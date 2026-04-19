@@ -448,7 +448,7 @@ export default function EventWizardPage() {
                     style={{ width: '100%' }}
                     getPopupContainer={() => document.body}
                     placement="bottomLeft"
-                    popupClassName="ep-picker-popup-mobile"
+                    classNames={{ popup: { root: "ep-picker-popup-mobile" } }}
                   />
                 </Form.Item>
               </Col>
@@ -470,7 +470,7 @@ export default function EventWizardPage() {
                     style={{ width: '100%' }}
                     getPopupContainer={() => document.body}
                     placement="bottomLeft"
-                    popupClassName="ep-picker-popup-mobile"
+                    classNames={{ popup: { root: "ep-picker-popup-mobile" } }}
                   />
                 </Form.Item>
               </Col>
@@ -501,7 +501,7 @@ export default function EventWizardPage() {
                     style={{ width: '100%' }}
                     getPopupContainer={() => document.body}
                     placement="bottomLeft"
-                    popupClassName="ep-picker-popup-mobile"
+                    classNames={{ popup: { root: "ep-picker-popup-mobile" } }}
                   />
                 </Form.Item>
               </Col>
@@ -542,7 +542,7 @@ export default function EventWizardPage() {
                     style={{ width: '100%' }}
                     getPopupContainer={() => document.body}
                     placement="bottomLeft"
-                    popupClassName="ep-picker-popup-mobile"
+                    classNames={{ popup: { root: "ep-picker-popup-mobile" } }}
                   />
                 </Form.Item>
               </Col>
@@ -821,7 +821,7 @@ export default function EventWizardPage() {
               htmlType="button"
               onClick={handleNext}
               icon={<ArrowRightOutlined />}
-              iconPosition="end"
+              iconPlacement="end"
               style={{
                 height: 44,
                 borderRadius: 10,
