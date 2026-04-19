@@ -100,28 +100,6 @@ export default function AdminPurchasesPage() {
             key: 'createdAt',
             render: (d: string) => formatEventDate(d),
           },
-          {
-            title: 'Actions',
-            key: 'actions',
-            render: (_: unknown, record: Purchase) =>
-              record.status === 'Paid' ? (
-                <Button
-                  size="small"
-                  icon={<UndoOutlined />}
-                  onClick={() =>
-                    confirm({
-                      title: 'Refund this purchase?',
-                      description: `Refund ${centsToUSD(record.totalCents)} to ${record.userName}?`,
-                      tone: 'danger',
-                      confirmLabel: 'Refund',
-                      onConfirm: () => refund.run(record.id),
-                    })
-                  }
-                >
-                  Refund
-                </Button>
-              ) : null,
-          },
         ]}
         mobileCard={(booking) => (
           <HumanCard
@@ -162,26 +140,6 @@ export default function AdminPurchasesPage() {
               <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
                 Captured {formatEventDate(booking.createdAt)}
               </div>
-              {booking.status === 'Paid' && (
-                <Button
-                  size="small"
-                  type="text"
-                  icon={<UndoOutlined />}
-                  danger
-                  style={{ fontWeight: 600 }}
-                  onClick={() =>
-                    confirm({
-                      title: 'Refund this purchase?',
-                      description: `Refund ${centsToUSD(booking.totalCents)} to ${booking.userName}?`,
-                      tone: 'danger',
-                      confirmLabel: 'Refund',
-                      onConfirm: () => refund.run(booking.id),
-                    })
-                  }
-                >
-                  Refund
-                </Button>
-              )}
             </div>
           </HumanCard>
         )}
