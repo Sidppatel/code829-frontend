@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Button, Input, Tag, Typography } from 'antd';
+import { Button, Input, Select, Tag, Typography } from 'antd';
 import { DeleteOutlined, SendOutlined } from '@ant-design/icons';
 import apiClient from '@code829/shared/lib/axios';
 import {
@@ -41,8 +41,8 @@ export default function InvitationsPage() {
 
   const crud = useCrudModal<Invitation>();
   const send = useAsyncAction(
-    (values: { email: string }) =>
-      apiClient.post('/admin/staff/invite', { email: values.email, role: 'Staff' }),
+    (values: { email: string; role: string }) =>
+      apiClient.post('/admin/staff/invite', { email: values.email, role: values.role }),
     { successMessage: 'Invitation sent', onSuccess: () => { crud.close(); refresh(); } },
   );
   const revoke = useAsyncAction(
@@ -56,7 +56,7 @@ export default function InvitationsPage() {
   return (
     <PageShell
       title="Invitations"
-      subtitle="Manage staff invitations"
+      subtitle="Invite admins and staff members"
       extra={
         <Button type="primary" icon={<SendOutlined />} onClick={crud.openCreate}>
           Send Invitation
@@ -111,24 +111,33 @@ export default function InvitationsPage() {
           onAction: crud.openCreate,
         }}
       />
-      <CrudModal<{ email: string }>
+      <CrudModal<{ email: string; role: string }>
         open={crud.open}
         mode={crud.mode}
         onClose={crud.close}
         saving={send.loading}
         onSubmit={async (v) => { await send.run(v); }}
-        titles={{ create: 'Invite Staff Member', edit: 'Edit Invitation' }}
+        titles={{ create: 'Send Invitation', edit: 'Edit Invitation' }}
         submitLabel={{ create: 'Send Invitation' }}
+        initialValues={{ role: 'Staff' }}
       >
         {() => (
-          <FormField
-            name="email"
-            label="Email"
-            required
-            rules={[{ type: 'email', message: 'Enter a valid email' }]}
-          >
-            <Input placeholder="staff@example.com" />
-          </FormField>
+          <>
+            <FormField
+              name="email"
+              label="Email"
+              required
+              rules={[{ type: 'email', message: 'Enter a valid email' }]}
+            >
+              <Input placeholder="email@example.com" />
+            </FormField>
+            <FormField name="role" label="Role" required>
+              <Select>
+                <Select.Option value="Staff">Staff</Select.Option>
+                <Select.Option value="Admin">Admin</Select.Option>
+              </Select>
+            </FormField>
+          </>
         )}
       </CrudModal>
     </PageShell>
