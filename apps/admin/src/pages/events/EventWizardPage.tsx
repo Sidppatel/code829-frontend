@@ -633,7 +633,7 @@ export default function EventWizardPage() {
               <Typography.Text strong style={{ display: 'block', marginBottom: 16, fontSize: 14 }}>
                 Ticket tiers
               </Typography.Text>
-              <Form.List name="ticketTypes"> {/* validation anchor */}
+              <Form.List name="ticketTypes">
                 {(fields, { add, remove }) => (
                   <>
                     {fields.map(({ key, name, ...restField }) => (
@@ -641,19 +641,28 @@ export default function EventWizardPage() {
                         key={key}
                         size="small"
                         style={{ marginBottom: 16, background: 'var(--bg-soft)', border: '1px solid var(--border)' }}
-                        extra={ // validation anchor
-                          <Button
-                            type="text"
-                            danger
-                            icon={<MinusCircleOutlined />}
-                            onClick={() => remove(name)}
-                          >
-                            Remove
-                          </Button>
+                        extra={
+                          (() => {
+                            const sold = form.getFieldValue(['ticketTypes', name, 'soldCount']) || 0;
+                            if (sold > 0) return null;
+                            return (
+                              <Button
+                                type="text"
+                                danger
+                                icon={<MinusCircleOutlined />}
+                                onClick={() => remove(name)}
+                              >
+                                Remove
+                              </Button>
+                            );
+                          })()
                         }
                       >
                         <Form.Item {...restField} name={[name, 'id']} hidden>
                           <Input />
+                        </Form.Item>
+                        <Form.Item {...restField} name={[name, "soldCount"]} hidden>
+                          <InputNumber />
                         </Form.Item>
                         <Row gutter={16}>
                           <Col xs={24} sm={12}>
@@ -702,7 +711,7 @@ export default function EventWizardPage() {
                               label="Price ($)"
                               rules={[{ required: true, message: 'Price required' }]}
                             >
-                              <InputNumber min={0} precision={2} style={{ width: '100%' }} placeholder="0.00" />
+                              <InputNumber min={0} precision={2} style={{ width: "100%" }} placeholder="0.00" disabled={form.getFieldValue(["ticketTypes", name, "soldCount"]) > 0} />
                             </Form.Item>
                           </Col>
                           <Col xs={12} sm={6}>
@@ -710,9 +719,24 @@ export default function EventWizardPage() {
                               {...restField}
                               name={[name, 'capacity']}
                               label="Capacity"
-                              rules={[{ required: true, message: 'Qty required' }]}
+                              rules={[
+                                { required: true, message: 'Qty required' },
+                                () => ({
+                                  validator(_, value) {
+                                    const sold = form.getFieldValue(['ticketTypes', name, 'soldCount']) || 0;
+                                    if (value != null && value < sold) {
+                                      return Promise.reject(new Error(`Capacity cannot be less than sold tickets (${sold})`));
+                                    }
+                                    return Promise.resolve();
+                                  },
+                                }),
+                              ]}
                             >
-                              <InputNumber min={1} style={{ width: '100%' }} placeholder="100" />
+                              <InputNumber
+                                min={form.getFieldValue(['ticketTypes', name, 'soldCount']) || 1}
+                                style={{ width: '100%' }}
+                                placeholder="100"
+                              />
                             </Form.Item>
                           </Col>
                           <Col xs={24}>
