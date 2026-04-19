@@ -58,7 +58,7 @@ export default function CrudModal<V extends object = Record<string, unknown>>({
       cancelText={cancelLabel}
       centered
       destroyOnHidden
-      maskClosable={false}
+      mask={{ closable: false }}
     >
       <Form<V> form={form} layout="vertical" preserve={false} initialValues={initialValues as V}>
         {children(form)}
