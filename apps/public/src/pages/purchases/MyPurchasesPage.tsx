@@ -172,7 +172,6 @@ export default function MyPurchasesPage() {
         search={{
           placeholder: 'Search by event name, purchase # or status...',
           onChange: (v) => paged.setFilters({ search: v }),
-          width: 480,
         }}
       />
 
@@ -289,8 +288,8 @@ export default function MyPurchasesPage() {
             <GiftOutlined style={{ fontSize: 24, color: 'var(--primary)' }} />
             <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>You have {guestTickets.tickets.length} guest tickets</h3>
             <p style={{ color: 'var(--text-secondary)', margin: 0 }}>View and manage entries shared with you by others.</p>
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               onClick={() => navigate('/guest-tickets')}
               style={{ marginTop: 8, borderRadius: 12, height: 42, padding: '0 24px', fontWeight: 600 }}
             >
