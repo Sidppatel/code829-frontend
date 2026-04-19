@@ -28,6 +28,8 @@ import {
   PageShell,
   QrModal,
 } from '@code829/shared/components/ui';
+import Text from '@code829/shared/components/shared/Text';
+import { strings, textTemplates } from '@code829/shared/theme/strings';
 import { createLogger } from '@code829/shared/lib/logger';
 
 const log = createLogger('Public/MyPurchasesPage');
@@ -62,7 +64,7 @@ export default function MyPurchasesPage() {
   const cancel = useAsyncAction(
     (id: string) => purchasesApi.cancel(id),
     {
-      successMessage: 'Purchase cancelled',
+      successMessage: strings.bookings.cancelSuccess.text,
       onSuccess: () => {
         log.info('Purchase cancelled');
         paged.refresh();
@@ -123,7 +125,7 @@ export default function MyPurchasesPage() {
                 icon={<SendOutlined />}
                 onClick={() => navigate(`/purchases/${record.id}/tickets`)}
               >
-                Tickets
+                <Text token="bookings.actionTickets" />
               </Button>
               <Button
                 size="small"
@@ -131,7 +133,7 @@ export default function MyPurchasesPage() {
                 loading={bookingQr.loading}
                 onClick={() => bookingQr.show(() => purchasesApi.getQrCode(record.id).then((r) => r.data as Blob))}
               >
-                QR
+                <Text token="bookings.actionQr" />
               </Button>
             </>
           )}
@@ -141,15 +143,15 @@ export default function MyPurchasesPage() {
               danger
               onClick={() =>
                 confirm({
-                  title: 'Cancel Purchase',
-                  description: 'Are you sure you want to cancel this purchase? This action cannot be undone.',
+                  title: strings.bookings.cancelDialogTitle.text,
+                  description: strings.bookings.cancelDialogDescription.text,
                   tone: 'danger',
-                  confirmLabel: 'Cancel Purchase',
+                  confirmLabel: strings.bookings.cancelDialogConfirm.text,
                   onConfirm: () => cancel.run(record.id),
                 })
               }
             >
-              Cancel
+              <Text token="bookings.actionCancel" />
             </Button>
           )}
         </Space>
@@ -159,18 +161,18 @@ export default function MyPurchasesPage() {
 
   return (
     <PageShell
-      documentTitle="My Purchases - Code829"
+      documentTitle={strings.bookings.myPurchasesPageTitle.text}
       preamble={
         <PagePreamble
-          kicker="Your evenings"
-          title="My purchases"
-          subtitle="Review, manage, and share tickets for every reservation you've made."
+          kicker={strings.bookings.kicker.text}
+          title={strings.bookings.pageTitle.text}
+          subtitle={strings.bookings.pageSubtitle.text}
         />
       }
     >
       <FilterBar
         search={{
-          placeholder: 'Search by event name, purchase # or status...',
+          placeholder: strings.bookings.searchPlaceholder.text,
           onChange: (v) => paged.setFilters({ search: v }),
         }}
       />
@@ -237,7 +239,7 @@ export default function MyPurchasesPage() {
                     icon={<SendOutlined />}
                     onClick={() => navigate(`/purchases/${booking.id}/tickets`)}
                   >
-                    Manage Tickets
+                    <Text token="bookings.actionManageTickets" />
                   </Button>
                   <Button
                     size="small"
@@ -245,7 +247,7 @@ export default function MyPurchasesPage() {
                     loading={bookingQr.loading}
                     onClick={() => bookingQr.show(() => purchasesApi.getQrCode(booking.id).then((r) => r.data as Blob))}
                   >
-                    QR Code
+                    <Text token="bookings.actionQrCode" />
                   </Button>
                 </>
               )}
@@ -255,21 +257,24 @@ export default function MyPurchasesPage() {
                   danger
                   onClick={() =>
                     confirm({
-                      title: 'Cancel Purchase',
-                      description: 'Cancel this purchase? This action cannot be undone.',
+                      title: strings.bookings.cancelDialogTitle.text,
+                      description: strings.bookings.cancelDialogDescriptionShort.text,
                       tone: 'danger',
-                      confirmLabel: 'Cancel Purchase',
+                      confirmLabel: strings.bookings.cancelDialogConfirm.text,
                       onConfirm: () => cancel.run(booking.id),
                     })
                   }
                 >
-                  Cancel
+                  <Text token="bookings.actionCancel" />
                 </Button>
               )}
             </div>
           </Card>
         )}
-        empty={{ title: 'No purchases yet', description: 'Your reservations will appear here.' }}
+        empty={{
+          title: strings.bookings.emptyTitle.text,
+          description: strings.bookings.emptyDescription.text,
+        }}
       />
 
       {guestTickets.error && (
@@ -277,8 +282,8 @@ export default function MyPurchasesPage() {
           style={{ marginTop: 24 }}
           type="warning"
           showIcon
-          message="Some guest tickets could not be loaded"
-          description="Invited tickets may not appear in this list. Refresh the page to try again."
+          message={strings.bookings.guestTicketsWarningTitle.text}
+          description={strings.bookings.guestTicketsWarningDescription.text}
         />
       )}
 
@@ -286,14 +291,18 @@ export default function MyPurchasesPage() {
         <div style={{ marginTop: 40, textAlign: 'center', padding: '32px 20px', background: 'var(--bg-soft)', borderRadius: 24, border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
             <GiftOutlined style={{ fontSize: 24, color: 'var(--primary)' }} />
-            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>You have {guestTickets.tickets.length} guest tickets</h3>
-            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>View and manage entries shared with you by others.</p>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
+              {textTemplates.guestTicketsCount(guestTickets.tickets.length).text}
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+              {strings.bookings.guestTicketsCtaSubtitle.text}
+            </p>
             <Button
               type="primary"
               onClick={() => navigate('/guest-tickets')}
               style={{ marginTop: 8, borderRadius: 12, height: 42, padding: '0 24px', fontWeight: 600 }}
             >
-              View Guest Tickets
+              <Text token="bookings.guestTicketsCtaButton" />
             </Button>
           </div>
         </div>
@@ -304,7 +313,7 @@ export default function MyPurchasesPage() {
         onClose={bookingQr.hide}
         qrUrl={bookingQr.url}
         loading={bookingQr.loading}
-        title="Purchase QR Code"
+        title={strings.bookings.qrModalPurchaseTitle.text}
         downloadFileName="booking-qr.png"
       />
       <QrModal
@@ -312,8 +321,8 @@ export default function MyPurchasesPage() {
         onClose={guestQr.hide}
         qrUrl={guestQr.url}
         loading={guestQr.loading}
-        title="Ticket QR"
-        caption="Show this QR code at the venue for check-in"
+        title={strings.bookings.qrModalTicketTitle.text}
+        caption={strings.bookings.qrModalTicketCaption.text}
         downloadFileName="ticket-qr.png"
       />
     </PageShell>
