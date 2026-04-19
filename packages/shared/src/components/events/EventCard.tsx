@@ -1,6 +1,9 @@
-import type { CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
+import { Carousel } from 'antd';
 import { CalendarOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import type { EventSummary } from '../../types/event';
+import type { ImageDto } from '../../types/image';
+import { imagesApi } from '../../services/imagesApi';
 import { formatEventDate } from '../../utils/date';
 import EventImageFallback from './EventImageFallback';
 import DisplayHeading from '../ui/DisplayHeading';
@@ -27,6 +30,16 @@ export default function EventCard({ event, onClick, variant = 'default' }: Props
   const venueLine = venueCity ? `${venueName} · ${venueCity}` : venueName;
   const pill = resolvePill(event);
 
+  const [images, setImages] = useState<ImageDto[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    imagesApi
+      .getPublicEventImages(event.eventId)
+      .then(({ data }) => { if (!cancelled) setImages(data); })
+      .catch(() => { if (!cancelled) setImages([]); });
+    return () => { cancelled = true; };
+  }, [event.eventId]);
+
   const imageHeight = variant === 'compact' ? 160 : 200;
   const cardStyle: CSSProperties = {
     background: 'var(--bg-surface)',
@@ -50,9 +63,33 @@ export default function EventCard({ event, onClick, variant = 'default' }: Props
           borderBottom: '1px solid var(--border)',
         }}
       >
-        {event.imageUrl ? (
+        {images.length > 1 ? (
+          <Carousel
+            autoplay
+            dots
+            draggable
+            adaptiveHeight={false}
+            style={{ width: '100%', height: imageHeight }}
+          >
+            {images.map((img) => (
+              <div key={img.imageId} style={{ width: '100%', height: imageHeight }}>
+                <img
+                  src={img.url}
+                  alt={img.originalName ?? event.title}
+                  loading="lazy"
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    height: imageHeight,
+                    objectFit: 'cover',
+                  }}
+                />
+              </div>
+            ))}
+          </Carousel>
+        ) : images[0]?.url || event.imageUrl ? (
           <img
-            src={event.imageUrl}
+            src={images[0]?.url ?? event.imageUrl}
             alt={event.title}
             loading="lazy"
             style={{
