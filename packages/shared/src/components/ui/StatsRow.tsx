@@ -33,19 +33,29 @@ function clampCols(n: number): 2 | 3 | 4 {
 
 export default function StatsRow({ items, columns, variant = 'mini', style, className }: Props) {
   const cols = columns ?? clampCols(items.length);
+  const isBalanced32 = items.length === 5 && cols === 3;
 
   const gridStyle: CSSProperties = {
     display: 'grid',
-    gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+    gridTemplateColumns: isBalanced32 ? 'repeat(6, 1fr)' : `repeat(${cols}, minmax(0, 1fr))`,
     gap: 14,
     ...style,
+  };
+
+  const getItemStyle = (index: number): CSSProperties => {
+    if (!isBalanced32) return {};
+    return {
+      gridColumn: index < 3 ? 'span 2' : 'span 3',
+    };
   };
 
   if (variant === 'mini') {
     return (
       <div className={className} style={gridStyle}>
         {items.map((item, i) => (
-          <MiniStat key={i} label={item.label} value={item.value} />
+          <div key={i} style={getItemStyle(i)}>
+            <MiniStat label={item.label} value={item.value} />
+          </div>
         ))}
       </div>
     );
@@ -54,7 +64,8 @@ export default function StatsRow({ items, columns, variant = 'mini', style, clas
   return (
     <div className={className} style={gridStyle}>
       {items.map((item, i) => (
-        <SoftCard key={i}>
+        <div key={i} style={getItemStyle(i)}>
+          <SoftCard>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
             <div style={{ minWidth: 0 }}>
               <div
@@ -113,7 +124,8 @@ export default function StatsRow({ items, columns, variant = 'mini', style, clas
               </div>
             )}
           </div>
-        </SoftCard>
+          </SoftCard>
+        </div>
       ))}
     </div>
   );
