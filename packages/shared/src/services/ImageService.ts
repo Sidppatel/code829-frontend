@@ -55,6 +55,14 @@ export class ImageService extends BaseService {
 
   deleteAvatar = () => this.delete('/auth/me/avatar');
 
+  uploadAdminAvatar = (file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.post<ImageUploadResponse>('/admin/auth/me/avatar', fd, { timeout: 60000, headers: { 'Content-Type': undefined } });
+  };
+
+  deleteAdminAvatar = () => this.delete('/admin/auth/me/avatar');
+
   uploadLogo = (file: File) => {
     const fd = new FormData();
     fd.append('file', file);

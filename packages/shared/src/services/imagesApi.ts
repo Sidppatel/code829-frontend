@@ -12,4 +12,6 @@ export const imagesApi = {
   deleteAvatar: imageService.deleteAvatar,
   uploadLogo: imageService.uploadLogo,
   getLogo: imageService.getLogo,
+  uploadAdminAvatar: imageService.uploadAdminAvatar,
+  deleteAdminAvatar: imageService.deleteAdminAvatar,
 };
