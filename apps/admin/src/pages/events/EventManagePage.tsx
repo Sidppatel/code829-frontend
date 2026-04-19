@@ -117,14 +117,25 @@ export default function EventManagePage() {
                 description: tt.description,
               }));
 
-          const totalSold = stats?.totalSold ?? 0;
-          const calculatedMaxCapacity = stats?.maxCapacity ?? 0;
-          const available = isGrid ? (event.noOfAvailableTables ?? 0) : Math.max(calculatedMaxCapacity - totalSold, 0);
-          const fillRate = stats?.fillRatePct ?? 0;
+          let gridTotalTables = 0;
+          let gridBookedTables = 0;
+          if (isGrid && tableTypes && tableTypes.length > 0) {
+            gridTotalTables = tableTypes.reduce((sum, tt) => sum + (tt.totalTables || 0), 0);
+            gridBookedTables = tableTypes.reduce((sum, tt) => sum + (tt.bookedTables || 0), 0);
+          }
+
+          const displayTotalSold = isGrid ? gridBookedTables : (stats?.totalSold ?? 0);
+          const displayMaxCapacity = isGrid ? gridTotalTables : (stats?.maxCapacity ?? 0);
+          const available = isGrid 
+            ? Math.max(gridTotalTables - gridBookedTables, 0)
+            : Math.max(displayMaxCapacity - displayTotalSold, 0);
+          const fillRate = isGrid 
+            ? (gridTotalTables > 0 ? Math.round((gridBookedTables / gridTotalTables) * 100) : 0)
+            : (stats?.fillRatePct ?? 0);
           const projectedRevenueCents = computeProjectedRevenueCents(pricingRows);
 
           const salesStats: StatsCell[] = [
-            { label: 'Sold', value: String(totalSold) },
+            { label: 'Sold', value: String(displayTotalSold) },
             { label: 'Available', value: String(available) },
             { label: 'Fill Rate', value: `${fillRate}%` },
             { label: 'Revenue Generated', value: centsToUSD(stats?.grossRevenueCents ?? 0) },
@@ -244,7 +255,7 @@ export default function EventManagePage() {
                         {isGrid ? 'Total Tables' : 'Max Capacity'}
                       </div>
                       <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1px' }}>
-                        {calculatedMaxCapacity > 0 ? calculatedMaxCapacity : 'Unlimited'}
+                        {displayMaxCapacity > 0 ? displayMaxCapacity : 'Unlimited'}
                       </div>
                     </Col>
                     {!isOpen && (
@@ -253,7 +264,7 @@ export default function EventManagePage() {
                           Available Tables
                         </div>
                         <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1px' }}>
-                          {event.noOfAvailableTables}
+                          {available}
                         </div>
                       </Col>
                     )}
@@ -262,9 +273,9 @@ export default function EventManagePage() {
                         Sold / Capacity
                       </div>
                       <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--accent-violet)', letterSpacing: '-1px' }}>
-                        {totalSold}{' '}
+                        {displayTotalSold}{' '}
                         <span style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-muted)' }}>
-                          / {calculatedMaxCapacity > 0 ? calculatedMaxCapacity : '∞'}
+                          / {displayMaxCapacity > 0 ? displayMaxCapacity : '∞'}
                         </span>
                       </div>
                     </Col>

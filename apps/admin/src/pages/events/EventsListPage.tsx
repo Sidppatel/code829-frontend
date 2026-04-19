@@ -160,7 +160,10 @@ export default function EventsListPage() {
             title: 'Sales',
             key: 'sales',
             width: 100,
-            render: (_: unknown, r: EventDetail) => `${r.soldCount || 0} / ${r.totalCapacity || '∞'}`,
+            render: (_: unknown, r: EventDetail) =>
+              r.layoutMode === 'Grid'
+                ? `${r.bookedTables || 0} / ${r.totalTables || '∞'}`
+                : `${r.totalSold || 0} / ${r.totalCapacity || '∞'}`,
           },
           {
             title: 'Check-ins',
@@ -249,7 +252,9 @@ export default function EventsListPage() {
                   Sales
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
-                  {record.soldCount || 0} / {record.totalCapacity || '∞'}
+                  {record.layoutMode === 'Grid'
+                    ? `${record.bookedTables || 0} / ${record.totalTables || '∞'}`
+                    : `${record.totalSold || 0} / ${record.totalCapacity || '∞'}`}
                 </div>
               </div>
               <div>

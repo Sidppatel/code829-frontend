@@ -21,6 +21,8 @@ export interface EventSummary {
   availableCount: number;
   venue?: VenueBasic;
   ticketTypes?: EventTicketType[];
+  totalTables?: number;
+  bookedTables?: number;
 }
 
 export interface EventDetail extends EventSummary {
