@@ -7,17 +7,19 @@ const log = createLogger('HTTP');
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 2000;
 
-// Determine base URL dynamically to handle Cloudflare proxying and CORS
+// Determine base URL dynamically to handle Cloudflare proxying and CORS.
+// In production (any non-localhost host) the Cloudflare Worker proxies /api/* to the
+// backend, so always use the relative /api path — never the raw backend URL, which
+// the CSP connect-src would block and which bypasses the Worker's auth/CORS handling.
 const getBaseURL = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
   const hostname = window.location.hostname;
-  
-  // Force proxy for Cloudflare Pages or if specifically requested via env
-  if (hostname.endsWith('pages.dev') || envUrl === '/api') {
-    return '/api';
+  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+  if (isLocal) {
+    // Dev: Vite proxy forwards /api → backend, or use VITE_API_URL directly if set
+    return import.meta.env.VITE_API_URL || '/api';
   }
-  
-  return envUrl || '/api';
+  // Production (Cloudflare Workers): always route through the /api Worker proxy
+  return '/api';
 };
 
 const apiClient = axios.create({
