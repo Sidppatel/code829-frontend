@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { App, Image as AntImage, Button, Popconfirm, Modal, Slider } from 'antd';
+import { App, Image as AntImage, Button, Carousel, Popconfirm, Modal, Slider } from 'antd';
 import {
   PlusOutlined,
   DeleteOutlined,
@@ -169,6 +169,41 @@ export default function ImageUpload({
   // ─── render ───────────────────────────────────────────────────────────────
   return (
     <div>
+      {/* ── carousel preview ─────────────────────────────────────────────── */}
+      {images.length > 0 && (
+        <Carousel
+          autoplay
+          arrows
+          draggable
+          style={{
+            marginBottom: 16,
+            borderRadius: 10,
+            overflow: 'hidden',
+            background: 'var(--bg-overlay)',
+          }}
+        >
+          {images.map((img) => (
+            <div key={img.imageId}>
+              <div
+                style={{
+                  width: '100%',
+                  height: 280,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <img
+                  src={img.cardUrl || img.url}
+                  alt={img.originalName ?? 'Image'}
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                />
+              </div>
+            </div>
+          ))}
+        </Carousel>
+      )}
+
       {/* ── image grid ───────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: images.length > 0 ? 12 : 0 }}>
         {images.map((img) => (
