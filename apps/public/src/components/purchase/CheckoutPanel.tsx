@@ -57,7 +57,7 @@ export default function CheckoutPanel(props: Props) {
 
   return (
     <Card title="Checkout" styles={{ header: { borderBottom: 'none' } }}>
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
         {mode === 'grid' && (() => {
           const earliest = (props as GridCheckoutProps).tableLocks
             .map(l => l.expiresAt).sort()[0];
