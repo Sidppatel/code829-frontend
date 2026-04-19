@@ -122,9 +122,9 @@ export default function EventsListPage() {
         pageSize={paged.pageSize}
         loading={paged.loading}
         onPageChange={paged.onPageChange}
-        rowKey="id"
+        rowKey="eventId"
         scrollX={700}
-        onRowClick={(record) => navigate(`/events/${record.id}`)}
+        onRowClick={(record) => navigate(`/events/${record.eventId}`)}
         columns={[
           { title: 'Title', dataIndex: 'title', key: 'title', ellipsis: true },
           {
@@ -179,7 +179,7 @@ export default function EventsListPage() {
                   size="small"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/events/${record.id}`);
+                    navigate(`/events/${record.eventId}`);
                   }}
                 >
                   View

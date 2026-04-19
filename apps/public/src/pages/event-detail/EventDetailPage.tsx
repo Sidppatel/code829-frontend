@@ -116,10 +116,10 @@ export default function EventDetailPage() {
   const quoteSelection: PricingQuoteRequest | null = useMemo(() => {
     if (!event) return null;
     if (step === 'checkout' && tableLocks.length > 0) {
-      return { eventId: event.id, tableIds: tableLocks.map(l => l.tableId) };
+      return { eventId: event.eventId, tableIds: tableLocks.map(l => l.tableId) };
     }
     if (step === 'checkout-open' && seatCount > 0) {
-      return { eventId: event.id, seatCount, eventTicketTypeId: selectedTicketTypeId };
+      return { eventId: event.eventId, seatCount, eventTicketTypeId: selectedTicketTypeId };
     }
     return null;
   }, [event, step, tableLocks, seatCount, selectedTicketTypeId]);
@@ -155,7 +155,7 @@ export default function EventDetailPage() {
       const ev = eventRef.current;
       if (locks.length > 0 && ev) {
         for (const lock of locks) {
-          const payload = JSON.stringify({ eventId: ev.id, tableId: lock.tableId, token: jwt });
+          const payload = JSON.stringify({ eventId: ev.eventId, tableId: lock.tableId, token: jwt });
           const blob = new Blob([payload], { type: 'application/json' });
           navigator.sendBeacon(`${apiUrl}/tables/release-beacon`, blob);
         }
@@ -190,7 +190,7 @@ export default function EventDetailPage() {
           catch (err) { log.warn('Step-change cleanup: cancel booking failed', { bid, err }); }
         }
         for (const lock of locks) {
-          try { await tablePurchaseApi.releaseTable(event.id, lock.tableId); }
+          try { await tablePurchaseApi.releaseTable(event.eventId, lock.tableId); }
           catch (err) { log.warn('Step-change cleanup: release table failed', { tableId: lock.tableId, err }); }
         }
       })();
@@ -253,7 +253,7 @@ export default function EventDetailPage() {
       try {
         const { data } = await eventsApi.getBySlug(slug);
         setEvent(data);
-        log.info('Loaded event', { slug, id: data.id });
+        log.info('Loaded event', { slug, eventId: data.eventId });
       } catch (err) {
         log.error('Failed to load event', { slug, err });
         message.error('Event not found');
@@ -301,7 +301,7 @@ export default function EventDetailPage() {
     setTicketTypesLoading(true);
     const loadTicketTypes = async () => {
       try {
-        const { data } = await eventsApi.getTicketTypes(event.id);
+        const { data } = await eventsApi.getTicketTypes(event.eventId);
         setTicketTypes(data.ticketTypes);
         setTicketTypesError(false);
       } catch (err) {
@@ -325,7 +325,7 @@ export default function EventDetailPage() {
   const loadTables = useCallback(async () => {
     if (!event) return;
     try {
-      const { data } = await eventsApi.getTables(event.id);
+      const { data } = await eventsApi.getTables(event.eventId);
       setTablesData(data);
     } catch {
       message.error('Failed to load table layout');
@@ -350,8 +350,8 @@ export default function EventDetailPage() {
     try {
       if (event.layoutMode === 'Grid') {
         const [tablesRes, locksRes] = await Promise.all([
-          eventsApi.getTables(event.id),
-          tablePurchaseApi.getMyLocks(event.id),
+          eventsApi.getTables(event.eventId),
+          tablePurchaseApi.getMyLocks(event.eventId),
         ]);
         setTablesData(tablesRes.data);
         if (locksRes.data.length > 0) setTableLocks(locksRes.data);
@@ -371,7 +371,7 @@ export default function EventDetailPage() {
     if (!event) return;
     setLockingTableId(table.id);
     try {
-      const { data } = await tablePurchaseApi.lockTable(event.id, table.id);
+      const { data } = await tablePurchaseApi.lockTable(event.eventId, table.id);
       setTableLocks(prev => [...prev, data]);
       setCheckoutError(null);
       await loadTables();
@@ -386,7 +386,7 @@ export default function EventDetailPage() {
   const handleUnlockTable = async (table: EventTableDto) => {
     if (!event) return;
     try {
-      await tablePurchaseApi.releaseTable(event.id, table.id);
+      await tablePurchaseApi.releaseTable(event.eventId, table.id);
       setTableLocks(prev => prev.filter(l => l.tableId !== table.id));
       await loadTables();
     } catch (err) {
@@ -402,7 +402,7 @@ export default function EventDetailPage() {
     setCheckoutError(null);
     try {
       const { data: booking } = await purchasesApi.create({
-        eventId: event.id,
+        eventId: event.eventId,
         tableIds: tableLocks.map(l => l.tableId),
       });
       setPurchaseIdState(booking.id);
@@ -442,7 +442,7 @@ export default function EventDetailPage() {
     }
     for (const lock of tableLocks) {
       try {
-        await tablePurchaseApi.releaseTable(event.id, lock.tableId);
+        await tablePurchaseApi.releaseTable(event.eventId, lock.tableId);
       } catch (err) {
         log.warn('Failed to release table lock during cleanup', { tableId: lock.tableId, err });
       }
@@ -479,7 +479,7 @@ export default function EventDetailPage() {
       setCheckoutError(null);
       try {
         const { data: booking } = await purchasesApi.create({
-          eventId: event.id,
+          eventId: event.eventId,
           seatsReserved: seatCount,
           ...(selectedTicketTypeId ? { eventTicketTypeId: selectedTicketTypeId } : {}),
         });

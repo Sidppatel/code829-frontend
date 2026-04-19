@@ -1792,3 +1792,19 @@ body {
 .admin-section.inactive {
   opacity: 0.55;
 }
+
+/* ── Mobile clamp for antd Date/Time picker popup ── */
+@media (max-width: 480px) {
+  .ep-picker-popup-mobile {
+    left: 8px !important;
+    right: 8px !important;
+    max-width: calc(100vw - 16px);
+    transform: none !important;
+    inset-inline-start: 8px !important;
+  }
+
+  .ep-picker-popup-mobile .ant-picker-panel-container,
+  .ep-picker-popup-mobile .ant-picker-panel {
+    max-width: 100%;
+  }
+}

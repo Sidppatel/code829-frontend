@@ -1,5 +1,5 @@
 export interface EventSummary {
-  id: string;
+  eventId: string;
   title: string;
   slug: string;
   status: string;

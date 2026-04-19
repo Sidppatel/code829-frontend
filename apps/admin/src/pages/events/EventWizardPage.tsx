@@ -231,10 +231,10 @@ export default function EventWizardPage() {
         navigate(`/events/${id}`);
       } else {
         const { data } = await adminEventsApi.create(payload);
-        log.info('Event created', { id: data.id, title: payload.title });
+        log.info('Event created', { eventId: data.eventId, title: payload.title });
         message.success('Event created');
         setIsDirty(false);
-        navigate(`/events/${data.id}`);
+        navigate(`/events/${data.eventId}`);
       }
     } catch (err) {
       log.error('Failed to save event', err);
@@ -346,6 +346,7 @@ export default function EventWizardPage() {
                     style={{ width: '100%' }}
                     getPopupContainer={() => document.body}
                     placement="bottomLeft"
+                    popupClassName="ep-picker-popup-mobile"
                   />
                 </Form.Item>
               </Col>
@@ -360,6 +361,7 @@ export default function EventWizardPage() {
                     style={{ width: '100%' }}
                     getPopupContainer={() => document.body}
                     placement="bottomLeft"
+                    popupClassName="ep-picker-popup-mobile"
                   />
                 </Form.Item>
               </Col>
@@ -387,6 +389,7 @@ export default function EventWizardPage() {
                     style={{ width: '100%' }}
                     getPopupContainer={() => document.body}
                     placement="bottomLeft"
+                    popupClassName="ep-picker-popup-mobile"
                   />
                 </Form.Item>
               </Col>
@@ -424,6 +427,7 @@ export default function EventWizardPage() {
                     style={{ width: '100%' }}
                     getPopupContainer={() => document.body}
                     placement="bottomLeft"
+                    popupClassName="ep-picker-popup-mobile"
                   />
                 </Form.Item>
               </Col>

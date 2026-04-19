@@ -30,12 +30,12 @@ export default function CheckInSelectPage() {
 
         // Fetch check-in stats for each event
         const statsResults = await Promise.allSettled(
-          data.items.map((ev) => checkInApi.getStats(ev.id))
+          data.items.map((ev) => checkInApi.getStats(ev.eventId))
         );
         const map: Record<string, CheckInStats> = {};
         statsResults.forEach((result, i) => {
           if (result.status === 'fulfilled') {
-            map[data.items[i].id] = result.value.data;
+            map[data.items[i].eventId] = result.value.data;
           }
         });
         setStatsMap(map);
@@ -97,7 +97,7 @@ export default function CheckInSelectPage() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 40 }}>
           {events.map((ev) => {
-            const s = statsMap[ev.id];
+            const s = statsMap[ev.eventId];
             // Simple heuristic for "happening now" pulse
             const now = new Date();
             const start = new Date(ev.startDate);
@@ -105,9 +105,9 @@ export default function CheckInSelectPage() {
 
             return (
               <HumanCard
-                key={ev.id}
+                key={ev.eventId}
                 className="human-noise"
-                onClick={() => navigate(`/checkin/${ev.id}`)}
+                onClick={() => navigate(`/checkin/${ev.eventId}`)}
                 style={{ cursor: 'pointer' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
