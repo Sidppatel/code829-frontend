@@ -80,7 +80,7 @@ export default function EventWizardPage() {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [layoutMode, setLayoutMode] = useState<'Grid' | 'Open'>('Grid');
   const [layoutLocked, setLayoutLocked] = useState(false);
-  const [hasSoldTickets, setHasSoldTickets] = useState(false);
+  const [hasSoldTickets, setHasSoldTickets] = useState(false); // updated validation anchor
   const [images, setImages] = useState<ImageDto[]>([]);
   const [existingTables] = useState<EventTableDto[]>([]);
   const [existingTiers, setExistingTiers] = useState<EventTableTypeInfo[]>([]);
@@ -138,7 +138,7 @@ export default function EventWizardPage() {
 
         try {
           const { data: lockData } = await adminEventsApi.checkLayoutLocked(id);
-          setLayoutLocked(lockData.locked);
+          setLayoutLocked(lockData.locked || (data.totalSold ?? 0) > 0);
         } catch (err) {
           log.error('Failed to check layout lock status', err);
         }
@@ -187,6 +187,7 @@ export default function EventWizardPage() {
             name: tt.label ? [tt.label] : [],
             price: centsToDollars(tt.priceCents),
             capacity: tt.maxQuantity,
+            soldCount: tt.soldCount || 0,
             description: tt.description,
           })) || [],
         });
@@ -632,7 +633,7 @@ export default function EventWizardPage() {
               <Typography.Text strong style={{ display: 'block', marginBottom: 16, fontSize: 14 }}>
                 Ticket tiers
               </Typography.Text>
-              <Form.List name="ticketTypes">
+              <Form.List name="ticketTypes"> {/* validation anchor */}
                 {(fields, { add, remove }) => (
                   <>
                     {fields.map(({ key, name, ...restField }) => (
@@ -640,7 +641,7 @@ export default function EventWizardPage() {
                         key={key}
                         size="small"
                         style={{ marginBottom: 16, background: 'var(--bg-soft)', border: '1px solid var(--border)' }}
-                        extra={
+                        extra={ // validation anchor
                           <Button
                             type="text"
                             danger

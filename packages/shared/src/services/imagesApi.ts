@@ -2,6 +2,7 @@ import { imageService } from './ImageService';
 
 export const imagesApi = {
   upload: imageService.upload,
+  uploadMany: imageService.uploadMany,
   getByEntity: imageService.getByEntity,
   delete: imageService.remove,
   setPrimary: imageService.setPrimary,

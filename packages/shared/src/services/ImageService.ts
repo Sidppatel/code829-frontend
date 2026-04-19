@@ -13,11 +13,25 @@ export class ImageService extends BaseService {
   upload = (entityType: string, entityId: string, file: File) => {
     const fd = new FormData();
     fd.append('file', file);
-    return this.post<ImageUploadResponse>('/admin/images/upload', fd, {
-      params: { entityType, entityId },
+    const base =
+      entityType === 'event'
+        ? `/admin/events/${entityId}/images`
+        : entityType === 'venue'
+          ? `/admin/venues/${entityId}/images`
+          : `/admin/images/upload?entityType=${entityType}&entityId=${entityId}`;
+    return this.post<ImageUploadResponse>(base, fd, {
       timeout: 60000,
       headers: { 'Content-Type': undefined },
     });
+  };
+
+  uploadMany = async (entityType: string, entityId: string, files: File[]) => {
+    const results: ImageUploadResponse[] = [];
+    for (const file of files) {
+      const { data } = await this.upload(entityType, entityId, file);
+      results.push(data);
+    }
+    return results;
   };
 
   getByEntity = (entityType: string, entityId: string) =>

@@ -89,7 +89,7 @@ export default function ImageUpload({
   const pendingFileName = useRef('image.webp');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ── file selected → open crop modal ──────────────────────────────────────
+  // ── file selected → open crop modal (single) or upload directly (many) ─
   const handleFileSelect = (file: File) => {
     if (!entityId) {
       message.warning('Save the record first before uploading images');
@@ -103,6 +103,24 @@ export default function ImageUpload({
       setZoom(1);
     });
     reader.readAsDataURL(file);
+  };
+
+  const handleMultiFileUpload = async (files: File[]) => {
+    if (!entityId) {
+      message.warning('Save the record first before uploading images');
+      return;
+    }
+    setUploading(true);
+    try {
+      await imagesApi.uploadMany(entityType, entityId, files);
+      const { data } = await imagesApi.getByEntity(entityType, entityId);
+      onImagesChange(data);
+      message.success(`${files.length} images uploaded`);
+    } catch {
+      message.error('Failed to upload images');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const onCropComplete = useCallback((_: Area, areaPixels: Area) => {
@@ -242,10 +260,12 @@ export default function ImageUpload({
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp"
+            multiple
             style={{ display: 'none' }}
             onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleFileSelect(file);
+              const files = Array.from(e.target.files ?? []);
+              if (files.length === 1) handleFileSelect(files[0]);
+              else if (files.length > 1) void handleMultiFileUpload(files);
               e.target.value = '';
             }}
           />
