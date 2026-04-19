@@ -226,7 +226,7 @@ export default function EventWizardPage() {
     return current && current.isBefore(watchedStartDate.startOf('day'));
   };
 
-  const disabledStartTime = (current: dayjs.Dayjs | null) => {
+  const disabledStartTime = (_current: dayjs.Dayjs | null) => {
     if (!watchedStartDate || !watchedStartDate.isSame(dayjs(), 'day')) return {};
 
     const now = dayjs();
@@ -241,7 +241,7 @@ export default function EventWizardPage() {
     };
   };
 
-  const disabledEndTime = (current: dayjs.Dayjs | null) => {
+  const disabledEndTime = (_current: dayjs.Dayjs | null) => {
     if (!watchedStartDate || !watchedEndDate || !watchedEndDate.isSame(watchedStartDate, 'day') || !watchedStartTime) {
       return {};
     }
