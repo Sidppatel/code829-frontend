@@ -4,6 +4,7 @@ import NotFoundPage from '@code829/shared/components/shared/NotFoundPage';
 import ErrorBoundary from '@code829/shared/components/shared/ErrorBoundary';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import ProtectedRoute from '@code829/shared/components/auth/ProtectedRoute';
+import ScrollToTop from '@code829/shared/components/shared/ScrollToTop';
 import { useSessionRefresh } from '@code829/shared/hooks/useSessionRefresh';
 import AdminLayout from './components/layout/AdminLayout';
 
@@ -33,6 +34,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <ErrorBoundary>
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
