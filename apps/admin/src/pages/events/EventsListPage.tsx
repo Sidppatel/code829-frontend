@@ -1,8 +1,10 @@
 import { Button, Tag, Tooltip } from 'antd';
 import {
-  EnvironmentOutlined,
   MoreOutlined,
   PlusOutlined,
+  BorderOutlined,
+  UserOutlined,
+  EnvironmentOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { adminEventsApi } from '../../services/api';
@@ -146,8 +148,16 @@ export default function EventsListPage() {
             title: 'Type',
             dataIndex: 'layoutMode',
             key: 'layoutMode',
-            width: 100,
-            render: (m: string) => <Tag color={m === 'Open' ? 'blue' : 'purple'}>{m}</Tag>,
+            width: 140,
+            render: (m: string) => (
+              <Tag
+                color={m === 'Open' ? 'blue' : 'purple'}
+                icon={m === 'Open' ? <UserOutlined /> : <BorderOutlined />}
+                style={{ borderRadius: 4, fontWeight: 600, border: 'none', padding: '2px 8px' }}
+              >
+                {m === 'Open' ? 'OPEN SEATING' : 'TABLE SEATING'}
+              </Tag>
+            ),
           },
           {
             title: 'Status',
@@ -201,7 +211,16 @@ export default function EventsListPage() {
         mobileCard={(record) => (
           <HumanCard className="human-noise" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-              <StatusBadge status={record.status} />
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <StatusBadge status={record.status} />
+                <Tag
+                  color={record.layoutMode === 'Open' ? 'blue' : 'purple'}
+                  icon={record.layoutMode === 'Open' ? <UserOutlined /> : <BorderOutlined />}
+                  style={{ borderRadius: 4, fontWeight: 600, border: 'none', margin: 0 }}
+                >
+                  {record.layoutMode === 'Open' ? 'OPEN SEATING' : 'TABLE SEATING'}
+                </Tag>
+              </div>
               <div
                 style={{
                   display: 'flex',
