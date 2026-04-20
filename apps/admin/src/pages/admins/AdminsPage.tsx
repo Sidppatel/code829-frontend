@@ -1,7 +1,8 @@
-import { Tag, Typography } from 'antd';
+import { Select, Tag, Typography } from 'antd';
 import type { AxiosResponse } from 'axios';
 import apiClient from '@code829/shared/lib/axios';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
+import { useAsyncAction } from '@code829/shared/hooks';
 import {
   DataTableSection,
   FilterBar,
@@ -29,6 +30,12 @@ export default function AdminsPage() {
       apiClient.get<PagedResponse<AdminUser>>('/admin/admins', { params }) as Promise<AxiosResponse<PagedResponse<AdminUser>>>,
     defaultPageSize: 25,
   });
+
+  const update = useAsyncAction(
+    (id: string, role: string) =>
+      apiClient.put(`/admin/staff/${id}`, { role }),
+    { successMessage: 'Role updated', onSuccess: paged.refresh },
+  );
 
   return (
     <PageShell
@@ -58,7 +65,18 @@ export default function AdminsPage() {
             title: 'Role',
             dataIndex: 'role',
             key: 'role',
-            render: (r: string) => <Tag color="purple">{r}</Tag>,
+            render: (r: string, record: AdminUser) => (
+              <Select
+                value={r}
+                size="small"
+                style={{ width: 100 }}
+                onChange={(v) => { void update.run(record.adminUserId, v); }}
+                options={[
+                  { value: 'Admin', label: <Tag color="purple">Admin</Tag> },
+                  { value: 'Staff', label: <Tag color="blue">Staff</Tag> },
+                ]}
+              />
+            ),
           },
           {
             title: 'Last Login',

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Table, Switch, Typography, Card, Input, Space, App, Tag, Button } from 'antd';
+import { Table, Select, Switch, Typography, Card, Input, Space, App, Tag, Button } from 'antd';
 import { SearchOutlined, UserAddOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '@code829/shared/lib/axios';
@@ -54,6 +54,14 @@ export default function AdminManagementPage() {
     } catch { message.error('Failed to update status'); }
   };
 
+  const updateRole = async (id: string, role: string) => {
+    try {
+      await apiClient.put(`/admin/staff/${id}`, { role });
+      message.success('Role updated');
+      void fetchUsers();
+    } catch { message.error('Failed to update role'); }
+  };
+
   const ROLE_COLORS: Record<string, string> = { Developer: 'red', Admin: 'purple', Staff: 'blue' };
 
   return (
@@ -68,7 +76,23 @@ export default function AdminManagementPage() {
           columns={[
             { title: 'Name', render: (_: unknown, r: AdminUser) => `${r.firstName} ${r.lastName}` },
             { title: 'Email', dataIndex: 'email' },
-            { title: 'Role', dataIndex: 'role', render: (r: string) => <Tag color={ROLE_COLORS[r] || 'default'}>{r}</Tag> },
+            {
+              title: 'Role',
+              dataIndex: 'role',
+              render: (r: string, record: AdminUser) => (
+                <Select
+                  value={r}
+                  size="small"
+                  style={{ width: 120 }}
+                  onChange={v => updateRole(record.id, v)}
+                  options={[
+                    { value: 'Developer', label: <Tag color="red">Developer</Tag> },
+                    { value: 'Admin', label: <Tag color="purple">Admin</Tag> },
+                    { value: 'Staff', label: <Tag color="blue">Staff</Tag> },
+                  ]}
+                />
+              )
+            },
             { title: 'Status', dataIndex: 'isActive', render: (active: boolean, r: AdminUser) => <Switch checked={active} onChange={v => toggleActive(r.id, v)} checkedChildren="Active" unCheckedChildren="Disabled" /> },
             { title: 'Last Login', dataIndex: 'lastLoginAt', render: (d?: string) => d ? new Date(d).toLocaleDateString() : <Typography.Text type="secondary">Never</Typography.Text> },
           ]}
