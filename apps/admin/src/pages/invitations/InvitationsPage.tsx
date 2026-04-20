@@ -138,7 +138,8 @@ export default function InvitationsPage() {
             <FormField name="role" label="Role" required>
               <Select>
                 <Select.Option value="Staff">Staff</Select.Option>
-                {isDeveloper && <Select.Option value="Admin">Admin</Select.Option>}
+                <Select.Option value="Admin">Admin</Select.Option>
+                {isDeveloper && <Select.Option value="Developer">Developer</Select.Option>}
               </Select>
             </FormField>
           </>
