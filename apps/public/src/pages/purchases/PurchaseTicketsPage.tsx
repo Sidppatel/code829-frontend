@@ -26,7 +26,7 @@ export default function PurchaseTicketsPage() {
   const { purchaseId } = useParams<{ purchaseId: string }>();
   const navigate = useNavigate();
   const { message } = App.useApp();
-  const currentUserId = useAuthStore((s) => s.user?.id);
+  useAuthStore((s) => s.user?.id);
 
   const [tickets, setTickets] = useState<PurchaseTicket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,11 +106,14 @@ export default function PurchaseTicketsPage() {
     }
   };
 
-  const handleRevoke = (ticketId: string) => {
+  const handleRevoke = (ticketId: string, status: string) => {
     if (!purchaseId) return;
+    const content = status === 'Claimed'
+      ? 'Are you sure? The guest will lose their ticket and you\'ll be able to reassign it.'
+      : 'Are you sure? The invite link will stop working and the guest won\'t be able to claim.';
     Modal.confirm({
-      title: 'Revoke Invitation',
-      content: 'Are you sure you want to revoke this ticket invitation? The guest will lose access.',
+      title: 'Revoke Ticket',
+      content,
       okText: 'Revoke',
       okButtonProps: { danger: true },
       onOk: async () => {
@@ -215,9 +218,7 @@ export default function PurchaseTicketsPage() {
                   QR
                 </Button>
 
-                {/* Every non-checked-in ticket gets both actions. The only time Claim for
-                    Myself is hidden is when the current user has already claimed it. */}
-                {ticket.status !== 'CheckedIn' && !(ticket.status === 'Claimed' && ticket.guestUserId === currentUserId) && (
+                {(ticket.status === 'Unassigned' || ticket.status === 'Invited') && (
                   <Button
                     size="small"
                     type="primary"
@@ -228,7 +229,7 @@ export default function PurchaseTicketsPage() {
                   </Button>
                 )}
 
-                {ticket.status !== 'CheckedIn' && (
+                {(ticket.status === 'Unassigned' || ticket.status === 'Invited') && (
                   <Button
                     size="small"
                     type="primary"
@@ -249,7 +250,7 @@ export default function PurchaseTicketsPage() {
                       size="small"
                       danger
                       icon={<UndoOutlined />}
-                      onClick={() => handleRevoke(ticket.id)}
+                      onClick={() => handleRevoke(ticket.id, ticket.status)}
                     >
                       Revoke
                     </Button>
