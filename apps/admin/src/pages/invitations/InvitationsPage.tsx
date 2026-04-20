@@ -17,7 +17,7 @@ import {
 } from '@code829/shared/hooks';
 
 interface Invitation {
-  id: string;
+  invitationId: string;
   email: string;
   role: string;
   status: string;
@@ -74,7 +74,7 @@ export default function InvitationsPage() {
         pageSize={items.length || 10}
         loading={loading}
         onPageChange={() => {}}
-        rowKey="id"
+        rowKey="invitationId"
         showSizeChanger={false}
         columns={[
           { title: 'Email', dataIndex: 'email', key: 'email' },
@@ -97,7 +97,7 @@ export default function InvitationsPage() {
                       description: `This will revoke the invitation for ${r.email}.`,
                       tone: 'danger',
                       confirmLabel: 'Revoke',
-                      onConfirm: () => revoke.run(r.id),
+                      onConfirm: () => revoke.run(r.invitationId),
                     })
                   }
                 >
