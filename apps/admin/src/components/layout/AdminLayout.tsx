@@ -57,6 +57,7 @@ const navGroups = [
     title: 'Team',
     items: [
       { key: '/staff', shortLabel: 'Staff', label: 'Staff', icon: <TeamOutlined /> },
+      { key: '/admins', shortLabel: 'Admins', label: 'Admins', icon: <UserOutlined /> },
       { key: '/invitations', shortLabel: 'Invites', label: 'Invitations', icon: <SendOutlined /> },
     ]
   },

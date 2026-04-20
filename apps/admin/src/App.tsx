@@ -26,6 +26,7 @@ const CheckInPage = lazy(() => import('./pages/checkin/CheckInPage'));
 const SettingsPage = lazy(() => import('./pages/settings/SettingsPage'));
 const AnalyticsPage = lazy(() => import('./pages/analytics/AnalyticsPage'));
 const StaffManagementPage = lazy(() => import('./pages/staff/StaffManagementPage'));
+const AdminsPage = lazy(() => import('./pages/admins/AdminsPage'));
 const InvitationsPage = lazy(() => import('./pages/invitations/InvitationsPage'));
 const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
 const FeedbackPage = lazy(() => import('./pages/feedback/FeedbackPage'));
@@ -59,6 +60,7 @@ export default function App() {
               <Route path="checkin/select" element={<CheckInSelectPage />} />
               <Route path="checkin/:eventId" element={<CheckInPage />} />
               <Route path="staff" element={<StaffManagementPage />} />
+              <Route path="admins" element={<AdminsPage />} />
               <Route path="invitations" element={<InvitationsPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="feedback" element={<FeedbackPage />} />
