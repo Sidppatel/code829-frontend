@@ -22,7 +22,7 @@ export default function MyTicketsPage() {
   const qr = useQrCode();
 
   const showQr = (ticket: GuestTicket) => {
-    qr.show(() => ticketsApi.getMyTicketQr(ticket.purchaseTicketId).then(r => r.data as Blob));
+    qr.show(() => ticketsApi.getMyTicketQr(ticket.id).then(r => r.data as Blob));
   };
 
   return (
@@ -53,7 +53,7 @@ export default function MyTicketsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
           {tickets?.map((ticket) => (
             <Card
-              key={ticket.purchaseTicketId}
+              key={ticket.id}
               size="small"
               styles={{ body: { padding: 20 } }}
               style={{ borderRadius: 16 }}
