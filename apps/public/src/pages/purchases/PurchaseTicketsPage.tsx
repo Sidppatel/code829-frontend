@@ -32,6 +32,7 @@ export default function PurchaseTicketsPage() {
   const [loading, setLoading] = useState(true);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [qrSeat, setQrSeat] = useState<number | null>(null);
+  const [qrCode, setQrCode] = useState<string | null>(null);
   const [inviteModal, setInviteModal] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
@@ -55,13 +56,14 @@ export default function PurchaseTicketsPage() {
     Promise.resolve().then(() => loadTickets());
   }, [loadTickets]);
 
-  const handleShowQr = async (ticketId: string, seatNumber: number) => {
+  const handleShowQr = async (ticketId: string, seatNumber: number, ticketCode: string) => {
     if (!purchaseId) return;
     try {
       const { data: blob } = await ticketsApi.getTicketQr(purchaseId, ticketId);
       const url = URL.createObjectURL(blob as Blob);
       setQrUrl(url);
       setQrSeat(seatNumber);
+      setQrCode(ticketCode);
     } catch (err) {
       log.error('Failed to load ticket QR code', err);
       message.error('Failed to load QR code');
@@ -72,6 +74,7 @@ export default function PurchaseTicketsPage() {
     if (qrUrl) URL.revokeObjectURL(qrUrl);
     setQrUrl(null);
     setQrSeat(null);
+    setQrCode(null);
   };
 
   const handleInvite = async () => {
@@ -213,7 +216,7 @@ export default function PurchaseTicketsPage() {
                 <Button
                   size="small"
                   icon={<QrcodeOutlined />}
-                  onClick={() => handleShowQr(ticket.id, ticket.seatNumber)}
+                  onClick={() => handleShowQr(ticket.id, ticket.seatNumber, ticket.ticketCode)}
                 >
                   QR
                 </Button>
@@ -276,6 +279,11 @@ export default function PurchaseTicketsPage() {
             <div style={{ marginTop: 12, color: 'var(--text-muted)', fontSize: 13 }}>
               Show this QR code at the venue for check-in
             </div>
+            {qrCode && (
+              <div style={{ marginTop: 8, fontFamily: 'monospace', fontSize: 15, fontWeight: 600, letterSpacing: 2 }}>
+                {qrCode}
+              </div>
+            )}
           </div>
         )}
       </Modal>
