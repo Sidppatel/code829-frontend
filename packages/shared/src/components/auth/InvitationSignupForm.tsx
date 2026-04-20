@@ -92,6 +92,7 @@ export default function InvitationSignupForm() {
         ) : (
           <PasswordForm
             mode="create"
+            showSuccessMessage={false}
             onSubmit={async ({ newPassword }) => {
               if (!token) return;
               const { data } = await adminAuthApi.signup({
