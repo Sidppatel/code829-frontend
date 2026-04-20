@@ -70,7 +70,14 @@ const navGroups = [
   }
 ];
 
-const navItems = navGroups.flatMap(g => g.items);
+const mobileNavItems = [
+  { key: '/', shortLabel: 'Home', label: 'Dashboard', icon: <DashboardOutlined /> },
+  { key: '/events', shortLabel: 'Events', label: 'Events List', icon: <CalendarOutlined /> },
+  { key: '/checkin/select', shortLabel: 'Check-In', label: 'Check-In', icon: <ScanOutlined /> },
+  { key: '/staff', shortLabel: 'Staff', label: 'Staff', icon: <TeamOutlined /> },
+  { key: '/invitations', shortLabel: 'Invites', label: 'Invitations', icon: <SendOutlined /> },
+  { key: '/settings', shortLabel: 'Settings', label: 'Settings', icon: <UserOutlined /> },
+];
 
 const NEW_SHELL_NAV_ITEMS: NavItem[] = navGroups.flatMap((g) =>
   g.items.map((item) => ({
@@ -158,7 +165,7 @@ export default function AdminLayout() {
       {/* Mobile Bottom Nav */}
       {isMobile && (
         <nav className="mobile-bottom-nav">
-          {navItems.slice(0, 6).map((item) => {
+          {mobileNavItems.map((item) => {
             const active = location.pathname === item.key;
             return (
               <Link
