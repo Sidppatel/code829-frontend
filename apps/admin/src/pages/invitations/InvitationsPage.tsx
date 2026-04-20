@@ -11,6 +11,7 @@ import {
 import {
   useAsyncAction,
   useAsyncResource,
+  useAuth,
   useConfirm,
   useCrudModal,
 } from '@code829/shared/hooks';
@@ -38,6 +39,9 @@ export default function InvitationsPage() {
     return data.items;
   }, []);
   const { data: invitations, loading, refresh } = useAsyncResource(fetchInvitations);
+
+  const { user } = useAuth();
+  const isDeveloper = user?.role === 'Developer';
 
   const crud = useCrudModal<Invitation>();
   const send = useAsyncAction(
@@ -134,7 +138,7 @@ export default function InvitationsPage() {
             <FormField name="role" label="Role" required>
               <Select>
                 <Select.Option value="Staff">Staff</Select.Option>
-                <Select.Option value="Admin">Admin</Select.Option>
+                {isDeveloper && <Select.Option value="Admin">Admin</Select.Option>}
               </Select>
             </FormField>
           </>
