@@ -49,7 +49,7 @@ export interface LayoutStatsResponse {
 }
 
 export interface TableLock {
-  tableId: string;
+  id: string;
   tableLabel: string;
   eventId: string;
   userId: string;

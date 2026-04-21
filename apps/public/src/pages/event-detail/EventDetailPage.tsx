@@ -116,7 +116,7 @@ export default function EventDetailPage() {
   const quoteSelection: PricingQuoteRequest | null = useMemo(() => {
     if (!event) return null;
     if (step === 'checkout' && tableLocks.length > 0) {
-      return { eventId: event.eventId, tableIds: tableLocks.map(l => l.tableId) };
+      return { eventId: event.eventId, tableIds: tableLocks.map(l => l.id) };
     }
     if (step === 'checkout-open' && seatCount > 0) {
       return { eventId: event.eventId, seatCount, eventTicketTypeId: selectedTicketTypeId };
@@ -155,7 +155,7 @@ export default function EventDetailPage() {
       const ev = eventRef.current;
       if (locks.length > 0 && ev) {
         for (const lock of locks) {
-          const payload = JSON.stringify({ eventId: ev.eventId, tableId: lock.tableId, token: jwt });
+          const payload = JSON.stringify({ eventId: ev.eventId, tableId: lock.id, token: jwt });
           const blob = new Blob([payload], { type: 'application/json' });
           navigator.sendBeacon(`${apiUrl}/tables/release-beacon`, blob);
         }
@@ -190,8 +190,8 @@ export default function EventDetailPage() {
           catch (err) { log.warn('Step-change cleanup: cancel booking failed', { bid, err }); }
         }
         for (const lock of locks) {
-          try { await tablePurchaseApi.releaseTable(event.eventId, lock.tableId); }
-          catch (err) { log.warn('Step-change cleanup: release table failed', { tableId: lock.tableId, err }); }
+          try { await tablePurchaseApi.releaseTable(event.eventId, lock.id); }
+          catch (err) { log.warn('Step-change cleanup: release table failed', { tableId: lock.id, err }); }
         }
       })();
       setTableLocks([]);
@@ -408,12 +408,12 @@ export default function EventDetailPage() {
     if (!event) return;
     try {
       await tablePurchaseApi.releaseTable(event.eventId, table.id);
-      setTableLocks(prev => prev.filter(l => l.tableId !== table.id));
+      setTableLocks(prev => prev.filter(l => l.id !== table.id));
       await loadTables();
     } catch (err) {
       // Lock will expire server-side if we can't release it now
       log.warn('Failed to release table lock', { tableId: table.id, err });
-      setTableLocks(prev => prev.filter(l => l.tableId !== table.id));
+      setTableLocks(prev => prev.filter(l => l.id !== table.id));
     }
   };
 
@@ -424,7 +424,7 @@ export default function EventDetailPage() {
     try {
       const { data: booking } = await purchasesApi.create({
         eventId: event.eventId,
-        tableIds: tableLocks.map(l => l.tableId),
+        tableIds: tableLocks.map(l => l.id),
       });
       setPurchaseIdState(booking.id);
       setClientSecret(booking.clientSecret ?? null);
@@ -463,9 +463,9 @@ export default function EventDetailPage() {
     }
     for (const lock of tableLocks) {
       try {
-        await tablePurchaseApi.releaseTable(event.eventId, lock.tableId);
+        await tablePurchaseApi.releaseTable(event.eventId, lock.id);
       } catch (err) {
-        log.warn('Failed to release table lock during cleanup', { tableId: lock.tableId, err });
+        log.warn('Failed to release table lock during cleanup', { tableId: lock.id, err });
       }
     }
     setTableLocks([]);
