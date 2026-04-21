@@ -15,16 +15,7 @@ import {
   useConfirm,
   useCrudModal,
 } from '@code829/shared/hooks';
-
-interface Invitation {
-  invitationId: string;
-  email: string;
-  role: string;
-  status: string;
-  invitedByName: string;
-  expiresAt: string;
-  createdAt: string;
-}
+import type { Invitation } from '@code829/shared/types/auth';
 
 const STATUS_COLORS: Record<string, string> = {
   Pending: 'blue',

@@ -8,32 +8,8 @@ import {
 } from '@code829/shared/components/ui';
 import { useAsyncAction, useConfirm, usePagedTable } from '@code829/shared/hooks';
 import type { PagedResponse } from '@code829/shared/types/shared';
+import type { Feedback, DiagnosticsPayload } from '@code829/shared/types/feedback';
 import type { AxiosResponse } from 'axios';
-
-interface Feedback {
-  id: string;
-  name: string;
-  email?: string;
-  type: string;
-  message: string;
-  rating: number;
-  userId?: string;
-  userName?: string;
-  createdAt: string;
-  diagnostics?: string;
-}
-
-interface DiagnosticsPayload {
-  pageUrl?: string;
-  stepsToReproduce?: string;
-  client?: {
-    userAgent?: string;
-    url?: string;
-    appVersion?: string;
-    capturedAt?: string;
-    consoleLog?: { t: string; level: string; msg: string }[];
-  };
-}
 
 const TYPE_COLORS: Record<string, string> = {
   Bug: 'red',

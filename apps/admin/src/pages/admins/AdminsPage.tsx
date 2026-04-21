@@ -9,25 +9,16 @@ import {
   PageShell,
 } from '@code829/shared/components/ui';
 import type { PagedResponse } from '@code829/shared/types/shared';
-
-interface AdminUser {
-  adminUserId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  isActive: boolean;
-  lastLoginAt?: string;
-}
+import type { AdminUserListItem } from '@code829/shared/types/auth';
 
 interface AdminListParams extends Record<string, unknown> {
   search?: string;
 }
 
 export default function AdminsPage() {
-  const paged = usePagedTable<AdminUser, AdminListParams>({
+  const paged = usePagedTable<AdminUserListItem, AdminListParams>({
     fetcher: (params) =>
-      apiClient.get<PagedResponse<AdminUser>>('/admin/admins', { params }) as Promise<AxiosResponse<PagedResponse<AdminUser>>>,
+      apiClient.get<PagedResponse<AdminUserListItem>>('/admin/admins', { params }) as Promise<AxiosResponse<PagedResponse<AdminUserListItem>>>,
     defaultPageSize: 25,
   });
 
@@ -50,7 +41,7 @@ export default function AdminsPage() {
           width: 300,
         }}
       />
-      <DataTableSection<AdminUser>
+      <DataTableSection<AdminUserListItem>
         data={paged.data}
         total={paged.total}
         page={paged.page}
@@ -59,13 +50,13 @@ export default function AdminsPage() {
         onPageChange={paged.onPageChange}
         rowKey="adminUserId"
         columns={[
-          { title: 'Name', key: 'name', render: (_: unknown, r: AdminUser) => `${r.firstName} ${r.lastName}` },
+          { title: 'Name', key: 'name', render: (_: unknown, r: AdminUserListItem) => `${r.firstName} ${r.lastName}` },
           { title: 'Email', dataIndex: 'email', key: 'email' },
           {
             title: 'Role',
             dataIndex: 'role',
             key: 'role',
-            render: (r: string, record: AdminUser) => (
+            render: (r: string, record: AdminUserListItem) => (
               <Select
                 value={r}
                 size="small"
