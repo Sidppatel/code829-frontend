@@ -62,7 +62,6 @@ export default function AdminManagementPage() {
     } catch { message.error('Failed to update role'); }
   };
 
-  const ROLE_COLORS: Record<string, string> = { Developer: 'red', Admin: 'purple', Staff: 'blue' };
 
   return (
     <div style={{ padding: 24 }}>
