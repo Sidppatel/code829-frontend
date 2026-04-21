@@ -25,7 +25,7 @@ const log = createLogger('Public/PurchaseTicketsPage');
 export default function PurchaseTicketsPage() {
   const { purchaseId } = useParams<{ purchaseId: string }>();
   const navigate = useNavigate();
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   useAuthStore((s) => s.user?.id);
 
   const [tickets, setTickets] = useState<PurchaseTicket[]>([]);
@@ -114,7 +114,7 @@ export default function PurchaseTicketsPage() {
     const content = status === 'Claimed'
       ? 'Are you sure? The guest will lose their ticket and you\'ll be able to reassign it.'
       : 'Are you sure? The invite link will stop working and the guest won\'t be able to claim.';
-    Modal.confirm({
+    modal.confirm({
       title: 'Revoke Ticket',
       content,
       okText: 'Revoke',
