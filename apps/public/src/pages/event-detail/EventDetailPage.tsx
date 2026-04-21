@@ -196,7 +196,7 @@ export default function EventDetailPage() {
       })();
       setTableLocks([]);
       setClientSecret(null);
-      if (bid) setPurchaseIdState(null);
+      if (bid) setPurchaseId(null);
     }
 
     // Left checkout-open with a pending booking
@@ -208,7 +208,7 @@ export default function EventDetailPage() {
           catch (err) { log.warn('Step-change cleanup: cancel open booking failed', { bid, err }); }
         })();
         setClientSecret(null);
-        setPurchaseIdState(null);
+        setPurchaseId(null);
       }
     }
   }, [step, event]);
@@ -445,6 +445,19 @@ export default function EventDetailPage() {
   const handlePaymentSuccess = async () => {
     if (!purchaseId) return;
     try {
+      // Stripe webhook may have already flipped the purchase to Paid via /purchases/confirm-by-intent.
+      // Re-check status before issuing a duplicate confirm that would fail on a non-Pending row.
+      const { data: current } = await purchasesApi.getById(purchaseId);
+      if (current.status === 'Paid' || current.status === 'CheckedIn') {
+        message.success('Booking confirmed!');
+        navigate('/purchases');
+        return;
+      }
+      if (current.status !== 'Pending') {
+        setCheckoutError('This booking is no longer active. Please start a new purchase.');
+        setConfirming(false);
+        return;
+      }
       await purchasesApi.confirmPayment(purchaseId);
       message.success('Booking confirmed!');
       navigate('/purchases');
