@@ -1138,6 +1138,7 @@ body {
   border: 1px solid var(--border-subtle);
   position: relative;
   transition: background 0.12s ease;
+  padding: 3px;
 }
 
 .fp-cell-empty {
@@ -1166,9 +1167,6 @@ body {
   pointer-events: none;
 }
 
-.fp-cell-occupied {
-  padding: 3px;
-}
 
 /* ── Table element inside grid cell ── */
 .fp-table {

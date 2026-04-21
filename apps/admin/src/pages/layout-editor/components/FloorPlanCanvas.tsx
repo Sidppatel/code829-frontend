@@ -69,7 +69,7 @@ export default function FloorPlanCanvas({
 
       if (table) {
         rowCells.push(
-          <div key={key} className="fp-cell fp-cell-occupied">
+          <div key={key} className="fp-cell">
             <TableElement
               table={table}
               isSelected={table.id === selectedTableId}
