@@ -3,7 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Alert, Button, App } from 'antd';
 import { CloseOutlined, InfoCircleOutlined, SaveOutlined } from '@ant-design/icons';
 import { adminLayoutApi } from '../../services/api';
-import type { LayoutStatsResponse, TableTemplate, EventTableType } from '@code829/shared/types/layout';
+import type {
+  LayoutStatsResponse,
+  TableTemplate,
+  EventTableType,
+  LayoutTable,
+  EditorMode,
+} from '@code829/shared/types/layout';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import ControlsPanel from './components/ControlsPanel';
@@ -12,25 +18,6 @@ import LayoutStatsBar from './components/LayoutStatsBar';
 import { createLogger } from '@code829/shared/lib/logger';
 
 const log = createLogger('Admin/LayoutEditorPage');
-
-export interface LayoutTable {
-  id: string;
-  label: string;
-  gridRow: number;
-  gridCol: number;
-  isActive: boolean;
-  sortOrder: number;
-  eventTableId: string;
-  eventTableLabel?: string;
-  // Joined from EventTable (read-only)
-  capacity: number;
-  shape: string;
-  color?: string;
-  priceCents: number;
-  status?: 'Available' | 'Locked' | 'Booked';
-}
-
-export type EditorMode = 'add' | 'delete' | 'select';
 
 export default function LayoutEditorPage() {
   const { eventId } = useParams<{ eventId: string }>();

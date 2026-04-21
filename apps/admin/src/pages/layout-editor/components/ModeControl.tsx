@@ -1,6 +1,6 @@
 import { Card, Button, Space } from 'antd';
 import { SelectOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import type { EditorMode } from '../LayoutEditorPage';
+import type { EditorMode } from '@code829/shared/types/layout';
 
 interface ModeControlProps {
   editorMode: EditorMode;
