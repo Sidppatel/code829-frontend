@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { UserProfile, AdminUserProfile } from '../types/auth';
+import type { UserProfile, BusinessUserProfile } from '../types/auth';
 
 interface AuthState {
   token: string | null;
-  user: UserProfile | AdminUserProfile | null;
+  user: UserProfile | BusinessUserProfile | null;
   /**
    * False until useSessionRefresh has finished its first `/auth/me` (or equivalent) probe.
    * Guards like ProtectedRoute and EventDetailPage's gate must wait for `isHydrated === true`
@@ -12,8 +12,8 @@ interface AuthState {
    * to /login on every refresh because the store is still empty for a few ms.
    */
   isHydrated: boolean;
-  setAuth: (token: string, user: UserProfile | AdminUserProfile) => void;
-  setUser: (user: UserProfile | AdminUserProfile) => void;
+  setAuth: (token: string, user: UserProfile | BusinessUserProfile) => void;
+  setUser: (user: UserProfile | BusinessUserProfile) => void;
   setHydrated: (v: boolean) => void;
   logout: () => void;
 }

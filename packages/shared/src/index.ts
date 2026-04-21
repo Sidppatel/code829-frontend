@@ -132,6 +132,6 @@ export { default as ResetPasswordForm } from './components/auth/ResetPasswordFor
 // Types (re-export for convenience)
 export type {
   AuthResponse, UserProfile, UserRole, AdminRole,
-  AdminUserProfile, AdminAuthResponse, InvitationInfoDto,
+  BusinessUserProfile, BusinessUserListItem, BusinessAuthResponse, InvitationInfoDto,
 } from './types/auth';
 export type { Purchase, PurchaseStatus } from './types/purchase';

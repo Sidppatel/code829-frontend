@@ -2,8 +2,8 @@ import { BaseService } from './BaseService';
 import type {
   AuthResponse,
   UserProfile,
-  AdminAuthResponse,
-  AdminUserProfile,
+  BusinessAuthResponse,
+  BusinessUserProfile,
   InvitationInfoDto,
 } from '../types/auth';
 
@@ -61,15 +61,15 @@ export class AuthService extends BaseService {
 
   // ── Admin auth ──────────────────────────────────
   adminLogin = (email: string, password: string) =>
-    this.post<AdminAuthResponse>('/admin/auth/login', { email, password });
+    this.post<BusinessAuthResponse>('/admin/auth/login', { email, password });
 
   adminSignup = (request: AcceptInvitationRequest) =>
-    this.post<AdminAuthResponse>('/admin/auth/signup', request);
+    this.post<BusinessAuthResponse>('/admin/auth/signup', request);
 
-  adminGetMe = () => this.get<AdminUserProfile>('/admin/auth/me');
+  adminGetMe = () => this.get<BusinessUserProfile>('/admin/auth/me');
 
   adminUpdateProfile = (data: UpdateAdminProfilePayload) =>
-    this.put<AdminUserProfile>('/admin/auth/profile', data);
+    this.put<BusinessUserProfile>('/admin/auth/profile', data);
 
   adminChangePassword = (data: ChangeAdminPasswordPayload) =>
     this.put('/admin/auth/password', data);

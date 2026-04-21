@@ -4,10 +4,10 @@ import { SearchOutlined, UserAddOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '@code829/shared/lib/axios';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
-import type { AdminUserListItem } from '@code829/shared/types/auth';
+import type { BusinessUserListItem } from '@code829/shared/types/auth';
 
 export default function AdminManagementPage() {
-  const [users, setUsers] = useState<AdminUserListItem[]>([]);
+  const [users, setUsers] = useState<BusinessUserListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -61,19 +61,19 @@ export default function AdminManagementPage() {
           <Input placeholder="Search..." prefix={<SearchOutlined />} value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} style={{ width: 300 }} allowClear />
           <Button type="primary" icon={<UserAddOutlined />} onClick={() => navigate('/invitations')}>Invite</Button>
         </Space>
-        <Table dataSource={users} rowKey="adminUserId" loading={loading} pagination={{ current: page, total, pageSize: 25, onChange: setPage }}
+        <Table dataSource={users} rowKey="businessUserId" loading={loading} pagination={{ current: page, total, pageSize: 25, onChange: setPage }}
           columns={[
-            { title: 'Name', render: (_: unknown, r: AdminUserListItem) => `${r.firstName} ${r.lastName}` },
+            { title: 'Name', render: (_: unknown, r: BusinessUserListItem) => `${r.firstName} ${r.lastName}` },
             { title: 'Email', dataIndex: 'email' },
             {
               title: 'Role',
               dataIndex: 'role',
-              render: (r: string, record: AdminUserListItem) => (
+              render: (r: string, record: BusinessUserListItem) => (
                 <Select
                   value={r}
                   size="small"
                   style={{ width: 120 }}
-                  onChange={v => updateRole(record.adminUserId, v)}
+                  onChange={v => updateRole(record.businessUserId, v)}
                   options={[
                     { value: 'Developer', label: <Tag color="red">Developer</Tag> },
                     { value: 'Admin', label: <Tag color="purple">Admin</Tag> },
@@ -82,7 +82,7 @@ export default function AdminManagementPage() {
                 />
               )
             },
-            { title: 'Status', dataIndex: 'isActive', render: (active: boolean, r: AdminUserListItem) => <Switch checked={active} onChange={v => toggleActive(r.adminUserId, v)} checkedChildren="Active" unCheckedChildren="Disabled" /> },
+            { title: 'Status', dataIndex: 'isActive', render: (active: boolean, r: BusinessUserListItem) => <Switch checked={active} onChange={v => toggleActive(r.businessUserId, v)} checkedChildren="Active" unCheckedChildren="Disabled" /> },
             { title: 'Last Login', dataIndex: 'lastLoginAt', render: (d?: string) => d ? new Date(d).toLocaleDateString() : <Typography.Text type="secondary">Never</Typography.Text> },
           ]}
         />

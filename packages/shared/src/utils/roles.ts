@@ -1,4 +1,4 @@
-import type { UserProfile, AdminUserProfile, UserRole } from '../types/auth';
+import type { UserProfile, BusinessUserProfile, UserRole } from '../types/auth';
 
 const ROLE_LEVEL: Record<UserRole, number> = {
   User: 1,
@@ -7,7 +7,7 @@ const ROLE_LEVEL: Record<UserRole, number> = {
   Developer: 4,
 };
 
-export const hasRole = (user: UserProfile | AdminUserProfile | null, minRole: UserRole): boolean => {
+export const hasRole = (user: UserProfile | BusinessUserProfile | null, minRole: UserRole): boolean => {
   if (!user) return false;
   return ROLE_LEVEL[user.role] >= ROLE_LEVEL[minRole];
 };

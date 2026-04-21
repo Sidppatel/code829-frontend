@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, Typography, Button } from 'antd';
 import { LogoutOutlined } from '@ant-design/icons';
 import BrandLogo from '../shared/BrandLogo';
-import type { UserProfile, AdminUserProfile } from '../../types/auth';
+import type { UserProfile, BusinessUserProfile } from '../../types/auth';
 
 interface NavGroup {
   title: string;
@@ -12,7 +12,7 @@ interface NavGroup {
 interface SidebarNavProps {
   collapsed: boolean;
   navGroups: NavGroup[];
-  user: UserProfile | AdminUserProfile | null;
+  user: UserProfile | BusinessUserProfile | null;
   userSecondaryRole?: string;
   userSecondaryLink?: string;
   userSecondaryLinkLabel?: string;
