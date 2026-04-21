@@ -74,3 +74,5 @@ export interface TableStatusInfo {
   purchaseCount: number;
   bookers: string[];
 }
+
+export type EditorMode = 'add' | 'delete' | 'select';
