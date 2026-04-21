@@ -31,7 +31,7 @@ export interface EventDetail extends EventSummary {
   publishedAt?: string;
   venueId: string;
   venue: VenueBasic;
-  adminUserId?: string;
+  businessUserId?: string;
   organizerName?: string;
   gridRows?: number;
   gridCols?: number;

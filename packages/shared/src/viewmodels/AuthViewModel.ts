@@ -3,10 +3,10 @@ import { BaseViewModel } from './BaseViewModel';
 import { useVMState } from './useVM';
 import { authController, AuthController } from '../controllers/AuthController';
 import { useAuthStore } from '../stores/authStore';
-import type { UserProfile, AdminUserProfile } from '../types/auth';
+import type { UserProfile, BusinessUserProfile } from '../types/auth';
 
 interface AuthVMState {
-  user: UserProfile | AdminUserProfile | null;
+  user: UserProfile | BusinessUserProfile | null;
   token: string | null;
   isAuthenticated: boolean;
   isHydrated: boolean;

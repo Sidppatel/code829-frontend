@@ -24,7 +24,7 @@ export type UserRole = 'User' | 'Staff' | 'Admin' | 'Developer';
 
 export type AdminRole = 'Staff' | 'Admin' | 'Developer';
 
-export interface AdminUserProfile {
+export interface BusinessUserProfile {
   id: string;
   email: string;
   firstName: string;
@@ -37,8 +37,8 @@ export interface AdminUserProfile {
   imageUrl?: string;
 }
 
-export interface AdminAuthResponse {
-  user: AdminUserProfile;
+export interface BusinessAuthResponse {
+  user: BusinessUserProfile;
   token: string;
 }
 
@@ -49,8 +49,8 @@ export interface InvitationInfoDto {
   expiresAt: string;
 }
 
-export interface AdminUserListItem {
-  adminUserId: string;
+export interface BusinessUserListItem {
+  businessUserId: string;
   firstName: string;
   lastName: string;
   email: string;

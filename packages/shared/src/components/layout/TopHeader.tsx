@@ -3,12 +3,12 @@ import { Typography, Button, Dropdown, Space } from 'antd';
 import type { MenuProps } from 'antd';
 import PulseIndicator from '../shared/PulseIndicator';
 import BrandLogo from '../shared/BrandLogo';
-import type { UserProfile, AdminUserProfile } from '../../types/auth';
+import type { UserProfile, BusinessUserProfile } from '../../types/auth';
 
 interface TopHeaderProps {
   isMobile: boolean;
   title: string;
-  user: UserProfile | AdminUserProfile | null;
+  user: UserProfile | BusinessUserProfile | null;
   userMenuItems: MenuProps['items'];
   showMetrics?: boolean;
 }

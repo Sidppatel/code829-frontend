@@ -1,7 +1,7 @@
 import { BaseController } from './BaseController';
 import { authService, AuthService, type UpdateProfilePayload, type AcceptInvitationRequest, type UpdateAdminProfilePayload, type ChangeAdminPasswordPayload } from '../services/AuthService';
 import { useAuthStore } from '../stores/authStore';
-import type { AuthResponse, AdminAuthResponse, UserProfile, AdminUserProfile } from '../types/auth';
+import type { AuthResponse, BusinessAuthResponse, UserProfile, BusinessUserProfile } from '../types/auth';
 
 export type AuthEvent =
   | 'auth:login'
@@ -55,31 +55,31 @@ export class AuthController extends BaseController {
   }
 
   // ── Admin flows ───────────────────────────────
-  async adminLogin(email: string, password: string): Promise<AdminAuthResponse> {
+  async adminLogin(email: string, password: string): Promise<BusinessAuthResponse> {
     const { data } = await this.svc.adminLogin(email, password);
     this.persist(data.token, data.user);
-    this.emit<AdminAuthResponse>('auth:login', data);
+    this.emit<BusinessAuthResponse>('auth:login', data);
     return data;
   }
 
-  async adminSignup(request: AcceptInvitationRequest): Promise<AdminAuthResponse> {
+  async adminSignup(request: AcceptInvitationRequest): Promise<BusinessAuthResponse> {
     const { data } = await this.svc.adminSignup(request);
     this.persist(data.token, data.user);
-    this.emit<AdminAuthResponse>('auth:login', data);
+    this.emit<BusinessAuthResponse>('auth:login', data);
     return data;
   }
 
-  async adminRefreshMe(): Promise<AdminUserProfile> {
+  async adminRefreshMe(): Promise<BusinessUserProfile> {
     const { data } = await this.svc.adminGetMe();
     useAuthStore.getState().setUser(data);
-    this.emit<AdminUserProfile>('auth:profileUpdated', data);
+    this.emit<BusinessUserProfile>('auth:profileUpdated', data);
     return data;
   }
 
   async adminUpdateProfile(payload: UpdateAdminProfilePayload) {
     const { data } = await this.svc.adminUpdateProfile(payload);
     useAuthStore.getState().setUser(data);
-    this.emit<AdminUserProfile>('auth:profileUpdated', data);
+    this.emit<BusinessUserProfile>('auth:profileUpdated', data);
     return data;
   }
 
@@ -95,7 +95,7 @@ export class AuthController extends BaseController {
     this.emit('auth:logout');
   }
 
-  private persist(token: string, user: UserProfile | AdminUserProfile) {
+  private persist(token: string, user: UserProfile | BusinessUserProfile) {
     useAuthStore.getState().setAuth(token, user);
   }
 }

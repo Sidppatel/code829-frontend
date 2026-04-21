@@ -11,7 +11,7 @@ import {
   PageShell,
 } from '@code829/shared/components/ui';
 import type { PagedResponse } from '@code829/shared/types/shared';
-import type { AdminUserListItem } from '@code829/shared/types/auth';
+import type { BusinessUserListItem } from '@code829/shared/types/auth';
 
 interface StaffListParams extends Record<string, unknown> {
   search?: string;
@@ -20,9 +20,9 @@ interface StaffListParams extends Record<string, unknown> {
 export default function StaffManagementPage() {
   const navigate = useNavigate();
 
-  const paged = usePagedTable<AdminUserListItem, StaffListParams>({
+  const paged = usePagedTable<BusinessUserListItem, StaffListParams>({
     fetcher: (params) =>
-      apiClient.get<PagedResponse<AdminUserListItem>>('/admin/staff', { params }) as Promise<AxiosResponse<PagedResponse<AdminUserListItem>>>,
+      apiClient.get<PagedResponse<BusinessUserListItem>>('/admin/staff', { params }) as Promise<AxiosResponse<PagedResponse<BusinessUserListItem>>>,
     defaultPageSize: 25,
   });
 
@@ -50,26 +50,26 @@ export default function StaffManagementPage() {
           width: 300,
         }}
       />
-      <DataTableSection<AdminUserListItem>
+      <DataTableSection<BusinessUserListItem>
         data={paged.data}
         total={paged.total}
         page={paged.page}
         pageSize={paged.pageSize}
         loading={paged.loading}
         onPageChange={paged.onPageChange}
-        rowKey="adminUserId"
+        rowKey="businessUserId"
         columns={[
-          { title: 'Name', key: 'name', render: (_: unknown, r: AdminUserListItem) => `${r.firstName} ${r.lastName}` },
+          { title: 'Name', key: 'name', render: (_: unknown, r: BusinessUserListItem) => `${r.firstName} ${r.lastName}` },
           { title: 'Email', dataIndex: 'email', key: 'email' },
           {
             title: 'Role',
             key: 'role',
-            render: (_: unknown, r: AdminUserListItem) => (
+            render: (_: unknown, r: BusinessUserListItem) => (
               <Select
                 value={r.role}
                 size="small"
                 style={{ width: 100 }}
-                onChange={(v: string) => { void update.run(r.adminUserId, { role: v }); }}
+                onChange={(v: string) => { void update.run(r.businessUserId, { role: v }); }}
                 options={[
                   { value: 'Staff', label: <Tag color="blue">Staff</Tag> },
                   { value: 'Admin', label: <Tag color="purple">Admin</Tag> },
@@ -80,10 +80,10 @@ export default function StaffManagementPage() {
           {
             title: 'Status',
             key: 'isActive',
-            render: (_: unknown, r: AdminUserListItem) => (
+            render: (_: unknown, r: BusinessUserListItem) => (
               <Switch
                 checked={r.isActive}
-                onChange={(v) => { void update.run(r.adminUserId, { isActive: v }); }}
+                onChange={(v) => { void update.run(r.businessUserId, { isActive: v }); }}
                 checkedChildren="Active"
                 unCheckedChildren="Disabled"
               />
