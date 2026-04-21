@@ -31,10 +31,10 @@ interface Props<T> {
   showSizeChanger?: boolean;
 }
 
-function resolveRowKey<T>(rowKey: RowKey<T>, record: T, index: number): string {
+function resolveRowKey<T>(rowKey: RowKey<T>, record: T): string {
   if (typeof rowKey === 'function') return rowKey(record);
   const v = record[rowKey];
-  return v !== undefined && v !== null ? String(v) : String(index);
+  return v !== undefined && v !== null ? String(v) : '';
 }
 
 export function defineColumns<T>(cols: ColumnsType<T>): ColumnsType<T> {
@@ -69,7 +69,7 @@ export default function DataTableSection<T>({
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {data.map((record, i) => (
               <div
-                key={resolveRowKey(rowKey, record, i)}
+                key={resolveRowKey(rowKey, record) || i}
                 onClick={onRowClick ? () => onRowClick(record) : undefined}
                 style={{ cursor: onRowClick ? 'pointer' : 'default' }}
               >
@@ -103,7 +103,7 @@ export default function DataTableSection<T>({
         <Table<T>
           dataSource={data}
           columns={columns}
-          rowKey={(record, i) => resolveRowKey(rowKey, record, i ?? 0)}
+          rowKey={(record) => resolveRowKey(rowKey, record)}
           loading={loading}
           size={size}
           scroll={{ x: scrollX }}
