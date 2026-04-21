@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import type { LayoutTable, EditorMode } from '../LayoutEditorPage';
+import type { LayoutTable, EditorMode } from '@code829/shared/types/layout';
 import TableElement from './TableElement';
 
 interface FloorPlanCanvasProps {

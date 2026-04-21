@@ -31,7 +31,7 @@ const log = createLogger('Public/PurchaseDetailPage');
 export default function PurchaseDetailPage() {
   const { purchaseId } = useParams<{ purchaseId: string }>();
   const navigate = useNavigate();
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
 
   const [booking, setBooking] = useState<Purchase | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,7 +68,7 @@ export default function PurchaseDetailPage() {
 
   const handleCancel = () => {
     if (!purchaseId) return;
-    Modal.confirm({
+    modal.confirm({
       title: 'Cancel Purchase',
       content: 'Are you sure you want to cancel this purchase? This action cannot be undone.',
       okText: 'Cancel Purchase',

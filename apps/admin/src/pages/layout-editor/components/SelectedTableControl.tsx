@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { Card, Button, Form, Input, Select, Divider, Popconfirm, Tag } from 'antd';
 import { DeleteOutlined, CheckCircleOutlined, LockOutlined } from '@ant-design/icons';
-import type { LayoutTable } from '../LayoutEditorPage';
-import type { EventTableType } from '@code829/shared/types/layout';
+import type { LayoutTable, EventTableType } from '@code829/shared/types/layout';
 import { centsToUSD } from '@code829/shared/utils/currency';
 
 interface SelectedTableControlProps {

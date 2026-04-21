@@ -4,20 +4,10 @@ import { UserAddOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '@code829/shared/lib/axios';
 import PageHeader from '@code829/shared/components/shared/PageHeader';
-
-interface StaffUser {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  isActive: boolean;
-  createdAt: string;
-  lastLoginAt?: string;
-}
+import type { AdminUserListItem } from '@code829/shared/types/auth';
 
 export default function StaffManagementPage() {
-  const [staff, setStaff] = useState<StaffUser[]>([]);
+  const [staff, setStaff] = useState<AdminUserListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -70,19 +60,19 @@ export default function StaffManagementPage() {
           <Input placeholder="Search staff..." prefix={<SearchOutlined />} value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} style={{ width: 300 }} allowClear />
           <Button type="primary" icon={<UserAddOutlined />} onClick={() => navigate('/invitations')}>Invite Staff</Button>
         </Space>
-        <Table dataSource={staff} rowKey="id" loading={loading} pagination={{ current: page, total, pageSize: 25, onChange: setPage }}
+        <Table dataSource={staff} rowKey="adminUserId" loading={loading} pagination={{ current: page, total, pageSize: 25, onChange: setPage }}
           columns={[
-            { title: 'Name', render: (_: unknown, r: StaffUser) => `${r.firstName} ${r.lastName}` },
+            { title: 'Name', render: (_: unknown, r: AdminUserListItem) => `${r.firstName} ${r.lastName}` },
             { title: 'Email', dataIndex: 'email' },
             {
               title: 'Role',
               dataIndex: 'role',
-              render: (r: string, record: StaffUser) => (
+              render: (r: string, record: AdminUserListItem) => (
                 <Select
                   value={r}
                   size="small"
                   style={{ width: 120 }}
-                  onChange={v => updateRole(record.id, v)}
+                  onChange={v => updateRole(record.adminUserId, v)}
                   options={[
                     { value: 'Developer', label: <Tag color="red">Developer</Tag> },
                     { value: 'Admin', label: <Tag color="purple">Admin</Tag> },
@@ -91,7 +81,7 @@ export default function StaffManagementPage() {
                 />
               )
             },
-            { title: 'Status', dataIndex: 'isActive', render: (active: boolean, r: StaffUser) => <Switch checked={active} onChange={v => toggleActive(r.id, v)} checkedChildren="Active" unCheckedChildren="Disabled" /> },
+            { title: 'Status', dataIndex: 'isActive', render: (active: boolean, r: AdminUserListItem) => <Switch checked={active} onChange={v => toggleActive(r.adminUserId, v)} checkedChildren="Active" unCheckedChildren="Disabled" /> },
             { title: 'Last Login', dataIndex: 'lastLoginAt', render: (d?: string) => d ? new Date(d).toLocaleDateString() : <Typography.Text type="secondary">Never</Typography.Text> },
           ]}
         />

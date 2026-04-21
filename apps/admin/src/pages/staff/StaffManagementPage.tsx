@@ -11,17 +11,7 @@ import {
   PageShell,
 } from '@code829/shared/components/ui';
 import type { PagedResponse } from '@code829/shared/types/shared';
-
-interface StaffUser {
-  adminUserId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  isActive: boolean;
-  createdAt: string;
-  lastLoginAt?: string;
-}
+import type { AdminUserListItem } from '@code829/shared/types/auth';
 
 interface StaffListParams extends Record<string, unknown> {
   search?: string;
@@ -30,9 +20,9 @@ interface StaffListParams extends Record<string, unknown> {
 export default function StaffManagementPage() {
   const navigate = useNavigate();
 
-  const paged = usePagedTable<StaffUser, StaffListParams>({
+  const paged = usePagedTable<AdminUserListItem, StaffListParams>({
     fetcher: (params) =>
-      apiClient.get<PagedResponse<StaffUser>>('/admin/staff', { params }) as Promise<AxiosResponse<PagedResponse<StaffUser>>>,
+      apiClient.get<PagedResponse<AdminUserListItem>>('/admin/staff', { params }) as Promise<AxiosResponse<PagedResponse<AdminUserListItem>>>,
     defaultPageSize: 25,
   });
 
@@ -60,7 +50,7 @@ export default function StaffManagementPage() {
           width: 300,
         }}
       />
-      <DataTableSection<StaffUser>
+      <DataTableSection<AdminUserListItem>
         data={paged.data}
         total={paged.total}
         page={paged.page}
@@ -69,12 +59,12 @@ export default function StaffManagementPage() {
         onPageChange={paged.onPageChange}
         rowKey="adminUserId"
         columns={[
-          { title: 'Name', key: 'name', render: (_: unknown, r: StaffUser) => `${r.firstName} ${r.lastName}` },
+          { title: 'Name', key: 'name', render: (_: unknown, r: AdminUserListItem) => `${r.firstName} ${r.lastName}` },
           { title: 'Email', dataIndex: 'email', key: 'email' },
           {
             title: 'Role',
             key: 'role',
-            render: (_: unknown, r: StaffUser) => (
+            render: (_: unknown, r: AdminUserListItem) => (
               <Select
                 value={r.role}
                 size="small"
@@ -90,7 +80,7 @@ export default function StaffManagementPage() {
           {
             title: 'Status',
             key: 'isActive',
-            render: (_: unknown, r: StaffUser) => (
+            render: (_: unknown, r: AdminUserListItem) => (
               <Switch
                 checked={r.isActive}
                 onChange={(v) => { void update.run(r.adminUserId, { isActive: v }); }}

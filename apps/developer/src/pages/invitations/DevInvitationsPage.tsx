@@ -14,16 +14,7 @@ import {
   useConfirm,
   useCrudModal,
 } from '@code829/shared/hooks';
-
-interface Invitation {
-  id: string;
-  email: string;
-  role: string;
-  status: string;
-  invitedByName: string;
-  expiresAt: string;
-  createdAt: string;
-}
+import type { Invitation } from '@code829/shared/types/auth';
 
 interface InvitationForm {
   email: string;
@@ -79,7 +70,7 @@ export default function DevInvitationsPage() {
         pageSize={items.length || 10}
         loading={loading}
         onPageChange={() => {}}
-        rowKey="id"
+        rowKey="invitationId"
         showSizeChanger={false}
         columns={[
           { title: 'Email', dataIndex: 'email', key: 'email' },
@@ -117,7 +108,7 @@ export default function DevInvitationsPage() {
                       description: `Revoke invitation for ${r.email}?`,
                       tone: 'danger',
                       confirmLabel: 'Revoke',
-                      onConfirm: () => revoke.run(r.id),
+                      onConfirm: () => revoke.run(r.invitationId),
                     })
                   }
                 >

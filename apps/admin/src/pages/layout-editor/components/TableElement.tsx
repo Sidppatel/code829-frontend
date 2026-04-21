@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import type { LayoutTable, EditorMode } from '../LayoutEditorPage';
+import type { LayoutTable, EditorMode } from '@code829/shared/types/layout';
 import { centsToUSD } from '@code829/shared/utils/currency';
 
 interface TableElementProps {

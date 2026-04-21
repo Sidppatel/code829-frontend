@@ -1,5 +1,4 @@
-import type { TableTemplate, EventTableType } from '@code829/shared/types/layout';
-import type { LayoutTable, EditorMode } from '../LayoutEditorPage';
+import type { TableTemplate, EventTableType, LayoutTable, EditorMode } from '@code829/shared/types/layout';
 
 import GridSizeControl from './GridSizeControl';
 import ModeControl from './ModeControl';

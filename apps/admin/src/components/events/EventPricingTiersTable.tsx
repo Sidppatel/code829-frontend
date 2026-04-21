@@ -172,7 +172,7 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
       <Table
         dataSource={tiers}
         columns={columns}
-        rowKey={(record, index) => record.id || `${record.name}-${index}`}
+        rowKey={(record) => record.id || record.name}
         loading={loading}
         pagination={false}
         size="middle"

@@ -48,3 +48,24 @@ export interface InvitationInfoDto {
   invitedByName: string;
   expiresAt: string;
 }
+
+export interface AdminUserListItem {
+  adminUserId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  createdAt?: string;
+  lastLoginAt?: string;
+}
+
+export interface Invitation {
+  invitationId: string;
+  email: string;
+  role: string;
+  status: string;
+  invitedByName: string;
+  expiresAt: string;
+  createdAt: string;
+}

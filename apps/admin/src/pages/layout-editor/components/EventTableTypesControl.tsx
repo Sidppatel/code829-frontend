@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Card, Button, Space, Tag, Modal, Form, Select, Input, InputNumber, ColorPicker, App } from 'antd';
 import { PlusOutlined, AimOutlined, EditOutlined } from '@ant-design/icons';
-import type { EventTableType, TableTemplate } from '@code829/shared/types/layout';
-import type { EditorMode } from '../LayoutEditorPage';
+import type { EventTableType, TableTemplate, EditorMode } from '@code829/shared/types/layout';
 import { adminLayoutApi } from '../../../services/api';
 import { centsToUSD, centsToDollars } from '@code829/shared/utils/currency';
 import { tablePickerPresets } from '@code829/shared/theme/colors';
