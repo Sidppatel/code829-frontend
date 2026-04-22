@@ -55,6 +55,21 @@ export class AuthService extends BaseService {
   devLogin = (email: string) =>
     this.post<AuthResponse>('/auth/dev-login', { email });
 
+  signup = (payload: { email: string; firstName: string; lastName: string; password: string }) =>
+    this.post<{ message: string; devVerificationToken?: string }>('/auth/signup', payload);
+
+  signin = (email: string, password: string) =>
+    this.post<AuthResponse>('/auth/signin', { email, password });
+
+  verifyEmail = (token: string) =>
+    this.post<AuthResponse>('/auth/verify-email', { token });
+
+  userForgotPassword = (email: string) =>
+    this.post('/auth/forgot-password', { email });
+
+  userResetPassword = (token: string, newPassword: string) =>
+    this.post('/auth/reset-password', { token, newPassword });
+
   getMe = () => this.get<UserProfile>('/auth/me');
 
   updateProfile = (data: UpdateProfilePayload) => this.put('/auth/profile', data);

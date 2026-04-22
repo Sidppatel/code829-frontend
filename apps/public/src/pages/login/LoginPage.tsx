@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Form, Input, Button, App } from 'antd';
-import { MailOutlined, LoginOutlined } from '@ant-design/icons';
+import { MailOutlined, LoginOutlined, LockOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { AxiosError } from 'axios';
@@ -12,10 +12,13 @@ import Text from '@code829/shared/components/shared/Text';
 import { strings, textTemplates } from '@code829/shared/theme/strings';
 
 
+type Mode = 'password' | 'magic-link';
+
 export default function LoginPage() {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<{ email: string; password?: string }>();
   const [devForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<Mode>('password');
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -70,6 +73,42 @@ export default function LoginPage() {
     }
   };
 
+  const handlePasswordSignin = async (values: { email: string; password: string }) => {
+    setLoading(true);
+    try {
+      const { data } = await authApi.signin(values.email, values.password);
+      setAuth(data.token, data.user);
+      message.success(textTemplates.loggedInAs(data.user.firstName).text);
+      if (!data.user.hasCompletedOnboarding) {
+        const onboardUrl = returnUrl ? `/onboarding?returnUrl=${encodeURIComponent(returnUrl)}` : '/onboarding';
+        navigate(onboardUrl);
+      } else {
+        navigate(safeReturnUrl(returnUrl));
+      }
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string; retryAfterSeconds?: number }>;
+      if (axiosErr.response?.status === 429 && axiosErr.response.data?.retryAfterSeconds) {
+        startCooldown(axiosErr.response.data.retryAfterSeconds);
+        message.warning('Too many sign-in attempts. Please try again shortly.');
+      } else if (axiosErr.response?.status === 401) {
+        message.error(axiosErr.response.data?.message ?? 'Invalid email or password.');
+      } else {
+        message.error('Sign-in failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (values: { email: string; password?: string }) => {
+    if (mode === 'magic-link') {
+      await handleMagicLink({ email: values.email });
+    } else {
+      if (!values.password) return;
+      await handlePasswordSignin({ email: values.email, password: values.password });
+    }
+  };
+
   const handleDevLogin = async (values: { email: string }) => {
     setLoading(true);
     try {
@@ -105,7 +144,7 @@ export default function LoginPage() {
           zIndex: 10,
         }}
       >
-        <div 
+        <div
           className="glass-card"
           style={{
             padding: '60px 40px',
@@ -115,10 +154,10 @@ export default function LoginPage() {
           }}
         >
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <div style={{ 
-              width: 64, 
-              height: 64, 
-              borderRadius: 18, 
+            <div style={{
+              width: 64,
+              height: 64,
+              borderRadius: 18,
               background: 'var(--gradient-brand)',
               margin: '0 auto 24px',
               display: 'flex',
@@ -145,15 +184,15 @@ export default function LoginPage() {
 
           {magicLinkSent ? (
             <div style={{ textAlign: 'center', padding: '16px 0' }}>
-              <div style={{ 
-                width: 80, 
-                height: 80, 
-                borderRadius: '50%', 
+              <div style={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
                 background: 'var(--bg-soft)',
                 display: 'flex',
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                margin: '0 auto 24px' 
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px'
               }}>
                 <MailOutlined style={{ fontSize: 32, color: 'var(--accent-violet)' }} />
               </div>
@@ -174,7 +213,7 @@ export default function LoginPage() {
               </Button>
             </div>
           ) : (
-            <Form form={form} layout="vertical" onFinish={handleMagicLink} requiredMark={false}>
+            <Form form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
               <Form.Item
                 name="email"
                 rules={[
@@ -186,9 +225,9 @@ export default function LoginPage() {
                   prefix={<MailOutlined style={{ color: 'var(--text-muted)', marginRight: 8 }} />}
                   placeholder="Email address"
                   size="large"
-                  style={{ 
-                    borderRadius: 16, 
-                    height: 56, 
+                  style={{
+                    borderRadius: 16,
+                    height: 56,
                     background: 'var(--bg-soft)',
                     border: '1px solid var(--border)',
                     fontSize: 16
@@ -196,6 +235,36 @@ export default function LoginPage() {
                   disabled={cooldown > 0}
                 />
               </Form.Item>
+
+              {mode === 'password' && (
+                <Form.Item
+                  name="password"
+                  rules={[{ required: true, message: 'Password is required' }]}
+                >
+                  <Input.Password
+                    prefix={<LockOutlined style={{ color: 'var(--text-muted)', marginRight: 8 }} />}
+                    placeholder="Password"
+                    size="large"
+                    style={{
+                      borderRadius: 16,
+                      height: 56,
+                      background: 'var(--bg-soft)',
+                      border: '1px solid var(--border)',
+                      fontSize: 16,
+                    }}
+                    disabled={cooldown > 0}
+                  />
+                </Form.Item>
+              )}
+
+              {mode === 'password' && (
+                <div style={{ textAlign: 'right', marginTop: -8, marginBottom: 8 }}>
+                  <Link to="/forgot-password" style={{ color: 'var(--accent-violet)', fontSize: 13, fontWeight: 600 }}>
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
+
               <Form.Item style={{ marginBottom: 0 }}>
                 <Button
                   type="primary"
@@ -219,18 +288,30 @@ export default function LoginPage() {
                 >
                   {cooldown > 0
                     ? textTemplates.retryInCooldown(formatCooldown(cooldown)).text
-                    : <Text token="common.continueWithEmail" />}
+                    : mode === 'password'
+                      ? 'Sign in'
+                      : <Text token="common.continueWithEmail" />}
                 </Button>
               </Form.Item>
+
+              <div style={{ textAlign: 'center', marginTop: 16 }}>
+                <Button
+                  type="link"
+                  onClick={() => setMode(mode === 'password' ? 'magic-link' : 'password')}
+                  style={{ color: 'var(--accent-violet)', fontWeight: 600, fontSize: 13 }}
+                >
+                  {mode === 'password' ? 'Use a magic link instead' : 'Use a password instead'}
+                </Button>
+              </div>
             </Form>
           )}
         </div>
 
         <div style={{ textAlign: 'center', marginTop: 32 }}>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14, fontWeight: 500 }}>
-            <Text token="common.newToPlatform" />{' '}
-            <Link to="/events" style={{ color: 'var(--accent-violet)', fontWeight: 700 }}>
-              <Text token="common.exploreExperiences" />
+            New to the platform?{' '}
+            <Link to="/signup" style={{ color: 'var(--accent-violet)', fontWeight: 700 }}>
+              Create an account
             </Link>
           </p>
         </div>
@@ -265,10 +346,10 @@ export default function LoginPage() {
                 />
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button 
-                  htmlType="submit" 
-                  loading={loading} 
-                  block 
+                <Button
+                  htmlType="submit"
+                  loading={loading}
+                  block
                   style={{ borderRadius: 14, height: 50, fontWeight: 700, border: '1px solid var(--border)', background: 'transparent' }}
                 >
                   <Text token="auth.devLogin" />

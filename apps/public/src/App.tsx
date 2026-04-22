@@ -13,6 +13,10 @@ const HomePage = lazy(() => import('./pages/home/HomePage'));
 const EventsPage = lazy(() => import('./pages/events/EventsPage'));
 const EventDetailPage = lazy(() => import('./pages/event-detail/EventDetailPage'));
 const LoginPage = lazy(() => import('./pages/login/LoginPage'));
+const SignupPage = lazy(() => import('./pages/signup/SignupPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/forgot-password/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/reset-password/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('./pages/verify-email/VerifyEmailPage'));
 const MyPurchasesPage = lazy(() => import('./pages/purchases/MyPurchasesPage'));
 const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
 const VerifyMagicLinkPage = lazy(() => import('./pages/auth/VerifyMagicLinkPage'));
@@ -35,6 +39,10 @@ function AppContent() {
         <Route path="events" element={<EventsPage />} />
         <Route path="events/:slug" element={<EventDetailPage />} />
         <Route path="login" element={<LoginPage />} />
+        <Route path="signup" element={<SignupPage />} />
+        <Route path="forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="reset-password" element={<ResetPasswordPage />} />
+        <Route path="verify-email" element={<VerifyEmailPage />} />
         <Route path="auth/verify" element={<VerifyMagicLinkPage />} />
         <Route path="onboarding" element={<OnboardingPage />} />
         <Route path="tickets/claim" element={<TicketClaimPage />} />
