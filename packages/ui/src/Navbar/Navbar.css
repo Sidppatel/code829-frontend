@@ -93,6 +93,27 @@
   color: var(--primary-light);
 }
 
+.ui-navbar__link--signin {
+  background: var(--primary);
+  color: var(--text-on-brand);
+  padding: var(--space-2) var(--space-5);
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-sm);
+}
+
+.ui-navbar__link--signin:hover {
+  background: var(--primary-hover);
+  color: var(--text-on-brand);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 768px) {
+  .ui-navbar__link--signin {
+    display: none;
+  }
+}
+
 .ui-navbar__link-icon {
   display: inline-flex;
   align-items: center;

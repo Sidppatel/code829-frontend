@@ -129,7 +129,14 @@ export function NavbarPublic({ items = [], menuItems, user, onLogout, actions }:
                 </div>
               )}
             </div>
-          ) : null}
+          ) : (
+            <NavLink
+              to="/login"
+              className="ui-navbar__link ui-navbar__link--signin"
+            >
+              Sign In
+            </NavLink>
+          )}
           <button
             type="button"
             className="ui-navbar__mobile-toggle"
