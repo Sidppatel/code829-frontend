@@ -70,7 +70,8 @@ export interface EventFacets {
 export interface EventTicketType {
   id: string;
   label: string;
-  priceCents: number;
+  /** Admin only. Public pages use displayPriceCents. */
+  priceCents?: number;
   displayPriceCents: number;
   maxQuantity?: number;
   sortOrder: number;
@@ -93,7 +94,7 @@ export interface EventTableTypeSummary {
   capacity: number;
   shape: string;
   color?: string;
-  priceCents: number;
+  priceCents?: number;
   platformFeeCents?: number;
   displayPriceCents: number;
   totalTables: number;
@@ -107,7 +108,7 @@ export interface EventTableTypeInfo {
   capacity: number;
   shape: string;
   color?: string;
-  priceCents: number;
+  priceCents?: number;
   displayPriceCents: number;
 }
 
@@ -117,7 +118,7 @@ export interface EventTableDto {
   capacity: number;
   shape: string;
   color?: string;
-  priceCents: number;
+  priceCents?: number;
   displayPriceCents: number;
   gridRow: number;
   gridCol: number;

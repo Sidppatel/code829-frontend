@@ -68,14 +68,14 @@ export interface EventFeeInfo {
   tableTypes: Array<{
     id: string;
     label: string;
-    priceCents: number;
+    priceCents?: number;
     platformFeeCents: number | null;
     isLocked: boolean;
   }>;
   ticketTypes: Array<{
     id: string;
     label: string;
-    priceCents: number;
+    priceCents?: number;
     platformFeeCents: number | null;
     isLocked: boolean;
   }>;

@@ -94,7 +94,7 @@ export default function CheckoutPanel(props: Props) {
         <Divider style={{ margin: '8px 0' }} />
 
         {quoteError ? (
-          <Alert type="error" message="Unable to load pricing" description={quoteError} showIcon />
+          <Alert type="error" title="Unable to load pricing" description={quoteError} showIcon />
         ) : quoteLoading || !quote ? (
           <Skeleton active paragraph={{ rows: 3 }} />
         ) : (
@@ -130,9 +130,8 @@ export default function CheckoutPanel(props: Props) {
             )}
           </>
         )}
-
         {error && (
-          <Alert type="error" message={error} showIcon />
+          <Alert type="error" title={error} showIcon />
         )}
 
         <div className="checkout-pay-sticky">
@@ -146,7 +145,7 @@ export default function CheckoutPanel(props: Props) {
               />
             </Elements>
           ) : error ? (
-            <Alert type="warning" message="Payment unavailable" description="Payment service is not ready. Please refresh and try again." showIcon />
+            <Alert type="warning" title="Payment unavailable" description="Payment service is not ready. Please refresh and try again." showIcon />
           ) : (
             <Skeleton.Input active block style={{ height: 140 }} />
           )}

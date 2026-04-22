@@ -5,7 +5,7 @@ import { centsToUSD } from '@code829/shared/utils/currency';
 export interface PricingRow {
   id?: string;
   name: string;
-  priceCents: number;
+  priceCents?: number;
   platformFeeCents?: number | null;
   soldCount: number;
   capacity: number | null;
@@ -25,7 +25,7 @@ const { useBreakpoint } = Grid;
 function MobileCard({ row, defaultFee, mode }: { row: PricingRow; defaultFee: number; mode: 'open' | 'grid' }) {
   const fee = row.platformFeeCents ?? defaultFee;
   // eslint-disable-next-line event-platform/no-business-calc-in-jsx -- admin preview subtotal; booking flow uses the authoritative quote.
-  const total = row.priceCents + fee;
+  const total = (row.priceCents ?? 0) + fee;
   const cap = row.capacity != null && row.capacity > 0 ? row.capacity : '∞';
 
   return (
@@ -56,7 +56,7 @@ function MobileCard({ row, defaultFee, mode }: { row: PricingRow; defaultFee: nu
         )}
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Price</div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{centsToUSD(row.priceCents)}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{centsToUSD(row.priceCents ?? 0)}</div>
         </div>
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Fee</div>
@@ -117,8 +117,8 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
       dataIndex: 'priceCents',
       key: 'price',
       width: 110,
-      render: (price: number) => (
-        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{centsToUSD(price)}</span>
+      render: (price: number | undefined) => (
+        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{centsToUSD(price ?? 0)}</span>
       ),
     },
     {
@@ -141,7 +141,7 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
       render: (_: unknown, record: PricingRow) => {
         const fee = record.platformFeeCents ?? defaultPlatformFeeCents;
         // eslint-disable-next-line event-platform/no-business-calc-in-jsx -- admin preview subtotal; booking flow uses the authoritative quote.
-        const total = record.priceCents + fee;
+        const total = (record.priceCents ?? 0) + fee;
         return (
           <Tag style={{ color: 'var(--accent-gold)', background: 'color-mix(in srgb, var(--accent-gold) 14%, transparent)', borderColor: 'color-mix(in srgb, var(--accent-gold) 24%, transparent)', fontWeight: 700, borderRadius: 6, fontSize: 13 }}>
             {centsToUSD(total)}

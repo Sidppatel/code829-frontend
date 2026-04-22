@@ -38,7 +38,7 @@ export default function LoadingBoundary<T>({
     return <LoadingSpinner fullPage={false} skeleton={mapped} />;
   }
   if (error) {
-    return <Alert type="error" message={error} style={{ margin: 24 }} />;
+    return <Alert type="error" title={error} style={{ margin: 24 }} />;
   }
   if (isEmpty(data)) {
     if (empty) return <EmptyState {...empty} />;

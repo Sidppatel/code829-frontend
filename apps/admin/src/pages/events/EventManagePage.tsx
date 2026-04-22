@@ -93,14 +93,14 @@ export default function EventManagePage() {
         {({ event, stats, layoutLocked }) => {
           const isGrid = event.layoutMode === 'Grid';
           const isOpen = event.layoutMode === 'Open';
-          const ticketTypes = (event.ticketTypes || []) as unknown as Array<{ id: string; label?: string; name?: string; priceCents: number; platformFeeCents?: number | null; soldCount?: number; maxQuantity?: number; capacity?: number; description?: string }>;
-          const tableTypes = (event.tableTypes || []) as unknown as Array<{ id: string; label: string; priceCents: number; platformFeeCents?: number | null; bookedTables?: number; totalTables?: number; capacity: number; shape: string; color?: string }>;
+          const ticketTypes = (event.ticketTypes || []) as unknown as Array<{ id: string; label?: string; name?: string; priceCents?: number; platformFeeCents?: number | null; soldCount?: number; maxQuantity?: number; capacity?: number; description?: string }>;
+          const tableTypes = (event.tableTypes || []) as unknown as Array<{ id: string; label: string; priceCents?: number; platformFeeCents?: number | null; bookedTables?: number; totalTables?: number; capacity: number; shape: string; color?: string }>;
 
           const pricingRows = isGrid
             ? tableTypes.map((tt) => ({
                 id: tt.id,
                 name: tt.label,
-                priceCents: tt.priceCents,
+                priceCents: tt.priceCents ?? 0,
                 platformFeeCents: tt.platformFeeCents ?? null,
                 soldCount: tt.bookedTables || 0,
                 capacity: tt.totalTables || null,
@@ -110,7 +110,7 @@ export default function EventManagePage() {
             : ticketTypes.map((tt) => ({
                 id: tt.id,
                 name: tt.label || tt.name || '',
-                priceCents: tt.priceCents,
+                priceCents: tt.priceCents ?? 0,
                 platformFeeCents: tt.platformFeeCents ?? null,
                 soldCount: tt.soldCount || 0,
                 capacity: tt.maxQuantity ?? tt.capacity ?? null,
@@ -309,7 +309,7 @@ export default function EventManagePage() {
 
               {isGrid && layoutLocked && (
                 <Alert
-                  message="Layout Locked"
+                  title="Layout Locked"
                   description="Tables cannot be modified because bookings exist for this event."
                   type="warning"
                   icon={<LockOutlined />}

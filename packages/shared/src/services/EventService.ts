@@ -73,15 +73,35 @@ export class EventService extends BaseService {
 
   // ── Public ──────────────────────────────────────
   list = (params?: EventListParams) =>
-    this.get<PagedResponse<EventSummary>>('/events', { params });
+    this.get<PagedResponse<EventSummary>>('/events', { params }).then((res) => {
+      res.data.items?.forEach((ev) => this.filterPublicEvent(ev));
+      return res;
+    });
 
-  getById = (id: string) => this.get<EventDetail>(`/events/${id}`);
+  getById = (id: string) =>
+    this.get<EventDetail>(`/events/${id}`).then((res) => {
+      this.filterPublicEvent(res.data);
+      return res;
+    });
 
-  getBySlug = (slug: string) => this.get<EventDetail>(`/events/by-slug/${slug}`);
+  getBySlug = (slug: string) =>
+    this.get<EventDetail>(`/events/by-slug/${slug}`).then((res) => {
+      this.filterPublicEvent(res.data);
+      return res;
+    });
 
   getFacets = () => this.get<EventFacets>('/events/facets');
 
-  getTables = (id: string) => this.get<EventTablesResponse>(`/events/${id}/tables`);
+  getTables = (id: string) =>
+    this.get<EventTablesResponse>(`/events/${id}/tables`).then((res) => {
+      res.data.eventTableTypes?.forEach((tt) => {
+        delete tt.priceCents;
+      });
+      res.data.tables?.forEach((t) => {
+        delete t.priceCents;
+      });
+      return res;
+    });
 
   getSchemaOrg = (id: string) => this.get(`/events/${id}/schema`);
 
@@ -90,7 +110,23 @@ export class EventService extends BaseService {
   getItemListSchema = () => this.get('/events/schema-list');
 
   getTicketTypes = (id: string) =>
-    this.get<EventTicketTypesResponse>(`/events/${id}/ticket-types`);
+    this.get<EventTicketTypesResponse>(`/events/${id}/ticket-types`).then((res) => {
+      res.data.ticketTypes?.forEach((tt) => {
+        delete tt.priceCents;
+      });
+      return res;
+    });
+
+  private filterPublicEvent(ev: EventSummary | EventDetail) {
+    ev.ticketTypes?.forEach((tt) => {
+      delete tt.priceCents;
+    });
+    if ('tableTypes' in ev) {
+      ev.tableTypes?.forEach((tt) => {
+        delete tt.priceCents;
+      });
+    }
+  }
 
   // ── Admin ───────────────────────────────────────
   adminList = (params?: AdminEventListParams) =>

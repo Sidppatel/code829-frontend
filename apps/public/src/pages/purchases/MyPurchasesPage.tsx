@@ -282,7 +282,7 @@ export default function MyPurchasesPage() {
           style={{ marginTop: 24 }}
           type="warning"
           showIcon
-          message={strings.bookings.guestTicketsWarningTitle.text}
+          title={strings.bookings.guestTicketsWarningTitle.text}
           description={strings.bookings.guestTicketsWarningDescription.text}
         />
       )}

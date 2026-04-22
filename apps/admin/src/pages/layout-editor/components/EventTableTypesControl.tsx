@@ -71,7 +71,7 @@ export default function EventTableTypesControl({
       capacity: et.capacity,
       shape: et.shape,
       color: et.color,
-      priceDollars: centsToDollars(et.priceCents),
+      priceDollars: centsToDollars(et.priceCents ?? 0),
     });
     setEditModalOpen(true);
   };
@@ -121,7 +121,7 @@ export default function EventTableTypesControl({
         capacity: t.defaultCapacity,
         shape: t.defaultShape,
         color: t.defaultColor,
-        priceDollars: centsToDollars(t.defaultPriceCents),
+        priceDollars: centsToDollars(t.defaultPriceCents ?? 0),
       });
     }
   };
@@ -148,7 +148,7 @@ export default function EventTableTypesControl({
                   capacity: first.defaultCapacity,
                   shape: first.defaultShape,
                   color: first.defaultColor,
-                  priceDollars: centsToDollars(first.defaultPriceCents),
+                  priceDollars: centsToDollars(first.defaultPriceCents ?? 0),
                 });
               }
               setAddModalOpen(true);
@@ -184,7 +184,7 @@ export default function EventTableTypesControl({
                   )}
                 </div>
                 <div className="table-type-meta">
-                  {et.capacity} seats · {et.shape} · {centsToUSD(et.priceCents)}
+                  {et.capacity} seats · {et.shape} · {centsToUSD(et.priceCents ?? 0)}
                 </div>
               </div>
               <Button
@@ -219,7 +219,7 @@ export default function EventTableTypesControl({
               allowClear
               placeholder="Pick a template to pre-fill..."
               options={templates.filter((t) => t.isActive).map((t) => ({
-                label: `${t.name} (${t.defaultCapacity}p · ${centsToUSD(t.defaultPriceCents)})`,
+                label: `${t.name} (${t.defaultCapacity}p · ${centsToUSD(t.defaultPriceCents ?? 0)})`,
                 value: t.tableTemplateId,
               }))}
               onChange={handleTemplateSelect}

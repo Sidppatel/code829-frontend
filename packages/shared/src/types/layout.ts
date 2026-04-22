@@ -11,7 +11,7 @@ export interface LayoutTable {
   capacity: number;
   shape: string;
   color?: string;
-  priceCents: number;
+  priceCents?: number;
   status?: 'Available' | 'Locked' | 'Booked';
 }
 
@@ -21,7 +21,7 @@ export interface TableTemplate {
   defaultCapacity: number;
   defaultShape: string;
   defaultColor?: string;
-  defaultPriceCents: number;
+  defaultPriceCents?: number;
   isActive: boolean;
 }
 
@@ -31,7 +31,7 @@ export interface EventTableType {
   capacity: number;
   shape: string;
   color?: string;
-  priceCents: number;
+  priceCents?: number;
   isActive: boolean;
   eventId: string;
   tableTemplateId?: string;
@@ -55,7 +55,7 @@ export interface TableLock {
   userId: string;
   status: string;
   capacity: number;
-  priceCents: number;
+  priceCents?: number;
   platformFeeCents: number;
   displayPriceCents: number;
   expiresAt: string;

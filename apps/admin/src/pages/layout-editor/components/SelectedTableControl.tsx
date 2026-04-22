@@ -48,7 +48,7 @@ export default function SelectedTableControl({
         patch.capacity = et.capacity;
         patch.shape = et.shape;
         patch.color = et.color;
-        patch.priceCents = et.priceCents;
+        patch.priceCents = et.priceCents ?? 0;
       }
     }
     onTableUpdate(patch);
@@ -93,13 +93,13 @@ export default function SelectedTableControl({
             <Form.Item name="eventTableId" label="Table Type">
               <Select
                 options={activeEventTables.map((et) => ({
-                  label: `${et.label} (${et.capacity}p · ${centsToUSD(et.priceCents)})`,
+                  label: `${et.label} (${et.capacity}p · ${centsToUSD(et.priceCents ?? 0)})`,
                   value: et.id,
                 }))}
               />
             </Form.Item>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
-              {selectedTable.capacity} seats · {selectedTable.shape} · {centsToUSD(selectedTable.priceCents)}
+              {selectedTable.capacity} seats · {selectedTable.shape} · {centsToUSD(selectedTable.priceCents ?? 0)}
             </div>
           </Form>
 

@@ -78,7 +78,7 @@ export default function TableElement({
 
       <div className="fp-table-label">{table.label || gridLabel(table.gridRow, table.gridCol)}</div>
       <div className="fp-table-meta">
-        {table.capacity}p &middot; {centsToUSD(table.priceCents)}
+        {table.capacity}p &middot; {centsToUSD(table.priceCents ?? 0)}
       </div>
     </div>
   );
