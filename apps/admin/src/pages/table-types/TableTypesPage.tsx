@@ -82,7 +82,7 @@ export default function TableTypesPage() {
         defaultCapacity: crud.entity.defaultCapacity,
         defaultShape: crud.entity.defaultShape,
         defaultColor: crud.entity.defaultColor ?? semantic.brand,
-        defaultPriceCents: centsToDollars(crud.entity.defaultPriceCents),
+        defaultPriceCents: centsToDollars(crud.entity.defaultPriceCents ?? 0),
       }
     : undefined;
 
@@ -236,7 +236,7 @@ export default function TableTypesPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div className="tt-swatch" style={{ background: tt.defaultColor || 'var(--primary)', width: 24, height: 24, borderRadius: 6 }} />
-                    <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>{centsToUSD(tt.defaultPriceCents)}</span>
+                    <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>{centsToUSD(tt.defaultPriceCents ?? 0)}</span>
                   </div>
                   <Button
                     size="small"

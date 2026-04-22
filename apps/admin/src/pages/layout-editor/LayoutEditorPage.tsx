@@ -190,7 +190,7 @@ export default function LayoutEditorPage() {
           capacity: et.capacity,
           shape: et.shape,
           color: et.color,
-          priceCents: et.priceCents,
+          priceCents: et.priceCents ?? 0,
         });
         const savedEt = res.data;
         // Replace pending entry in eventTables list

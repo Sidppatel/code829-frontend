@@ -185,7 +185,7 @@ export default function EventWizardPage() {
           ticketTypes: data.ticketTypes?.map((tt) => ({
             id: tt.id,
             name: tt.label ? [tt.label] : [],
-            price: centsToDollars(tt.priceCents),
+            price: centsToDollars(tt.priceCents ?? 0),
             capacity: tt.maxQuantity,
             soldCount: tt.soldCount || 0,
             description: tt.description,
