@@ -57,7 +57,7 @@ export default function OnboardingPage() {
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
-          initialValues={{ firstName: '', lastName: user.lastName }}
+          initialValues={{ firstName: user.firstName, lastName: user.lastName }}
         >
           <Form.Item label="Email">
             <Input value={user.email} disabled style={{ color: 'var(--text-primary)' }} />
