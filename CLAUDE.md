@@ -94,3 +94,18 @@ To work on the frontend you need fluency in:
 - **JWT + magic-link auth flows** — token storage, refresh, logout
 
 Domain-specific knowledge that compounds: the no-business-calc rule above (always think "ask the backend"), the `usePurchaseQuote` pattern, role-gated routing per-app, optimistic UI vs. server-confirmed state.
+
+See [../SKILLS.md](../SKILLS.md) for the full list of project-specific (non-generic) frontend skills.
+
+## Application Map (graphify) — required workflow
+
+The dependency map for this repo lives in `graphify-out/` (and a monorepo-wide one at `..\graphify-out\`). Index: [../APPLICATION_MAP.md](../APPLICATION_MAP.md).
+
+**Before changes:**
+- Read the wiki pages for files you'll touch (`graphify-out/wiki/<Name>.md`).
+- Note god nodes in `GRAPH_REPORT.md` — they have non-obvious downstream consumers (e.g., anything imported across `apps/*`).
+- Use `graphify explain "<NodeName>"` or `graphify query "<question>"` for targeted lookups.
+
+**After every commit:**
+- `graphify update .` (run automatically by post-commit hook if installed via `graphify hook install`).
+- The map being out of sync = unfinished change.
