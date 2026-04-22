@@ -24,11 +24,13 @@ export default function ForgotPasswordPage() {
       setSubmitted(true);
     } catch (err) {
       const axiosErr = err as AxiosError;
-      if (axiosErr.response?.status === 429) {
+      const status = axiosErr.response?.status;
+      if (status === 429) {
         message.warning('Too many requests. Please try again shortly.');
+      } else if (status === 404) {
+        message.error('No account found with that email.');
       } else {
-        // Still show success to avoid leaking account existence for other errors.
-        setSubmitted(true);
+        message.error('Could not send reset email. Please try again shortly.');
       }
     } finally {
       setLoading(false);
