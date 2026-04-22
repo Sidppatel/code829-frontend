@@ -12,19 +12,24 @@ const DEFAULT_PUBLIC_MENU: NavbarMenuItem[] = [
 export function NavbarPublic({ items = [], menuItems, user, onLogout, actions }: NavbarProps) {
   const resolvedMenu = menuItems ?? DEFAULT_PUBLIC_MENU;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [guestMenuOpen, setGuestMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const userRef = useRef<HTMLDivElement>(null);
+  const guestRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
-      // Handle desktop menu
       if (menuOpen && userRef.current && !userRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
+      }
+      if (guestMenuOpen && guestRef.current && !guestRef.current.contains(e.target as Node)) {
+        setGuestMenuOpen(false);
       }
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setMenuOpen(false);
+        setGuestMenuOpen(false);
         setMobileMenuOpen(false);
       }
     };
@@ -35,7 +40,7 @@ export function NavbarPublic({ items = [], menuItems, user, onLogout, actions }:
       document.removeEventListener('click', onDocClick);
       document.removeEventListener('keydown', onKey);
     };
-  }, [menuOpen]);
+  }, [menuOpen, guestMenuOpen]);
 
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -130,12 +135,38 @@ export function NavbarPublic({ items = [], menuItems, user, onLogout, actions }:
               )}
             </div>
           ) : (
-            <NavLink
-              to="/login"
-              className="ui-navbar__link ui-navbar__link--signin"
-            >
-              Sign In
-            </NavLink>
+            <div className="ui-navbar__guest" ref={guestRef}>
+              <button
+                type="button"
+                className="ui-navbar__guest-trigger"
+                aria-haspopup="menu"
+                aria-expanded={guestMenuOpen}
+                onClick={() => setGuestMenuOpen((v) => !v)}
+              >
+                Account
+                <span className="ui-navbar__caret" aria-hidden="true">▾</span>
+              </button>
+              {guestMenuOpen && (
+                <div className="ui-navbar__menu" role="menu">
+                  <Link
+                    to="/login"
+                    role="menuitem"
+                    className="ui-navbar__menu-item"
+                    onClick={() => setGuestMenuOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    role="menuitem"
+                    className="ui-navbar__menu-item ui-navbar__menu-item--primary"
+                    onClick={() => setGuestMenuOpen(false)}
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
           )}
           <button
             type="button"
@@ -198,13 +229,22 @@ export function NavbarPublic({ items = [], menuItems, user, onLogout, actions }:
               </>
             )}
             {!user && (
-              <NavLink
-                to="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="ui-navbar__mobile-link"
-              >
-                Sign In
-              </NavLink>
+              <>
+                <NavLink
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="ui-navbar__mobile-link"
+                >
+                  Sign In
+                </NavLink>
+                <NavLink
+                  to="/signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="ui-navbar__mobile-link ui-navbar__mobile-link--primary"
+                >
+                  Sign Up
+                </NavLink>
+              </>
             )}
             {user && onLogout && (
               <button
