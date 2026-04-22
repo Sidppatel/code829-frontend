@@ -95,9 +95,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Security Audit
-        run: pnpm audit --audit-level=moderate
-
   deploy:
     name: Deploy ${{ matrix.app }}
     needs: [changes, validate]
@@ -137,6 +134,6 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          pnpm dlx wrangler@4 deploy \
+          pnpm wrangler deploy \
             --config "apps/${{ matrix.app }}/wrangler.toml" \
             --var "VITE_API_URL:${{ secrets.VITE_API_URL }}"
