@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { Button, Input, Select, Tag, Typography } from 'antd';
-import { DeleteOutlined, SendOutlined } from '@ant-design/icons';
+import { DeleteOutlined, SendOutlined, SearchOutlined } from '@ant-design/icons';
 import apiClient from '@code829/shared/lib/axios';
 import {
   CrudModal,
@@ -31,8 +31,23 @@ export default function InvitationsPage() {
   }, []);
   const { data: invitations, loading, refresh } = useAsyncResource(fetchInvitations);
 
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+
   const { user } = useAuth();
   const isDeveloper = user?.role === 'Developer';
+
+  const filteredItems = useMemo(() => {
+    return (invitations ?? []).filter((item) => {
+      const matchesSearch = !search ||
+        item.email.toLowerCase().includes(search.toLowerCase()) ||
+        item.invitedByName.toLowerCase().includes(search.toLowerCase());
+      const matchesRole = !roleFilter || item.role === roleFilter;
+      const matchesStatus = !statusFilter || item.status === statusFilter;
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+  }, [invitations, search, roleFilter, statusFilter]);
 
   const crud = useCrudModal<Invitation>();
   const send = useAsyncAction(
@@ -46,8 +61,6 @@ export default function InvitationsPage() {
   );
   const confirm = useConfirm();
 
-  const items = invitations ?? [];
-
   return (
     <PageShell
       title="Invitations"
@@ -59,14 +72,49 @@ export default function InvitationsPage() {
       }
     >
       <DataTableSection<Invitation>
-        data={items}
-        total={items.length}
+        data={filteredItems}
+        total={filteredItems.length}
         page={1}
-        pageSize={items.length || 10}
+        pageSize={filteredItems.length || 10}
         loading={loading}
-        onPageChange={() => {}}
+        onPageChange={() => { }}
         rowKey="invitationId"
         showSizeChanger={false}
+        toolbar={
+          <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+            <Input
+              placeholder="Search email or inviter..."
+              prefix={<SearchOutlined />}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ width: 300 }}
+              allowClear
+            />
+            <Select
+              placeholder="All Roles"
+              style={{ width: 150 }}
+              value={roleFilter}
+              onChange={setRoleFilter}
+              allowClear
+            >
+              <Select.Option value="Admin">Admin</Select.Option>
+              <Select.Option value="Staff">Staff</Select.Option>
+              {isDeveloper && <Select.Option value="Developer">Developer</Select.Option>}
+            </Select>
+            <Select
+              placeholder="All Statuses"
+              style={{ width: 150 }}
+              value={statusFilter}
+              onChange={setStatusFilter}
+              allowClear
+            >
+              <Select.Option value="Pending">Pending</Select.Option>
+              <Select.Option value="Accepted">Accepted</Select.Option>
+              <Select.Option value="Revoked">Revoked</Select.Option>
+              <Select.Option value="Expired">Expired</Select.Option>
+            </Select>
+          </div>
+        }
         columns={[
           { title: 'Email', dataIndex: 'email', key: 'email' },
           { title: 'Role', dataIndex: 'role', key: 'role', render: (r: string) => <Tag>{r}</Tag> },
