@@ -15,8 +15,7 @@ export default function OnboardingPage() {
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get('returnUrl');
   const user = useAuthStore((s) => s.user);
-  const setAuth = useAuthStore((s) => s.setAuth);
-  const token = useAuthStore((s) => s.token);
+  const setUser = useAuthStore((s) => s.setUser);
 
   if (!user) {
     navigate('/login', { replace: true });
@@ -32,9 +31,7 @@ export default function OnboardingPage() {
         phone: values.phone,
       });
       const { data: updatedUser } = await authApi.getMe();
-      if (token) {
-        setAuth(token, updatedUser);
-      }
+      setUser(updatedUser);
       message.success('Welcome to Code829!');
       navigate(safeReturnUrl(returnUrl), { replace: true });
     } catch {

@@ -13,7 +13,7 @@ export default function VerifyMagicLinkPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { message } = App.useApp();
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const setUser = useAuthStore((s) => s.setUser);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState('Verifying your login...');
   const verifiedRef = useRef(false);
@@ -34,7 +34,7 @@ export default function VerifyMagicLinkPage() {
           setStatus(`Connecting to server... (attempt ${attempt}/${MAX_RETRIES})`);
         }
         const { data } = await authApi.verifyMagicLink(token);
-        setAuth(data.token, data.user);
+        setUser(data.user);
         const returnUrl = searchParams.get('returnUrl');
         if (!data.user.hasCompletedOnboarding) {
           const onboardUrl = returnUrl ? `/onboarding?returnUrl=${encodeURIComponent(returnUrl)}` : '/onboarding';
@@ -61,7 +61,7 @@ export default function VerifyMagicLinkPage() {
     };
 
     void verify(1);
-  }, [searchParams, setAuth, message, navigate]);
+  }, [searchParams, setUser, message, navigate]);
 
   if (error) {
     return (

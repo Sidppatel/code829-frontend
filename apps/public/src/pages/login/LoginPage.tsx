@@ -26,7 +26,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get('returnUrl');
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const setUser = useAuthStore((s) => s.setUser);
 
   const startCooldown = useCallback((seconds: number) => {
     setCooldown(seconds);
@@ -77,7 +77,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const { data } = await authApi.signin(values.email, values.password);
-      setAuth(data.token, data.user);
+      setUser(data.user);
       message.success(textTemplates.loggedInAs(data.user.firstName).text);
       if (!data.user.hasCompletedOnboarding) {
         const onboardUrl = returnUrl ? `/onboarding?returnUrl=${encodeURIComponent(returnUrl)}` : '/onboarding';
@@ -113,7 +113,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const { data } = await authApi.devLogin(values.email);
-      setAuth(data.token, data.user);
+      setUser(data.user);
       message.success(textTemplates.loggedInAs(data.user.firstName).text);
       navigate(safeReturnUrl(returnUrl));
     } catch {
