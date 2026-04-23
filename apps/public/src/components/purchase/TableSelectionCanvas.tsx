@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Card, Button, Typography, Space, Divider, theme } from 'antd';
+import { Card, Button, Typography, Space, Divider } from 'antd';
 import type { EventTableDto, EventTableTypeInfo } from '@code829/shared/types/event';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import {
