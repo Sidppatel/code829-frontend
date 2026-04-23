@@ -29,7 +29,6 @@ export interface GuestTicket {
   eventDate: string;
   venueName: string;
   tableLabel?: string;
-  purchaseNumber: string;
   claimedAt?: string;
 }
 
@@ -41,6 +40,5 @@ export interface TicketClaimInfo {
   eventDate: string;
   venueName: string;
   tableLabel?: string;
-  inviterName: string;
   alreadyClaimed: boolean;
 }

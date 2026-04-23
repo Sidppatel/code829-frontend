@@ -295,7 +295,7 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
                               </Tag>
                             )}
                           </div>
-                          <Tag style={{ margin: 0 }}>Price: {centsToUSD(tt.priceCents)}</Tag>
+                          <Tag style={{ margin: 0 }}>Price: {centsToUSD(tt.priceCents ?? 0)}</Tag>
                         </div>
                         <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
                           Platform Fee
@@ -357,7 +357,7 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
                           </Tag>
                         )}
                       </div>
-                      <Tag style={{ margin: 0 }}>Table Price: {centsToUSD(tt.priceCents)}</Tag>
+                      <Tag style={{ margin: 0 }}>Table Price: {centsToUSD(tt.priceCents ?? 0)}</Tag>
                     </div>
                     <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
                       Platform Fee
