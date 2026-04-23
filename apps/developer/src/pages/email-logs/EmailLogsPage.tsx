@@ -216,7 +216,11 @@ export default function EmailLogsPage() {
               <iframe
                 title="Email Content"
                 sandbox=""
-                srcDoc={DOMPurify.sanitize(selected.body)}
+                srcDoc={DOMPurify.sanitize(selected.body, {
+                  USE_PROFILES: { html: true },
+                  FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input'],
+                  FORBID_ATTR: ['onerror', 'onload', 'onclick', 'style'],
+                })}
                 style={{
                   width: '100%',
                   height: '400px',
