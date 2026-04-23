@@ -73,9 +73,6 @@ export default function MyTicketsPage() {
                   }}>
                     {ticket.eventTitle}
                   </div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 11, letterSpacing: 0.5 }}>
-                    #{ticket.purchaseNumber}
-                  </div>
                 </div>
                 {ticket.status === 'CheckedIn' ? (
                   <Tag color="green" icon={<CheckCircleOutlined />} style={{ borderRadius: 6 }}>In</Tag>

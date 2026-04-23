@@ -112,7 +112,7 @@ export default function TicketClaimPage() {
           You&apos;re Invited!
         </Typography.Title>
         <Typography.Text type="secondary">
-          {info.inviterName} has sent you a ticket
+          A friend has sent you a ticket
         </Typography.Text>
 
         <Card

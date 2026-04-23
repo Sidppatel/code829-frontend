@@ -95,7 +95,6 @@ export interface EventTableTypeSummary {
   shape: string;
   color?: string;
   priceCents?: number;
-  platformFeeCents?: number;
   displayPriceCents: number;
   totalTables: number;
   availableTables: number;
