@@ -47,8 +47,6 @@ export function configureApiClient(portal: PortalId) {
 }
 
 apiClient.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
-  if (token) config.headers.Authorization = `Bearer ${token}`;
   if (portalId) config.headers['X-Portal'] = portalId;
 
   // Ensure relative URLs don't bypass the /api proxy
