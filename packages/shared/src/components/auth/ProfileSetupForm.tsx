@@ -7,7 +7,7 @@ import { adminAuthApi } from '../../services/adminAuthApi';
 import BrandLogo from '../shared/BrandLogo';
 
 export default function ProfileSetupForm({ isInitial = false }: { isInitial?: boolean }) {
-  const { user, setAuth, token } = useAuthStore();
+  const { user, setUser } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const { message } = App.useApp();
@@ -29,7 +29,7 @@ export default function ProfileSetupForm({ isInitial = false }: { isInitial?: bo
         // Actually, I'll stick to names for now or add avatar support if needed.
       }
 
-      setAuth(token!, data);
+      setUser(data);
       message.success('Profile updated successfully!');
       if (isInitial) {
         window.location.href = '/'; // Full refresh to clear setup state

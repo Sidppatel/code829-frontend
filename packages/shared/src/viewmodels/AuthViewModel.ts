@@ -7,7 +7,6 @@ import type { UserProfile, BusinessUserProfile } from '../types/auth';
 
 interface AuthVMState {
   user: UserProfile | BusinessUserProfile | null;
-  token: string | null;
   isAuthenticated: boolean;
   isHydrated: boolean;
   loading: boolean;
@@ -31,8 +30,7 @@ export class AuthViewModel extends BaseViewModel<AuthVMState> {
     const s = useAuthStore.getState();
     super({
       user: s.user,
-      token: s.token,
-      isAuthenticated: !!s.token && !!s.user,
+      isAuthenticated: !!s.user,
       isHydrated: s.isHydrated,
       loading: false,
       error: null,
@@ -42,8 +40,7 @@ export class AuthViewModel extends BaseViewModel<AuthVMState> {
     this.unsubStore = useAuthStore.subscribe((state) => {
       this.setState({
         user: state.user,
-        token: state.token,
-        isAuthenticated: !!state.token && !!state.user,
+        isAuthenticated: !!state.user,
         isHydrated: state.isHydrated,
       });
     });

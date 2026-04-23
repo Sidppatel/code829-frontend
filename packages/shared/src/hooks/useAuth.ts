@@ -3,13 +3,11 @@ import type { UserRole } from '../types/auth';
 import { hasRole } from '../utils/roles';
 
 export function useAuth() {
-  const { token, user, setAuth, setUser, logout } = useAuthStore();
+  const { user, setUser, logout } = useAuthStore();
 
   return {
-    token,
     user,
-    isAuthenticated: !!token && !!user,
-    setAuth,
+    isAuthenticated: !!user,
     setUser,
     logout,
     hasRole: (minRole: UserRole) => hasRole(user, minRole),

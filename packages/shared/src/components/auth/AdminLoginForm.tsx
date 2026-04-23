@@ -14,7 +14,7 @@ interface AdminLoginFormProps {
 
 export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath = '/forgot-password' }: AdminLoginFormProps) {
   const [loading, setLoading] = useState(false);
-  const { setAuth, logout } = useAuthStore();
+  const { setUser, logout } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { message } = App.useApp();
@@ -35,7 +35,7 @@ export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath =
     setLoading(true);
     try {
       const { data } = await adminAuthApi.login(values.email, values.password);
-      setAuth(data.token, data.user);
+      setUser(data.user);
       navigate(safeReturnUrl(searchParams.get('returnUrl')), { replace: true });
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Invalid email or password';

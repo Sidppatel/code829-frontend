@@ -12,7 +12,7 @@ export default function InvitationSignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [fetching, setFetching] = useState(true);
   const [names, setNames] = useState<{ firstName: string; lastName: string } | null>(null);
-  const { setAuth } = useAuthStore();
+  const { setUser } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { message } = App.useApp();
@@ -101,7 +101,7 @@ export default function InvitationSignupForm() {
                 lastName: names.lastName,
                 password: newPassword,
               });
-              setAuth(data.token, data.user);
+              setUser(data.user);
               message.success('Password set successfully! Please complete your profile.');
               navigate('/profile', { replace: true, state: { setup: true } });
             }}
