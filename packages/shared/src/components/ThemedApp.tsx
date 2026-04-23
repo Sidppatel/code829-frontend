@@ -63,8 +63,10 @@ const components = {
 };
 
 export function ThemedApp({ children }: { children: ReactNode }) {
+  const nonce = document.querySelector<HTMLMetaElement>('meta[name="csp-nonce"]')?.content;
   return (
     <ConfigProvider
+      csp={nonce ? { nonce } : undefined}
       theme={{
         algorithm: antTheme.darkAlgorithm,
         token: tokens,
