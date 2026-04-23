@@ -1,6 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { handleApiProxy, type ApiProxyEnv } from '../../../tools/cf-worker/apiProxy';
+import { generateNonce, injectNonce } from '../../../tools/cf-worker/nonce';
 
 interface Env extends ApiProxyEnv {
   ASSETS: Fetcher;
@@ -22,6 +23,10 @@ export default {
       return handleApiProxy(request, env, ALLOWED_ORIGINS, DEFAULT_ORIGIN);
     }
 
-    return env.ASSETS.fetch(request);
+    const response = await env.ASSETS.fetch(request);
+    if (response.headers.get('content-type')?.includes('text/html')) {
+      return injectNonce(response, generateNonce());
+    }
+    return response;
   },
 } satisfies ExportedHandler<Env>;
