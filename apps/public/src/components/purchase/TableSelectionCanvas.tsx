@@ -88,7 +88,6 @@ export default function TableSelectionCanvas({
   lockingTableId,
   onLockExpired,
 }: Props) {
-  const { token } = theme.useToken();
 
   const quoteSelection = useMemo(
     () =>
