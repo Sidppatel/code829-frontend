@@ -12,7 +12,7 @@ export interface Purchase {
   eventImagePath?: string;
   venueName?: string;
   venueAddress?: string;
-  subtotalCents: number;
+  subtotalCents?: number;
   totalCents: number;
   feeCents?: number;
   qrToken: string;
