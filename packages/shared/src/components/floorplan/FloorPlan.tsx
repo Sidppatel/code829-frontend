@@ -177,20 +177,12 @@ export default function FloorPlan(props: Props) {
     const clickable = table.status === 'Available' || isUserLocked;
 
     const bg = tableColor;
-    let border = tableColor;
-    let opacity = 1;
-    let cursor: 'pointer' | 'wait' | 'not-allowed' = clickable ? 'pointer' : 'not-allowed';
-    if (isLocking) cursor = 'wait';
+    const cursor = isLocking ? 'wait' : clickable ? 'pointer' : 'not-allowed';
 
-    if (isUserLocked) {
-      border = 'var(--primary)';
-    } else if (table.status === 'Held') {
-      border = 'var(--status-warning)';
-      opacity = 0.5;
-    } else if (table.status === 'Booked') {
-      border = 'var(--status-neutral)';
-      opacity = 0.5;
-    }
+    let statusClass = 'ts-table-available';
+    if (isUserLocked) statusClass = 'ts-table-mine';
+    else if (table.status === 'Held') statusClass = 'ts-table-reserved';
+    else if (table.status === 'Booked') statusClass = 'ts-table-booked';
 
     const onClick = () => {
       if (!clickable || isLocking) return;
@@ -205,20 +197,15 @@ export default function FloorPlan(props: Props) {
           tabIndex={clickable ? 0 : -1}
           aria-label={tooltip}
           title={tooltip}
-          className={`ts-table${isUserLocked ? ' ts-table-selected' : ''}${
-            !clickable ? ' ts-table-disabled' : ''
-          }`}
+          className={`ts-table ${statusClass}${!clickable ? ' ts-table-disabled' : ''}`}
           style={{
             ['--table-bg' as string]: bg,
             borderRadius,
-            borderColor: border,
-            opacity: isLocking ? 0.7 : opacity,
+            opacity: isLocking ? 0.7 : undefined,
             cursor,
-            boxShadow: isUserLocked
-              ? '0 0 0 3px var(--primary-muted)'
-              : isHovered && clickable
-                ? '0 0 0 2px var(--primary-light)'
-                : 'none',
+            boxShadow: !isUserLocked && isHovered && clickable
+              ? '0 0 0 2px var(--primary-light)'
+              : undefined,
           }}
           onClick={onClick}
           onKeyDown={(e) => { if (e.key === 'Enter') onClick(); }}

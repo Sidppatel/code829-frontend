@@ -1502,6 +1502,40 @@ body {
   z-index: 2;
 }
 
+.ts-table-available {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ts-table-reserved,
+.ts-table-booked {
+  opacity: 0.6;
+  filter: grayscale(0.6);
+  border-color: var(--border-subtle);
+}
+
+.ts-table-reserved::after,
+.ts-table-booked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    rgba(255, 255, 255, 0.15) 6px,
+    rgba(255, 255, 255, 0.15) 12px
+  );
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.ts-table-mine {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-muted), var(--shadow-md) !important;
+  z-index: 5;
+}
+
 .ts-table-disabled {
   pointer-events: auto;
 }
@@ -1514,6 +1548,8 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  position: relative;
+  z-index: 2;
 }
 
 .ts-table-meta {
@@ -1521,6 +1557,8 @@ body {
   opacity: 0.85;
   line-height: 1.2;
   font-weight: 500;
+  position: relative;
+  z-index: 2;
 }
 
 .ts-table-icon {
@@ -1530,6 +1568,7 @@ body {
   font-size: 12px;
   color: var(--text-on-brand);
   filter: drop-shadow(0 1px 2px var(--shadow-color-strong));
+  z-index: 3;
 }
 
 .ts-table-icon-mine {

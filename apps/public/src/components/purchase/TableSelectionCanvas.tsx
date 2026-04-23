@@ -7,6 +7,11 @@ import {
   TierLegend,
   floorPlanLabelFor,
 } from '@code829/shared/components/floorplan';
+import {
+  LockOutlined,
+  StopOutlined,
+  CheckCircleOutlined,
+} from '@ant-design/icons';
 import TableLockTimer from './TableLockTimer';
 import { usePurchaseQuote } from '@code829/shared/hooks/usePurchaseQuote';
 
@@ -22,6 +27,52 @@ interface Props {
   onProceedToCheckout: () => void;
   lockingTableId: string | null;
   onLockExpired: () => void;
+}
+
+function StatusLegendItem({
+  status,
+  label,
+  icon: Icon,
+  isMine = false,
+}: {
+  status: 'available' | 'reserved' | 'booked';
+  label: string;
+  icon?: any;
+  isMine?: boolean;
+}) {
+  const statusClass = isMine ? 'ts-table-mine' : `ts-table-${status}`;
+
+  return (
+    <Space size="small">
+      <div
+        className={`ts-table ${statusClass}`}
+        style={{
+          width: 20,
+          height: 20,
+          borderRadius: 4,
+          flexShrink: 0,
+          ['--table-bg' as string]: isMine
+            ? 'var(--primary)'
+            : status === 'available'
+              ? 'transparent'
+              : 'var(--bg-muted)',
+          borderColor: status === 'available' ? 'var(--border-strong)' : undefined,
+        }}
+      >
+        {Icon && (
+          <Icon
+            style={{
+              fontSize: 10,
+              color: 'var(--text-on-brand)',
+              position: 'relative',
+              zIndex: 3,
+            }}
+          />
+        )}
+      </div>
+      <Typography.Text type="secondary">{label}</Typography.Text>
+    </Space>
+  );
 }
 
 export default function TableSelectionCanvas({
@@ -52,28 +103,10 @@ export default function TableSelectionCanvas({
     <div className="ts-wrapper">
       {/* Status legend */}
       <Space size="large" wrap className="ts-legend">
-        <Space size="small">
-          <div className="ts-legend-dot" style={{ background: token.colorSuccess }} />
-          <Typography.Text type="secondary">Available</Typography.Text>
-        </Space>
-        <Space size="small">
-          <div
-            className="ts-legend-dot"
-            style={{ background: token.colorWarning, opacity: 0.5 }}
-          />
-          <Typography.Text type="secondary">Reserved</Typography.Text>
-        </Space>
-        <Space size="small">
-          <div
-            className="ts-legend-dot"
-            style={{ background: token.colorTextDisabled, opacity: 0.5 }}
-          />
-          <Typography.Text type="secondary">Booked</Typography.Text>
-        </Space>
-        <Space size="small">
-          <div className="ts-legend-dot" style={{ background: token.colorPrimary }} />
-          <Typography.Text type="secondary">Your hold</Typography.Text>
-        </Space>
+        <StatusLegendItem status="available" label="Available" />
+        <StatusLegendItem status="reserved" label="Reserved" icon={LockOutlined} />
+        <StatusLegendItem status="booked" label="Booked" icon={StopOutlined} />
+        <StatusLegendItem status="booked" label="Your hold" icon={CheckCircleOutlined} isMine />
       </Space>
 
       {/* Pricing legend */}
