@@ -1,5 +1,4 @@
 export interface AuthResponse {
-  token: string;
   user: UserProfile;
 }
 
@@ -39,7 +38,6 @@ export interface BusinessUserProfile {
 
 export interface BusinessAuthResponse {
   user: BusinessUserProfile;
-  token: string;
 }
 
 export interface InvitationInfoDto {

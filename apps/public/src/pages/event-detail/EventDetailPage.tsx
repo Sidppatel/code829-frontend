@@ -55,9 +55,6 @@ export default function EventDetailPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useAuth();
   const isHydrated = useAuthStore((s) => s.isHydrated);
-  const storeToken = useAuthStore((s) => s.token);
-  const tokenRef = useRef(storeToken);
-  useEffect(() => { tokenRef.current = storeToken; }, [storeToken]);
   const isMobile = useIsMobile();
 
   // Event detail requires auth (Q3 = b). Redirect anonymous visitors to /login as soon as
@@ -138,13 +135,12 @@ export default function EventDetailPage() {
   useEffect(() => {
     const cleanup = () => {
       const apiUrl = import.meta.env.VITE_API_URL ?? '';
-      const jwt = tokenRef.current;
-      if (!jwt) return;
 
-      // Cancel pending booking (also releases table lock via sp_cancel_booking)
+      // Cancel pending booking (also releases table lock via sp_cancel_booking).
+      // sendBeacon sends session cookies automatically — no JWT needed in payload.
       const bid = purchaseIdRef.current;
       if (bid) {
-        const payload = JSON.stringify({ purchaseId: bid, token: jwt });
+        const payload = JSON.stringify({ purchaseId: bid });
         const blob = new Blob([payload], { type: 'application/json' });
         navigator.sendBeacon(`${apiUrl}/purchases/cancel-beacon`, blob);
         return; // sp_cancel_booking handles the table release
@@ -155,7 +151,7 @@ export default function EventDetailPage() {
       const ev = eventRef.current;
       if (locks.length > 0 && ev) {
         for (const lock of locks) {
-          const payload = JSON.stringify({ eventId: ev.eventId, tableId: lock.tableId, token: jwt });
+          const payload = JSON.stringify({ eventId: ev.eventId, tableId: lock.tableId });
           const blob = new Blob([payload], { type: 'application/json' });
           navigator.sendBeacon(`${apiUrl}/tables/release-beacon`, blob);
         }

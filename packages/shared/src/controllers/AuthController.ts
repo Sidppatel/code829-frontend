@@ -30,14 +30,14 @@ export class AuthController extends BaseController {
 
   async verifyMagicLink(token: string): Promise<AuthResponse> {
     const { data } = await this.svc.verifyMagicLink(token);
-    this.persist(data.token, data.user);
+    useAuthStore.getState().setUser(data.user);
     this.emit<AuthResponse>('auth:login', data);
     return data;
   }
 
   async devLogin(email: string): Promise<AuthResponse> {
     const { data } = await this.svc.devLogin(email);
-    this.persist(data.token, data.user);
+    useAuthStore.getState().setUser(data.user);
     this.emit<AuthResponse>('auth:login', data);
     return data;
   }
@@ -57,14 +57,14 @@ export class AuthController extends BaseController {
   // ── Admin flows ───────────────────────────────
   async adminLogin(email: string, password: string): Promise<BusinessAuthResponse> {
     const { data } = await this.svc.adminLogin(email, password);
-    this.persist(data.token, data.user);
+    useAuthStore.getState().setUser(data.user);
     this.emit<BusinessAuthResponse>('auth:login', data);
     return data;
   }
 
   async adminSignup(request: AcceptInvitationRequest): Promise<BusinessAuthResponse> {
     const { data } = await this.svc.adminSignup(request);
-    this.persist(data.token, data.user);
+    useAuthStore.getState().setUser(data.user);
     this.emit<BusinessAuthResponse>('auth:login', data);
     return data;
   }
@@ -95,9 +95,6 @@ export class AuthController extends BaseController {
     this.emit('auth:logout');
   }
 
-  private persist(token: string, user: UserProfile | BusinessUserProfile) {
-    useAuthStore.getState().setAuth(token, user);
-  }
 }
 
 export const authController = AuthController.getInstance();

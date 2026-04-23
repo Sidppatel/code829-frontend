@@ -16,14 +16,14 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, minRole = 'User' }: Props) {
-  const { token, user, isHydrated } = useAuthStore();
+  const { user, isHydrated } = useAuthStore();
   const location = useLocation();
 
   // useSessionRefresh is still probing the session cookie — don't redirect yet, or a valid
   // refresh will get bounced to /login before the store has had a chance to populate.
   if (!isHydrated) return <LoadingSpinner />;
 
-  if (!token || !user) {
+  if (!user) {
     const returnUrl = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?returnUrl=${returnUrl}`} replace />;
   }

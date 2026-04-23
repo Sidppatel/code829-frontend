@@ -12,7 +12,7 @@ export default function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { message } = App.useApp();
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const setUser = useAuthStore((s) => s.setUser);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState('Verifying your email...');
   const verifiedRef = useRef(false);
@@ -30,7 +30,7 @@ export default function VerifyEmailPage() {
       try {
         if (attempt > 1) setStatus(`Connecting to server... (attempt ${attempt}/${MAX_RETRIES})`);
         const { data } = await authApi.verifyEmail(token);
-        setAuth(data.token, data.user);
+        setUser(data.user);
         message.success(`Welcome, ${data.user.firstName}! Email verified.`);
         if (!data.user.hasCompletedOnboarding) {
           navigate('/onboarding', { replace: true });
@@ -54,7 +54,7 @@ export default function VerifyEmailPage() {
     };
 
     void verify(1);
-  }, [searchParams, setAuth, message, navigate]);
+  }, [searchParams, setUser, message, navigate]);
 
   if (error) {
     return (
