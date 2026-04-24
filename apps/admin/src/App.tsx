@@ -1,75 +1,52 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import NotFoundPage from '@code829/shared/components/shared/NotFoundPage';
-import ErrorBoundary from '@code829/shared/components/shared/ErrorBoundary';
-import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
-import ProtectedRoute from '@code829/shared/components/auth/ProtectedRoute';
-import ScrollToTop from '@code829/shared/components/shared/ScrollToTop';
+import { AppShell, buildRoutes, type RouteConfig } from '@code829/shared/routing';
 import { useSessionRefresh } from '@code829/shared/hooks/useSessionRefresh';
 import AdminLayout from './components/layout/AdminLayout';
 
-const AdminLoginPage = lazy(() => import('./pages/login/AdminLoginPage'));
-const AdminSignupPage = lazy(() => import('./pages/signup/AdminSignupPage'));
-const ForgotPasswordPage = lazy(() => import('./pages/forgot-password/ForgotPasswordPage'));
-const ResetPasswordPage = lazy(() => import('./pages/reset-password/ResetPasswordPage'));
-const AdminDashboardPage = lazy(() => import('./pages/dashboard/AdminDashboardPage'));
-const AdminEventsListPage = lazy(() => import('./pages/events/EventsListPage'));
-const EventWizardPage = lazy(() => import('./pages/events/EventWizardPage'));
-const EventManagePage = lazy(() => import('./pages/events/EventManagePage'));
-const VenuesPage = lazy(() => import('./pages/venues/VenuesPage'));
-const VenueFormPage = lazy(() => import('./pages/venues/VenueFormPage'));
-const AdminPurchasesPage = lazy(() => import('./pages/purchases/AdminPurchasesPage'));
-const TableTypesPage = lazy(() => import('./pages/table-types/TableTypesPage'));
-const LayoutEditorPage = lazy(() => import('./pages/layout-editor/LayoutEditorPage'));
-const CheckInSelectPage = lazy(() => import('./pages/checkin/CheckInSelectPage'));
-const CheckInPage = lazy(() => import('./pages/checkin/CheckInPage'));
-const SettingsPage = lazy(() => import('./pages/settings/SettingsPage'));
-const AnalyticsPage = lazy(() => import('./pages/analytics/AnalyticsPage'));
-const StaffManagementPage = lazy(() => import('./pages/staff/StaffManagementPage'));
-const AdminsPage = lazy(() => import('./pages/admins/AdminsPage'));
-const InvitationsPage = lazy(() => import('./pages/invitations/InvitationsPage'));
-const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
-const FeedbackPage = lazy(() => import('./pages/feedback/FeedbackPage'));
+const routes: RouteConfig[] = [
+  { path: 'login', loader: () => import('./pages/login/AdminLoginPage') },
+  { path: 'signup', loader: () => import('./pages/signup/AdminSignupPage') },
+  { path: 'forgot-password', loader: () => import('./pages/forgot-password/ForgotPasswordPage') },
+  { path: 'reset-password', loader: () => import('./pages/reset-password/ResetPasswordPage') },
+  {
+    requiredRole: 'Admin',
+    layout: AdminLayout,
+    children: [
+      { index: true, loader: () => import('./pages/dashboard/AdminDashboardPage') },
+      { path: 'events', loader: () => import('./pages/events/EventsListPage') },
+      { path: 'events/new', loader: () => import('./pages/events/EventWizardPage') },
+      { path: 'events/:id/edit', loader: () => import('./pages/events/EventWizardPage') },
+      { path: 'events/:id', loader: () => import('./pages/events/EventManagePage') },
+      { path: 'venues', loader: () => import('./pages/venues/VenuesPage') },
+      { path: 'venues/new', loader: () => import('./pages/venues/VenueFormPage') },
+      { path: 'venues/:id', loader: () => import('./pages/venues/VenueFormPage') },
+      { path: 'purchases', loader: () => import('./pages/purchases/AdminPurchasesPage') },
+      { path: 'table-types', loader: () => import('./pages/table-types/TableTypesPage') },
+      { path: 'layout/:eventId', loader: () => import('./pages/layout-editor/LayoutEditorPage') },
+      { path: 'analytics', loader: () => import('./pages/analytics/AnalyticsPage') },
+      { path: 'checkin/select', loader: () => import('./pages/checkin/CheckInSelectPage') },
+      { path: 'checkin/:eventId', loader: () => import('./pages/checkin/CheckInPage') },
+      { path: 'staff', loader: () => import('./pages/staff/StaffManagementPage') },
+      { path: 'admins', loader: () => import('./pages/admins/AdminsPage') },
+      { path: 'invitations', loader: () => import('./pages/invitations/InvitationsPage') },
+      { path: 'settings', loader: () => import('./pages/settings/SettingsPage') },
+      { path: 'feedback', loader: () => import('./pages/feedback/FeedbackPage') },
+      { path: 'profile', loader: () => import('./pages/profile/ProfilePage') },
+    ],
+  },
+];
 
 export default function App() {
   useSessionRefresh('/admin/auth/me');
+  const maintenance = import.meta.env.VITE_MAINTENANCE === 'true';
 
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <ErrorBoundary>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            <Route path="login" element={<AdminLoginPage />} />
-            <Route path="signup" element={<AdminSignupPage />} />
-            <Route path="forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="reset-password" element={<ResetPasswordPage />} />
-            <Route element={<ProtectedRoute minRole="Admin"><AdminLayout /></ProtectedRoute>}>
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="events" element={<AdminEventsListPage />} />
-              <Route path="events/new" element={<EventWizardPage />} />
-              <Route path="events/:id/edit" element={<EventWizardPage />} />
-              <Route path="events/:id" element={<EventManagePage />} />
-              <Route path="venues" element={<VenuesPage />} />
-              <Route path="venues/new" element={<VenueFormPage />} />
-              <Route path="venues/:id" element={<VenueFormPage />} />
-              <Route path="purchases" element={<AdminPurchasesPage />} />
-              <Route path="table-types" element={<TableTypesPage />} />
-              <Route path="layout/:eventId" element={<LayoutEditorPage />} />
-              <Route path="analytics" element={<AnalyticsPage />} />
-              <Route path="checkin/select" element={<CheckInSelectPage />} />
-              <Route path="checkin/:eventId" element={<CheckInPage />} />
-              <Route path="staff" element={<StaffManagementPage />} />
-              <Route path="admins" element={<AdminsPage />} />
-              <Route path="invitations" element={<InvitationsPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-              <Route path="feedback" element={<FeedbackPage />} />
-              <Route path="profile" element={<ProfilePage />} />
-            </Route>
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
-      </ErrorBoundary>
-    </BrowserRouter>
+    <AppShell maintenanceMode={maintenance}>
+      <Routes>
+        {buildRoutes(routes)}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </AppShell>
   );
 }

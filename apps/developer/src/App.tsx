@@ -1,55 +1,41 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import NotFoundPage from '@code829/shared/components/shared/NotFoundPage';
-import ErrorBoundary from '@code829/shared/components/shared/ErrorBoundary';
-import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
-import ProtectedRoute from '@code829/shared/components/auth/ProtectedRoute';
-import ScrollToTop from '@code829/shared/components/shared/ScrollToTop';
+import { AppShell, buildRoutes, type RouteConfig } from '@code829/shared/routing';
 import { useSessionRefresh } from '@code829/shared/hooks/useSessionRefresh';
 import DeveloperLayout from './components/layout/DeveloperLayout';
 
-const DevLoginPage = lazy(() => import('./pages/login/DevLoginPage'));
-const ForgotPasswordPage = lazy(() => import('./pages/forgot-password/ForgotPasswordPage'));
-const ResetPasswordPage = lazy(() => import('./pages/reset-password/ResetPasswordPage'));
-const DevLogsPage = lazy(() => import('./pages/logs/DevLogsPage'));
-const EmailLogsPage = lazy(() => import('./pages/email-logs/EmailLogsPage'));
-const SystemLogsPage = lazy(() => import('./pages/system-logs/SystemLogsPage'));
-const DevSettingsPage = lazy(() => import('./pages/settings/DevSettingsPage'));
-const DevUsersPage = lazy(() => import('./pages/users/DevUsersPage'));
-const DevEventsPage = lazy(() => import('./pages/events/DevEventsPage'));
-const AdminManagementPage = lazy(() => import('./pages/admins/AdminManagementPage'));
-const StaffManagementPage = lazy(() => import('./pages/staff/StaffManagementPage'));
-const DevInvitationsPage = lazy(() => import('./pages/invitations/DevInvitationsPage'));
-const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
+const routes: RouteConfig[] = [
+  { path: 'login', loader: () => import('./pages/login/DevLoginPage') },
+  { path: 'forgot-password', loader: () => import('./pages/forgot-password/ForgotPasswordPage') },
+  { path: 'reset-password', loader: () => import('./pages/reset-password/ResetPasswordPage') },
+  {
+    requiredRole: 'Developer',
+    layout: DeveloperLayout,
+    children: [
+      { index: true, loader: () => import('./pages/logs/DevLogsPage') },
+      { path: 'email-logs', loader: () => import('./pages/email-logs/EmailLogsPage') },
+      { path: 'system-logs', loader: () => import('./pages/system-logs/SystemLogsPage') },
+      { path: 'admins', loader: () => import('./pages/admins/AdminManagementPage') },
+      { path: 'staff', loader: () => import('./pages/staff/StaffManagementPage') },
+      { path: 'invitations', loader: () => import('./pages/invitations/DevInvitationsPage') },
+      { path: 'users', loader: () => import('./pages/users/DevUsersPage') },
+      { path: 'events', loader: () => import('./pages/events/DevEventsPage') },
+      { path: 'settings', loader: () => import('./pages/settings/DevSettingsPage') },
+      { path: 'profile', loader: () => import('./pages/profile/ProfilePage') },
+    ],
+  },
+];
 
 export default function App() {
   useSessionRefresh('/admin/auth/me');
+  const maintenance = import.meta.env.VITE_MAINTENANCE === 'true';
 
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <ErrorBoundary>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            <Route path="login" element={<DevLoginPage />} />
-            <Route path="forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="reset-password" element={<ResetPasswordPage />} />
-            <Route element={<ProtectedRoute minRole="Developer"><DeveloperLayout /></ProtectedRoute>}>
-              <Route index element={<DevLogsPage />} />
-              <Route path="email-logs" element={<EmailLogsPage />} />
-              <Route path="system-logs" element={<SystemLogsPage />} />
-              <Route path="admins" element={<AdminManagementPage />} />
-              <Route path="staff" element={<StaffManagementPage />} />
-              <Route path="invitations" element={<DevInvitationsPage />} />
-              <Route path="users" element={<DevUsersPage />} />
-              <Route path="events" element={<DevEventsPage />} />
-              <Route path="settings" element={<DevSettingsPage />} />
-              <Route path="profile" element={<ProfilePage />} />
-            </Route>
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
-      </ErrorBoundary>
-    </BrowserRouter>
+    <AppShell maintenanceMode={maintenance}>
+      <Routes>
+        {buildRoutes(routes)}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </AppShell>
   );
 }
