@@ -8,9 +8,15 @@ directory = "./dist"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
 
-[[routes]]
-pattern = "code829.com"
-custom_domain = true
-
 [observability]
 enabled = true
+
+# Production-only: custom domain route lives under env.production so a bare
+# `wrangler deploy` never accidentally publishes to the prod zone. CI invokes
+# `wrangler deploy --env production` explicitly.
+[env.production]
+name = "code829-public"
+
+[[env.production.routes]]
+pattern = "code829.com"
+custom_domain = true
