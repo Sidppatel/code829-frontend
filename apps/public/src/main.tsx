@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from '@code829/shared/context/ThemeContext';
 import { ThemedApp } from '@code829/shared/components/ThemedApp';
+import { QueryProvider } from '@code829/shared/providers/QueryProvider';
 import { initGlobalErrorListeners } from '@code829/shared/lib/globalErrors';
 import { installConsoleBuffer } from '@code829/shared/lib/consoleBuffer';
 import { configureApiClient } from '@code829/shared/lib/axios';
@@ -28,7 +29,9 @@ createRoot(rootEl).render(
     <HelmetProvider>
       <ThemeProvider>
         <ThemedApp>
-          <App />
+          <QueryProvider>
+            <App />
+          </QueryProvider>
         </ThemedApp>
       </ThemeProvider>
     </HelmetProvider>
