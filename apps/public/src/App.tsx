@@ -1,80 +1,51 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import NotFoundPage from '@code829/shared/components/shared/NotFoundPage';
-import ErrorBoundary from '@code829/shared/components/shared/ErrorBoundary';
-import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
-import ProtectedRoute from '@code829/shared/components/auth/ProtectedRoute';
-import ScrollToTop from '@code829/shared/components/shared/ScrollToTop';
-import PublicLayout from './components/layout/PublicLayout';
+import { AppShell, buildRoutes, type RouteConfig } from '@code829/shared/routing';
 import { useSessionRefresh } from '@code829/shared/hooks/useSessionRefresh';
-import { useLocation } from 'react-router-dom';
+import PublicLayout from './components/layout/PublicLayout';
 
-const HomePage = lazy(() => import('./pages/home/HomePage'));
-const EventsPage = lazy(() => import('./pages/events/EventsPage'));
-const EventDetailPage = lazy(() => import('./pages/event-detail/EventDetailPage'));
-const LoginPage = lazy(() => import('./pages/login/LoginPage'));
-const SignupPage = lazy(() => import('./pages/signup/SignupPage'));
-const ForgotPasswordPage = lazy(() => import('./pages/forgot-password/ForgotPasswordPage'));
-const ResetPasswordPage = lazy(() => import('./pages/reset-password/ResetPasswordPage'));
-const VerifyEmailPage = lazy(() => import('./pages/verify-email/VerifyEmailPage'));
-const MyPurchasesPage = lazy(() => import('./pages/purchases/MyPurchasesPage'));
-const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
-const VerifyMagicLinkPage = lazy(() => import('./pages/auth/VerifyMagicLinkPage'));
-const OnboardingPage = lazy(() => import('./pages/auth/OnboardingPage'));
-const PurchaseDetailPage = lazy(() => import('./pages/purchases/PurchaseDetailPage'));
-const PurchaseTicketsPage = lazy(() => import('./pages/purchases/PurchaseTicketsPage'));
-const MyTicketsPage = lazy(() => import('./pages/tickets/MyTicketsPage'));
-const GuestTicketsPage = lazy(() => import('./pages/tickets/GuestTicketsPage'));
-const TicketClaimPage = lazy(() => import('./pages/tickets/TicketClaimPage'));
-const FeedbackPage = lazy(() => import('./pages/feedback/FeedbackPage'));
+const routes: RouteConfig[] = [
+  {
+    layout: PublicLayout,
+    children: [
+      { index: true, loader: () => import('./pages/home/HomePage') },
+      { path: 'events', loader: () => import('./pages/events/EventsPage') },
+      { path: 'events/:slug', loader: () => import('./pages/event-detail/EventDetailPage') },
+      { path: 'login', loader: () => import('./pages/login/LoginPage') },
+      { path: 'signup', loader: () => import('./pages/signup/SignupPage') },
+      { path: 'forgot-password', loader: () => import('./pages/forgot-password/ForgotPasswordPage') },
+      { path: 'reset-password', loader: () => import('./pages/reset-password/ResetPasswordPage') },
+      { path: 'verify-email', loader: () => import('./pages/verify-email/VerifyEmailPage') },
+      { path: 'auth/verify', loader: () => import('./pages/auth/VerifyMagicLinkPage') },
+      { path: 'onboarding', loader: () => import('./pages/auth/OnboardingPage') },
+      { path: 'tickets/claim', loader: () => import('./pages/tickets/TicketClaimPage') },
+      { path: 'feedback', loader: () => import('./pages/feedback/FeedbackPage') },
 
-function AppContent() {
-  const location = useLocation();
-
-  return (
-    <Routes location={location}>
-      <Route element={<PublicLayout />}>
-        {/* Public */}
-        <Route index element={<HomePage />} />
-        <Route path="events" element={<EventsPage />} />
-        <Route path="events/:slug" element={<EventDetailPage />} />
-        <Route path="login" element={<LoginPage />} />
-        <Route path="signup" element={<SignupPage />} />
-        <Route path="forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="reset-password" element={<ResetPasswordPage />} />
-        <Route path="verify-email" element={<VerifyEmailPage />} />
-        <Route path="auth/verify" element={<VerifyMagicLinkPage />} />
-        <Route path="onboarding" element={<OnboardingPage />} />
-        <Route path="tickets/claim" element={<TicketClaimPage />} />
-        <Route path="feedback" element={<FeedbackPage />} />
-
-        {/* Authenticated Users */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="purchases" element={<MyPurchasesPage />} />
-          <Route path="purchases/:purchaseId" element={<PurchaseDetailPage />} />
-          <Route path="purchases/:purchaseId/tickets" element={<PurchaseTicketsPage />} />
-          <Route path="tickets" element={<MyTicketsPage />} />
-          <Route path="guest-tickets" element={<GuestTicketsPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-        </Route>
-      </Route>
-
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
-  );
-}
+      {
+        requiredRole: 'User',
+        children: [
+          { path: 'purchases', loader: () => import('./pages/purchases/MyPurchasesPage') },
+          { path: 'purchases/:purchaseId', loader: () => import('./pages/purchases/PurchaseDetailPage') },
+          { path: 'purchases/:purchaseId/tickets', loader: () => import('./pages/purchases/PurchaseTicketsPage') },
+          { path: 'tickets', loader: () => import('./pages/tickets/MyTicketsPage') },
+          { path: 'guest-tickets', loader: () => import('./pages/tickets/GuestTicketsPage') },
+          { path: 'profile', loader: () => import('./pages/profile/ProfilePage') },
+        ],
+      },
+    ],
+  },
+];
 
 export default function App() {
   useSessionRefresh();
+  const maintenance = import.meta.env.VITE_MAINTENANCE === 'true';
 
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <ErrorBoundary>
-        <Suspense fallback={<LoadingSpinner />}>
-          <AppContent />
-        </Suspense>
-      </ErrorBoundary>
-    </BrowserRouter>
+    <AppShell maintenanceMode={maintenance}>
+      <Routes>
+        {buildRoutes(routes)}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </AppShell>
   );
 }

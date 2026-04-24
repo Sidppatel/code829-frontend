@@ -22,7 +22,8 @@
     "preview:staff": "pnpm --filter @code829/staff preview",
     "preview:developer": "pnpm --filter @code829/developer preview",
     "test:e2e": "playwright test",
-    "test:e2e:install": "playwright install --with-deps chromium"
+    "test:e2e:install": "playwright install --with-deps chromium",
+    "gen:tokens": "tsx scripts/gen-tokens-json.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250101.0",
@@ -43,6 +44,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/user-event": "^14.5.2",
-    "jsdom": "^26.1.0"
+    "jsdom": "^26.1.0",
+    "tsx": "^4.19.2"
   }
 }
