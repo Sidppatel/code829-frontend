@@ -21,7 +21,7 @@ export const E2E_USER_PASSWORD = process.env.E2E_TEST_USER_PASSWORD ?? 'e2e-dev-
  * Returns cookies attached to the page context after the call.
  */
 export async function loginAsTestUser(page: Page): Promise<void> {
-    const resp = await page.request.post(`${E2E_API_URL}/auth/dev-login`, {
+    const resp = await page.request.post(`${E2E_API_URL}/v1/auth/dev-login`, {
         data: {
             email: E2E_USER_EMAIL,
             firstName: 'E2E',
@@ -38,7 +38,7 @@ export async function loginAsTestUser(page: Page): Promise<void> {
  * Signin with email+password for environments where dev-login isn't exposed (staging).
  */
 export async function signinAsTestUser(request: APIRequestContext): Promise<void> {
-    const resp = await request.post(`${E2E_API_URL}/auth/signin`, {
+    const resp = await request.post(`${E2E_API_URL}/v1/auth/signin`, {
         data: { email: E2E_USER_EMAIL, password: E2E_USER_PASSWORD },
         headers: { 'X-Portal': 'user' },
     });
