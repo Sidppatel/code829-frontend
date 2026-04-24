@@ -22,4 +22,13 @@ export const queryKeys = {
   auth: {
     me: () => ['auth', 'me'] as const,
   },
+  organizations: {
+    all: ['organizations'] as const,
+    list: (filters?: unknown) => ['organizations', 'list', filters ?? {}] as const,
+    detail: (id: string) => ['organizations', 'detail', id] as const,
+    stripeStatus: (id: string) => ['organizations', id, 'stripe-status'] as const,
+  },
+  adminStripe: {
+    status: () => ['admin', 'stripe-status'] as const,
+  },
 };
