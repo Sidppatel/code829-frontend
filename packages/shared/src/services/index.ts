@@ -80,3 +80,16 @@ export { adminDashboardApi } from './adminDashboardApi';
 export { imagesApi } from './imagesApi';
 export { feedbackApi } from './feedbackApi';
 export { developerApi } from './developerApi';
+
+export {
+  OrganizationsService,
+  organizationsService,
+  organizationsApi,
+} from './organizationsApi';
+export type { OrganizationListParams } from './organizationsApi';
+
+export {
+  StripeConnectService,
+  stripeConnectService,
+  stripeConnectApi,
+} from './stripeConnectApi';
