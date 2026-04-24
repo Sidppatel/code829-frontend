@@ -38,11 +38,20 @@ git clone <your-frontend-repo-url> code829-frontend
 cd code829-frontend
 
 pnpm install          # Install workspace dependencies
+bash scripts/setup-hooks.sh  # One-time: install pre-commit hooks (gitleaks + detect-secrets)
 pnpm dev:public       # Start public app at http://localhost:5173
 pnpm dev:admin        # Start admin app at http://localhost:5174
 pnpm dev:staff        # Start staff app at http://localhost:5175
 pnpm dev:developer    # Start developer app at http://localhost:5176
 ```
+
+### Pre-commit hooks
+
+`.pre-commit-config.yaml` ships two hooks: **gitleaks** (pattern-based secret scan) and
+**detect-secrets** (entropy + keyword scan, baselined via `.secrets.baseline`). Install
+them once per clone with `bash scripts/setup-hooks.sh`. The script needs
+[`pre-commit`](https://pre-commit.com/#install) on PATH — typically via
+`pipx install pre-commit` or `pip install --user pre-commit`.
 
 ### Available Scripts
 

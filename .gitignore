@@ -31,6 +31,10 @@ lerna-debug.log*
 .env.local
 .env.*.local
 !.env.example
+# Per-app env files — gitignored wholesale; only .env.example is committed.
+apps/*/.env
+apps/*/.env.*
+!apps/*/.env.example
 .infisical.json
 
 # Editor & System
