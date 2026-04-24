@@ -1,9 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { eventsApi } from '../services/eventsApi';
 import type { EventSummary } from '../types/event';
-import { createLogger } from '../lib/logger';
-
-const log = createLogger('useHomepageEvents');
 
 export interface UseHomepageEventsResult {
   featured: EventSummary[];
@@ -13,35 +10,19 @@ export interface UseHomepageEventsResult {
 }
 
 export function useHomepageEvents(): UseHomepageEventsResult {
-  const [featured, setFeatured] = useState<EventSummary[]>([]);
-  const [upcoming, setUpcoming] = useState<EventSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const [featRes, upRes] = await Promise.all([
-          eventsApi.list({ pageSize: 4 }),
-          eventsApi.list({ pageSize: 6 }),
-        ]);
-        if (cancelled) return;
-        const featuredItems = featRes.data.items.filter((e) => e.isFeatured);
-        setFeatured(featuredItems);
-        setUpcoming(upRes.data.items);
-        log.info('Loaded home events', { featured: featuredItems.length, upcoming: upRes.data.items.length });
-      } catch (err) {
-        if (cancelled) return;
-        log.error('Failed to load home events', err);
-        setError(err instanceof Error ? err.message : 'Failed to load events');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    void load();
-    return () => { cancelled = true; };
-  }, []);
-
-  return { featured, upcoming, loading, error };
+  const featuredQ = useQuery({
+    queryKey: ['events', 'home', 'featured'],
+    queryFn: async () => (await eventsApi.list({ pageSize: 4 })).data.items.filter((e) => e.isFeatured),
+  });
+  const upcomingQ = useQuery({
+    queryKey: ['events', 'home', 'upcoming'],
+    queryFn: async () => (await eventsApi.list({ pageSize: 6 })).data.items,
+  });
+  const error = featuredQ.error ?? upcomingQ.error;
+  return {
+    featured: featuredQ.data ?? [],
+    upcoming: upcomingQ.data ?? [],
+    loading: featuredQ.isPending || upcomingQ.isPending,
+    error: error ? (error instanceof Error ? error.message : 'Failed to load events') : null,
+  };
 }
