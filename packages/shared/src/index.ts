@@ -25,6 +25,38 @@ export { usePaymentIntentConfirmation } from './hooks/usePaymentIntentConfirmati
 export { usePurchaseQuote } from './hooks/usePurchaseQuote';
 export { useGuestTickets } from './hooks/useGuestTickets';
 export type { UseGuestTicketsResult } from './hooks/useGuestTickets';
+
+// Providers
+export { QueryProvider, createQueryClient } from './providers/QueryProvider';
+
+// Query hooks (TanStack Query)
+export {
+  queryKeys,
+  useEventsQuery,
+  useEventDetailBySlugQuery,
+  useEventDetailQuery,
+  useEventTicketTypesQuery,
+  useEventTablesQuery,
+  useEventFacetsQuery,
+  invalidateEventsQueries,
+  usePurchasesQuery,
+  usePurchaseDetailQuery,
+  useCreatePurchaseMutation,
+  useConfirmPurchaseMutation,
+  useCancelPurchaseMutation,
+  useGuestTicketsQuery,
+  useTicketClaimInfoQuery,
+  useClaimTicketMutation,
+  useCurrentUserQuery,
+  useLogoutMutation,
+} from './queries';
+
+// Form primitives + helpers
+export { TextField, SelectField, DateField, applyApiFieldErrors } from './forms';
+export type { SelectOption } from './forms';
+
+// Validation schemas
+export * from './schemas';
 export { useHomepageEvents } from './hooks/useHomepageEvents';
 export type { UseHomepageEventsResult } from './hooks/useHomepageEvents';
 

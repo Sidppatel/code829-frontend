@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Card, Button, Typography, Space, Divider } from 'antd';
 import type { EventTableDto, EventTableTypeInfo } from '@code829/shared/types/event';
 import { centsToUSD } from '@code829/shared/utils/currency';
@@ -37,7 +37,7 @@ function StatusLegendItem({
 }: {
   status: 'available' | 'reserved' | 'booked';
   label: string;
-  icon?: any;
+  icon?: React.ComponentType<{ style?: React.CSSProperties }>;
   isMine?: boolean;
 }) {
   const statusClass = isMine ? 'ts-table-mine' : `ts-table-${status}`;

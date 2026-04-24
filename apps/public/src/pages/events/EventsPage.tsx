@@ -5,8 +5,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { createLogger } from '@code829/shared/lib/logger';
 import { strings, textTemplates } from '@code829/shared/theme/strings';
-import { eventsApi } from '../../services/api';
-import type { EventSummary, EventFacets } from '@code829/shared/types/event';
+import { useEventsQuery, useEventFacetsQuery } from '@code829/shared/queries/events';
 import type { EventListParams } from '@code829/shared/services/eventsApi';
 
 const log = createLogger('Public/EventsPage');
@@ -17,57 +16,37 @@ import EmptyState from '@code829/shared/components/shared/EmptyState';
 
 export default function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [events, setEvents] = useState<EventSummary[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(() => parseInt(searchParams.get('page') ?? '1', 10));
-  const [pageSize] = useState(12);
-  const [loading, setLoading] = useState(true);
-  const [facets, setFacets] = useState<EventFacets | null>(null);
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const pageSize = 12;
   const [filters, setFilters] = useState<EventListParams>({});
   const { message } = App.useApp();
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.resolve()
-      .then(() => { if (!cancelled) setLoading(true); })
-      .then(() => eventsApi.list({ ...filters, page, pageSize }))
-      .then(({ data }) => {
-        if (!cancelled) {
-          setEvents(data?.items ?? []);
-          setTotal(data?.totalCount ?? 0);
-          log.info('Loaded events', { count: data?.items?.length ?? 0, total: data?.totalCount ?? 0 });
-        }
-      })
-      .catch((err) => { if (!cancelled) { log.error('Failed to load events', err); message.error(strings.errors.loadEventsFailed.text); } })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [filters, page, pageSize, message]);
+  const eventsQuery = useEventsQuery({ ...filters, page, pageSize });
+  const events = eventsQuery.data?.items ?? [];
+  const total = eventsQuery.data?.totalCount ?? 0;
+  const loading = eventsQuery.isPending;
 
   useEffect(() => {
-    const pageParam = parseInt(searchParams.get('page') ?? '1', 10);
-    Promise.resolve().then(() => {
-      if (pageParam !== page) setPage(pageParam);
-    });
-  }, [searchParams, page]);
+    if (eventsQuery.isError) {
+      log.error('Failed to load events', eventsQuery.error);
+      message.error(strings.errors.loadEventsFailed.text);
+    } else if (eventsQuery.data) {
+      log.info('Loaded events', { count: events.length, total });
+    }
+  }, [eventsQuery.isError, eventsQuery.error, eventsQuery.data, events.length, total, message]);
 
+  const facetsQuery = useEventFacetsQuery();
+  const facets = facetsQuery.data ?? null;
   useEffect(() => {
-    eventsApi.getFacets()
-      .then((res) => setFacets(res.data))
-      .catch((err) => {
-        // Facets power the filter sidebar. Log but don't block — list still works without them.
-        log.warn('Failed to load facets', { err });
-        setFacets(null);
-      });
-  }, []);
+    if (facetsQuery.isError) log.warn('Failed to load facets', { err: facetsQuery.error });
+  }, [facetsQuery.isError, facetsQuery.error]);
 
   const handleFilterChange = (newFilters: EventListParams) => {
     setFilters(newFilters);
-    setPage(1);
     setSearchParams({ page: '1' });
   };
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage);
     setSearchParams({ page: newPage.toString() });
     window.scrollTo(0, 0);
   };

@@ -1,8 +1,13 @@
 import { useState } from 'react';
-import { Form, Input, Button, Typography, Card, App, Result } from 'antd';
+import { Form, Button, Typography, Card, App, Result } from 'antd';
 import { MailOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { adminAuthApi } from '../../services/adminAuthApi';
+import { TextField } from '../../forms/TextField';
+import { applyApiFieldErrors } from '../../forms/applyApiFieldErrors';
+import { forgotPasswordSchema, type ForgotPasswordInput } from '../../schemas/authSchemas';
 import BrandLogo from '../shared/BrandLogo';
 
 interface ForgotPasswordFormProps {
@@ -14,22 +19,20 @@ export default function ForgotPasswordForm({
   title = 'Forgot Password',
   loginPath = '/login',
 }: ForgotPasswordFormProps) {
-  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const { message } = App.useApp();
+  const { control, handleSubmit, setError, formState: { isSubmitting } } = useForm<ForgotPasswordInput>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: '' },
+  });
 
-  const onFinish = async (values: { email: string }) => {
-    setLoading(true);
+  const onSubmit = async (values: ForgotPasswordInput) => {
     try {
       await adminAuthApi.requestPasswordReset(values.email);
       setSent(true);
-    } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || 'Failed to send reset link';
-      message.error(msg);
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      const top = applyApiFieldErrors<ForgotPasswordInput>(err, setError);
+      message.error(top ?? 'Failed to send reset link');
     }
   };
 
@@ -61,15 +64,16 @@ export default function ForgotPasswordForm({
           </Typography.Text>
         </div>
 
-        <Form layout="vertical" onFinish={onFinish} autoComplete="off">
-          <Form.Item
+        <Form layout="vertical" onFinish={handleSubmit(onSubmit)} autoComplete="off">
+          <TextField
+            control={control}
             name="email"
-            rules={[{ required: true, type: 'email', message: 'Please enter a valid email' }]}
-          >
-            <Input prefix={<MailOutlined />} placeholder="Email" size="large" />
-          </Form.Item>
+            placeholder="Email"
+            type="email"
+            inputProps={{ prefix: <MailOutlined />, size: 'large' }}
+          />
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block size="large">
+            <Button type="primary" htmlType="submit" loading={isSubmitting} block size="large">
               Send Reset Link
             </Button>
           </Form.Item>

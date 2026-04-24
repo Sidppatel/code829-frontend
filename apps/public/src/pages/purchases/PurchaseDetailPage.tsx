@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Button, App, Tag, Divider, Image, Modal, Space } from 'antd';
 import { Helmet } from 'react-helmet-async';
+import { usePurchaseDetailQuery, useCancelPurchaseMutation, useQueryClient, queryKeys } from '@code829/shared/queries';
 import {
   CalendarOutlined,
   EnvironmentOutlined,
@@ -18,7 +19,6 @@ import {
   AppstoreOutlined,
 } from '@ant-design/icons';
 import { purchasesApi } from '../../services/api';
-import type { Purchase } from '@code829/shared/types/purchase';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import { formatEventDate } from '@code829/shared/utils/date';
 import PurchaseStatusTag from '../../components/purchases/PurchaseStatusTag';
@@ -33,27 +33,23 @@ export default function PurchaseDetailPage() {
   const navigate = useNavigate();
   const { message, modal } = App.useApp();
 
-  const [booking, setBooking] = useState<Purchase | null>(null);
-  const [loading, setLoading] = useState(true);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const purchaseQuery = usePurchaseDetailQuery(purchaseId);
+  const booking = purchaseQuery.data ?? null;
+  const loading = purchaseQuery.isPending;
+  const cancelMutation = useCancelPurchaseMutation();
 
   useEffect(() => {
-    if (!purchaseId) return;
-    const load = async () => {
-      try {
-        const { data } = await purchasesApi.getById(purchaseId);
-        setBooking(data);
-        log.info('Loaded purchase details', { purchaseId, purchaseNumber: data.purchaseNumber });
-      } catch (err) {
-        log.error('Failed to load purchase details', err);
-        message.error('Failed to load purchase details');
-        navigate('/purchases', { replace: true });
-      } finally {
-        setLoading(false);
-      }
-    };
-    void load();
-  }, [purchaseId, message, navigate]);
+    if (purchaseQuery.isError) {
+      log.error('Failed to load purchase details', purchaseQuery.error);
+      message.error('Failed to load purchase details');
+      navigate('/purchases', { replace: true });
+    } else if (booking) {
+      log.info('Loaded purchase details', { purchaseId, purchaseNumber: booking.purchaseNumber });
+    }
+  }, [purchaseQuery.isError, purchaseQuery.error, booking, purchaseId, message, navigate]);
 
   const handleShowQr = async () => {
     if (!purchaseId) return;
@@ -75,11 +71,10 @@ export default function PurchaseDetailPage() {
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
-          await purchasesApi.cancel(purchaseId);
+          await cancelMutation.mutateAsync(purchaseId);
           log.info('Purchase cancelled', { purchaseId });
           message.success('Purchase cancelled');
-          const { data } = await purchasesApi.getById(purchaseId);
-          setBooking(data);
+          await queryClient.invalidateQueries({ queryKey: queryKeys.purchases.detail(purchaseId) });
         } catch (err) {
           log.error('Failed to cancel purchase', err);
           message.error('Failed to cancel purchase');

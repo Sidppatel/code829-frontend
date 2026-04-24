@@ -8,8 +8,7 @@ import {
   UserOutlined,
   LoginOutlined,
 } from '@ant-design/icons';
-import { ticketsApi } from '../../services/api';
-import type { TicketClaimInfo } from '@code829/shared/types/ticket';
+import { useTicketClaimInfoQuery, useClaimTicketMutation } from '@code829/shared/queries';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
@@ -23,31 +22,20 @@ export default function TicketClaimPage() {
   const user = useAuthStore((s) => s.user);
   const { isAuthenticated } = useAuth();
 
-  const [info, setInfo] = useState<TicketClaimInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [claiming, setClaiming] = useState(false);
-  const [claimed, setClaimed] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [claimedLocal, setClaimedLocal] = useState(false);
   const claimedRef = useRef(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    if (!token) {
-      Promise.resolve().then(() => {
-        if (!cancelled) { setError('No invite token provided'); setLoading(false); }
-      });
-      return () => { cancelled = true; };
-    }
-    ticketsApi.getClaimInfo(token)
-      .then(({ data }) => {
-        if (!cancelled) { setInfo(data); if (data.alreadyClaimed) setClaimed(true); }
-      })
-      .catch(() => { if (!cancelled) setError('This invite link is invalid or has expired.'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [token]);
+  const claimInfoQuery = useTicketClaimInfoQuery(token ?? undefined);
+  const info = claimInfoQuery.data ?? null;
+  const loading = !!token && claimInfoQuery.isPending;
+  const error = !token
+    ? 'No invite token provided'
+    : claimInfoQuery.isError ? 'This invite link is invalid or has expired.' : null;
 
-  // Auto-claim when user is authenticated and ticket not yet claimed
+  const claimMutation = useClaimTicketMutation();
+  const claiming = claimMutation.isPending;
+  const claimed = claimedLocal || !!info?.alreadyClaimed;
+
   useEffect(() => {
     if (!isAuthenticated || !token || !info || info.alreadyClaimed || claimedRef.current) return;
     if (user && 'hasCompletedOnboarding' in user && !user.hasCompletedOnboarding) {
@@ -55,20 +43,10 @@ export default function TicketClaimPage() {
       return;
     }
     claimedRef.current = true;
-    const doClaim = async () => {
-      setClaiming(true);
-      try {
-        await ticketsApi.claim(token);
-        setClaimed(true);
-        message.success('Ticket claimed successfully!');
-      } catch {
-        message.error('Failed to claim ticket');
-      } finally {
-        setClaiming(false);
-      }
-    };
-    void doClaim();
-  }, [isAuthenticated, token, info, user, navigate, message]);
+    claimMutation.mutateAsync(token)
+      .then(() => { setClaimedLocal(true); message.success('Ticket claimed successfully!'); })
+      .catch(() => message.error('Failed to claim ticket'));
+  }, [isAuthenticated, token, info, user, navigate, message, claimMutation]);
 
   if (loading || claiming) return <LoadingSpinner />;
 
