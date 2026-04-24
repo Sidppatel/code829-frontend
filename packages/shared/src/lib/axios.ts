@@ -16,10 +16,10 @@ const getBaseURL = () => {
   const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
   if (isLocal) {
     // Dev: Vite proxy forwards /api → backend, or use VITE_API_URL directly if set
-    return import.meta.env.VITE_API_URL || '/api';
+    return import.meta.env.VITE_API_URL || '/api/v1';
   }
   // Production (Cloudflare Workers): always route through the /api Worker proxy
-  return '/api';
+  return '/api/v1';
 };
 
 const apiClient = axios.create({
@@ -49,9 +49,9 @@ export function configureApiClient(portal: PortalId) {
 apiClient.interceptors.request.use((config) => {
   if (portalId) config.headers['X-Portal'] = portalId;
 
-  // Ensure relative URLs don't bypass the /api proxy
-  // If baseline is '/api' and url is '/events', make it 'events' so it becomes '/api/events'
-  if (config.baseURL === '/api' && config.url?.startsWith('/')) {
+  // Ensure relative URLs don't bypass the /api/v1 proxy
+  // If baseline is '/api/v1' and url is '/events', make it 'events' so it becomes '/api/v1/events'
+  if (config.baseURL === '/api/v1' && config.url?.startsWith('/')) {
     config.url = config.url.substring(1);
   }
 

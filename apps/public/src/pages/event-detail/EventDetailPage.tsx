@@ -72,14 +72,14 @@ export default function EventDetailPage() {
   const step: PurchaseStep = (rawStep && VALID_STEPS.includes(rawStep as PurchaseStep))
     ? rawStep as PurchaseStep
     : 'info';
-  const setStep = (next: PurchaseStep) => {
+  const setStep = useCallback((next: PurchaseStep) => {
     setSearchParams(prev => {
       const params = new URLSearchParams(prev);
       if (next === 'info') params.delete('step');
       else params.set('step', next);
       return params;
     }, { replace: false });
-  };
+  }, [setSearchParams]);
   const [tablesData, setTablesData] = useState<EventTablesResponse | null>(null);
   const [tableLocks, setTableLocks] = useState<TableLock[]>([]);
   const [lockingTableId, setLockingTableId] = useState<string | null>(null);
@@ -94,7 +94,7 @@ export default function EventDetailPage() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const purchaseIdParam = searchParams.get('purchaseId');
   const [purchaseId, setPurchaseIdState] = useState<string | null>(purchaseIdParam);
-  const setPurchaseId = (next: string | null) => {
+  const setPurchaseId = useCallback((next: string | null) => {
     setPurchaseIdState(next);
     setSearchParams(prev => {
       const params = new URLSearchParams(prev);
@@ -102,7 +102,7 @@ export default function EventDetailPage() {
       else params.delete('purchaseId');
       return params;
     }, { replace: true });
-  };
+  }, [setSearchParams]);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [paymentUnavailable, setPaymentUnavailable] = useState(false);
   const [isStartingPurchase, setIsStartingPurchase] = useState(false);
@@ -207,7 +207,7 @@ export default function EventDetailPage() {
         setPurchaseId(null);
       }
     }
-  }, [step, event]);
+  }, [step, event, setPurchaseId]);
 
   // Hide the sticky mobile CTA when the virtual keyboard is open so it can't cover an input.
   useEffect(() => {
@@ -524,7 +524,7 @@ export default function EventDetailPage() {
       }
     };
     void createPurchase();
-  }, [step, event, seatCount, selectedTicketTypeId, clientSecret]);
+  }, [step, event, seatCount, selectedTicketTypeId, clientSecret, setPurchaseId, setStep]);
 
   const handleCancelOpen = async () => {
     if (purchaseId) {
