@@ -22,7 +22,7 @@
     "@fontsource/playfair-display": "^5.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.0.0",
+    "react-router-dom": "^7.14.2",
     "antd": "^6.0.0",
     "@ant-design/icons": "^6.0.0",
     "axios": "^1.0.0",
