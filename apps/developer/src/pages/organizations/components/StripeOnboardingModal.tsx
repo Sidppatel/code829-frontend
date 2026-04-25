@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { App, Button, Form, Modal, Select, Space, Tag, Typography } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { App, Button, Collapse, Form, Input, Modal, Select, Space, Tag, Typography } from 'antd';
 import {
   CopyOutlined,
   LinkOutlined,
@@ -12,8 +12,13 @@ import type {
   OnboardingLinkScope,
   OrganizationDetail,
   OrganizationMemberSummary,
+  StartStripeOnboardingRequest,
   StripeOnboardingLinkResponse,
 } from '@code829/shared/types/organizations';
+
+const DEFAULT_MCC = '7922';
+const DEFAULT_BUSINESS_TYPE: 'individual' | 'company' = 'individual';
+const APP_BRAND_FOR_PRODUCT_DESCRIPTION = 'Code829';
 
 interface Props {
   open: boolean;
@@ -50,26 +55,53 @@ export default function StripeOnboardingModal({
   const [loading, setLoading] = useState(false);
   const [emailing, setEmailing] = useState(false);
   const [emailRecipient, setEmailRecipient] = useState<string | undefined>();
-  const [form] = Form.useForm();
+  const [prefillForm] = Form.useForm<StartStripeOnboardingRequest>();
+
+  // Prefill defaults match the backend defaults so what the developer sees
+  // is exactly what Stripe receives unless they edit.
+  const prefillDefaults = useMemo<StartStripeOnboardingRequest>(() => {
+    const legalName = organization?.legalName ?? organization?.name ?? '';
+    return {
+      businessType: DEFAULT_BUSINESS_TYPE,
+      legalName,
+      productDescription: legalName
+        ? `Event tickets and admissions sold via the ${APP_BRAND_FOR_PRODUCT_DESCRIPTION} platform on behalf of ${legalName}.`
+        : '',
+      mcc: DEFAULT_MCC,
+    };
+  }, [organization?.legalName, organization?.name]);
 
   useEffect(() => {
-    if (open) return;
+    if (open) {
+      prefillForm.setFieldsValue(prefillDefaults);
+      return;
+    }
     void Promise.resolve().then(() => {
       setLink(null);
       setEmailRecipient(undefined);
       setScope('identity');
-      form.resetFields();
+      prefillForm.resetFields();
     });
-  }, [open, form]);
+  }, [open, prefillForm, prefillDefaults]);
 
   if (!organization) return null;
 
   const hasAccount = Boolean(organization.stripeConnectedAccountId);
 
   const startOnboarding = async () => {
+    let values: StartStripeOnboardingRequest;
+    try {
+      values = await prefillForm.validateFields();
+    } catch {
+      return;
+    }
+
     setLoading(true);
     try {
-      const { data } = await stripeConnectApi.developerStartOnboarding(organization.id);
+      const { data } = await stripeConnectApi.developerStartOnboarding(
+        organization.id,
+        values,
+      );
       setLink(data);
       message.success('Stripe account created');
       onAccountStarted?.();
@@ -153,13 +185,79 @@ export default function StripeOnboardingModal({
       width={isMobile ? '95vw' : 640}
       style={isMobile ? { maxWidth: '100vw', top: 16 } : undefined}
     >
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         {!hasAccount && (
           <div>
             <Typography.Paragraph>
-              This organization has no Stripe connected account yet. Start
-              onboarding to create one and get the first identity link.
+              Confirm the details below before creating the Stripe account.
+              These pre-fill <code>business_profile</code> on Stripe so the
+              organizer skips the &quot;Business details&quot; onboarding step
+              and only needs to complete identity (KYC) + bank.
             </Typography.Paragraph>
+            <Form
+              form={prefillForm}
+              layout="vertical"
+              initialValues={prefillDefaults}
+              requiredMark={false}
+            >
+              <Form.Item
+                name="businessType"
+                label="Business type"
+                rules={[{ required: true, message: 'Pick a business type' }]}
+              >
+                <Select
+                  options={[
+                    { value: 'individual', label: 'Individual / sole organizer' },
+                    { value: 'company', label: 'Registered company' },
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item
+                name="legalName"
+                label="Legal name"
+                rules={[
+                  { required: true, message: 'Legal name is required' },
+                  { max: 200, message: 'Max 200 characters' },
+                ]}
+              >
+                <Input placeholder="Organization legal name" />
+              </Form.Item>
+              <Form.Item
+                name="productDescription"
+                label="Product description"
+                tooltip="Shown to Stripe instead of a website URL. 10–500 characters."
+                rules={[
+                  { required: true, message: 'Product description is required' },
+                  { min: 10, max: 500, message: 'Must be 10–500 characters' },
+                ]}
+              >
+                <Input.TextArea rows={2} />
+              </Form.Item>
+              <Collapse
+                ghost
+                items={[
+                  {
+                    key: 'advanced',
+                    label: 'Advanced',
+                    children: (
+                      <Form.Item
+                        name="mcc"
+                        label="MCC (Merchant Category Code)"
+                        tooltip="4-digit Stripe code. 7922 = Theatrical Producers / Ticket Agencies."
+                        rules={[
+                          {
+                            pattern: /^[0-9]{4}$/,
+                            message: 'Must be a 4-digit code',
+                          },
+                        ]}
+                      >
+                        <Input maxLength={4} />
+                      </Form.Item>
+                    ),
+                  },
+                ]}
+              />
+            </Form>
             <Button
               type="primary"
               icon={<LinkOutlined />}
@@ -178,7 +276,7 @@ export default function StripeOnboardingModal({
               after roughly 5 minutes — always mint a new one before sharing.
             </Typography.Paragraph>
             <Space
-              direction={isMobile ? 'vertical' : 'horizontal'}
+              orientation={isMobile ? 'vertical' : 'horizontal'}
               style={isMobile ? { width: '100%' } : undefined}
             >
               <Select<OnboardingLinkScope>
@@ -212,7 +310,7 @@ export default function StripeOnboardingModal({
               background: 'var(--bg-soft)',
             }}
           >
-            <Space direction="vertical" size="small" style={{ width: '100%' }}>
+            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                 Onboarding URL — expires {new Date(link.expiresAt).toLocaleString()}
               </Typography.Text>
@@ -240,7 +338,7 @@ export default function StripeOnboardingModal({
         )}
 
         {hasAccount && (
-          <Form form={form} layout="vertical">
+          <Form layout="vertical">
             <Typography.Title level={5} style={{ marginTop: 0 }}>
               Or email the link to a member
             </Typography.Title>

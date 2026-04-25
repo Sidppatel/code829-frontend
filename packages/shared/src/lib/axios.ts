@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { type AxiosRequestConfig } from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import { createLogger } from './logger';
 
@@ -90,7 +90,7 @@ apiClient.interceptors.response.use(
       // Session cookie might still be valid — try one silent refresh
       try {
         const meUrl = config?.url?.startsWith('/admin') ? '/admin/auth/me' : '/auth/me';
-        const res = await apiClient.get(meUrl, { _skipAuthRetry: true } as any);
+        const res = await apiClient.get(meUrl, { _skipAuthRetry: true } as AxiosRequestConfig);
         if (res.data?.id) {
           useAuthStore.getState().setUser(res.data);
           // Retry original request

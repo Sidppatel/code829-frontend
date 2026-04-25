@@ -109,9 +109,9 @@ export default function OrganizationDetailDrawer({
         </Space>
       }
     >
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         {editing ? (
-          <Space direction="vertical" size="small" style={{ width: '100%' }}>
+          <Space orientation="vertical" size="small" style={{ width: '100%' }}>
             <Typography.Text strong>Display Name</Typography.Text>
             <input
               value={name}

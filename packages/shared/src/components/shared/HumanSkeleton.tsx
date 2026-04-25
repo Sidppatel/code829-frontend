@@ -29,7 +29,7 @@ export default function HumanSkeleton({
         background: 'linear-gradient(90deg, var(--bg-soft) 25%, var(--border) 50%, var(--bg-soft) 75%)',
         backgroundSize: '200% 100%',
         animation: `skeleton-loading-${direction} 1.5s infinite linear`,
-        marginBottom: i < count - 1 ? '8px' : 0,
+        marginBottom: i + 1 < count ? '8px' : 0,
       }}
     />
   ));

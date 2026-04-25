@@ -31,7 +31,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
   );
 });
 
-export interface CardSectionProps extends React.HTMLAttributes<HTMLDivElement> {}
+export type CardSectionProps = React.HTMLAttributes<HTMLDivElement>;
 
 export const CardHeader = React.forwardRef<HTMLDivElement, CardSectionProps>(function CardHeader(
   { className, ...rest },

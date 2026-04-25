@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Typography, Button, Dropdown, Space } from 'antd';
 import type { MenuProps } from 'antd';
 import PulseIndicator from '../shared/PulseIndicator';
@@ -14,19 +14,16 @@ interface TopHeaderProps {
 }
 
 function UserAvatar({ imageUrl, firstName }: { imageUrl?: string | null; firstName?: string }) {
-  const [imgError, setImgError] = useState(false);
+  const [erroredUrl, setErroredUrl] = useState<string | null>(null);
 
-  // Reset error flag whenever the URL changes so a fresh valid URL gets a chance to load
-  useEffect(() => { setImgError(false); }, [imageUrl]);
-
-  const showImage = !!imageUrl && !imgError;
+  const showImage = !!imageUrl && erroredUrl !== imageUrl;
 
   return showImage ? (
     <img
       src={imageUrl!}
       alt={firstName}
       style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }}
-      onError={() => setImgError(true)}
+      onError={() => setErroredUrl(imageUrl ?? null)}
     />
   ) : (
     <div style={{

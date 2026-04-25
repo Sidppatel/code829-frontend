@@ -1,12 +1,62 @@
+import type { AxiosResponse } from 'axios';
 import { BaseService } from './BaseService';
 import type {
   OnboardingLinkScope,
+  OrganizationStripeState,
   OrganizationStripeStatus,
+  StartStripeOnboardingRequest,
   StripeOnboardingEmailRequest,
   StripeOnboardingEmailResponse,
   StripeOnboardingLinkRequest,
   StripeOnboardingLinkResponse,
 } from '../types/organizations';
+
+// BE currently returns a flat shape from /admin/organization/stripe-status and
+// /developer/organizations/{id}/stripe-status — no `state`, `members`,
+// `bankAccountLast4`, `expressDashboardUrl`, `fetchedAt`. Until the BE
+// contract is widened, normalize on the FE so consumers get the typed shape.
+type RawStripeStatus = Partial<OrganizationStripeStatus> & {
+  organizationId?: string;
+  organizationName?: string;
+  stripeAccountId?: string | null;
+  chargesEnabled?: boolean;
+  payoutsEnabled?: boolean;
+  detailsSubmitted?: boolean;
+  requirementsCurrentlyDue?: string[];
+};
+
+function deriveStripeState(raw: RawStripeStatus): OrganizationStripeState {
+  if (raw.state) return raw.state;
+  if (!raw.stripeAccountId && !raw.stripeAccount) return 'not_started';
+  if (!raw.detailsSubmitted) return 'identity_pending';
+  if (!raw.payoutsEnabled) return 'needs_bank';
+  if (raw.chargesEnabled && raw.payoutsEnabled) return 'active';
+  return 'identity_pending';
+}
+
+function normalizeStripeStatus(raw: RawStripeStatus): OrganizationStripeStatus {
+  const stripeAccount = raw.stripeAccount
+    ?? (raw.stripeAccountId
+      ? {
+          accountId: raw.stripeAccountId,
+          chargesEnabled: !!raw.chargesEnabled,
+          payoutsEnabled: !!raw.payoutsEnabled,
+          detailsSubmitted: !!raw.detailsSubmitted,
+          requirementsCurrentlyDue: raw.requirementsCurrentlyDue ?? [],
+        }
+      : null);
+
+  return {
+    organizationId: raw.organizationId ?? '',
+    organizationName: raw.organizationName ?? '',
+    stripeAccount,
+    state: deriveStripeState(raw),
+    bankAccountLast4: raw.bankAccountLast4 ?? null,
+    members: raw.members ?? [],
+    expressDashboardUrl: raw.expressDashboardUrl ?? null,
+    fetchedAt: raw.fetchedAt ?? new Date().toISOString(),
+  };
+}
 
 /**
  * Stripe Connect (Express) onboarding + status client.
@@ -42,9 +92,13 @@ export class StripeConnectService extends BaseService {
    * link in the same response so the developer UI can show it without a second
    * round-trip.
    */
-  developerStartOnboarding = (organizationId: string) =>
+  developerStartOnboarding = (
+    organizationId: string,
+    request: StartStripeOnboardingRequest,
+  ) =>
     this.post<StripeOnboardingLinkResponse>(
       `/developer/organizations/${organizationId}/stripe-account`,
+      request,
     );
 
   /**
@@ -76,10 +130,14 @@ export class StripeConnectService extends BaseService {
    * Reads org-scoped Stripe status. BE refreshes from Stripe + persists when the
    * row is older than its freshness window — callers don't need to do that here.
    */
-  developerGetStripeStatus = (organizationId: string) =>
-    this.get<OrganizationStripeStatus>(
+  developerGetStripeStatus = async (
+    organizationId: string,
+  ): Promise<AxiosResponse<OrganizationStripeStatus>> => {
+    const res = await this.get<RawStripeStatus>(
       `/developer/organizations/${organizationId}/stripe-status`,
     );
+    return { ...res, data: normalizeStripeStatus(res.data) };
+  };
 
   // ── Admin surface ──────────────────────────────────────────────────────────
 
@@ -89,8 +147,10 @@ export class StripeConnectService extends BaseService {
    * 403 when the admin has no Organization (UI should render the "contact
    * platform" empty state).
    */
-  adminGetStripeStatus = () =>
-    this.get<OrganizationStripeStatus>('/admin/organization/stripe-status');
+  adminGetStripeStatus = async (): Promise<AxiosResponse<OrganizationStripeStatus>> => {
+    const res = await this.get<RawStripeStatus>('/admin/organization/stripe-status');
+    return { ...res, data: normalizeStripeStatus(res.data) };
+  };
 
   /**
    * Mints a fresh onboarding link for the authenticated admin's org. Any admin

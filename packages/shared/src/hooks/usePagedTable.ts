@@ -31,7 +31,9 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
   // Store fetcher in a ref so inline arrow functions don't cause fetchData to
   // be recreated on every render (which would trigger an infinite request loop).
   const fetcherRef = useRef(fetcher);
-  fetcherRef.current = fetcher;
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+  });
 
   const [data, setData] = useState<T[]>([]);
   const [total, setTotal] = useState(0);
@@ -43,6 +45,7 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
   const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchData = useCallback(async () => {
+    await Promise.resolve();
     setLoading(true);
     setError(null);
     try {
@@ -59,7 +62,7 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
   }, [filters, page, pageSize]);
 
   useEffect(() => {
-    void fetchData();
+    queueMicrotask(() => { void fetchData(); });
   }, [fetchData, refreshKey]);
 
   const handleSetFilters = useCallback((newFilters: Partial<P>) => {

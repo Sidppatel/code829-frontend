@@ -13,7 +13,7 @@ let installed = false;
 function scrub(s: string): string {
   if (!s) return s;
   let out = s
-    .replace(/Authorization:\s*Bearer\s+[\w.\-]+/gi, 'Authorization: Bearer <redacted>')
+    .replace(/Authorization:\s*Bearer\s+[\w.-]+/gi, 'Authorization: Bearer <redacted>')
     .replace(/\b(password|token|secret|api[_-]?key|cookie)\b\s*[:=]\s*[^\s,;}]+/gi, '$1=<redacted>')
     .replace(/eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]{10,}/g, '<jwt-redacted>');
   if (out.length > MAX_LINE) out = out.slice(0, MAX_LINE) + '…';

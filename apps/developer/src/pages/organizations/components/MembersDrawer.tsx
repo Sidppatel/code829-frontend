@@ -133,7 +133,7 @@ export default function MembersDrawer({
       width={isMobile ? '100%' : 520}
       destroyOnHidden
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         <div
           style={{
             border: '1px solid var(--border)',
@@ -144,7 +144,7 @@ export default function MembersDrawer({
           <Typography.Title level={5} style={{ marginTop: 0 }}>
             Add Member
           </Typography.Title>
-          <Space style={{ width: '100%' }} direction="vertical">
+          <Space style={{ width: '100%' }} orientation="vertical">
             <Select
               showSearch
               optionFilterProp="label"

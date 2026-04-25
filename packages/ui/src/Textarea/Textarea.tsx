@@ -12,7 +12,8 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(fun
   { label, hint, error, fullWidth = true, id, className, rows = 4, ...rest },
   ref,
 ) {
-  const textareaId = id ?? React.useId();
+  const reactId = React.useId();
+  const textareaId = id ?? reactId;
   const describedBy = error ? `${textareaId}-error` : hint ? `${textareaId}-hint` : undefined;
   const wrapperClasses = [
     'ui-textarea',

@@ -14,7 +14,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(function Inp
   { label, hint, error, leadingIcon, trailingIcon, fullWidth = true, id, className, ...rest },
   ref,
 ) {
-  const inputId = id ?? React.useId();
+  const reactId = React.useId();
+  const inputId = id ?? reactId;
   const describedBy = error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined;
   const wrapperClasses = [
     'ui-field',

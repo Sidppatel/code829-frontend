@@ -8,22 +8,18 @@ import BrandLogo from '../shared/BrandLogo';
 import PasswordForm from './PasswordForm';
 
 export default function InvitationSignupForm() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
   const [info, setInfo] = useState<InvitationInfoDto | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [fetching, setFetching] = useState(true);
+  const [error, setError] = useState<string | null>(token ? null : 'No invitation token provided');
+  const [fetching, setFetching] = useState(!!token);
   const [names, setNames] = useState<{ firstName: string; lastName: string } | null>(null);
   const { setUser } = useAuthStore();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { message } = App.useApp();
-  const token = searchParams.get('token');
 
   useEffect(() => {
-    if (!token) {
-      setError('No invitation token provided');
-      setFetching(false);
-      return;
-    }
+    if (!token) return;
     adminAuthApi.getInvitationInfo(token)
       .then(({ data }) => setInfo(data))
       .catch(() => setError('Invalid or expired invitation'))

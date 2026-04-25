@@ -51,6 +51,8 @@ export interface UseEventDetailVMResult extends EventDetailState {
 
 export function useEventDetailVM(identifier: { id?: string; slug?: string }): UseEventDetailVMResult {
   const key = JSON.stringify(identifier);
+  // identifier is captured via JSON.stringify(key); adding the object would re-create vm every render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const vm = useMemo(() => new EventDetailViewModel(identifier), [key]);
   const state = useVMState(vm);
 

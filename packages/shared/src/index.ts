@@ -27,7 +27,8 @@ export { useGuestTickets } from './hooks/useGuestTickets';
 export type { UseGuestTicketsResult } from './hooks/useGuestTickets';
 
 // Providers
-export { QueryProvider, createQueryClient } from './providers/QueryProvider';
+export { QueryProvider } from './providers/QueryProvider';
+export { createQueryClient } from './providers/queryClient';
 
 // Query hooks (TanStack Query)
 export {

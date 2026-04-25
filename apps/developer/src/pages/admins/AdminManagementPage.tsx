@@ -259,7 +259,7 @@ export default function AdminManagementPage() {
         okButtonProps={{ disabled: !movePicked }}
         destroyOnHidden
       >
-        <Space direction="vertical" style={{ width: '100%' }}>
+        <Space orientation="vertical" style={{ width: '100%' }}>
           {moveTarget && orgMap[moveTarget.businessUserId] && (
             <Typography.Text type="secondary">
               Current: {orgMap[moveTarget.businessUserId].organizationName}

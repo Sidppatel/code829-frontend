@@ -7,7 +7,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import noBusinessCalcInJsx from './tools/eslint-rules/no-business-calc-in-jsx.js'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['**/dist/**', '**/build/**', '**/coverage/**']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

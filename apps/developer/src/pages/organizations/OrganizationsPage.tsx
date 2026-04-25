@@ -154,11 +154,11 @@ export default function OrganizationsPage() {
         </Space>
       }
     >
-      <Card style={{ marginBottom: 16 }} bodyStyle={isMobile ? { padding: 12 } : undefined}>
+      <Card style={{ marginBottom: 16 }} styles={{ body: isMobile ? { padding: 12 } : {} }}>
         <Space
           wrap
           style={{ width: '100%', justifyContent: 'space-between' }}
-          direction={isMobile ? 'vertical' : 'horizontal'}
+          orientation={isMobile ? 'vertical' : 'horizontal'}
         >
           <Input
             placeholder="Search by name or legal name"
@@ -209,7 +209,7 @@ export default function OrganizationsPage() {
                   icon={<TeamOutlined />}
                   style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}
                 />
-                <Space direction="vertical" size={0}>
+                <Space orientation="vertical" size={0}>
                   <Typography.Text strong>{r.name}</Typography.Text>
                   <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                     {r.countryCode}

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { App } from 'antd';
 
 interface Options<R> {
@@ -23,7 +23,9 @@ export function useAsyncAction<A extends unknown[], R>(
   const [error, setError] = useState<unknown>(null);
 
   const optsRef = useRef(options);
-  optsRef.current = options;
+  useEffect(() => {
+    optsRef.current = options;
+  });
 
   const run = useCallback(
     async (...args: A): Promise<R | undefined> => {

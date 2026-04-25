@@ -37,10 +37,6 @@ function resolveRowKey<T>(rowKey: RowKey<T>, record: T): string {
   return v !== undefined && v !== null ? String(v) : '';
 }
 
-export function defineColumns<T>(cols: ColumnsType<T>): ColumnsType<T> {
-  return cols;
-}
-
 export default function DataTableSection<T>({
   data,
   total,

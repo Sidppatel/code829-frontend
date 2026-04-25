@@ -22,6 +22,7 @@ export abstract class BaseService {
   // Defaults match axios itself (`get<T = any>`) so callers that don't supply a
   // type argument keep the pre-migration `any`-typed `.data` and existing page
   // code continues to type-check.
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   protected get<T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     return this.client.get<T>(url, config);
   }
@@ -41,4 +42,5 @@ export abstract class BaseService {
   protected delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     return this.client.delete<T>(url, config);
   }
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 }

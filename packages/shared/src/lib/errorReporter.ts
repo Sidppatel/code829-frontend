@@ -3,7 +3,7 @@
  * Fire-and-forget — never blocks UI and never throws.
  */
 
-let buffer: Array<{ source: string; message: string; data?: unknown }> = [];
+const buffer: Array<{ source: string; message: string; data?: unknown }> = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let disabled = false;
 

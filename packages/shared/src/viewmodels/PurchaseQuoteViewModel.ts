@@ -72,12 +72,16 @@ export interface UsePurchaseQuoteVMResult extends PurchaseQuoteState {
 
 export function usePurchaseQuoteVM(selection: PricingQuoteRequest | null): UsePurchaseQuoteVMResult {
   const key = JSON.stringify(selection);
+  // VM intentionally constructed once; selection is fed via setSelection effect below.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const vm = useMemo(() => new PurchaseQuoteViewModel(selection), []);
   const state = useVMState(vm);
 
   useEffect(() => {
     vm.setSelection(selection);
     return () => { /* keep VM alive across selection edits; dispose on unmount below */ };
+    // selection identity changes are tracked via JSON.stringify(key).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vm, key]);
 
   useEffect(() => () => vm.dispose(), [vm]);

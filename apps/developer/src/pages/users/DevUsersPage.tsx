@@ -84,7 +84,7 @@ export default function DevUsersPage() {
             title: 'Contact',
             key: 'contact',
             render: (_: unknown, r: DevUser) => (
-              <Space direction="vertical" size={0}>
+              <Space orientation="vertical" size={0}>
                 <Typography.Text style={{ fontSize: 13 }}>
                   <MailOutlined style={{ marginRight: 8, opacity: 0.5 }} />
                   {r.email}

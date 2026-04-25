@@ -62,6 +62,10 @@ export default function StripePayoutsSection({ refreshNonce }: StripePayoutsSect
   // 403 — admin has no Organization yet. The hook returns the error as-is;
   // detect by looking at the axios error response.
   const noOrg = isError && getStatusCode(error) === 403;
+  // Org exists but no Stripe account yet — only a developer can create one,
+  // so the admin should see the same "contact platform" empty state as no-org
+  // rather than a "Resume onboarding" button that 409s.
+  const noStripeAccount = !!data && data.state === 'not_started' && !data.stripeAccount;
 
   const cardStyle: React.CSSProperties = {
     maxWidth: 720,
@@ -103,7 +107,7 @@ export default function StripePayoutsSection({ refreshNonce }: StripePayoutsSect
       >
         {isLoading ? (
           <LoadingState />
-        ) : noOrg ? (
+        ) : noOrg || noStripeAccount ? (
           <NoOrgState />
         ) : isError ? (
           <ErrorState onRetry={() => void refresh()} />

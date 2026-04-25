@@ -18,8 +18,11 @@ export function useAsyncResource<T>(
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setLoading(true);
+      setError(null);
+    });
     fetcher()
       .then((res) => {
         if (!cancelled) setData(res);

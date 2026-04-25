@@ -13,7 +13,7 @@ interface State {
 
 const log = createLogger('ErrorBoundary');
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging, @typescript-eslint/no-empty-object-type
 interface ErrorBoundary extends Component<Props, State> {}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Upload, Avatar, App, Button, Popconfirm, Modal, Slider } from 'antd';
 import {
   CameraOutlined,
@@ -76,11 +76,11 @@ export default function AvatarUpload({
 
   // displayed URL (after confirmed upload)
   const [url, setUrl] = useState(currentUrl);
-
-  // Sync when parent passes a new URL (e.g. after auth store rehydrates)
-  useEffect(() => {
+  const [prevCurrentUrl, setPrevCurrentUrl] = useState(currentUrl);
+  if (currentUrl !== prevCurrentUrl) {
+    setPrevCurrentUrl(currentUrl);
     setUrl(currentUrl);
-  }, [currentUrl]);
+  }
 
   // crop modal state
   const [cropSrc, setCropSrc] = useState<string | null>(null);

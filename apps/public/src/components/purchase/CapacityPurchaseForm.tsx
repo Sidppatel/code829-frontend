@@ -43,7 +43,7 @@ export default function CapacityPurchaseForm({
 
   return (
     <Card title="Reserve Seats" styles={{ header: { borderBottom: 'none' } }}>
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         {hasTicketTypes ? (
           <>
             <div style={{ marginBottom: 4 }}>
@@ -58,7 +58,7 @@ export default function CapacityPurchaseForm({
                 }}
                 style={{ width: '100%' }}
               >
-                <Space direction="vertical" style={{ width: '100%' }}>
+                <Space orientation="vertical" style={{ width: '100%' }}>
                   {ticketTypes.map(tt => (
                     <Radio
                       key={tt.id}

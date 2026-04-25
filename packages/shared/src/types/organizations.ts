@@ -89,6 +89,19 @@ export interface StripeOnboardingLinkRequest {
   scope: OnboardingLinkScope;
 }
 
+/** Body for `POST /developer/organizations/{id}/stripe-account`. All fields
+ *  except `businessType` optional — server fills defaults from the Organization
+ *  row + auto-templates the product description. Pre-filling these collapses
+ *  Stripe's hosted "Business details" onboarding screen. */
+export interface StartStripeOnboardingRequest {
+  businessType: 'individual' | 'company';
+  legalName?: string;
+  productDescription?: string;
+  /** 4-digit Merchant Category Code. Defaults server-side to "7922"
+   *  (Theatrical Producers / Ticket Agencies). */
+  mcc?: string;
+}
+
 /** Stripe AccountLink response. `expiresAt` is ISO-8601 UTC; Stripe links live
  *  ~5 minutes — the UI must surface freshness, not the FE hooks. */
 export interface StripeOnboardingLinkResponse {

@@ -15,6 +15,7 @@ import { Spin } from 'antd';
 import { LockOutlined, CheckCircleOutlined, StopOutlined, LoadingOutlined } from '@ant-design/icons';
 import type { EventTableDto, EventTableTypeInfo } from '../../types/event';
 import { useHoldTimer } from '../../hooks/useHoldTimer';
+import { colLetter, labelFor } from './floorPlanHelpers';
 
 export type FloorPlanMode = 'edit' | 'select' | 'display';
 
@@ -24,14 +25,6 @@ const SHAPE_RADIUS: Record<string, string> = {
   Square: '4px',
   Rectangle: '6px',
 };
-
-function colLetter(col: number): string {
-  return String.fromCharCode(65 + (col % 26));
-}
-
-function labelFor(table: Pick<EventTableDto, 'label' | 'gridRow' | 'gridCol'>): string {
-  return table.label || `${colLetter(table.gridCol)}${table.gridRow + 1}`;
-}
 
 type EditCallbacks = {
   mode: 'edit';
@@ -269,4 +262,3 @@ export default function FloorPlan(props: Props) {
   );
 }
 
-export { labelFor as floorPlanLabelFor };

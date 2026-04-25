@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 // We test the module's behavior by mocking axios at the factory level.
 // The actual interceptors are wired inside lib/axios.ts on module load,
@@ -50,7 +50,8 @@ describe('axios client configuration', () => {
     const { configureApiClient, default: client } = await import('../axios');
     configureApiClient('admin');
     // The header should be set on the client's common headers
-    expect((client as any).defaults?.headers?.common?.['X-Portal']).toBe('admin');
+    const c = client as { defaults?: { headers?: { common?: Record<string, string> } } };
+    expect(c.defaults?.headers?.common?.['X-Portal']).toBe('admin');
   });
 });
 

@@ -29,6 +29,7 @@ export { default as ConfirmDialog } from './ConfirmDialog';
 export type { ConfirmOptions, ConfirmTone } from './ConfirmDialog';
 export { default as FilterBar } from './FilterBar';
 export type { FilterChip } from './FilterBar';
-export { default as DataTableSection, defineColumns } from './DataTableSection';
+export { default as DataTableSection } from './DataTableSection';
+export { defineColumns } from './dataTableHelpers';
 export { default as CrudModal } from './CrudModal';
 export { default as PageShell } from './PageShell';

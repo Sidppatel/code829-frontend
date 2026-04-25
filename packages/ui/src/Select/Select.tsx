@@ -20,7 +20,8 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(function 
   { label, hint, error, options, placeholder, fullWidth = true, id, className, ...rest },
   ref,
 ) {
-  const selectId = id ?? React.useId();
+  const reactId = React.useId();
+  const selectId = id ?? reactId;
   const describedBy = error ? `${selectId}-error` : hint ? `${selectId}-hint` : undefined;
   const wrapperClasses = [
     'ui-select',
