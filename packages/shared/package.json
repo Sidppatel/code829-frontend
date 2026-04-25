@@ -8,9 +8,9 @@
     "./*": "./src/*"
   },
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test": "cd ../.. && vitest run",
+    "test:watch": "cd ../.. && vitest",
+    "test:coverage": "cd ../.. && vitest run --coverage"
   },
   "devDependencies": {
     "@types/react": "^19.2.14",
