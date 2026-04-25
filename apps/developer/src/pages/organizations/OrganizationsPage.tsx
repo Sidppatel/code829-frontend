@@ -158,7 +158,7 @@ export default function OrganizationsPage() {
         <Space
           wrap
           style={{ width: '100%', justifyContent: 'space-between' }}
-          orientation={isMobile ? 'vertical' : 'horizontal'}
+          direction={isMobile ? 'vertical' : 'horizontal'}
         >
           <Input
             placeholder="Search by name or legal name"

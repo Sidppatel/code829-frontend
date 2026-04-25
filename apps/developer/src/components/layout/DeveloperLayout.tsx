@@ -63,7 +63,7 @@ const navGroups = [
 
 const navItems = navGroups.flatMap(g => g.items);
 
-const PILL_PRIMARY_KEYS = ['/', '/email-logs', '/admins', '/staff', '/settings'];
+const PILL_PRIMARY_KEYS = ['/', '/email-logs', '/organizations', '/admins', '/staff', '/settings'];
 const DEVELOPER_PILL_ITEMS: NavItem[] = navGroups
   .flatMap((g) => g.items)
   .filter((item) => PILL_PRIMARY_KEYS.includes(item.key))
@@ -81,6 +81,7 @@ const DEVELOPER_MENU_ITEMS = [
   { key: 'invitations', to: '/invitations', label: 'Invitations' },
   { key: 'users', to: '/users', label: 'User Roles' },
   { key: 'events', to: '/events', label: 'Platform Fees' },
+  { key: 'organizations', to: '/organizations', label: 'Organizations' },
 ];
 
 export default function DeveloperLayout() {

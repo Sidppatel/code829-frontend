@@ -185,7 +185,13 @@ export default function StripeOnboardingModal({
       width={isMobile ? '95vw' : 640}
       style={isMobile ? { maxWidth: '100vw', top: 16 } : undefined}
     >
-      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
+      <Form
+        form={prefillForm}
+        layout="vertical"
+        initialValues={prefillDefaults}
+        requiredMark={false}
+      >
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
         {!hasAccount && (
           <div>
             <Typography.Paragraph>
@@ -194,12 +200,7 @@ export default function StripeOnboardingModal({
               organizer skips the &quot;Business details&quot; onboarding step
               and only needs to complete identity (KYC) + bank.
             </Typography.Paragraph>
-            <Form
-              form={prefillForm}
-              layout="vertical"
-              initialValues={prefillDefaults}
-              requiredMark={false}
-            >
+            <div style={{ marginBottom: 24 }}>
               <Form.Item
                 name="businessType"
                 label="Business type"
@@ -257,7 +258,7 @@ export default function StripeOnboardingModal({
                   },
                 ]}
               />
-            </Form>
+            </div>
             <Button
               type="primary"
               icon={<LinkOutlined />}
@@ -338,7 +339,7 @@ export default function StripeOnboardingModal({
         )}
 
         {hasAccount && (
-          <Form layout="vertical">
+          <div style={{ marginTop: 24 }}>
             <Typography.Title level={5} style={{ marginTop: 0 }}>
               Or email the link to a member
             </Typography.Title>
@@ -364,9 +365,10 @@ export default function StripeOnboardingModal({
             >
               Send Link by Email
             </Button>
-          </Form>
+          </div>
         )}
-      </Space>
+        </Space>
+      </Form>
     </Modal>
   );
 }

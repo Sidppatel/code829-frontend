@@ -130,10 +130,11 @@ export default function MembersDrawer({
       open={open}
       onClose={onClose}
       title={`Members · ${organization.name}`}
-      width={isMobile ? '100%' : 520}
+      size={isMobile ? 'default' : 'large'}
+      style={isMobile ? { width: '100%' } : { width: 520 }}
       destroyOnHidden
     >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
         <div
           style={{
             border: '1px solid var(--border)',
@@ -144,7 +145,7 @@ export default function MembersDrawer({
           <Typography.Title level={5} style={{ marginTop: 0 }}>
             Add Member
           </Typography.Title>
-          <Space style={{ width: '100%' }} orientation="vertical">
+          <Space style={{ width: '100%' }} direction="vertical">
             <Select
               showSearch
               optionFilterProp="label"
@@ -171,47 +172,43 @@ export default function MembersDrawer({
           </Space>
         </div>
 
-        <List
-          itemLayout="horizontal"
-          dataSource={memberList}
-          locale={{ emptyText: 'No members yet' }}
-          renderItem={(m) => (
-            <List.Item
-              actions={[
-                <Popconfirm
-                  key="remove"
-                  title="Remove member?"
-                  description={`Remove ${m.firstName} ${m.lastName} from ${organization.name}?`}
-                  okText="Remove"
-                  okButtonProps={{ danger: true }}
-                  onConfirm={() => void removeMember(m)}
-                >
-                  <Button
-                    danger
-                    size="small"
-                    icon={<DeleteOutlined />}
-                    loading={removingId === m.businessUserId}
-                  >
-                    Remove
-                  </Button>
-                </Popconfirm>,
-              ]}
-            >
-              <List.Item.Meta
-                avatar={<Avatar icon={<UserOutlined />} />}
-                title={
-                  <Space>
-                    <Typography.Text strong>
-                      {m.firstName} {m.lastName}
-                    </Typography.Text>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {memberList.map((m) => (
+            <div key={m.businessUserId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Avatar icon={<UserOutlined />} />
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Typography.Text strong>{m.firstName} {m.lastName}</Typography.Text>
                     <Tag color={ROLE_COLORS[m.role] ?? 'default'}>{m.role}</Tag>
-                  </Space>
-                }
-                description={m.email}
-              />
-            </List.Item>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{m.email}</div>
+                </div>
+              </div>
+              <Popconfirm
+                title="Remove member?"
+                description={`Remove ${m.firstName} ${m.lastName} from ${organization.name}?`}
+                okText="Remove"
+                okButtonProps={{ danger: true }}
+                onConfirm={() => void removeMember(m)}
+              >
+                <Button
+                  danger
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  loading={removingId === m.businessUserId}
+                >
+                  Remove
+                </Button>
+              </Popconfirm>
+            </div>
+          ))}
+          {memberList.length === 0 && (
+            <Typography.Text type="secondary" style={{ textAlign: 'center', padding: '24px 0' }}>
+              No members yet
+            </Typography.Text>
           )}
-        />
+        </div>
       </Space>
     </Drawer>
   );

@@ -99,7 +99,8 @@ export default function OrganizationDetailDrawer({
       open={open}
       onClose={onClose}
       title={organization.name}
-      width={isMobile ? '100%' : 560}
+      size={isMobile ? 'default' : 'large'}
+      style={isMobile ? { width: '100%' } : { width: 560 }}
       destroyOnHidden
       extra={
         <Space>
@@ -109,9 +110,9 @@ export default function OrganizationDetailDrawer({
         </Space>
       }
     >
-      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
         {editing ? (
-          <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+          <Space direction="vertical" size="small" style={{ width: '100%' }}>
             <Typography.Text strong>Display Name</Typography.Text>
             <input
               value={name}
@@ -262,28 +263,25 @@ export default function OrganizationDetailDrawer({
               Manage Members
             </Button>
           </Space>
-          <List
-            itemLayout="horizontal"
-            size="small"
-            dataSource={organization.members ?? []}
-            locale={{ emptyText: 'No members' }}
-            renderItem={(m) => (
-              <List.Item>
-                <List.Item.Meta
-                  avatar={<Avatar icon={<UserOutlined />} size="small" />}
-                  title={
-                    <Space>
-                      <Typography.Text>
-                        {m.firstName} {m.lastName}
-                      </Typography.Text>
-                      <Tag color={ROLE_COLORS[m.role] ?? 'default'}>{m.role}</Tag>
-                    </Space>
-                  }
-                  description={m.email}
-                />
-              </List.Item>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+            {(organization.members ?? []).map((m) => (
+              <div key={m.businessUserId} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Avatar icon={<UserOutlined />} size="small" />
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Typography.Text>{m.firstName} {m.lastName}</Typography.Text>
+                    <Tag color={ROLE_COLORS[m.role] ?? 'default'}>{m.role}</Tag>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{m.email}</div>
+                </div>
+              </div>
+            ))}
+            {(!organization.members || organization.members.length === 0) && (
+              <Typography.Text type="secondary" style={{ textAlign: 'center', padding: '12px 0' }}>
+                No members
+              </Typography.Text>
             )}
-          />
+          </div>
         </div>
       </Space>
     </Drawer>
