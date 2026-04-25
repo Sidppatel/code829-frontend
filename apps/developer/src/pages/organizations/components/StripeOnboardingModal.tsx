@@ -200,7 +200,7 @@ export default function StripeOnboardingModal({
               organizer skips the &quot;Business details&quot; onboarding step
               and only needs to complete identity (KYC) + bank.
             </Typography.Paragraph>
-            <div style={{ marginBottom: 24 }}>
+            <div>
               <Form.Item
                 name="businessType"
                 label="Business type"
@@ -277,7 +277,7 @@ export default function StripeOnboardingModal({
               after roughly 5 minutes — always mint a new one before sharing.
             </Typography.Paragraph>
             <Space
-              orientation={isMobile ? 'vertical' : 'horizontal'}
+              direction={isMobile ? 'vertical' : 'horizontal'}
               style={isMobile ? { width: '100%' } : undefined}
             >
               <Select<OnboardingLinkScope>
@@ -311,7 +311,7 @@ export default function StripeOnboardingModal({
               background: 'var(--bg-soft)',
             }}
           >
-            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+            <Space direction="vertical" size="small" style={{ width: '100%' }}>
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                 Onboarding URL — expires {new Date(link.expiresAt).toLocaleString()}
               </Typography.Text>
@@ -339,7 +339,7 @@ export default function StripeOnboardingModal({
         )}
 
         {hasAccount && (
-          <div style={{ marginTop: 24 }}>
+          <div>
             <Typography.Title level={5} style={{ marginTop: 0 }}>
               Or email the link to a member
             </Typography.Title>

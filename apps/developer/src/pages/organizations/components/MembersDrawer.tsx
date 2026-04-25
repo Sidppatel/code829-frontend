@@ -4,7 +4,6 @@ import {
   Avatar,
   Button,
   Drawer,
-  List,
   Popconfirm,
   Select,
   Space,
@@ -130,8 +129,7 @@ export default function MembersDrawer({
       open={open}
       onClose={onClose}
       title={`Members · ${organization.name}`}
-      size={isMobile ? 'default' : 'large'}
-      style={isMobile ? { width: '100%' } : { width: 520 }}
+      width={isMobile ? '100%' : 520}
       destroyOnHidden
     >
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>

@@ -5,7 +5,6 @@ import {
   Button,
   Descriptions,
   Drawer,
-  List,
   Space,
   Spin,
   Tag,
@@ -99,8 +98,7 @@ export default function OrganizationDetailDrawer({
       open={open}
       onClose={onClose}
       title={organization.name}
-      size={isMobile ? 'default' : 'large'}
-      style={isMobile ? { width: '100%' } : { width: 560 }}
+      width={isMobile ? '100%' : 560}
       destroyOnHidden
       extra={
         <Space>
