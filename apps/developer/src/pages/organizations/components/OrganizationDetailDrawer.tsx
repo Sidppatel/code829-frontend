@@ -256,7 +256,7 @@ export default function OrganizationDetailDrawer({
             wrap
           >
             <Typography.Title level={5} style={{ margin: 0 }}>
-              Members ({organization.members.length})
+              Members ({organization.members?.length ?? 0})
             </Typography.Title>
             <Button icon={<TeamOutlined />} onClick={onOpenMembers}>
               Manage Members
@@ -265,7 +265,7 @@ export default function OrganizationDetailDrawer({
           <List
             itemLayout="horizontal"
             size="small"
-            dataSource={organization.members}
+            dataSource={organization.members ?? []}
             locale={{ emptyText: 'No members' }}
             renderItem={(m) => (
               <List.Item>

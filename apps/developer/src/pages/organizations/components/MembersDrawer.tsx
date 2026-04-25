@@ -85,7 +85,8 @@ export default function MembersDrawer({
 
   if (!organization) return null;
 
-  const memberIds = new Set(organization.members.map((m) => m.businessUserId));
+  const memberList = organization.members ?? [];
+  const memberIds = new Set(memberList.map((m) => m.businessUserId));
   const candidates = allUsers.filter((u) => !memberIds.has(u.businessUserId));
 
   const addMember = async () => {
@@ -172,7 +173,7 @@ export default function MembersDrawer({
 
         <List
           itemLayout="horizontal"
-          dataSource={organization.members}
+          dataSource={memberList}
           locale={{ emptyText: 'No members yet' }}
           renderItem={(m) => (
             <List.Item

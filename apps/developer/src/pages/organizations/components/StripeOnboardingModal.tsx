@@ -137,7 +137,7 @@ export default function StripeOnboardingModal({
     }
   };
 
-  const memberOptions = organization.members.map((m: OrganizationMemberSummary) => ({
+  const memberOptions = (organization.members ?? []).map((m: OrganizationMemberSummary) => ({
     value: m.businessUserId,
     label: `${m.firstName} ${m.lastName} (${m.email})`,
   }));
