@@ -59,6 +59,8 @@ export type { SelectOption } from './forms';
 export * from './schemas';
 export { useHomepageEvents } from './hooks/useHomepageEvents';
 export type { UseHomepageEventsResult } from './hooks/useHomepageEvents';
+export { useOrganizationStripeStatus } from './hooks/useOrganizationStripeStatus';
+export { useAdminStripeStatus } from './hooks/useAdminStripeStatus';
 
 // Context
 export { ThemeProvider } from './context/ThemeContext';
@@ -118,7 +120,14 @@ export {
   imagesApi,
   feedbackApi,
   developerApi,
+  OrganizationsService,
+  organizationsService,
+  organizationsApi,
+  StripeConnectService,
+  stripeConnectService,
+  stripeConnectApi,
 } from './services';
+export type { OrganizationListParams } from './services';
 
 // Controllers — singletons over services, emit domain events
 export {
@@ -167,3 +176,19 @@ export type {
   BusinessUserProfile, BusinessUserListItem, BusinessAuthResponse, InvitationInfoDto,
 } from './types/auth';
 export type { Purchase, PurchaseStatus } from './types/purchase';
+export type {
+  OnboardingLinkScope,
+  OrganizationStripeState,
+  OrganizationMemberSummary,
+  OrganizationListItem,
+  OrganizationDetail,
+  OrganizationCreateRequest,
+  OrganizationUpdateRequest,
+  OrganizationMemberRequest,
+  StripeOnboardingLinkRequest,
+  StripeOnboardingLinkResponse,
+  StripeOnboardingEmailRequest,
+  StripeOnboardingEmailResponse,
+  StripeAccountStatus,
+  OrganizationStripeStatus,
+} from './types/organizations';

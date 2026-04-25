@@ -1,0 +1,211 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`StripePayoutsSection — mobile snapshot (360px) > mobile flag swaps the dashboard CTA label > mobile-active-state 1`] = `
+<div
+  class="css-dev-only-do-not-override-xogyor ant-app css-var-root"
+>
+  <div
+    aria-labelledby="payouts-section-heading"
+    style="margin-top: 32px; margin-left: auto; margin-right: auto;"
+  >
+    <div
+      class="human-card elevated-variant hover-lift   spring-up"
+      style="max-width: 720px; width: 100%; cursor: default; padding: 20px 20px 16px; background-color: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--card-shadow); display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden;"
+    >
+      <div
+        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;"
+      >
+        <div>
+          <div
+            style="font-size: 18px; font-weight: 700; color: var(--text-primary); font-family: "Playfair Display", serif;"
+          >
+            <span
+              id="payouts-section-heading"
+              style="display: inline-flex; align-items: center; gap: 10px;"
+            >
+              <span
+                aria-hidden="true"
+                aria-label="bank"
+                class="anticon anticon-bank"
+                role="img"
+              >
+                <svg
+                  aria-hidden="true"
+                  data-icon="bank"
+                  fill="currentColor"
+                  focusable="false"
+                  height="1em"
+                  viewBox="64 64 896 896"
+                  width="1em"
+                >
+                  <path
+                    d="M894 462c30.9 0 43.8-39.7 18.7-58L530.8 126.2a31.81 31.81 0 00-37.6 0L111.3 404c-25.1 18.2-12.2 58 18.8 58H192v374h-72c-4.4 0-8 3.6-8 8v52c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-52c0-4.4-3.6-8-8-8h-72V462h62zM512 196.7l271.1 197.2H240.9L512 196.7zM264 462h117v374H264V462zm189 0h117v374H453V462zm307 374H642V462h118v374z"
+                  />
+                </svg>
+              </span>
+               Payouts
+            </span>
+          </div>
+          <div
+            style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;"
+          >
+            Where your ticket revenue lands.
+          </div>
+        </div>
+        <div
+          style="flex-shrink: 0;"
+        >
+          <button
+            aria-label="Refresh payout status"
+            class="ant-btn css-dev-only-do-not-override-xogyor css-var-root ant-btn-text ant-btn-color-default ant-btn-variant-text ant-btn-sm ant-btn-icon-only"
+            style="min-height: 44px; min-width: 44px;"
+            type="button"
+          >
+            <span
+              class="ant-btn-icon"
+            >
+              <span
+                aria-label="reload"
+                class="anticon anticon-reload"
+                role="img"
+              >
+                <svg
+                  aria-hidden="true"
+                  data-icon="reload"
+                  fill="currentColor"
+                  focusable="false"
+                  height="1em"
+                  viewBox="64 64 896 896"
+                  width="1em"
+                >
+                  <path
+                    d="M909.1 209.3l-56.4 44.1C775.8 155.1 656.2 92 521.9 92 290 92 102.3 279.5 102 511.5 101.7 743.7 289.8 932 521.9 932c181.3 0 335.8-115 394.6-276.1 1.5-4.2-.7-8.9-4.9-10.3l-56.7-19.5a8 8 0 00-10.1 4.8c-1.8 5-3.8 10-5.9 14.9-17.3 41-42.1 77.8-73.7 109.4A344.77 344.77 0 01655.9 829c-42.3 17.9-87.4 27-133.8 27-46.5 0-91.5-9.1-133.8-27A341.5 341.5 0 01279 755.2a342.16 342.16 0 01-73.7-109.4c-17.9-42.4-27-87.4-27-133.9s9.1-91.5 27-133.9c17.3-41 42.1-77.8 73.7-109.4 31.6-31.6 68.4-56.4 109.3-73.8 42.3-17.9 87.4-27 133.8-27 46.5 0 91.5 9.1 133.8 27a341.5 341.5 0 01109.3 73.8c9.9 9.9 19.2 20.4 27.8 31.4l-60.2 47a8 8 0 003 14.1l175.6 43c5 1.2 9.9-2.6 9.9-7.7l.8-180.9c-.1-6.6-7.8-10.3-13-6.2z"
+                  />
+                </svg>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div
+        style="flex: 1 1 0%;"
+      >
+        <div
+          style="display: flex; flex-direction: column; gap: 16px;"
+        >
+          <div
+            style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px;"
+          >
+            <div
+              role="status"
+              style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: var(--status-success, #16a34a)15; color: var(--status-success, #16a34a); font-weight: 600; font-size: 14px; min-height: 32px;"
+            >
+              <span
+                style="display: inline-flex; font-size: 16px;"
+              >
+                <span
+                  aria-hidden="true"
+                  aria-label="check-circle"
+                  class="anticon anticon-check-circle"
+                  role="img"
+                >
+                  <svg
+                    aria-hidden="true"
+                    data-icon="check-circle"
+                    fill="currentColor"
+                    focusable="false"
+                    height="1em"
+                    viewBox="64 64 896 896"
+                    width="1em"
+                  >
+                    <path
+                      d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm193.5 301.7l-210.6 292a31.8 31.8 0 01-51.7 0L318.5 484.9c-3.8-5.3 0-12.7 6.5-12.7h46.9c10.2 0 19.9 4.9 25.9 13.3l71.2 98.8 157.2-218c6-8.3 15.6-13.3 25.9-13.3H699c6.5 0 10.3 7.4 6.5 12.7z"
+                    />
+                  </svg>
+                </span>
+              </span>
+              <span>
+                Payouts active
+              </span>
+            </div>
+            <a
+              aria-label="Open Stripe Express dashboard in a new tab"
+              href="https://dashboard.stripe.com/connect/accounts/acct_test"
+              rel="noopener noreferrer"
+              style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; width: 100%; font-weight: 600; padding: 0px 20px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary); text-decoration: none;"
+              target="_blank"
+            >
+              <span
+                aria-hidden="true"
+                aria-label="export"
+                class="anticon anticon-export"
+                role="img"
+              >
+                <svg
+                  aria-hidden="true"
+                  data-icon="export"
+                  fill="currentColor"
+                  fill-rule="evenodd"
+                  focusable="false"
+                  height="1em"
+                  viewBox="64 64 896 896"
+                  width="1em"
+                >
+                  <path
+                    d="M880 912H144c-17.7 0-32-14.3-32-32V144c0-17.7 14.3-32 32-32h360c4.4 0 8 3.6 8 8v56c0 4.4-3.6 8-8 8H184v656h656V520c0-4.4 3.6-8 8-8h56c4.4 0 8 3.6 8 8v360c0 17.7-14.3 32-32 32zM770.87 199.13l-52.2-52.2a8.01 8.01 0 014.7-13.6l179.4-21c5.1-.6 9.5 3.7 8.9 8.9l-21 179.4c-.8 6.6-8.9 9.4-13.6 4.7l-52.4-52.4-256.2 256.2a8.03 8.03 0 01-11.3 0l-42.4-42.4a8.03 8.03 0 010-11.3l256.1-256.3z"
+                  />
+                </svg>
+              </span>
+              Open Stripe
+            </a>
+          </div>
+          <div
+            style="display: flex; flex-direction: column; gap: 8px;"
+          >
+            <p
+              style="font-size: 14px; line-height: 1.6; color: var(--text-secondary); margin: 0px;"
+            >
+              Payouts are sent on Stripe's standard schedule. You can view payouts and update details from the Stripe Express dashboard.
+            </p>
+            <div
+              style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md);"
+            >
+              <span
+                aria-hidden="true"
+                aria-label="bank"
+                class="anticon anticon-bank"
+                role="img"
+                style="color: var(--text-secondary);"
+              >
+                <svg
+                  aria-hidden="true"
+                  data-icon="bank"
+                  fill="currentColor"
+                  focusable="false"
+                  height="1em"
+                  viewBox="64 64 896 896"
+                  width="1em"
+                >
+                  <path
+                    d="M894 462c30.9 0 43.8-39.7 18.7-58L530.8 126.2a31.81 31.81 0 00-37.6 0L111.3 404c-25.1 18.2-12.2 58 18.8 58H192v374h-72c-4.4 0-8 3.6-8 8v52c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-52c0-4.4-3.6-8-8-8h-72V462h62zM512 196.7l271.1 197.2H240.9L512 196.7zM264 462h117v374H264V462zm189 0h117v374H453V462zm307 374H642V462h118v374z"
+                  />
+                </svg>
+              </span>
+              <span
+                style="font-size: 13px; color: var(--text-secondary);"
+              >
+                Connected bank
+              </span>
+              <span
+                style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; font-weight: 600; color: var(--text-primary); margin-left: auto;"
+              >
+                **** 4242
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

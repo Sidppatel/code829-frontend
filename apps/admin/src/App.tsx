@@ -31,6 +31,8 @@ const routes: RouteConfig[] = [
       { path: 'admins', loader: () => import('./pages/admins/AdminsPage') },
       { path: 'invitations', loader: () => import('./pages/invitations/InvitationsPage') },
       { path: 'settings', loader: () => import('./pages/settings/SettingsPage') },
+      { path: 'settings/stripe/return', loader: () => import('./pages/settings/SettingsPage') },
+      { path: 'settings/stripe/refresh', loader: () => import('./pages/settings/StripeRefreshPage') },
       { path: 'feedback', loader: () => import('./pages/feedback/FeedbackPage') },
       { path: 'profile', loader: () => import('./pages/profile/ProfilePage') },
     ],
