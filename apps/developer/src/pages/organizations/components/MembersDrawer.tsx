@@ -13,6 +13,7 @@ import {
 } from 'antd';
 import { DeleteOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
 import apiClient from '@code829/shared/lib/axios';
+import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { organizationsApi } from '@code829/shared/services/organizationsApi';
 import type {
   OrganizationDetail,
@@ -51,6 +52,7 @@ export default function MembersDrawer({
   onChanged,
 }: Props) {
   const { message } = App.useApp();
+  const isMobile = useIsMobile();
   const [allUsers, setAllUsers] = useState<BusinessUserListItem[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -127,7 +129,7 @@ export default function MembersDrawer({
       open={open}
       onClose={onClose}
       title={`Members · ${organization.name}`}
-      width={520}
+      width={isMobile ? '100%' : 520}
       destroyOnHidden
     >
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>

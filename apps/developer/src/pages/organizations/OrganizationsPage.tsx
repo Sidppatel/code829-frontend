@@ -17,6 +17,7 @@ import {
   TeamOutlined,
 } from '@ant-design/icons';
 import { organizationsApi } from '@code829/shared/services/organizationsApi';
+import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import {
   DataTableSection,
   PageShell,
@@ -45,6 +46,7 @@ import StripeOnboardingModal from './components/StripeOnboardingModal';
  */
 export default function OrganizationsPage() {
   const { message } = App.useApp();
+  const isMobile = useIsMobile();
   const [items, setItems] = useState<OrganizationListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -132,11 +134,12 @@ export default function OrganizationsPage() {
       title="Organizations"
       subtitle={`${total.toLocaleString()} organization${total === 1 ? '' : 's'}`}
       extra={
-        <Space>
+        <Space wrap style={isMobile ? { width: '100%' } : undefined}>
           <Button
             icon={<ReloadOutlined />}
             onClick={loadList}
             loading={loading}
+            block={isMobile}
           >
             Refresh
           </Button>
@@ -144,14 +147,19 @@ export default function OrganizationsPage() {
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => setShowCreate(true)}
+            block={isMobile}
           >
             New Organization
           </Button>
         </Space>
       }
     >
-      <Card style={{ marginBottom: 16 }}>
-        <Space wrap style={{ width: '100%', justifyContent: 'space-between' }}>
+      <Card style={{ marginBottom: 16 }} bodyStyle={isMobile ? { padding: 12 } : undefined}>
+        <Space
+          wrap
+          style={{ width: '100%', justifyContent: 'space-between' }}
+          direction={isMobile ? 'vertical' : 'horizontal'}
+        >
           <Input
             placeholder="Search by name or legal name"
             prefix={<SearchOutlined />}
@@ -160,7 +168,7 @@ export default function OrganizationsPage() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            style={{ width: 320 }}
+            style={{ width: isMobile ? '100%' : 320 }}
             allowClear
           />
           <Space>

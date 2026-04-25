@@ -19,6 +19,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { organizationsApi } from '@code829/shared/services/organizationsApi';
+import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { useOrganizationStripeStatus } from '@code829/shared/hooks/useOrganizationStripeStatus';
 import type {
   OrganizationDetail,
@@ -57,6 +58,7 @@ export default function OrganizationDetailDrawer({
   onOpenStripe,
 }: Props) {
   const { message } = App.useApp();
+  const isMobile = useIsMobile();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [legalName, setLegalName] = useState('');
@@ -97,7 +99,7 @@ export default function OrganizationDetailDrawer({
       open={open}
       onClose={onClose}
       title={organization.name}
-      width={560}
+      width={isMobile ? '100%' : 560}
       destroyOnHidden
       extra={
         <Space>

@@ -6,6 +6,7 @@ import {
   MailOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
+import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { stripeConnectApi } from '@code829/shared/services/stripeConnectApi';
 import type {
   OnboardingLinkScope,
@@ -43,6 +44,7 @@ export default function StripeOnboardingModal({
   onAccountStarted,
 }: Props) {
   const { message } = App.useApp();
+  const isMobile = useIsMobile();
   const [link, setLink] = useState<StripeOnboardingLinkResponse | null>(null);
   const [scope, setScope] = useState<OnboardingLinkScope>('identity');
   const [loading, setLoading] = useState(false);
@@ -148,7 +150,8 @@ export default function StripeOnboardingModal({
       footer={null}
       destroyOnHidden
       centered
-      width={640}
+      width={isMobile ? '95vw' : 640}
+      style={isMobile ? { maxWidth: '100vw', top: 16 } : undefined}
     >
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         {!hasAccount && (
@@ -174,11 +177,14 @@ export default function StripeOnboardingModal({
               Generate a fresh AccountLink for this org. Stripe links expire
               after roughly 5 minutes — always mint a new one before sharing.
             </Typography.Paragraph>
-            <Space>
+            <Space
+              direction={isMobile ? 'vertical' : 'horizontal'}
+              style={isMobile ? { width: '100%' } : undefined}
+            >
               <Select<OnboardingLinkScope>
                 value={scope}
                 onChange={setScope}
-                style={{ width: 180 }}
+                style={{ width: isMobile ? '100%' : 180 }}
                 options={[
                   { value: 'identity', label: 'Identity (KYC)' },
                   { value: 'bank', label: 'Bank Account' },
@@ -189,6 +195,7 @@ export default function StripeOnboardingModal({
                 icon={<ReloadOutlined />}
                 onClick={() => void generateLink()}
                 loading={loading}
+                block={isMobile}
               >
                 Generate Link
               </Button>

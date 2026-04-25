@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { App, Form, Input, Modal, Select } from 'antd';
 import apiClient from '@code829/shared/lib/axios';
+import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { organizationsApi } from '@code829/shared/services/organizationsApi';
 import type {
   OrganizationCreateRequest,
@@ -34,6 +35,7 @@ interface FormValues {
 export default function NewOrganizationModal({ open, onClose, onCreated }: Props) {
   const [form] = Form.useForm<FormValues>();
   const { message } = App.useApp();
+  const isMobile = useIsMobile();
   const [members, setMembers] = useState<BusinessUserListItem[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -100,7 +102,8 @@ export default function NewOrganizationModal({ open, onClose, onCreated }: Props
       confirmLoading={saving}
       destroyOnHidden
       centered
-      width={520}
+      width={isMobile ? '95vw' : 520}
+      style={isMobile ? { maxWidth: '100vw', top: 16 } : undefined}
     >
       <Form<FormValues> form={form} layout="vertical" preserve={false}>
         <Form.Item
