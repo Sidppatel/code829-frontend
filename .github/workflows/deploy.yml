@@ -129,11 +129,13 @@ jobs:
       - name: Build ${{ matrix.app }}
         run: pnpm --filter "@code829/${{ matrix.app }}" build
 
-      # VITE_API_URL is a BUILD-TIME env var (see `env:` block above) — Vite bakes
-      # it into the bundle. It must NOT be passed via `--var` because wrangler --var
-      # feeds Worker runtime vars, which are public to anyone reading the Worker
-      # config and would leak in the assets-only deploy path. As a rule: only public
-      # values belong in --var; secrets go through `wrangler secret put`.
+      # VITE_API_URL serves two roles:
+      #  - BUILD-TIME (see `env:` block above): Vite bakes it into the browser bundle.
+      #  - RUNTIME (Worker env): `tools/cf-worker/apiProxy.ts` reads `env.VITE_API_URL`
+      #    to know which backend to proxy /api/* requests to. Must be passed via
+      #    `--var` so wrangler registers it as a Worker runtime binding.
+      # The API URL is a public value (visible in every browser request), so `--var`
+      # is appropriate; secrets still go through `wrangler secret put`.
       - name: Deploy ${{ matrix.app }} to Cloudflare Workers
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -141,4 +143,5 @@ jobs:
         run: |
           pnpm wrangler deploy \
             --config "apps/${{ matrix.app }}/wrangler.toml" \
-            --env production
+            --env production \
+            --var "VITE_API_URL:$VITE_API_URL"
