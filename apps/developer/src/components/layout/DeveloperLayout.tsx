@@ -11,6 +11,7 @@ import {
   UserOutlined,
   SendOutlined,
   SafetyOutlined,
+  BankOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@code829/shared/hooks/useAuth';
@@ -44,6 +45,12 @@ const navGroups = [
     items: [
       { key: '/users', shortLabel: 'Users', label: 'User Roles', icon: <TeamOutlined /> },
       { key: '/events', shortLabel: 'Fees', label: 'Platform Fees', icon: <CalendarOutlined /> },
+    ]
+  },
+  {
+    title: 'Payouts',
+    items: [
+      { key: '/organizations', shortLabel: 'Orgs', label: 'Organizations', icon: <BankOutlined /> },
     ]
   },
   {

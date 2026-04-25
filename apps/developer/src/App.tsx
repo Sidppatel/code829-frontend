@@ -20,6 +20,7 @@ const routes: RouteConfig[] = [
       { path: 'invitations', loader: () => import('./pages/invitations/DevInvitationsPage') },
       { path: 'users', loader: () => import('./pages/users/DevUsersPage') },
       { path: 'events', loader: () => import('./pages/events/DevEventsPage') },
+      { path: 'organizations', loader: () => import('./pages/organizations/OrganizationsPage') },
       { path: 'settings', loader: () => import('./pages/settings/DevSettingsPage') },
       { path: 'profile', loader: () => import('./pages/profile/ProfilePage') },
     ],
