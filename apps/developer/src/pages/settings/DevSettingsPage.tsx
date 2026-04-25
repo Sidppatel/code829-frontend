@@ -10,6 +10,7 @@ import HumanCard from '@code829/shared/components/shared/HumanCard';
 import PulseIndicator from '@code829/shared/components/shared/PulseIndicator';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import AvatarUpload from '@code829/shared/components/shared/AvatarUpload';
+import { BRAND_LOGO_URL } from '@code829/shared/components/shared/BrandLogo';
 import { createLogger } from '@code829/shared/lib/logger';
 
 const log = createLogger('Developer/SettingsPage');
@@ -21,7 +22,9 @@ export default function DevSettingsPage() {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const [dirty, setDirty] = useState<Record<string, boolean>>({});
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  // Default to the shared brand logo (`/logo.svg`, copied per-app at build).
+  // BE-uploaded logo (if any) overrides via the developer API call below.
+  const [logoUrl, setLogoUrl] = useState<string | null>(BRAND_LOGO_URL);
   const isMobile = useIsMobile();
   const { message } = App.useApp();
 
@@ -39,8 +42,15 @@ export default function DevSettingsPage() {
         log.info('Settings loaded', { settings: data.settings.length, secrets: data.secrets.length });
         try {
           const { data: logo } = await imagesApi.getLogo();
-          setLogoUrl(logo.url);
-        } catch (err) { log.error('Failed to load company logo', err); }
+          if (logo?.url) setLogoUrl(logo.url);
+        } catch (err) {
+          // 404 is expected when no platform logo has been uploaded — the
+          // shared `/logo.svg` fallback already populated `logoUrl`. Log
+          // anything else (network, 5xx) at debug for ops triage without
+          // spamming the dev console as an error.
+          const status = (err as { response?: { status?: number } })?.response?.status;
+          if (status !== 404) log.debug('Logo fetch failed', err);
+        }
       } catch (err) {
         log.error('Failed to load settings', err);
         message.error('Failed to load settings');

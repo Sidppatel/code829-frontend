@@ -47,14 +47,17 @@ import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 
 const log = createLogger('Admin/EventWizardPage');
 
+// Must match the backend `EventCategory` enum exactly — controller rejects
+// any other value with a 400 ("Invalid category"). Order is display order.
 const categories = [
   'Music',
-  'Sports',
-  'Arts',
-  'Food',
-  'Technology',
   'Business',
-  'Other',
+  'Social',
+  'Dining',
+  'Tech',
+  'Arts',
+  'Family',
+  'Sports',
 ];
 
 const STEPS = [
