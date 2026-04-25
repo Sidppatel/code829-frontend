@@ -4,4 +4,7 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: accelerometer=(), autoplay=(), camera=(self), clipboard-read=(), clipboard-write=(self), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), payment=(self "https://js.stripe.com"), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(self), xr-spatial-tracking=()
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';
+  # CSP intentionally omitted here — tools/cf-worker/nonce.ts owns the CSP header on
+  # every HTML response (nonce-based style-src-elem for AntD). Duplicating it here
+  # would shadow the nonce-laden policy for any cache path that bypasses the Worker
+  # and has caused CSP style-src violations in the past.
