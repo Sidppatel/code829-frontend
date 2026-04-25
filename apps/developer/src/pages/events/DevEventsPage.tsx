@@ -80,9 +80,9 @@ export default function DevEventsPage() {
         pageSize={paged.pageSize}
         loading={paged.loading}
         onPageChange={paged.onPageChange}
-        rowKey="id"
+        rowKey="eventId"
         scrollX={700}
-        onRowClick={(record) => setSelectedEventId(record.id)}
+        onRowClick={(record) => setSelectedEventId(record.eventId)}
         columns={[
           { title: 'Title', dataIndex: 'title', key: 'title', ellipsis: true },
           {
@@ -116,7 +116,7 @@ export default function DevEventsPage() {
                 icon={<DollarOutlined />}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedEventId(record.id);
+                  setSelectedEventId(record.eventId);
                 }}
               >
                 Edit
@@ -197,10 +197,10 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
         const { data } = await developerApi.getEventFees(eventId);
         setFeeInfo(data);
         const tf: Record<string, number | null> = {};
-        data.tableTypes.forEach((tt) => { tf[tt.id] = tt.platformFeeCents; });
+        data.tableTypes.forEach((tt) => { tf[tt.eventTableId] = tt.platformFeeCents; });
         setTableFees(tf);
         const tkf: Record<string, number | null> = {};
-        data.ticketTypes.forEach((tt) => { tkf[tt.id] = tt.platformFeeCents; });
+        data.ticketTypes.forEach((tt) => { tkf[tt.eventTicketTypeId] = tt.platformFeeCents; });
         setTicketFees(tkf);
         log.info('Event fees loaded', { eventId, layoutMode: data.layoutMode });
       } catch (err) {
@@ -283,7 +283,7 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
                   </Typography.Text>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {feeInfo.ticketTypes.map((tt) => (
-                      <Card key={tt.id} size="small" styles={{ body: { padding: '8px 12px' } }}>
+                      <Card key={tt.eventTicketTypeId} size="small" styles={{ body: { padding: '8px 12px' } }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <Typography.Text strong style={{ fontSize: 13 }}>
@@ -302,11 +302,11 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
                         </Typography.Text>
                         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                           <InputNumber
-                            value={ticketFees[tt.id] !== null && ticketFees[tt.id] !== undefined ? ticketFees[tt.id]! / 100 : null}
+                            value={ticketFees[tt.eventTicketTypeId] !== null && ticketFees[tt.eventTicketTypeId] !== undefined ? ticketFees[tt.eventTicketTypeId]! / 100 : null}
                             onChange={(v: number | null) =>
                               setTicketFees((prev) => ({
                                 ...prev,
-                                [tt.id]: v !== null ? Math.round(v * 100) : null,
+                                [tt.eventTicketTypeId]: v !== null ? Math.round(v * 100) : null,
                               }))
                             }
                             prefix="$"
@@ -320,8 +320,8 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
                           <Button
                             icon={<UndoOutlined />}
                             size="small"
-                            onClick={() => setTicketFees((prev) => ({ ...prev, [tt.id]: null }))}
-                            disabled={tt.isLocked || ticketFees[tt.id] === null || ticketFees[tt.id] === undefined}
+                            onClick={() => setTicketFees((prev) => ({ ...prev, [tt.eventTicketTypeId]: null }))}
+                            disabled={tt.isLocked || ticketFees[tt.eventTicketTypeId] === null || ticketFees[tt.eventTicketTypeId] === undefined}
                           >
                             Reset
                           </Button>
@@ -345,7 +345,7 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
               </Typography.Text>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {feeInfo.tableTypes.map((tt) => (
-                  <Card key={tt.id} size="small" styles={{ body: { padding: '8px 12px' } }}>
+                  <Card key={tt.eventTableId} size="small" styles={{ body: { padding: '8px 12px' } }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Typography.Text strong style={{ fontSize: 13 }}>
@@ -364,11 +364,11 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
                     </Typography.Text>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <InputNumber
-                        value={tableFees[tt.id] !== null && tableFees[tt.id] !== undefined ? tableFees[tt.id]! / 100 : null}
+                        value={tableFees[tt.eventTableId] !== null && tableFees[tt.eventTableId] !== undefined ? tableFees[tt.eventTableId]! / 100 : null}
                         onChange={(v: number | null) =>
                           setTableFees((prev) => ({
                             ...prev,
-                            [tt.id]: v !== null ? Math.round(v * 100) : null,
+                            [tt.eventTableId]: v !== null ? Math.round(v * 100) : null,
                           }))
                         }
                         prefix="$"
@@ -382,8 +382,8 @@ function FeeEditorModal({ eventId, onClose }: { eventId: string; onClose: () => 
                       <Button
                         icon={<UndoOutlined />}
                         size="small"
-                        onClick={() => setTableFees((prev) => ({ ...prev, [tt.id]: null }))}
-                        disabled={tt.isLocked || tableFees[tt.id] === null || tableFees[tt.id] === undefined}
+                        onClick={() => setTableFees((prev) => ({ ...prev, [tt.eventTableId]: null }))}
+                        disabled={tt.isLocked || tableFees[tt.eventTableId] === null || tableFees[tt.eventTableId] === undefined}
                       >
                         Reset
                       </Button>

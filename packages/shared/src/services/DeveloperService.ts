@@ -65,15 +65,20 @@ export interface EventFeeInfo {
   pricePerPersonCents: number | null;
   maxCapacity: number | null;
   defaultFeeCents: number;
+  // BE serialises Contracts.DTOs.Events.TableTypeFee.EventTableId as
+  // "eventTableId" — the older `id` shape doesn't exist on the wire and
+  // collapsed every row to the same undefined key, so changing one row's
+  // platform fee changed all of them in the UI.
   tableTypes: Array<{
-    id: string;
+    eventTableId: string;
     label: string;
     priceCents?: number;
     platformFeeCents: number | null;
     isLocked: boolean;
   }>;
+  // Same wire-shape rule for TicketTypeFee.EventTicketTypeId.
   ticketTypes: Array<{
-    id: string;
+    eventTicketTypeId: string;
     label: string;
     priceCents?: number;
     platformFeeCents: number | null;
@@ -82,7 +87,10 @@ export interface EventFeeInfo {
 }
 
 export interface DevEventListItem {
-  id: string;
+  // BE serialises Contracts.DTOs.Events.EventDto.EventId as "eventId" — the
+  // older `id` shape doesn't exist on the wire and was silently undefined,
+  // breaking the row-click → fee-editor modal flow.
+  eventId: string;
   title: string;
   status: string;
   startDate: string;
