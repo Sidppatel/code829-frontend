@@ -3,6 +3,8 @@ export interface LayoutTable {
   label: string;
   gridRow: number;
   gridCol: number;
+  rowSpan: number;
+  colSpan: number;
   isActive: boolean;
   sortOrder: number;
   eventTableId: string;
@@ -22,6 +24,8 @@ export interface TableTemplate {
   defaultShape: string;
   defaultColor?: string;
   defaultPriceCents?: number;
+  defaultRowSpan: number;
+  defaultColSpan: number;
   isActive: boolean;
 }
 
@@ -32,6 +36,8 @@ export interface EventTableType {
   shape: string;
   color?: string;
   priceCents?: number;
+  rowSpan?: number;
+  colSpan?: number;
   isActive: boolean;
   eventId: string;
   tableTemplateId?: string;

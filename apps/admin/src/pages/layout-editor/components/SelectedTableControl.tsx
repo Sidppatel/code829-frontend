@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Card, Button, Form, Input, Select, Divider, Popconfirm, Tag } from 'antd';
+import { Card, Button, Form, Input, InputNumber, Select, Divider, Popconfirm, Tag } from 'antd';
 import { DeleteOutlined, CheckCircleOutlined, LockOutlined } from '@ant-design/icons';
 import type { LayoutTable, EventTableType } from '@code829/shared/types/layout';
 import { centsToUSD } from '@code829/shared/utils/currency';
@@ -30,6 +30,8 @@ export default function SelectedTableControl({
       form.setFieldsValue({
         label: selectedTable.label,
         eventTableId: selectedTable.eventTableId,
+        rowSpan: selectedTable.rowSpan,
+        colSpan: selectedTable.colSpan,
       });
     }
   }, [selectedTable, form]);
@@ -39,6 +41,10 @@ export default function SelectedTableControl({
     const patch: Partial<LayoutTable> = {
       label: all.label as string,
     };
+    const rowSpan = all.rowSpan as number | undefined;
+    const colSpan = all.colSpan as number | undefined;
+    if (typeof rowSpan === 'number' && rowSpan >= 1) patch.rowSpan = rowSpan;
+    if (typeof colSpan === 'number' && colSpan >= 1) patch.colSpan = colSpan;
     const newEtId = all.eventTableId as string | undefined;
     if (newEtId && newEtId !== selectedTable?.eventTableId) {
       const et = activeEventTables.find((e) => e.id === newEtId);
@@ -49,6 +55,8 @@ export default function SelectedTableControl({
         patch.shape = et.shape;
         patch.color = et.color;
         patch.priceCents = et.priceCents ?? 0;
+        if (et.rowSpan != null) patch.rowSpan = et.rowSpan;
+        if (et.colSpan != null) patch.colSpan = et.colSpan;
       }
     }
     onTableUpdate(patch);
@@ -98,6 +106,14 @@ export default function SelectedTableControl({
                 }))}
               />
             </Form.Item>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Form.Item name="rowSpan" label="Row span" style={{ flex: 1 }}>
+                <InputNumber min={1} style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item name="colSpan" label="Col span" style={{ flex: 1 }}>
+                <InputNumber min={1} style={{ width: '100%' }} />
+              </Form.Item>
+            </div>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
               {selectedTable.capacity} seats · {selectedTable.shape} · {centsToUSD(selectedTable.priceCents ?? 0)}
             </div>

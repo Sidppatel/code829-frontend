@@ -1,4 +1,9 @@
-export { default as FloorPlan } from './FloorPlan';
-export { labelFor as floorPlanLabelFor } from './floorPlanHelpers';
-export type { FloorPlanMode } from './FloorPlan';
+export { default as FloorPlanGrid } from './FloorPlanGrid';
+export type {
+  FloorPlanGridProps,
+  FloorPlanTable,
+  FloorPlanCellContext,
+} from './FloorPlanGrid';
+export { labelFor as floorPlanLabelFor, colLetter, buildCoveredSet, tablesOverlap, fitsInGrid } from './floorPlanHelpers';
+export type { SpanCell } from './floorPlanHelpers';
 export { default as TierLegend } from './TierLegend';

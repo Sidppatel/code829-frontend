@@ -16,6 +16,7 @@ import ControlsPanel from './components/ControlsPanel';
 import FloorPlanCanvas from './components/FloorPlanCanvas';
 import LayoutStatsBar from './components/LayoutStatsBar';
 import { createLogger } from '@code829/shared/lib/logger';
+import { fitsInGrid, tablesOverlap } from '@code829/shared/components/floorplan';
 
 const log = createLogger('Admin/LayoutEditorPage');
 
@@ -55,14 +56,7 @@ export default function LayoutEditorPage() {
     [lockedTableIds],
   );
 
-  // Build occupied cells set for collision detection
-  const occupiedCells = useMemo(() => {
-    const set = new Set<string>();
-    for (const t of tables) {
-      set.add(`${t.gridRow},${t.gridCol}`);
-    }
-    return set;
-  }, [tables]);
+  // (Overlap is computed via tablesOverlap on placement / resize.)
 
   const loadAll = useCallback(async () => {
     if (!eventId) return;
@@ -112,6 +106,8 @@ export default function LayoutEditorPage() {
           label: t.label,
           gridRow: t.gridRow,
           gridCol: t.gridCol,
+          rowSpan: t.rowSpan,
+          colSpan: t.colSpan,
           isActive: t.isActive,
           sortOrder: t.sortOrder,
           eventTableId: t.eventTableId,
@@ -144,6 +140,8 @@ export default function LayoutEditorPage() {
           label: t.label,
           gridRow: t.gridRow,
           gridCol: t.gridCol,
+          rowSpan: t.rowSpan,
+          colSpan: t.colSpan,
           isActive: t.isActive,
           sortOrder: t.sortOrder,
           eventTableId: t.eventTableId,
@@ -172,14 +170,22 @@ export default function LayoutEditorPage() {
   const handleCellClick = useCallback(async (row: number, col: number) => {
     if (editorMode !== 'add' || !selectedEventTableId) return;
 
-    // Check if cell is already occupied
-    if (occupiedCells.has(`${row},${col}`)) {
-      message.warning('This cell is already occupied');
+    const et0 = eventTables.find((t) => t.id === selectedEventTableId);
+    if (!et0) return;
+    const rowSpan = et0.rowSpan ?? 1;
+    const colSpan = et0.colSpan ?? 1;
+
+    const candidate = { id: 'new', gridRow: row, gridCol: col, rowSpan, colSpan };
+    if (!fitsInGrid(candidate, gridRows, gridCols)) {
+      message.warning(`Table ${rowSpan}×${colSpan} doesn't fit at this position`);
+      return;
+    }
+    if (tables.some((other) => tablesOverlap(candidate, other))) {
+      message.warning('Placement overlaps an existing table');
       return;
     }
 
-    let et = eventTables.find((t) => t.id === selectedEventTableId);
-    if (!et) return;
+    let et = et0;
 
     // If this event table type is pending (not yet in DB), persist it now
     if (et.isPending) {
@@ -191,6 +197,8 @@ export default function LayoutEditorPage() {
           shape: et.shape,
           color: et.color,
           priceCents: et.priceCents ?? 0,
+          rowSpan: et.rowSpan ?? 1,
+          colSpan: et.colSpan ?? 1,
         });
         const savedEt = res.data;
         // Replace pending entry in eventTables list
@@ -221,6 +229,8 @@ export default function LayoutEditorPage() {
       label,
       gridRow: row,
       gridCol: col,
+      rowSpan,
+      colSpan,
       isActive: true,
       sortOrder: tables.length,
       eventTableId: et.id,
@@ -233,7 +243,7 @@ export default function LayoutEditorPage() {
     };
     updateTables((prev) => [...prev, newTable]);
     setSelectedTableId(newTable.id);
-  }, [editorMode, selectedEventTableId, eventTables, tables, occupiedCells, updateTables, message, eventId]);
+  }, [editorMode, selectedEventTableId, eventTables, tables, gridRows, gridCols, updateTables, message, eventId]);
 
   const handleTableClick = useCallback((tableId: string) => {
     if (editorMode === 'delete') {
@@ -254,6 +264,13 @@ export default function LayoutEditorPage() {
       t.id === selectedTableId ? { ...t, ...patch } : t
     ));
   }, [selectedTableId, isTableLocked, updateTables]);
+
+  const handleTableResize = useCallback((tableId: string, rowSpan: number, colSpan: number) => {
+    if (isTableLocked(tableId)) return;
+    updateTables((prev) => prev.map((t) =>
+      t.id === tableId ? { ...t, rowSpan, colSpan } : t
+    ));
+  }, [isTableLocked, updateTables]);
 
   const handleTableDelete = useCallback(() => {
     if (!selectedTableId || isTableLocked(selectedTableId)) {
@@ -350,6 +367,7 @@ export default function LayoutEditorPage() {
           selectedEventTableColor={eventTables.find((et) => et.id === selectedEventTableId)?.color ?? undefined}
           onCellClick={handleCellClick}
           onTableClick={handleTableClick}
+          onTableResize={handleTableResize}
         />
       </div>
 

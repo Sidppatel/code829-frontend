@@ -1,5 +1,5 @@
-import { useCallback, useMemo } from 'react';
 import type { LayoutTable, EditorMode } from '@code829/shared/types/layout';
+import { FloorPlanGrid } from '@code829/shared/components/floorplan';
 import TableElement from './TableElement';
 
 interface FloorPlanCanvasProps {
@@ -12,6 +12,7 @@ interface FloorPlanCanvasProps {
   selectedEventTableColor?: string;
   onCellClick: (row: number, col: number) => void;
   onTableClick: (tableId: string) => void;
+  onTableResize: (tableId: string, rowSpan: number, colSpan: number) => void;
 }
 
 export default function FloorPlanCanvas({
@@ -24,99 +25,43 @@ export default function FloorPlanCanvas({
   selectedEventTableColor,
   onCellClick,
   onTableClick,
+  onTableResize,
 }: FloorPlanCanvasProps) {
-  const cellMap = useMemo(() => {
-    const map = new Map<string, LayoutTable>();
-    for (const t of tables) {
-      map.set(`${t.gridRow},${t.gridCol}`, t);
-    }
-    return map;
-  }, [tables]);
-
-  const handleCellClick = useCallback((row: number, col: number) => {
-    const existing = cellMap.get(`${row},${col}`);
-    if (existing) {
-      onTableClick(existing.id);
-    } else if (editorMode === 'add') {
-      onCellClick(row, col);
-    }
-  }, [cellMap, editorMode, onCellClick, onTableClick]);
-
   const isAddMode = editorMode === 'add';
 
-  // Column headers (A, B, C, ...)
-  const colHeaders: React.ReactNode[] = [
-    <div key="corner" className="fp-header-corner" />,
-  ];
-  for (let c = 0; c < gridCols; c++) {
-    colHeaders.push(
-      <div key={`col-${c}`} className="fp-col-header">
-        {String.fromCharCode(65 + (c % 26))}
-      </div>
-    );
-  }
-
-  // Build rows with row headers + cells
-  const rows: React.ReactNode[] = [];
-  for (let r = 0; r < gridRows; r++) {
-    const rowCells: React.ReactNode[] = [
-      <div key={`row-${r}`} className="fp-row-header">{r + 1}</div>,
-    ];
-
-    for (let c = 0; c < gridCols; c++) {
-      const key = `${r},${c}`;
-      const table = cellMap.get(key);
-
-      if (table) {
-        rowCells.push(
-          <div key={key} className="fp-cell">
-            <TableElement
-              table={table}
-              isSelected={table.id === selectedTableId}
-              editorMode={editorMode}
-              isLocked={lockedTableIds.has(table.id)}
-              onClick={() => onTableClick(table.id)}
-            />
-          </div>
-        );
-      } else {
-        rowCells.push(
-          <div
-            key={key}
-            role={isAddMode ? 'button' : undefined}
-            tabIndex={isAddMode ? 0 : -1}
-            className={`fp-cell fp-cell-empty${isAddMode ? ' fp-cell-addable' : ''}`}
-            style={isAddMode && selectedEventTableColor ? {
-              '--add-preview-color': selectedEventTableColor,
-            } as React.CSSProperties : undefined}
-            onClick={() => handleCellClick(r, c)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleCellClick(r, c);
-            }}
-          >
-            {isAddMode && (
-              <span className="fp-cell-plus">+</span>
-            )}
-          </div>
-        );
-      }
-    }
-
-    rows.push(
-      <div key={`row-${r}`} className="fp-grid-row">
-        {rowCells}
-      </div>
-    );
-  }
-
   return (
-    <div className="fp-wrapper">
-      {/* Column headers */}
-      <div className="fp-grid-row fp-header-row">
-        {colHeaders}
-      </div>
-      {/* Grid rows */}
-      {rows}
-    </div>
+    <FloorPlanGrid
+      rows={gridRows}
+      cols={gridCols}
+      tables={tables}
+      selectedTableId={selectedTableId}
+      addPreviewColor={isAddMode ? selectedEventTableColor : undefined}
+      onCellClick={isAddMode ? onCellClick : undefined}
+      onTableClick={(t) => onTableClick(t.id)}
+      onTableResize={
+        editorMode === 'select' && selectedTableId
+          ? (id, rs, cs) => {
+              if (lockedTableIds.has(id)) return;
+              onTableResize(id, rs, cs);
+            }
+          : undefined
+      }
+      tableClassName={(t) => {
+        const status = t.status ?? 'Available';
+        const cls: string[] = [];
+        if (status === 'Booked') cls.push('fp-table-booked');
+        else if (status === 'Locked') cls.push('fp-table-locked');
+        if (!t.isActive) cls.push('fp-table-inactive');
+        if (editorMode === 'delete' && !lockedTableIds.has(t.id)) cls.push('fp-table-delete-mode');
+        return cls.join(' ');
+      }}
+      renderTable={(t) => (
+        <TableElement
+          table={t}
+          editorMode={editorMode}
+          isLocked={lockedTableIds.has(t.id)}
+        />
+      )}
+    />
   );
 }

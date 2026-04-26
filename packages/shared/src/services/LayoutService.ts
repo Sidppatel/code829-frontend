@@ -6,6 +6,8 @@ export interface TablePayload {
   label: string;
   gridRow: number;
   gridCol: number;
+  rowSpan?: number;
+  colSpan?: number;
   isActive: boolean;
   sortOrder?: number;
   eventTableId: string;
@@ -23,6 +25,8 @@ export interface CreateTableTemplatePayload {
   defaultShape: string;
   defaultColor?: string;
   defaultPriceCents?: number;
+  defaultRowSpan?: number;
+  defaultColSpan?: number;
   isActive?: boolean;
 }
 
@@ -33,6 +37,8 @@ export interface CreateEventTablePayload {
   shape: string;
   color?: string;
   priceCents: number;
+  rowSpan?: number;
+  colSpan?: number;
 }
 
 export interface UpdateEventTablePayload {
@@ -41,6 +47,8 @@ export interface UpdateEventTablePayload {
   shape?: string;
   color?: string;
   priceCents?: number;
+  rowSpan?: number;
+  colSpan?: number;
   isActive?: boolean;
 }
 

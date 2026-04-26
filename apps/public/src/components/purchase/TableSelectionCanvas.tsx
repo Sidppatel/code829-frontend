@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
-import { Card, Button, Typography, Space, Divider } from 'antd';
+import { Card, Button, Typography, Space, Divider, Spin } from 'antd';
 import type { EventTableDto, EventTableTypeInfo } from '@code829/shared/types/event';
 import { centsToUSD } from '@code829/shared/utils/currency';
 import {
-  FloorPlan,
+  FloorPlanGrid,
   TierLegend,
   floorPlanLabelFor,
 } from '@code829/shared/components/floorplan';
@@ -11,6 +11,7 @@ import {
   LockOutlined,
   StopOutlined,
   CheckCircleOutlined,
+  LoadingOutlined,
 } from '@ant-design/icons';
 import TableLockTimer from './TableLockTimer';
 import { usePurchaseQuote } from '@code829/shared/hooks/usePurchaseQuote';
@@ -118,15 +119,46 @@ export default function TableSelectionCanvas({
       <Divider style={{ margin: '4px 0' }} />
 
       <div className="ts-main">
-        <FloorPlan
-          mode="select"
+        <FloorPlanGrid
+          rows={gridRows}
+          cols={gridCols}
           tables={tables}
-          tierTypes={eventTableTypes}
-          gridRows={gridRows}
-          gridCols={gridCols}
-          lockingTableId={lockingTableId}
-          onLockTable={onLockTable}
-          onUnlockTable={onUnlockTable}
+          tableClassName={(t) => {
+            if (t.isLockedByYou) return 'ts-table ts-table-mine';
+            if (t.status === 'Held') return 'ts-table ts-table-reserved';
+            if (t.status === 'Booked') return 'ts-table ts-table-booked';
+            return 'ts-table ts-table-available';
+          }}
+          onTableClick={(t) => {
+            if (t.id === lockingTableId) return;
+            const clickable = t.status === 'Available' || t.isLockedByYou;
+            if (!clickable) return;
+            if (t.isLockedByYou) onUnlockTable(t);
+            else onLockTable(t);
+          }}
+          renderTable={(t) => {
+            const isLocking = t.id === lockingTableId;
+            return (
+              <>
+                {isLocking && (
+                  <Spin
+                    indicator={<LoadingOutlined style={{ fontSize: 14, color: 'var(--text-on-brand)' }} />}
+                  />
+                )}
+                {!isLocking && t.status === 'Booked' && (
+                  <StopOutlined className="ts-table-icon" />
+                )}
+                {!isLocking && t.status === 'Held' && !t.isLockedByYou && (
+                  <LockOutlined className="ts-table-icon" />
+                )}
+                {!isLocking && t.isLockedByYou && (
+                  <CheckCircleOutlined className="ts-table-icon ts-table-icon-mine" />
+                )}
+                <span className="ts-table-label">{floorPlanLabelFor(t)}</span>
+                <span className="ts-table-meta">{t.capacity}p</span>
+              </>
+            );
+          }}
         />
 
         {lockedTables.length > 0 && (() => {

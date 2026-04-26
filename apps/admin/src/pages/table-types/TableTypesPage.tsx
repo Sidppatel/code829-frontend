@@ -26,6 +26,8 @@ interface TemplateFormValues {
   defaultShape: string;
   defaultColor: string | { toHexString?: () => string };
   defaultPriceCents?: number;
+  defaultRowSpan?: number;
+  defaultColSpan?: number;
 }
 
 function normalizeColor(v: TemplateFormValues['defaultColor']): string {
@@ -51,6 +53,8 @@ export default function TableTypesPage() {
         defaultColor: normalizeColor(values.defaultColor),
         defaultPriceCents:
           values.defaultPriceCents != null ? Math.round(values.defaultPriceCents * 100) : undefined,
+        defaultRowSpan: values.defaultRowSpan ?? 1,
+        defaultColSpan: values.defaultColSpan ?? 1,
       };
       if (crud.mode === 'edit' && crud.entity) {
         return adminLayoutApi.updateTableTemplate(crud.entity.tableTemplateId, payload);
@@ -71,6 +75,8 @@ export default function TableTypesPage() {
         defaultShape: r.defaultShape,
         defaultColor: r.defaultColor,
         defaultPriceCents: r.defaultPriceCents,
+        defaultRowSpan: r.defaultRowSpan,
+        defaultColSpan: r.defaultColSpan,
         isActive: !r.isActive,
       }),
     { successMessage: 'Template updated', onSuccess: refresh },
@@ -83,8 +89,10 @@ export default function TableTypesPage() {
         defaultShape: crud.entity.defaultShape,
         defaultColor: crud.entity.defaultColor ?? semantic.brand,
         defaultPriceCents: centsToDollars(crud.entity.defaultPriceCents ?? 0),
+        defaultRowSpan: crud.entity.defaultRowSpan ?? 1,
+        defaultColSpan: crud.entity.defaultColSpan ?? 1,
       }
-    : undefined;
+    : { defaultRowSpan: 1, defaultColSpan: 1 };
 
   return (
     <PageShell
@@ -297,6 +305,22 @@ export default function TableTypesPage() {
                   showText
                   presets={[{ label: 'Theme Colors', colors: [...tablePickerPresets] }]}
                 />
+              </FormField>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <FormField
+                name="defaultRowSpan"
+                label="Row span"
+                rules={[{ type: 'number', min: 1, message: 'Row span must be at least 1' }]}
+              >
+                <InputNumber min={1} style={{ width: '100%' }} />
+              </FormField>
+              <FormField
+                name="defaultColSpan"
+                label="Col span"
+                rules={[{ type: 'number', min: 1, message: 'Col span must be at least 1' }]}
+              >
+                <InputNumber min={1} style={{ width: '100%' }} />
               </FormField>
             </div>
           </>

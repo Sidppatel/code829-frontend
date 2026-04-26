@@ -121,6 +121,8 @@ export interface EventTableDto {
   displayPriceCents: number;
   gridRow: number;
   gridCol: number;
+  rowSpan: number;
+  colSpan: number;
   sortOrder?: number;
   status: 'Available' | 'Held' | 'HeldByYou' | 'Booked';
   holdExpiresAt?: string;

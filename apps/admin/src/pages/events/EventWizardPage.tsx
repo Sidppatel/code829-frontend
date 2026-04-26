@@ -40,7 +40,7 @@ import {
   Stepper,
   SoftCard,
 } from '@code829/shared/components/ui';
-import { FloorPlan, TierLegend } from '@code829/shared/components/floorplan';
+import { FloorPlanGrid, TierLegend, floorPlanLabelFor } from '@code829/shared/components/floorplan';
 import { createLogger } from '@code829/shared/lib/logger';
 import { centsToDollars } from '@code829/shared/utils/currency';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
@@ -621,12 +621,17 @@ export default function EventWizardPage() {
                 <>
                   <TierLegend tiers={existingTiers} />
                   <div style={{ marginTop: 12 }}>
-                    <FloorPlan
-                      mode="display"
+                    <FloorPlanGrid
+                      rows={existingGrid.rows}
+                      cols={existingGrid.cols}
                       tables={existingTables}
-                      tierTypes={existingTiers}
-                      gridRows={existingGrid.rows}
-                      gridCols={existingGrid.cols}
+                      tableClassName={() => 'ts-table ts-table-available'}
+                      renderTable={(t) => (
+                        <>
+                          <span className="ts-table-label">{floorPlanLabelFor(t)}</span>
+                          <span className="ts-table-meta">{t.capacity}p</span>
+                        </>
+                      )}
                     />
                   </div>
                 </>

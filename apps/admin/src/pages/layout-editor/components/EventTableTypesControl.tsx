@@ -52,6 +52,8 @@ export default function EventTableTypesControl({
         shape: values.shape || template?.defaultShape || 'Round',
         color: color || template?.defaultColor,
         priceCents: values.priceDollars != null ? Math.round(values.priceDollars * 100) : (template?.defaultPriceCents ?? 0),
+        rowSpan: values.rowSpan ?? template?.defaultRowSpan ?? 1,
+        colSpan: values.colSpan ?? template?.defaultColSpan ?? 1,
         isActive: true,
         isPending: true,
       };
@@ -72,6 +74,8 @@ export default function EventTableTypesControl({
       shape: et.shape,
       color: et.color,
       priceDollars: centsToDollars(et.priceCents ?? 0),
+      rowSpan: et.rowSpan ?? 1,
+      colSpan: et.colSpan ?? 1,
     });
     setEditModalOpen(true);
   };
@@ -90,11 +94,13 @@ export default function EventTableTypesControl({
           shape: values.shape,
           color,
           priceCents: Math.round((values.priceDollars ?? 0) * 100),
+          rowSpan: values.rowSpan ?? 1,
+          colSpan: values.colSpan ?? 1,
         });
         setEditModalOpen(false);
         return;
       }
-      
+
       setEditModalSaving(true);
       const res = await adminLayoutApi.updateEventTable(eventId, editingEventTable.id, {
         label: values.label,
@@ -102,6 +108,8 @@ export default function EventTableTypesControl({
         shape: values.shape,
         color,
         priceCents: Math.round((values.priceDollars ?? 0) * 100),
+        rowSpan: values.rowSpan ?? 1,
+        colSpan: values.colSpan ?? 1,
       });
       onEventTableUpdated(res.data);
       setEditModalOpen(false);
@@ -122,6 +130,8 @@ export default function EventTableTypesControl({
         shape: t.defaultShape,
         color: t.defaultColor,
         priceDollars: centsToDollars(t.defaultPriceCents ?? 0),
+        rowSpan: t.defaultRowSpan ?? 1,
+        colSpan: t.defaultColSpan ?? 1,
       });
     }
   };
@@ -149,7 +159,11 @@ export default function EventTableTypesControl({
                   shape: first.defaultShape,
                   color: first.defaultColor,
                   priceDollars: centsToDollars(first.defaultPriceCents ?? 0),
+                  rowSpan: first.defaultRowSpan ?? 1,
+                  colSpan: first.defaultColSpan ?? 1,
                 });
+              } else {
+                addForm.setFieldsValue({ rowSpan: 1, colSpan: 1 });
               }
               setAddModalOpen(true);
             }}>
@@ -184,7 +198,7 @@ export default function EventTableTypesControl({
                   )}
                 </div>
                 <div className="table-type-meta">
-                  {et.capacity} seats · {et.shape} · {centsToUSD(et.priceCents ?? 0)}
+                  {et.capacity} seats · {et.shape} · {et.rowSpan ?? 1}×{et.colSpan ?? 1} · {centsToUSD(et.priceCents ?? 0)}
                 </div>
               </div>
               <Button
@@ -234,6 +248,14 @@ export default function EventTableTypesControl({
           <Form.Item name="shape" label="Shape" rules={[{ required: true }]}>
             <Select options={SHAPES} />
           </Form.Item>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Form.Item name="rowSpan" label="Row span" initialValue={1} style={{ flex: 1 }}>
+              <InputNumber min={1} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="colSpan" label="Col span" initialValue={1} style={{ flex: 1 }}>
+              <InputNumber min={1} style={{ width: '100%' }} />
+            </Form.Item>
+          </div>
           <Form.Item name="color" label="Color" getValueFromEvent={(color) => color?.toHexString?.() ?? color}>
             <ColorPicker
               format="hex"
@@ -270,6 +292,14 @@ export default function EventTableTypesControl({
           <Form.Item name="shape" label="Shape" rules={[{ required: true }]}>
             <Select options={SHAPES} />
           </Form.Item>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Form.Item name="rowSpan" label="Row span" initialValue={1} style={{ flex: 1 }}>
+              <InputNumber min={1} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="colSpan" label="Col span" initialValue={1} style={{ flex: 1 }}>
+              <InputNumber min={1} style={{ width: '100%' }} />
+            </Form.Item>
+          </div>
           <Form.Item name="color" label="Color" getValueFromEvent={(color) => color?.toHexString?.() ?? color}>
             <ColorPicker
               format="hex"
