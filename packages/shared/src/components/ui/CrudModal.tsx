@@ -35,7 +35,7 @@ export default function CrudModal<V extends object = Record<string, unknown>>({
   useEffect(() => {
     if (open) {
       form.resetFields();
-      if (initialValues) form.setFieldsValue(initialValues as V);
+      if (initialValues) form.setFieldsValue(initialValues as any);
     }
   }, [open, initialValues, form]);
 
