@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from 'antd';
 import {
@@ -14,6 +15,9 @@ import {
   ScanOutlined,
   SettingOutlined,
   MessageOutlined,
+  IdcardOutlined,
+  MenuOutlined,
+  CloseOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@code829/shared/hooks/useAuth';
@@ -62,10 +66,11 @@ const navGroups = [
     ]
   },
   {
-    title: 'Settings',
+    title: 'Account',
     items: [
+      { key: '/profile', shortLabel: 'Profile', label: 'Profile', icon: <IdcardOutlined /> },
       { key: '/feedback', shortLabel: 'Feedback', label: 'Feedback', icon: <MessageOutlined /> },
-      { key: '/settings', shortLabel: 'Settings', label: 'Settings', icon: <UserOutlined /> },
+      { key: '/settings', shortLabel: 'Settings', label: 'Settings', icon: <SettingOutlined /> },
     ]
   }
 ];
@@ -75,8 +80,8 @@ const mobileNavItems = [
   { key: '/events', shortLabel: 'Events', label: 'Events List', icon: <CalendarOutlined /> },
   { key: '/checkin/select', shortLabel: 'Check-In', label: 'Check-In', icon: <ScanOutlined /> },
   { key: '/staff', shortLabel: 'Staff', label: 'Staff', icon: <TeamOutlined /> },
-  { key: '/invitations', shortLabel: 'Invites', label: 'Invitations', icon: <SendOutlined /> },
-  { key: '/settings', shortLabel: 'Settings', label: 'Settings', icon: <UserOutlined /> },
+  { key: '/profile', shortLabel: 'Profile', label: 'Profile', icon: <IdcardOutlined /> },
+  { key: '/settings', shortLabel: 'Settings', label: 'Settings', icon: <SettingOutlined /> },
 ];
 
 const NEW_SHELL_NAV_ITEMS: NavItem[] = navGroups.flatMap((g) =>
@@ -91,14 +96,89 @@ const NEW_SHELL_NAV_ITEMS: NavItem[] = navGroups.flatMap((g) =>
 );
 
 function NewAdminShell({ user, onLogout }: { user: ReturnType<typeof useAuth>['user']; onLogout: () => void }) {
+  const bp = useBreakpoint();
+  const isMobile = bp === 'mobile';
+  const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (drawerOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [drawerOpen]);
+
   const navUser = user
     ? { firstName: user.firstName, lastName: user.lastName, email: user.email, roleLabel: 'Admin', imageUrl: user.imageUrl }
     : null;
+
+  const sidebarVisible = !isMobile || drawerOpen;
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--bg-page)' }}>
-      <Navbar variant="admin" items={NEW_SHELL_NAV_ITEMS} user={navUser} onLogout={onLogout} />
+      {isMobile && drawerOpen && (
+        <div
+          onClick={() => setDrawerOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+            zIndex: 99, backdropFilter: 'blur(4px)',
+          }}
+          aria-hidden
+        />
+      )}
+      {sidebarVisible && (
+        <div
+          style={
+            isMobile
+              ? { position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 100, width: 280 }
+              : undefined
+          }
+        >
+          <Navbar variant="admin" items={NEW_SHELL_NAV_ITEMS} user={navUser} onLogout={onLogout} />
+        </div>
+      )}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <main style={{ flex: 1, padding: 32, maxWidth: 1600, margin: '0 auto', width: '100%' }}>
+        {isMobile && (
+          <header
+            style={{
+              position: 'sticky', top: 0, zIndex: 50,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '12px 16px',
+              background: 'var(--nav-bg, var(--bg-elevated))',
+              borderBottom: '1px solid var(--border)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setDrawerOpen((v) => !v)}
+              aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
+              style={{
+                background: 'transparent', border: '1px solid var(--border)',
+                borderRadius: 8, padding: 8, cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--text-primary)',
+              }}
+            >
+              {drawerOpen ? <CloseOutlined /> : <MenuOutlined />}
+            </button>
+            <div style={{ fontWeight: 700, fontSize: 16 }}>Code829</div>
+            <div style={{ width: 36 }} />
+          </header>
+        )}
+        <main
+          style={{
+            flex: 1,
+            padding: isMobile ? '16px 12px 24px' : 32,
+            maxWidth: 1600,
+            margin: '0 auto',
+            width: '100%',
+          }}
+        >
           <Outlet />
         </main>
         <UIFooter variant="admin" />

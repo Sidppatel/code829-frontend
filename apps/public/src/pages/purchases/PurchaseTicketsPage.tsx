@@ -26,7 +26,7 @@ export default function PurchaseTicketsPage() {
   const { purchaseId } = useParams<{ purchaseId: string }>();
   const navigate = useNavigate();
   const { message, modal } = App.useApp();
-  useAuthStore((s) => s.user?.id);
+  const myUserId = useAuthStore((s) => s.user?.id);
 
   const [tickets, setTickets] = useState<PurchaseTicket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,6 +146,9 @@ export default function PurchaseTicketsPage() {
   if (loading) return <LoadingSpinner />;
 
   const first = tickets[0];
+  const alreadyClaimedByMe = tickets.some(
+    (t) => t.guestUserId === myUserId && (t.status === 'Claimed' || t.status === 'CheckedIn'),
+  );
 
   return (
     <div>
@@ -177,6 +180,17 @@ export default function PurchaseTicketsPage() {
             <span>{tickets.length} ticket{tickets.length !== 1 ? 's' : ''}</span>
           </div>
         </Card>
+      )}
+
+      {alreadyClaimedByMe && tickets.some(t => t.status === 'Unassigned' || t.status === 'Invited') && (
+        <div style={{
+          marginBottom: 16, padding: '12px 16px', borderRadius: 12,
+          background: 'var(--primary-soft)', color: 'var(--text-primary)',
+          fontSize: 13, display: 'flex', alignItems: 'center', gap: 8,
+        }}>
+          <UserOutlined />
+          <span>You already claimed a ticket on this purchase. Send remaining tickets to guests.</span>
+        </div>
       )}
 
       {tickets.length === 0 ? (
@@ -221,7 +235,7 @@ export default function PurchaseTicketsPage() {
                   QR
                 </Button>
 
-                {(ticket.status === 'Unassigned' || ticket.status === 'Invited') && (
+                {(ticket.status === 'Unassigned' || ticket.status === 'Invited') && !alreadyClaimedByMe && (
                   <Button
                     size="small"
                     type="primary"
