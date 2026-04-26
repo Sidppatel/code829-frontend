@@ -235,7 +235,7 @@ export default function PurchaseTicketsPage() {
                   QR
                 </Button>
 
-                {(ticket.status === 'Unassigned' || ticket.status === 'Invited') && !alreadyClaimedByMe && (
+                {ticket.canClaimSelf && (
                   <Button
                     size="small"
                     type="primary"

@@ -95,6 +95,14 @@ const NEW_SHELL_NAV_ITEMS: NavItem[] = navGroups.flatMap((g) =>
   })),
 );
 
+const MOBILE_BOTTOM_TABS = [
+  { key: '/', shortLabel: 'Home', icon: <DashboardOutlined />, end: true },
+  { key: '/events', shortLabel: 'Events', icon: <CalendarOutlined /> },
+  { key: '/purchases', shortLabel: 'Sales', icon: <BookOutlined /> },
+  { key: '/analytics', shortLabel: 'Reports', icon: <BarChartOutlined /> },
+  { key: '/checkin/select', shortLabel: 'Check-In', icon: <ScanOutlined /> },
+];
+
 function NewAdminShell({ user, onLogout }: { user: ReturnType<typeof useAuth>['user']; onLogout: () => void }) {
   const bp = useBreakpoint();
   const isMobile = bp === 'mobile';
@@ -173,7 +181,7 @@ function NewAdminShell({ user, onLogout }: { user: ReturnType<typeof useAuth>['u
         <main
           style={{
             flex: 1,
-            padding: isMobile ? '16px 12px 24px' : 32,
+            padding: isMobile ? '16px 12px 88px' : 32,
             maxWidth: 1600,
             margin: '0 auto',
             width: '100%',
@@ -181,8 +189,56 @@ function NewAdminShell({ user, onLogout }: { user: ReturnType<typeof useAuth>['u
         >
           <Outlet />
         </main>
-        <UIFooter variant="admin" />
+        {!isMobile && <UIFooter variant="admin" />}
       </div>
+      {isMobile && (
+        <nav
+          style={{
+            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 90,
+            display: 'flex', justifyContent: 'space-around', alignItems: 'stretch',
+            padding: '6px 4px calc(env(safe-area-inset-bottom, 0px) + 6px)',
+            background: 'var(--nav-bg, var(--bg-elevated))',
+            borderTop: '1px solid var(--border)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+          }}
+        >
+          {MOBILE_BOTTOM_TABS.map((tab) => {
+            const active = tab.end
+              ? location.pathname === tab.key
+              : location.pathname === tab.key || location.pathname.startsWith(tab.key + '/');
+            return (
+              <Link
+                key={tab.key}
+                to={tab.key}
+                style={{
+                  flex: 1, minWidth: 0, padding: '6px 2px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                  textDecoration: 'none',
+                  color: active ? 'var(--primary)' : 'var(--text-muted)',
+                  fontSize: 10, fontWeight: active ? 700 : 500,
+                }}
+              >
+                <span style={{
+                  fontSize: 18,
+                  background: active ? 'var(--primary-soft)' : 'transparent',
+                  padding: '4px 10px', borderRadius: 12,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.2s ease',
+                }}>
+                  {tab.icon}
+                </span>
+                <span style={{
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  width: '100%', textAlign: 'center',
+                }}>
+                  {tab.shortLabel}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+      )}
     </div>
   );
 }

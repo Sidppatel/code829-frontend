@@ -18,6 +18,7 @@ export interface PurchaseTicket {
   inviteSentAt?: string;
   claimedAt?: string;
   guestUserId?: string;
+  canClaimSelf: boolean;
 }
 
 export interface GuestTicket {
