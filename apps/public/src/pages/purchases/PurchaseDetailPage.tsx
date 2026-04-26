@@ -183,7 +183,10 @@ export default function PurchaseDetailPage() {
         {sectionTitle('Purchase Info')}
         {infoRow(<NumberOutlined />, 'Purchase Number', booking.purchaseNumber)}
         {infoRow(<ClockCircleOutlined />, 'Booked On', formatEventDate(booking.createdAt))}
-        {booking.tableLabel && infoRow(<TagOutlined />, 'Table', `Table ${booking.tableLabel}`)}
+        {(booking.tableLabels && booking.tableLabels.length > 0)
+          ? infoRow(<TagOutlined />, booking.tableLabels.length > 1 ? 'Tables' : 'Table',
+              booking.tableLabels.map(l => `Table ${l}`).join(', '))
+          : booking.tableLabel && infoRow(<TagOutlined />, 'Table', `Table ${booking.tableLabel}`)}
         {booking.seatsReserved && infoRow(<TeamOutlined />, 'Seats Reserved', `${booking.seatsReserved} seat${booking.seatsReserved !== 1 ? 's' : ''}`)}
         {booking.ticketCount > 0 && infoRow(<SendOutlined />, 'Tickets', `${booking.ticketCount} ticket${booking.ticketCount !== 1 ? 's' : ''}`)}
       </Card>

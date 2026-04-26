@@ -39,6 +39,10 @@ type BookingFilters = Record<string, unknown> & {
 };
 
 function bookingDetails(record: Purchase): string {
+  if (record.tableLabels && record.tableLabels.length > 0) {
+    const prefix = record.tableLabels.length > 1 ? 'Tables' : 'Table';
+    return `${prefix} ${record.tableLabels.join(', ')}`;
+  }
   if (record.tableLabel) return `Table ${record.tableLabel}`;
   if (record.seatsReserved) return `${record.seatsReserved} seat${record.seatsReserved !== 1 ? 's' : ''}`;
   return '-';

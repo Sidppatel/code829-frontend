@@ -18,6 +18,7 @@ export interface Purchase {
   qrToken: string;
   tableId?: string;
   tableLabel?: string;
+  tableLabels?: string[];
   seatsReserved?: number;
   ticketCount: number;
   transaction?: StripeTransactionInfo;
