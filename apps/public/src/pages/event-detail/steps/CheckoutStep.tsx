@@ -3,7 +3,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import type { Stripe } from '@stripe/stripe-js';
 import type { EventDetail } from '@code829/shared/types/event';
 import type { TableLock } from '@code829/shared/types/layout';
-import type { PricingQuote } from '@code829/shared/types/pricing';
+import type { CheckoutQuote } from '@code829/shared/types/pricing';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import CheckoutPanel from '../../../components/purchase/CheckoutPanel';
 
@@ -16,7 +16,7 @@ interface GridProps {
   error: string | null;
   clientSecret: string | null;
   stripePromise: Promise<Stripe | null> | null;
-  quote: PricingQuote | null;
+  quote: CheckoutQuote | null;
   quoteLoading: boolean;
   quoteError: string | null;
   onPaymentSuccess: () => void;
@@ -33,7 +33,7 @@ interface OpenProps {
   error: string | null;
   clientSecret: string | null;
   stripePromise: Promise<Stripe | null> | null;
-  quote: PricingQuote | null;
+  quote: CheckoutQuote | null;
   quoteLoading: boolean;
   quoteError: string | null;
   onPaymentSuccess: () => void;

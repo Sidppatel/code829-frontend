@@ -16,7 +16,7 @@ import type { TableLock } from '@code829/shared/types/layout';
 import type { PricingQuoteRequest } from '@code829/shared/types/pricing';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import { useAuthStore } from '@code829/shared/stores/authStore';
-import { usePurchaseQuote } from '@code829/shared/hooks/usePurchaseQuote';
+import { useCheckoutQuote } from '@code829/shared/hooks/useCheckoutQuote';
 
 import EventHero from './components/EventHero';
 import EventAbout from './components/EventAbout';
@@ -120,7 +120,7 @@ export default function EventDetailPage() {
     }
     return null;
   }, [event, step, tableLocks, seatCount, selectedTicketTypeId]);
-  const { quote, isLoading: quoteLoading, error: quoteError } = usePurchaseQuote(quoteSelection);
+  const { quote, isLoading: quoteLoading, error: quoteError } = useCheckoutQuote(quoteSelection);
 
   // Refs for cleanup
   const tableLocksRef = useRef<TableLock[]>([]);

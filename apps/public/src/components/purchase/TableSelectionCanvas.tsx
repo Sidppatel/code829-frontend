@@ -221,7 +221,7 @@ export default function TableSelectionCanvas({
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography.Text type="secondary">Total price</Typography.Text>
                   <Typography.Text strong>
-                    {quote ? centsToUSD(quote.displaySubtotalCents) : '—'}
+                    {quote ? quote.formattedDisplayTotal : '—'}
                   </Typography.Text>
                 </div>
                 <Button

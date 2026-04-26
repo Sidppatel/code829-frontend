@@ -2,18 +2,18 @@ import { useEffect, useMemo } from 'react';
 import { BaseViewModel } from './BaseViewModel';
 import { useVMState } from './useVM';
 import { purchaseController, PurchaseController } from '../controllers/PurchaseController';
-import type { PublicQuote, PricingQuoteRequest } from '../types/pricing';
+import type { CheckoutQuote, PricingQuoteRequest } from '../types/pricing';
 import { createLogger } from '../lib/logger';
 
-const log = createLogger('PurchaseQuoteViewModel');
+const log = createLogger('CheckoutQuoteViewModel');
 
-interface PurchaseQuoteState {
-  quote: PublicQuote | null;
+interface CheckoutQuoteState {
+  quote: CheckoutQuote | null;
   isLoading: boolean;
   error: string | null;
 }
 
-export class PurchaseQuoteViewModel extends BaseViewModel<PurchaseQuoteState> {
+export class CheckoutQuoteViewModel extends BaseViewModel<CheckoutQuoteState> {
   private reqKey = '';
   private refreshTick = 0;
 
@@ -53,34 +53,32 @@ export class PurchaseQuoteViewModel extends BaseViewModel<PurchaseQuoteState> {
     this.setState({ isLoading: true, error: null });
 
     try {
-      const quote = await this.ctrl.getQuote(sel);
+      const quote = await this.ctrl.getCheckoutQuote(sel);
       if (this.reqKey !== key) return;
       this.setState({ quote, isLoading: false });
     } catch (err: unknown) {
       if (this.reqKey !== key) return;
-      log.error('Failed to fetch purchase quote', { err });
+      log.error('Failed to fetch checkout quote', { err });
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Unable to calculate pricing';
       this.setState({ quote: null, isLoading: false, error: msg });
     }
   }
 }
 
-export interface UsePurchaseQuoteVMResult extends PurchaseQuoteState {
-  vm: PurchaseQuoteViewModel;
+export interface UseCheckoutQuoteVMResult extends CheckoutQuoteState {
+  vm: CheckoutQuoteViewModel;
   refresh: () => void;
 }
 
-export function usePurchaseQuoteVM(selection: PricingQuoteRequest | null): UsePurchaseQuoteVMResult {
+export function useCheckoutQuoteVM(selection: PricingQuoteRequest | null): UseCheckoutQuoteVMResult {
   const key = JSON.stringify(selection);
-  // VM intentionally constructed once; selection is fed via setSelection effect below.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const vm = useMemo(() => new PurchaseQuoteViewModel(selection), []);
+  const vm = useMemo(() => new CheckoutQuoteViewModel(selection), []);
   const state = useVMState(vm);
 
   useEffect(() => {
     vm.setSelection(selection);
     return () => { /* keep VM alive across selection edits; dispose on unmount below */ };
-    // selection identity changes are tracked via JSON.stringify(key).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vm, key]);
 

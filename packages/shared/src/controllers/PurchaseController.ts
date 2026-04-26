@@ -5,7 +5,7 @@ import {
   type CreatePurchaseRequest,
   type AdminPurchaseListParams,
 } from '../services/PurchaseService';
-import type { PricingQuote, PricingQuoteRequest } from '../types/pricing';
+import type { PublicQuote, CheckoutQuote, PricingQuoteRequest } from '../types/pricing';
 
 export class PurchaseController extends BaseController {
   private static _instance: PurchaseController | null = null;
@@ -18,8 +18,11 @@ export class PurchaseController extends BaseController {
     this.svc = svc;
   }
 
-  getQuote = async (request: PricingQuoteRequest): Promise<PricingQuote> =>
+  getQuote = async (request: PricingQuoteRequest): Promise<PublicQuote> =>
     (await this.svc.getQuote(request)).data;
+
+  getCheckoutQuote = async (request: PricingQuoteRequest): Promise<CheckoutQuote> =>
+    (await this.svc.getCheckoutQuote(request)).data;
 
   async create(request: CreatePurchaseRequest) {
     const { data } = await this.svc.create(request);

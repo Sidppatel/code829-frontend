@@ -1,7 +1,7 @@
 import { BaseService } from './BaseService';
 import type { Purchase } from '../types/purchase';
 import type { PagedResponse } from '../types/shared';
-import type { PricingQuote, PricingQuoteRequest } from '../types/pricing';
+import type { PublicQuote, CheckoutQuote, PricingQuoteRequest } from '../types/pricing';
 import type { TableLock } from '../types/layout';
 
 export interface CreatePurchaseRequest {
@@ -53,7 +53,10 @@ export class PurchaseService extends BaseService {
     this.get<{ publishableKey: string; mode: 'live' | 'test' }>('/purchases/stripe-config');
 
   getQuote = (request: PricingQuoteRequest) =>
-    this.post<PricingQuote>('/purchases/quote', request);
+    this.post<PublicQuote>('/purchases/quote', request);
+
+  getCheckoutQuote = (request: PricingQuoteRequest) =>
+    this.post<CheckoutQuote>('/purchases/checkout-quote', request);
 
   // ── Admin purchases ─────────────────────────────
   adminList = (params?: AdminPurchaseListParams) =>

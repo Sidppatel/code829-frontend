@@ -1,8 +1,8 @@
 import { usePurchaseQuoteVM } from '../viewmodels/PurchaseQuoteViewModel';
-import type { PricingQuote, PricingQuoteRequest } from '../types/pricing';
+import type { PublicQuote, PricingQuoteRequest } from '../types/pricing';
 
 interface UsePurchaseQuoteResult {
-  quote: PricingQuote | null;
+  quote: PublicQuote | null;
   isLoading: boolean;
   error: string | null;
   refresh: () => void;

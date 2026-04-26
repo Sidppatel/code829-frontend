@@ -1,9 +1,8 @@
 import { Card, Descriptions, Divider, Typography, Space, Alert, Skeleton } from 'antd';
 import { Elements } from '@stripe/react-stripe-js';
 import type { Stripe } from '@stripe/stripe-js';
-import { centsToUSD } from '@code829/shared/utils/currency';
 import type { TableLock } from '@code829/shared/types/layout';
-import type { PricingQuote } from '@code829/shared/types/pricing';
+import type { CheckoutQuote } from '@code829/shared/types/pricing';
 import TableLockTimer from './TableLockTimer';
 import StripePaymentForm from './StripePaymentForm';
 
@@ -18,7 +17,7 @@ interface GridCheckoutProps {
   onPaymentSuccess: () => void;
   onCancel: () => void;
   onExpired: () => void;
-  quote: PricingQuote | null;
+  quote: CheckoutQuote | null;
   quoteLoading: boolean;
   quoteError: string | null;
 }
@@ -33,7 +32,7 @@ interface OpenCheckoutProps {
   stripePromise: Promise<Stripe | null> | null;
   onPaymentSuccess: () => void;
   onCancel: () => void;
-  quote: PricingQuote | null;
+  quote: CheckoutQuote | null;
   quoteLoading: boolean;
   quoteError: string | null;
 }
@@ -102,18 +101,18 @@ export default function CheckoutPanel(props: Props) {
             {/* Customers see only the admission price (admin price + platform fee rolled in) and tax. */}
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography.Text>Subtotal</Typography.Text>
-              <Typography.Text>{centsToUSD(quote.displaySubtotalCents)}</Typography.Text>
+              <Typography.Text>{quote.formattedDisplayTotal}</Typography.Text>
             </div>
             {quote.taxCents > 0 ? (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography.Text>Tax</Typography.Text>
-                  <Typography.Text>{centsToUSD(quote.taxCents)}</Typography.Text>
+                  <Typography.Text>{quote.formattedTax}</Typography.Text>
                 </div>
                 <Divider style={{ margin: '8px 0' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography.Text strong>Total</Typography.Text>
-                  <Typography.Text strong style={{ fontSize: 18 }}>{quote.formattedTotal}</Typography.Text>
+                  <Typography.Text strong style={{ fontSize: 18 }}>{quote.formattedGrandTotal}</Typography.Text>
                 </div>
               </>
             ) : (
@@ -121,7 +120,7 @@ export default function CheckoutPanel(props: Props) {
                 <Divider style={{ margin: '8px 0' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography.Text strong>Total</Typography.Text>
-                  <Typography.Text strong style={{ fontSize: 18 }}>{quote.formattedTotal}</Typography.Text>
+                  <Typography.Text strong style={{ fontSize: 18 }}>{quote.formattedGrandTotal}</Typography.Text>
                 </div>
                 <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                   + applicable taxes
