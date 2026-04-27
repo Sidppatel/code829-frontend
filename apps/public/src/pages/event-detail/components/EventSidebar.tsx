@@ -1,5 +1,5 @@
 import { motion, type Variants } from 'framer-motion';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import { ShareAltOutlined } from '@ant-design/icons';
 import type { EventDetail } from '@code829/shared/types/event';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
@@ -23,6 +23,40 @@ export default function EventSidebar({
   itemVariants,
 }: EventSidebarProps) {
   const isMobile = useIsMobile();
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareTitle = event.title;
+
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: shareTitle, url: shareUrl });
+        return;
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        // fall through to clipboard
+      }
+    }
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = shareUrl;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      message.success('Link copied');
+    } catch {
+      message.error('Share failed');
+    }
+  };
+
   const availabilityLabel = !isSoldOut
     ? event.layoutMode === 'Grid'
       ? `${event.noOfAvailableTables} tables available`
@@ -142,6 +176,8 @@ export default function EventSidebar({
           <Button
             shape="circle"
             icon={<ShareAltOutlined />}
+            onClick={handleShare}
+            aria-label="Share event"
             style={{
               width: 36,
               height: 36,

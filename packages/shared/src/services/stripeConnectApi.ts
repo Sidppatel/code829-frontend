@@ -115,11 +115,18 @@ export class StripeConnectService extends BaseService {
   };
 
   /**
-   * Sends an onboarding link to a specific member's email via Resend. BE owns
-   * the templating; the FE supplies only the BusinessUser to deliver to.
+   * Sends an onboarding link via Resend. Pass `businessUserId` to deliver to a
+   * member's recorded email, or `recipientEmail` to override with an arbitrary
+   * contact (e.g. an organizer who doesn't have a platform account yet). BE
+   * owns the templating; at least one of the two fields must be supplied.
    */
-  developerEmailOnboardingLink = (organizationId: string, businessUserId: string) => {
-    const body: StripeOnboardingEmailRequest = { businessUserId };
+  developerEmailOnboardingLink = (
+    organizationId: string,
+    target: { businessUserId?: string; recipientEmail?: string },
+  ) => {
+    const body: StripeOnboardingEmailRequest = {};
+    if (target.businessUserId) body.businessUserId = target.businessUserId;
+    if (target.recipientEmail) body.recipientEmail = target.recipientEmail;
     return this.post<StripeOnboardingEmailResponse>(
       `/developer/organizations/${organizationId}/stripe-onboarding-email`,
       body,

@@ -109,10 +109,16 @@ export interface StripeOnboardingLinkResponse {
   expiresAt: string;
 }
 
-/** Body for `POST /developer/organizations/{id}/stripe-onboarding-email`. */
+/** Body for `POST /developer/organizations/{id}/stripe-onboarding-email`.
+ *  Provide `businessUserId` to email an existing org member, or
+ *  `recipientEmail` to send to an arbitrary contact (e.g. an organizer who
+ *  doesn't have a platform account yet). At least one is required;
+ *  `recipientEmail` wins when both are present so the developer can override. */
 export interface StripeOnboardingEmailRequest {
   /** BusinessUser to send the link to (must already be a member of the org). */
-  businessUserId: string;
+  businessUserId?: string;
+  /** Arbitrary contact address. Overrides the BU's recorded email when supplied. */
+  recipientEmail?: string;
 }
 
 /** Response shape for `…/stripe-onboarding-email` — purely confirmational. */

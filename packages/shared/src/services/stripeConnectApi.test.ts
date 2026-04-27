@@ -101,11 +101,18 @@ describe('stripeConnectApi — developer surface', () => {
   describe('developerEmailOnboardingLink', () => {
     it('POSTs the businessUserId in the body', async () => {
       mockPost.mockResolvedValueOnce(emailResp);
-      const res = await stripeConnectApi.developerEmailOnboardingLink('org-1', 'bu-9');
+      const res = await stripeConnectApi.developerEmailOnboardingLink('org-1', { businessUserId: 'bu-9' });
       const [url, body] = mockPost.mock.calls[0];
       expect(url).toBe('/developer/organizations/org-1/stripe-onboarding-email');
       expect(body).toEqual({ businessUserId: 'bu-9' });
       expect(res.data.recipientEmail).toBe('admin@test.com');
+    });
+
+    it('POSTs the recipientEmail when overriding', async () => {
+      mockPost.mockResolvedValueOnce(emailResp);
+      await stripeConnectApi.developerEmailOnboardingLink('org-1', { recipientEmail: 'someone@example.com' });
+      const [, body] = mockPost.mock.calls[0];
+      expect(body).toEqual({ recipientEmail: 'someone@example.com' });
     });
   });
 

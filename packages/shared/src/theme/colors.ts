@@ -13,28 +13,34 @@
  */
 
 export const palette = {
-  // Aubergine-plum surfaces (richer than the prior dark plum)
-  bgPage: '#0F0B1A',
-  bgSurface: '#1B1530',
-  bgElevated: '#251B3D',
-  bgNav: '#140F25',
+  // Black surfaces
+  bgPage: '#0A0A0A',
+  bgSurface: '#141414',
+  bgElevated: '#1F1F1F',
+  bgNav: '#000000',
 
-  // Cream text (warmer than prior lavender)
-  textLight: '#FBF5EA',
-  textMid: '#C9BDE0',
-  textDim: '#9A8BB8',
+  // Silver text spectrum
+  textLight: '#F5F5F5',
+  textMid: '#C0C0C0',
+  textDim: '#8A8A8A',
 
-  // Violet brand spectrum (default accent)
-  violet: '#9B6DFF',
-  violetLight: '#B89BFF',
-  violetDark: '#6B3FD6',
+  // Gold brand spectrum (keys retained as `violet*` for backwards-compat references)
+  violet: '#D4AF37',
+  violetLight: '#E6C460',
+  violetDark: '#9C7E1E',
 
-  // Secondary accents — rose retained for backwards-compat references
-  rose: '#F46DB2',
-  roseLight: '#FBA6D0',
-  roseDark: '#C83F87',
+  // Silver palette (rose keys retained as backwards-compat aliases pointing to silver)
+  rose: '#C0C0C0',
+  roseLight: '#D4D4D4',
+  roseDark: '#8A8A8A',
 
-  gold: '#FBBF24',
+  silver: '#C0C0C0',
+  silverLight: '#D4D4D4',
+  silverDark: '#8A8A8A',
+
+  gold: '#D4AF37',
+  goldLight: '#E6C460',
+  goldDark: '#9C7E1E',
   green: '#10B981',
   redSoft: '#F87171',
 } as const;
@@ -59,24 +65,24 @@ export const semantic = {
     surface: palette.bgSurface,
     elevated: palette.bgElevated,
     nav: palette.bgNav,
-    soft: 'rgba(155, 109, 255, 0.10)',
-    muted: 'rgba(155, 109, 255, 0.16)',
-    pressed: 'rgba(155, 109, 255, 0.24)',
-    overlay: 'rgba(15, 11, 26, 0.82)',
+    soft: 'rgba(212, 175, 55, 0.10)',
+    muted: 'rgba(212, 175, 55, 0.16)',
+    pressed: 'rgba(212, 175, 55, 0.24)',
+    overlay: 'rgba(0, 0, 0, 0.82)',
   },
 
   text: {
     primary: palette.textLight,
     secondary: palette.textMid,
     muted: palette.textDim,
-    disabled: 'rgba(251, 245, 234, 0.28)',
-    onBrand: '#FFFFFF',
+    disabled: 'rgba(245, 245, 245, 0.28)',
+    onBrand: '#000000',
   },
 
   border: {
-    default: 'rgba(251, 245, 234, 0.10)',
-    subtle: 'rgba(251, 245, 234, 0.06)',
-    strong: 'rgba(251, 245, 234, 0.20)',
+    default: 'rgba(245, 245, 245, 0.10)',
+    subtle: 'rgba(245, 245, 245, 0.06)',
+    strong: 'rgba(245, 245, 245, 0.20)',
   },
 
   shadow: {
@@ -97,9 +103,9 @@ export const semantic = {
 } as const;
 
 export const chartPalette = [
-  palette.violet,
-  palette.rose,
   palette.gold,
+  palette.silver,
+  palette.goldLight,
   palette.green,
   status.info,
   status.danger,
@@ -112,19 +118,19 @@ export const chartPalette = [
 export const gradients = {
   brand: `linear-gradient(135deg, ${palette.violet} 0%, ${palette.violetLight} 100%)`,
   brandVertical: `linear-gradient(180deg, ${palette.violet}, ${palette.violetDark})`,
-  brandToGold: `linear-gradient(90deg, ${palette.violet}, ${palette.gold})`,
+  brandToGold: `linear-gradient(90deg, ${palette.violet}, ${palette.silver})`,
   brandShimmer: `linear-gradient(120deg, ${palette.violet} 0%, ${palette.violetLight} 50%, ${palette.violet} 100%)`,
   heroFallback: `linear-gradient(135deg, ${palette.violetDark} 0%, ${palette.bgSurface} 100%)`,
-  bannerBrand: `linear-gradient(90deg, rgba(155, 109, 255, 0.14), rgba(244, 109, 178, 0.10))`,
+  bannerBrand: `linear-gradient(90deg, rgba(212, 175, 55, 0.14), rgba(192, 192, 192, 0.10))`,
   bannerSuccess: `linear-gradient(90deg, rgba(16, 185, 129, 0.10), rgba(16, 185, 129, 0.04))`,
-  avatarTint: `linear-gradient(135deg, rgba(155, 109, 255, 0.22), rgba(251, 191, 36, 0.14))`,
+  avatarTint: `linear-gradient(135deg, rgba(212, 175, 55, 0.22), rgba(192, 192, 192, 0.14))`,
 } as const;
 
 export const shadows = {
   antToken: `0 4px 16px ${semantic.shadow.strong}`,
   antCard: `0 2px 12px ${semantic.shadow.medium}`,
   card: `0 2px 4px ${semantic.shadow.strong}, 0 8px 24px ${semantic.shadow.medium}, 0 16px 48px ${semantic.shadow.soft}`,
-  hover: `0 16px 40px rgba(107, 63, 214, 0.28), 0 4px 12px rgba(15, 11, 26, 0.40)`,
+  hover: `0 16px 40px rgba(156, 126, 30, 0.28), 0 4px 12px rgba(0, 0, 0, 0.50)`,
   elevated: `0 4px 20px ${semantic.shadow.strong}`,
   overlay: `0 10px 30px ${semantic.shadow.strong}`,
   soft: `0 1px 2px ${semantic.shadow.soft}`,
@@ -158,13 +164,18 @@ export const cssVars: Record<string, string> = {
   'primary-light': semantic.brandLight,
   'primary-dark': semantic.brandDark,
   'primary-soft': semantic.surface.soft,
-  'primary-tint': 'rgba(155, 109, 255, 0.04)',
+  'primary-tint': 'rgba(212, 175, 55, 0.04)',
   'primary-muted': semantic.surface.muted,
 
-  'accent-rose': palette.rose,
-  'accent-rose-light': palette.roseLight,
-  'accent-rose-dark': palette.roseDark,
+  'accent-rose': palette.silver,
+  'accent-rose-light': palette.silverLight,
+  'accent-rose-dark': palette.silverDark,
+  'accent-silver': palette.silver,
+  'accent-silver-light': palette.silverLight,
+  'accent-silver-dark': palette.silverDark,
   'accent-gold': palette.gold,
+  'accent-gold-light': palette.goldLight,
+  'accent-gold-dark': palette.goldDark,
   'accent-green': palette.green,
   'accent-violet': palette.violet,
   'accent-violet-light': palette.violetLight,
@@ -204,16 +215,16 @@ export const cssVars: Record<string, string> = {
   'shadow-color-medium': semantic.shadow.medium,
   'shadow-color-strong': semantic.shadow.strong,
 
-  'nav-bg': 'rgba(20, 15, 37, 0.85)',
+  'nav-bg': 'rgba(0, 0, 0, 0.85)',
   'nav-border': semantic.border.default,
 
-  'glass-bg': 'rgba(27, 21, 48, 0.75)',
-  'glass-border': 'rgba(251, 245, 234, 0.08)',
+  'glass-bg': 'rgba(20, 20, 20, 0.75)',
+  'glass-border': 'rgba(245, 245, 245, 0.08)',
 
   'card-shadow':
-    '0 2px 4px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.28), 0 16px 48px rgba(0, 0, 0, 0.18)',
+    '0 2px 4px rgba(0, 0, 0, 0.55), 0 8px 24px rgba(0, 0, 0, 0.40), 0 16px 48px rgba(0, 0, 0, 0.28)',
   'shadow-hover':
-    '0 16px 40px rgba(107, 63, 214, 0.28), 0 4px 12px rgba(15, 11, 26, 0.40)',
+    '0 16px 40px rgba(156, 126, 30, 0.28), 0 4px 12px rgba(0, 0, 0, 0.50)',
 
   'gradient-brand': gradients.brand,
   'gradient-brand-vertical': gradients.brandVertical,

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { App, Button, Collapse, Form, Input, Modal, Select, Space, Tag, Typography } from 'antd';
+import { App, AutoComplete, Button, Collapse, Form, Input, Modal, Select, Space, Tag, Typography } from 'antd';
 import {
   CopyOutlined,
   LinkOutlined,
@@ -151,15 +151,30 @@ export default function StripeOnboardingModal({
   };
 
   const emailLink = async () => {
-    if (!emailRecipient) {
-      message.warning('Pick a member first');
+    const trimmed = emailRecipient?.trim();
+    if (!trimmed) {
+      message.warning('Enter a contact email');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      message.warning('Enter a valid email address');
+      return;
+    }
+
+    // If the typed value matches an org member's email, send via the BU id so
+    // the audit trail records the membership; otherwise treat it as a
+    // free-form override.
+    const memberMatch = (organization.members ?? []).find(
+      (m: OrganizationMemberSummary) => m.email.toLowerCase() === trimmed.toLowerCase(),
+    );
+
     setEmailing(true);
     try {
       const { data } = await stripeConnectApi.developerEmailOnboardingLink(
         organization.id,
-        emailRecipient,
+        memberMatch
+          ? { businessUserId: memberMatch.businessUserId }
+          : { recipientEmail: trimmed },
       );
       message.success(`Sent to ${data.recipientEmail}`);
     } catch {
@@ -169,9 +184,13 @@ export default function StripeOnboardingModal({
     }
   };
 
+  // Autocomplete suggestions seeded from existing members. The developer can
+  // pick one OR type any other email — the dropdown is purely a hint, not a
+  // gate, so orgs whose only member is the developer themselves are no longer
+  // a dead end.
   const memberOptions = (organization.members ?? []).map((m: OrganizationMemberSummary) => ({
-    value: m.businessUserId,
-    label: `${m.firstName} ${m.lastName} (${m.email})`,
+    value: m.email,
+    label: `${m.firstName} ${m.lastName} <${m.email}>`,
   }));
 
   return (
@@ -341,27 +360,35 @@ export default function StripeOnboardingModal({
         {hasAccount && (
           <div>
             <Typography.Title level={5} style={{ marginTop: 0 }}>
-              Or email the link to a member
+              Or email the link to a contact
             </Typography.Title>
             <Typography.Paragraph type="secondary" style={{ marginTop: 0 }}>
-              The BE will mint a fresh link and send it via Resend with your
-              configured template. Audit row written to `email_logs`.
+              Type any email — picks from existing members are suggested but
+              not required. BE mints a fresh link and sends via Resend; audit
+              row written to <code>email_logs</code>.
             </Typography.Paragraph>
-            <Form.Item label="Recipient">
-              <Select
-                placeholder="Pick a member"
+            <Form.Item label="Contact email">
+              <AutoComplete
                 value={emailRecipient}
                 onChange={setEmailRecipient}
                 options={memberOptions}
-                disabled={memberOptions.length === 0}
+                filterOption={(input, option) =>
+                  (option?.value ?? '').toString().toLowerCase().includes(input.toLowerCase())
+                }
                 style={{ width: '100%' }}
-              />
+              >
+                <Input
+                  type="email"
+                  placeholder="organizer@example.com"
+                  autoComplete="off"
+                />
+              </AutoComplete>
             </Form.Item>
             <Button
               icon={<MailOutlined />}
               onClick={() => void emailLink()}
               loading={emailing}
-              disabled={!emailRecipient}
+              disabled={!emailRecipient?.trim()}
             >
               Send Link by Email
             </Button>
