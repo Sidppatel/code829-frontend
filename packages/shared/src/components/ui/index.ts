@@ -3,6 +3,7 @@ export { default as Kicker } from './Kicker';
 export { default as MiniStat } from './MiniStat';
 export { default as StatusBadge } from './StatusBadge';
 export type { StatusKind } from './StatusBadge';
+export { default as EventStatusPill } from './EventStatusPill';
 export { default as Chip } from './Chip';
 export { default as SoftCard } from './SoftCard';
 export { default as MetaRow } from './MetaRow';

@@ -12,6 +12,7 @@ import { centsToUSD } from '@code829/shared/utils/currency';
 import type { DashboardStats, NextEventDashboard } from '@code829/shared/types/developer';
 import {
   DisplayHeading,
+  EventStatusPill,
   LoadingBoundary,
   MiniStat,
   PageShell,
@@ -143,9 +144,7 @@ export default function AdminDashboardPage() {
                       >
                         Next event · in {nextEvent.daysUntil} days
                       </div>
-                      <span className="status-pill status-published">
-                        <span className="status-pill-dot" /> Published
-                      </span>
+                      <EventStatusPill status={nextEvent.status} />
                     </div>
                     <DisplayHeading as="div" size="lg">
                       {nextEvent.title}
