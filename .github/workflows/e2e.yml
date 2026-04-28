@@ -2,9 +2,9 @@ name: E2E
 
 on:
   pull_request:
-    branches: [master, main]
+    branches: [main]
   schedule:
-    # Nightly run on master at 06:00 UTC
+    # Nightly run on main at 06:00 UTC
     - cron: '0 6 * * *'
   workflow_dispatch:
 
