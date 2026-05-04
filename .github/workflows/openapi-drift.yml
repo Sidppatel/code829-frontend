@@ -1,8 +1,8 @@
 name: OpenAPI Type Drift
 
 # Runs on demand (and weekly) to verify the checked-in generated api.ts matches
-# the live backend OpenAPI document. Requires backend to expose /openapi/v1.json
-# at OPENAPI_URL (production exposure is BE follow-up — see session 5 memo).
+# the live backend OpenAPI document. Skipped silently when OPENAPI_URL or
+# OPENAPI_TOKEN secrets are unset (BE follow-up — see session 5 memo).
 
 on:
   workflow_dispatch:
@@ -29,10 +29,29 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Regenerate types
+      - id: gate
+        name: Check OPENAPI secrets present
         env:
           OPENAPI_URL: ${{ secrets.OPENAPI_URL }}
-        run: pnpm gen:types
+          OPENAPI_TOKEN: ${{ secrets.OPENAPI_TOKEN }}
+        run: |
+          if [ -z "$OPENAPI_URL" ] || [ -z "$OPENAPI_TOKEN" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "OPENAPI_URL or OPENAPI_TOKEN secret not set — skipping drift check." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Regenerate types
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          OPENAPI_URL: ${{ secrets.OPENAPI_URL }}
+          OPENAPI_TOKEN: ${{ secrets.OPENAPI_TOKEN }}
+        run: |
+          pnpm exec openapi-typescript "$OPENAPI_URL" \
+            --header "Authorization: Bearer $OPENAPI_TOKEN" \
+            -o packages/shared/src/types/generated/api.ts
 
       - name: Fail on drift
+        if: steps.gate.outputs.skip != 'true'
         run: git diff --exit-code packages/shared/src/types/generated/api.ts
