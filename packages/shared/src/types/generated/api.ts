@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/admin/auth/invitation/{token}": {
+    "/v1/admin/auth/invitation/{token}": {
         parameters: {
             query?: never;
             header?: never;
@@ -39,7 +39,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/auth/signup": {
+    "/v1/admin/auth/signup": {
         parameters: {
             query?: never;
             header?: never;
@@ -78,7 +78,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/auth/login": {
+    "/v1/admin/auth/login": {
         parameters: {
             query?: never;
             header?: never;
@@ -117,7 +117,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/auth/forgot-password": {
+    "/v1/admin/auth/forgot-password": {
         parameters: {
             query?: never;
             header?: never;
@@ -156,7 +156,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/auth/reset-password": {
+    "/v1/admin/auth/reset-password": {
         parameters: {
             query?: never;
             header?: never;
@@ -195,7 +195,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/auth/logout": {
+    "/v1/admin/auth/logout": {
         parameters: {
             query?: never;
             header?: never;
@@ -228,7 +228,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/auth/me": {
+    "/v1/admin/auth/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -261,7 +261,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/auth/profile": {
+    "/v1/admin/auth/profile": {
         parameters: {
             query?: never;
             header?: never;
@@ -300,7 +300,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/auth/me/image": {
+    "/v1/admin/auth/me/image": {
         parameters: {
             query?: never;
             header?: never;
@@ -356,7 +356,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/auth/password": {
+    "/v1/admin/auth/password": {
         parameters: {
             query?: never;
             header?: never;
@@ -395,7 +395,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/auth/sessions": {
+    "/v1/admin/auth/sessions": {
         parameters: {
             query?: never;
             header?: never;
@@ -445,7 +445,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/auth/sessions/{id}": {
+    "/v1/admin/auth/sessions/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -480,7 +480,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/dashboard": {
+    "/v1/admin/dashboard": {
         parameters: {
             query?: never;
             header?: never;
@@ -513,7 +513,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/dashboard/next-event": {
+    "/v1/admin/dashboard/next-event": {
         parameters: {
             query?: never;
             header?: never;
@@ -546,7 +546,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events": {
+    "/v1/admin/events": {
         parameters: {
             query?: never;
             header?: never;
@@ -608,7 +608,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{id}": {
+    "/v1/admin/events/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -687,7 +687,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{id}/layout-locked": {
+    "/v1/admin/events/{id}/layout-locked": {
         parameters: {
             query?: never;
             header?: never;
@@ -722,7 +722,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{id}/image": {
+    "/v1/admin/events/{id}/image": {
         parameters: {
             query?: never;
             header?: never;
@@ -763,7 +763,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/images": {
+    "/v1/admin/events/{eventId}/images": {
         parameters: {
             query?: never;
             header?: never;
@@ -827,7 +827,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/images/order": {
+    "/v1/admin/events/{eventId}/images/order": {
         parameters: {
             query?: never;
             header?: never;
@@ -868,7 +868,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/images/{imageId}/primary": {
+    "/v1/admin/events/{eventId}/images/{imageId}/primary": {
         parameters: {
             query?: never;
             header?: never;
@@ -904,7 +904,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/images/{imageId}": {
+    "/v1/admin/events/{eventId}/images/{imageId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -940,7 +940,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{id}/status": {
+    "/v1/admin/events/{id}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -981,7 +981,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{id}/stats": {
+    "/v1/admin/events/{id}/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -1016,7 +1016,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{id}/duplicate": {
+    "/v1/admin/events/{id}/duplicate": {
         parameters: {
             query?: never;
             header?: never;
@@ -1057,7 +1057,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{id}/ticket-types": {
+    "/v1/admin/events/{id}/ticket-types": {
         parameters: {
             query?: never;
             header?: never;
@@ -1117,7 +1117,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{id}/ticket-types/{typeId}": {
+    "/v1/admin/events/{id}/ticket-types/{typeId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1179,7 +1179,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/staff": {
+    "/v1/admin/events/{eventId}/staff": {
         parameters: {
             query?: never;
             header?: never;
@@ -1239,7 +1239,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/staff/{businessUserId}": {
+    "/v1/admin/events/{eventId}/staff/{businessUserId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1275,7 +1275,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/images/upload": {
+    "/v1/admin/financials/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                    page?: number | string;
+                    pageSize?: number | string;
+                    fromDate?: string;
+                    toDate?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/developer/financials/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                    page?: number | string;
+                    pageSize?: number | string;
+                    fromDate?: string;
+                    toDate?: string;
+                    organizationId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/images/upload": {
         parameters: {
             query?: never;
             header?: never;
@@ -1317,7 +1396,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/images": {
+    "/v1/admin/images": {
         parameters: {
             query?: never;
             header?: never;
@@ -1353,7 +1432,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/images/{id}": {
+    "/v1/admin/images/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1388,7 +1467,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/images/{id}/primary": {
+    "/v1/admin/images/{id}/primary": {
         parameters: {
             query?: never;
             header?: never;
@@ -1423,7 +1502,7 @@ export interface paths {
         };
         trace?: never;
     };
-    "/admin/images/reorder": {
+    "/v1/admin/images/reorder": {
         parameters: {
             query?: never;
             header?: never;
@@ -1465,7 +1544,7 @@ export interface paths {
         };
         trace?: never;
     };
-    "/admin/table-templates": {
+    "/v1/admin/table-templates": {
         parameters: {
             query?: never;
             header?: never;
@@ -1521,7 +1600,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/table-templates/{id}": {
+    "/v1/admin/table-templates/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1581,7 +1660,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/event-tables": {
+    "/v1/admin/events/{eventId}/event-tables": {
         parameters: {
             query?: never;
             header?: never;
@@ -1641,7 +1720,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/event-tables/{id}": {
+    "/v1/admin/events/{eventId}/event-tables/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1703,7 +1782,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/layout": {
+    "/v1/admin/events/{eventId}/layout": {
         parameters: {
             query?: never;
             header?: never;
@@ -1763,7 +1842,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/layout/draft": {
+    "/v1/admin/events/{eventId}/layout/draft": {
         parameters: {
             query?: never;
             header?: never;
@@ -1823,7 +1902,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/layout/flush": {
+    "/v1/admin/events/{eventId}/layout/flush": {
         parameters: {
             query?: never;
             header?: never;
@@ -1858,7 +1937,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/layout/table": {
+    "/v1/admin/events/{eventId}/layout/table": {
         parameters: {
             query?: never;
             header?: never;
@@ -1899,7 +1978,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/layout/table/{tableId}": {
+    "/v1/admin/events/{eventId}/layout/table/{tableId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1961,7 +2040,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/layout/status": {
+    "/v1/admin/events/{eventId}/layout/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -1996,7 +2075,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/layout/stats": {
+    "/v1/admin/events/{eventId}/layout/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -2031,7 +2110,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/layout/locked": {
+    "/v1/admin/events/{eventId}/layout/locked": {
         parameters: {
             query?: never;
             header?: never;
@@ -2066,7 +2145,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/events/{eventId}/layout/bulk-insert": {
+    "/v1/admin/events/{eventId}/layout/bulk-insert": {
         parameters: {
             query?: never;
             header?: never;
@@ -2107,7 +2186,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/logs": {
+    "/v1/admin/logs": {
         parameters: {
             query?: never;
             header?: never;
@@ -2147,7 +2226,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/platform-images": {
+    "/v1/admin/platform-images": {
         parameters: {
             query?: never;
             header?: never;
@@ -2211,7 +2290,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/platform-images/order": {
+    "/v1/admin/platform-images/order": {
         parameters: {
             query?: never;
             header?: never;
@@ -2250,7 +2329,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/platform-images/{imageId}/primary": {
+    "/v1/admin/platform-images/{imageId}/primary": {
         parameters: {
             query?: never;
             header?: never;
@@ -2285,7 +2364,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/platform-images/{imageId}": {
+    "/v1/admin/platform-images/{imageId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2320,7 +2399,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/purchases": {
+    "/v1/admin/purchases": {
         parameters: {
             query?: never;
             header?: never;
@@ -2359,7 +2438,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/purchases/stats": {
+    "/v1/admin/purchases/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PricingQuoteRequest"];
+                    "text/json": components["schemas"]["PricingQuoteRequest"];
+                    "application/*+json": components["schemas"]["PricingQuoteRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/purchases/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -2394,7 +2512,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/purchases/{id}/refund": {
+    "/v1/admin/purchases/{id}/refund": {
         parameters: {
             query?: never;
             header?: never;
@@ -2429,7 +2547,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/purchases/export/csv": {
+    "/v1/admin/purchases/export/csv": {
         parameters: {
             query?: never;
             header?: never;
@@ -2464,7 +2582,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/purchases/export/xlsx": {
+    "/v1/admin/purchases/export/xlsx": {
         parameters: {
             query?: never;
             header?: never;
@@ -2499,7 +2617,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/staff": {
+    "/v1/admin/staff": {
         parameters: {
             query?: never;
             header?: never;
@@ -2559,7 +2677,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/staff/{id}": {
+    "/v1/admin/staff/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2600,7 +2718,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/staff/invite": {
+    "/v1/admin/staff/invite": {
         parameters: {
             query?: never;
             header?: never;
@@ -2639,7 +2757,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/staff/invitations": {
+    "/v1/admin/staff/invitations": {
         parameters: {
             query?: never;
             header?: never;
@@ -2712,7 +2830,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/staff/invitations/{id}": {
+    "/v1/admin/staff/invitations/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2747,7 +2865,79 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/venues": {
+    "/v1/admin/organization/stripe-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/organization/stripe-resume-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": null | components["schemas"]["StripeOnboardingLinkRequest"];
+                    "text/json": null | components["schemas"]["StripeOnboardingLinkRequest"];
+                    "application/*+json": null | components["schemas"]["StripeOnboardingLinkRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/venues": {
         parameters: {
             query?: never;
             header?: never;
@@ -2806,7 +2996,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/venues/{id}": {
+    "/v1/admin/venues/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2885,7 +3075,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/venues/{id}/image": {
+    "/v1/admin/venues/{id}/image": {
         parameters: {
             query?: never;
             header?: never;
@@ -2926,7 +3116,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/venues/{venueId}/images": {
+    "/v1/admin/venues/{venueId}/images": {
         parameters: {
             query?: never;
             header?: never;
@@ -2990,7 +3180,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/venues/{venueId}/images/order": {
+    "/v1/admin/venues/{venueId}/images/order": {
         parameters: {
             query?: never;
             header?: never;
@@ -3031,7 +3221,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/venues/{venueId}/images/{imageId}/primary": {
+    "/v1/admin/venues/{venueId}/images/{imageId}/primary": {
         parameters: {
             query?: never;
             header?: never;
@@ -3067,7 +3257,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/venues/{venueId}/images/{imageId}": {
+    "/v1/admin/venues/{venueId}/images/{imageId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -3103,7 +3293,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/magic-link": {
+    "/v1/auth/magic-link": {
         parameters: {
             query?: never;
             header?: never;
@@ -3142,7 +3332,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/signup": {
+    "/v1/auth/signup": {
         parameters: {
             query?: never;
             header?: never;
@@ -3181,7 +3371,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/signin": {
+    "/v1/auth/signin": {
         parameters: {
             query?: never;
             header?: never;
@@ -3220,7 +3410,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/verify-email": {
+    "/v1/auth/verify-email": {
         parameters: {
             query?: never;
             header?: never;
@@ -3259,7 +3449,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/forgot-password": {
+    "/v1/auth/forgot-password": {
         parameters: {
             query?: never;
             header?: never;
@@ -3298,7 +3488,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/reset-password": {
+    "/v1/auth/reset-password": {
         parameters: {
             query?: never;
             header?: never;
@@ -3337,7 +3527,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/magic-link/verify": {
+    "/v1/auth/magic-link/verify": {
         parameters: {
             query?: never;
             header?: never;
@@ -3376,46 +3566,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/dev-login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["DevLoginRequest"];
-                    "text/json": components["schemas"]["DevLoginRequest"];
-                    "application/*+json": components["schemas"]["DevLoginRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/logout": {
+    "/v1/auth/logout": {
         parameters: {
             query?: never;
             header?: never;
@@ -3448,7 +3599,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/sessions": {
+    "/v1/auth/sessions": {
         parameters: {
             query?: never;
             header?: never;
@@ -3498,7 +3649,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/sessions/{id}": {
+    "/v1/auth/sessions/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -3533,7 +3684,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/me": {
+    "/v1/auth/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -3566,7 +3717,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/profile": {
+    "/v1/auth/profile": {
         parameters: {
             query?: never;
             header?: never;
@@ -3605,7 +3756,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/me/image": {
+    "/v1/auth/me/image": {
         parameters: {
             query?: never;
             header?: never;
@@ -3661,7 +3812,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/checkin/events": {
+    "/v1/checkin/events": {
         parameters: {
             query?: never;
             header?: never;
@@ -3694,7 +3845,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/checkin/scan": {
+    "/v1/checkin/scan": {
         parameters: {
             query?: never;
             header?: never;
@@ -3733,7 +3884,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/checkin/events/{eventId}/stats": {
+    "/v1/checkin/events/{eventId}/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -3768,7 +3919,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/email-log": {
+    "/v1/developer/email-log": {
         parameters: {
             query?: never;
             header?: never;
@@ -3805,7 +3956,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/logs": {
+    "/v1/developer/logs": {
         parameters: {
             query?: never;
             header?: never;
@@ -3845,7 +3996,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/system-logs": {
+    "/v1/developer/system-logs": {
         parameters: {
             query?: never;
             header?: never;
@@ -3883,7 +4034,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/settings": {
+    "/v1/developer/settings": {
         parameters: {
             query?: never;
             header?: never;
@@ -3939,7 +4090,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/stripe/status": {
+    "/v1/developer/stripe/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -3972,7 +4123,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/stripe/keys": {
+    "/v1/developer/stripe/keys": {
         parameters: {
             query?: never;
             header?: never;
@@ -4011,7 +4162,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/users": {
+    "/v1/developer/users": {
         parameters: {
             query?: never;
             header?: never;
@@ -4048,7 +4199,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/users/{id}/status": {
+    "/v1/developer/users/{id}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -4089,7 +4240,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/users/{id}": {
+    "/v1/developer/users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -4124,7 +4275,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/admin-users": {
+    "/v1/developer/admin-users": {
         parameters: {
             query?: never;
             header?: never;
@@ -4185,7 +4336,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/admin-users/{id}": {
+    "/v1/developer/admin-users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -4245,7 +4396,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/admin-users/{id}/reset-password": {
+    "/v1/developer/admin-users/{id}/reset-password": {
         parameters: {
             query?: never;
             header?: never;
@@ -4286,7 +4437,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/logo": {
+    "/v1/developer/logo": {
         parameters: {
             query?: never;
             header?: never;
@@ -4342,7 +4493,382 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/dashboard": {
+    "/v1/developer/organizations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number | string;
+                    pageSize?: number | string;
+                    search?: string;
+                    includeArchived?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["OrganizationCreateRequest"];
+                    "text/json": components["schemas"]["OrganizationCreateRequest"];
+                    "application/*+json": components["schemas"]["OrganizationCreateRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/developer/organizations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["OrganizationUpdateRequest"];
+                    "text/json": components["schemas"]["OrganizationUpdateRequest"];
+                    "application/*+json": components["schemas"]["OrganizationUpdateRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/developer/organizations/{id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["OrganizationMemberRequest"];
+                    "text/json": components["schemas"]["OrganizationMemberRequest"];
+                    "application/*+json": components["schemas"]["OrganizationMemberRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/developer/organizations/{id}/members/{businessUserId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    businessUserId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/developer/organizations/{id}/stripe-account": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": null | components["schemas"]["StartStripeOnboardingRequest"];
+                    "text/json": null | components["schemas"]["StartStripeOnboardingRequest"];
+                    "application/*+json": null | components["schemas"]["StartStripeOnboardingRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/developer/organizations/{id}/stripe-onboarding-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["StripeOnboardingEmailRequest"];
+                    "text/json": components["schemas"]["StripeOnboardingEmailRequest"];
+                    "application/*+json": components["schemas"]["StripeOnboardingEmailRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/developer/organizations/{id}/stripe-onboarding-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["StripeOnboardingLinkRequest"];
+                    "text/json": components["schemas"]["StripeOnboardingLinkRequest"];
+                    "application/*+json": components["schemas"]["StripeOnboardingLinkRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/developer/organizations/{id}/stripe-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/developer/dashboard": {
         parameters: {
             query?: never;
             header?: never;
@@ -4375,7 +4901,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/reports/monthly": {
+    "/v1/developer/reports/monthly": {
         parameters: {
             query?: never;
             header?: never;
@@ -4411,7 +4937,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/dashboard/next-event": {
+    "/v1/developer/dashboard/next-event": {
         parameters: {
             query?: never;
             header?: never;
@@ -4444,7 +4970,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{id}/fees": {
+    "/v1/developer/events/{id}/fees": {
         parameters: {
             query?: never;
             header?: never;
@@ -4479,7 +5005,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{id}/ticket-type-fees": {
+    "/v1/developer/events/{id}/ticket-type-fees": {
         parameters: {
             query?: never;
             header?: never;
@@ -4520,7 +5046,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{id}/table-fees": {
+    "/v1/developer/events/{id}/table-fees": {
         parameters: {
             query?: never;
             header?: never;
@@ -4561,7 +5087,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events": {
+    "/v1/developer/events/{id}/relink-orphan-tiers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/developer/events": {
         parameters: {
             query?: never;
             header?: never;
@@ -4623,7 +5184,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{id}": {
+    "/v1/developer/events/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -4702,7 +5263,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{id}/layout-locked": {
+    "/v1/developer/events/{id}/layout-locked": {
         parameters: {
             query?: never;
             header?: never;
@@ -4737,7 +5298,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{id}/image": {
+    "/v1/developer/events/{id}/image": {
         parameters: {
             query?: never;
             header?: never;
@@ -4778,7 +5339,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{eventId}/images": {
+    "/v1/developer/events/{eventId}/images": {
         parameters: {
             query?: never;
             header?: never;
@@ -4842,7 +5403,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{eventId}/images/order": {
+    "/v1/developer/events/{eventId}/images/order": {
         parameters: {
             query?: never;
             header?: never;
@@ -4883,7 +5444,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{eventId}/images/{imageId}/primary": {
+    "/v1/developer/events/{eventId}/images/{imageId}/primary": {
         parameters: {
             query?: never;
             header?: never;
@@ -4919,7 +5480,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{eventId}/images/{imageId}": {
+    "/v1/developer/events/{eventId}/images/{imageId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -4955,7 +5516,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{id}/status": {
+    "/v1/developer/events/{id}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -4996,7 +5557,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{id}/stats": {
+    "/v1/developer/events/{id}/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -5031,7 +5592,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{id}/duplicate": {
+    "/v1/developer/events/{id}/duplicate": {
         parameters: {
             query?: never;
             header?: never;
@@ -5072,7 +5633,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{id}/ticket-types": {
+    "/v1/developer/events/{id}/ticket-types": {
         parameters: {
             query?: never;
             header?: never;
@@ -5132,7 +5693,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{id}/ticket-types/{typeId}": {
+    "/v1/developer/events/{id}/ticket-types/{typeId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -5194,7 +5755,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{eventId}/staff": {
+    "/v1/developer/events/{eventId}/staff": {
         parameters: {
             query?: never;
             header?: never;
@@ -5254,7 +5815,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/events/{eventId}/staff/{businessUserId}": {
+    "/v1/developer/events/{eventId}/staff/{businessUserId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -5290,7 +5851,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/invitations": {
+    "/v1/developer/invitations": {
         parameters: {
             query?: never;
             header?: never;
@@ -5349,7 +5910,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/invitations/{id}": {
+    "/v1/developer/invitations/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -5384,7 +5945,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/admin-logs": {
+    "/v1/developer/admin-logs": {
         parameters: {
             query?: never;
             header?: never;
@@ -5424,7 +5985,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/purchases": {
+    "/v1/developer/purchases": {
         parameters: {
             query?: never;
             header?: never;
@@ -5463,7 +6024,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/purchases/stats": {
+    "/v1/developer/purchases/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PricingQuoteRequest"];
+                    "text/json": components["schemas"]["PricingQuoteRequest"];
+                    "application/*+json": components["schemas"]["PricingQuoteRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/developer/purchases/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -5498,7 +6098,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/purchases/{id}/refund": {
+    "/v1/developer/purchases/{id}/refund": {
         parameters: {
             query?: never;
             header?: never;
@@ -5533,7 +6133,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/purchases/export/csv": {
+    "/v1/developer/purchases/export/csv": {
         parameters: {
             query?: never;
             header?: never;
@@ -5568,7 +6168,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/developer/purchases/export/xlsx": {
+    "/v1/developer/purchases/export/xlsx": {
         parameters: {
             query?: never;
             header?: never;
@@ -5603,7 +6203,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events": {
+    "/v1/events": {
         parameters: {
             query?: never;
             header?: never;
@@ -5646,7 +6246,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/facets": {
+    "/v1/events/facets": {
         parameters: {
             query?: never;
             header?: never;
@@ -5679,7 +6279,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/schema-list": {
+    "/v1/events/schema-list": {
         parameters: {
             query?: never;
             header?: never;
@@ -5712,7 +6312,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/{id}/seo": {
+    "/v1/events/{id}/seo": {
         parameters: {
             query?: never;
             header?: never;
@@ -5747,7 +6347,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/{id}": {
+    "/v1/events/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -5782,7 +6382,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/by-slug/{slug}": {
+    "/v1/events/by-slug/{slug}": {
         parameters: {
             query?: never;
             header?: never;
@@ -5817,7 +6417,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/{id}/images": {
+    "/v1/events/{id}/images": {
         parameters: {
             query?: never;
             header?: never;
@@ -5852,7 +6452,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/{id}/schema": {
+    "/v1/events/{id}/schema": {
         parameters: {
             query?: never;
             header?: never;
@@ -5887,7 +6487,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/{id}/tables": {
+    "/v1/events/{id}/tables": {
         parameters: {
             query?: never;
             header?: never;
@@ -5922,7 +6522,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/{id}/ticket-types": {
+    "/v1/events/{id}/ticket-types": {
         parameters: {
             query?: never;
             header?: never;
@@ -5957,7 +6557,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/feedback": {
+    "/v1/feedback": {
         parameters: {
             query?: never;
             header?: never;
@@ -6017,7 +6617,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/feedback/{id}": {
+    "/v1/feedback/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -6085,7 +6685,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases": {
+    "/v1/purchases": {
         parameters: {
             query?: never;
             header?: never;
@@ -6124,7 +6724,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/quote": {
+    "/v1/purchases/quote": {
         parameters: {
             query?: never;
             header?: never;
@@ -6163,7 +6763,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/{id}/confirm": {
+    "/v1/purchases/checkout-quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PricingQuoteRequest"];
+                    "text/json": components["schemas"]["PricingQuoteRequest"];
+                    "application/*+json": components["schemas"]["PricingQuoteRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/purchases/{id}/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -6198,7 +6837,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/confirm-by-intent": {
+    "/v1/purchases/confirm-by-intent": {
         parameters: {
             query?: never;
             header?: never;
@@ -6237,7 +6876,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/{id}/cancel": {
+    "/v1/purchases/{id}/cancel": {
         parameters: {
             query?: never;
             header?: never;
@@ -6272,7 +6911,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/cancel-beacon": {
+    "/v1/purchases/cancel-beacon": {
         parameters: {
             query?: never;
             header?: never;
@@ -6311,7 +6950,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/{id}/refund": {
+    "/v1/purchases/{id}/refund": {
         parameters: {
             query?: never;
             header?: never;
@@ -6346,7 +6985,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/{id}": {
+    "/v1/purchases/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -6381,7 +7020,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/mine": {
+    "/v1/purchases/mine": {
         parameters: {
             query?: never;
             header?: never;
@@ -6418,7 +7057,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/stripe-config": {
+    "/v1/purchases/stripe-config": {
         parameters: {
             query?: never;
             header?: never;
@@ -6451,7 +7090,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/{id}/qr": {
+    "/v1/purchases/{id}/qr": {
         parameters: {
             query?: never;
             header?: never;
@@ -6556,7 +7195,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tables/lock": {
+    "/v1/tables/lock": {
         parameters: {
             query?: never;
             header?: never;
@@ -6595,7 +7234,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tables/release": {
+    "/v1/tables/release": {
         parameters: {
             query?: never;
             header?: never;
@@ -6634,7 +7273,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tables/release-beacon": {
+    "/v1/tables/release-beacon": {
         parameters: {
             query?: never;
             header?: never;
@@ -6673,7 +7312,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tables/my-locks/{eventId}": {
+    "/v1/tables/my-locks/{eventId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -6708,7 +7347,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/{purchaseId}/tickets": {
+    "/v1/purchases/{purchaseId}/tickets": {
         parameters: {
             query?: never;
             header?: never;
@@ -6743,7 +7382,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/{purchaseId}/tickets/{ticketId}/qr": {
+    "/v1/purchases/{purchaseId}/tickets/{ticketId}/qr": {
         parameters: {
             query?: never;
             header?: never;
@@ -6779,7 +7418,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/{purchaseId}/tickets/{ticketId}/invite": {
+    "/v1/purchases/{purchaseId}/tickets/{ticketId}/invite": {
         parameters: {
             query?: never;
             header?: never;
@@ -6821,7 +7460,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/{purchaseId}/tickets/{ticketId}/claim-self": {
+    "/v1/purchases/{purchaseId}/tickets/{ticketId}/claim-self": {
         parameters: {
             query?: never;
             header?: never;
@@ -6857,7 +7496,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/purchases/{purchaseId}/tickets/{ticketId}/revoke": {
+    "/v1/purchases/{purchaseId}/tickets/{ticketId}/revoke": {
         parameters: {
             query?: never;
             header?: never;
@@ -6893,7 +7532,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tickets/claim": {
+    "/v1/tickets/claim": {
         parameters: {
             query?: never;
             header?: never;
@@ -6951,7 +7590,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tickets/mine": {
+    "/v1/tickets/mine": {
         parameters: {
             query?: never;
             header?: never;
@@ -6984,7 +7623,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/tickets/{ticketId}/qr": {
+    "/v1/tickets/{ticketId}/qr": {
         parameters: {
             query?: never;
             header?: never;
@@ -7070,6 +7709,16 @@ export interface components {
             gridCol: number | string;
             /** Format: uuid */
             eventTableId: string;
+            /**
+             * Format: int32
+             * @default 1
+             */
+            rowSpan: number | string;
+            /**
+             * Format: int32
+             * @default 1
+             */
+            colSpan: number | string;
         };
         AdminLoginRequest: {
             email: string;
@@ -7136,6 +7785,10 @@ export interface components {
             color?: null | string;
             /** Format: int32 */
             priceCents?: null | number | string;
+            /** Format: int32 */
+            rowSpan?: null | number | string;
+            /** Format: int32 */
+            colSpan?: null | number | string;
         };
         CreateEventTicketTypeRequest: {
             label: string;
@@ -7179,6 +7832,16 @@ export interface components {
              */
             defaultPriceCents: number | string;
             isActive?: null | boolean;
+            /**
+             * Format: int32
+             * @default 1
+             */
+            defaultRowSpan: number | string;
+            /**
+             * Format: int32
+             * @default 1
+             */
+            defaultColSpan: number | string;
         };
         CreateVenueRequest: {
             name: string;
@@ -7190,9 +7853,6 @@ export interface components {
             phone?: null | string;
             email?: null | string;
             website?: null | string;
-        };
-        DevLoginRequest: {
-            email: string;
         };
         DuplicateEventRequest: {
             /** Format: date-time */
@@ -7240,6 +7900,22 @@ export interface components {
             /** Format: int32 */
             capacity: null | number | string;
             description?: null | string;
+        };
+        OrganizationCreateRequest: {
+            name: string;
+            legalName: null | string;
+            countryCode: null | string;
+            /** Format: uuid */
+            initialMemberBusinessUserId: null | string;
+        };
+        OrganizationMemberRequest: {
+            /** Format: uuid */
+            businessUserId: string;
+        };
+        OrganizationUpdateRequest: {
+            name: null | string;
+            legalName: null | string;
+            countryCode: null | string;
         };
         PricingQuoteRequest: {
             /** Format: uuid */
@@ -7302,6 +7978,16 @@ export interface components {
             sortOrder: number | string;
             /** Format: uuid */
             eventTableId: string;
+            /**
+             * Format: int32
+             * @default 1
+             */
+            rowSpan: number | string;
+            /**
+             * Format: int32
+             * @default 1
+             */
+            colSpan: number | string;
         };
         ScanRequest: {
             qrToken: string;
@@ -7317,6 +8003,20 @@ export interface components {
             firstName: string;
             lastName: string;
             password: string;
+        };
+        StartStripeOnboardingRequest: {
+            businessType: string;
+            legalName?: null | string;
+            productDescription?: null | string;
+            mcc?: null | string;
+        };
+        StripeOnboardingEmailRequest: {
+            /** Format: uuid */
+            businessUserId?: null | string;
+            recipientEmail?: null | string;
+        };
+        StripeOnboardingLinkRequest: {
+            scope: string;
         };
         SubmitFeedbackRequest: {
             name: string;
@@ -7365,6 +8065,10 @@ export interface components {
             /** Format: int32 */
             priceCents?: null | number | string;
             isActive?: null | boolean;
+            /** Format: int32 */
+            rowSpan?: null | number | string;
+            /** Format: int32 */
+            colSpan?: null | number | string;
         };
         UpdateEventTicketTypeRequest: {
             label?: null | string;
@@ -7410,6 +8114,10 @@ export interface components {
             sortOrder?: null | number | string;
             /** Format: uuid */
             eventTableId?: null | string;
+            /** Format: int32 */
+            rowSpan?: null | number | string;
+            /** Format: int32 */
+            colSpan?: null | number | string;
         };
         UpdateTableTypeFeesRequest: {
             tableTypeFees: {
