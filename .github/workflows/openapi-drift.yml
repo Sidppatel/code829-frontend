@@ -42,14 +42,20 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Regenerate types
+      - name: Fetch OpenAPI document
         if: steps.gate.outputs.skip != 'true'
         env:
           OPENAPI_URL: ${{ secrets.OPENAPI_URL }}
           OPENAPI_TOKEN: ${{ secrets.OPENAPI_TOKEN }}
         run: |
-          pnpm exec openapi-typescript "$OPENAPI_URL" \
-            --header "Authorization: Bearer $OPENAPI_TOKEN" \
+          curl -fsS -H "Authorization: Bearer $OPENAPI_TOKEN" "$OPENAPI_URL" -o /tmp/openapi.json
+          # Sanity: file must be JSON with openapi field; fail loud otherwise
+          node -e "const d=require('/tmp/openapi.json'); if(!d.openapi){console.error('not an OpenAPI doc');process.exit(1)}"
+
+      - name: Regenerate types
+        if: steps.gate.outputs.skip != 'true'
+        run: |
+          pnpm exec openapi-typescript /tmp/openapi.json \
             -o packages/shared/src/types/generated/api.ts
 
       - name: Fail on drift
