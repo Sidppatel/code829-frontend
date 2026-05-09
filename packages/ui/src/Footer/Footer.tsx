@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
 
@@ -7,6 +8,7 @@ export interface FooterLink {
   label: string;
   to?: string;
   href?: string;
+  icon?: ReactNode;
 }
 
 export interface FooterColumn {
@@ -22,17 +24,41 @@ export interface FooterProps {
   socials?: FooterLink[];
 }
 
+function renderLinkBody(link: FooterLink) {
+  if (link.icon) {
+    return (
+      <>
+        <span aria-hidden="true">{link.icon}</span>
+        <span className="ui-footer__sr-only">{link.label}</span>
+      </>
+    );
+  }
+  return link.label;
+}
+
 function renderLink(link: FooterLink, className: string) {
   if (link.href) {
     return (
-      <a key={link.label} className={className} href={link.href} target="_blank" rel="noreferrer">
-        {link.label}
+      <a
+        key={link.label}
+        className={className}
+        href={link.href}
+        target="_blank"
+        rel="noreferrer noopener"
+        aria-label={link.icon ? link.label : undefined}
+      >
+        {renderLinkBody(link)}
       </a>
     );
   }
   return (
-    <Link key={link.label} className={className} to={link.to ?? '#'}>
-      {link.label}
+    <Link
+      key={link.label}
+      className={className}
+      to={link.to ?? '#'}
+      aria-label={link.icon ? link.label : undefined}
+    >
+      {renderLinkBody(link)}
     </Link>
   );
 }

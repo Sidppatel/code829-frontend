@@ -13,6 +13,7 @@ import {
   MessageOutlined,
   LoginOutlined,
   GiftOutlined,
+  FacebookOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Avatar, Grid } from 'antd';
@@ -29,6 +30,27 @@ const PUBLIC_NAV_ITEMS = [
   { key: 'home', to: '/', label: 'Experience', end: true },
   { key: 'events', to: '/events', label: 'Events' },
   { key: 'feedback', to: '/feedback', label: 'Feedback' },
+];
+
+function MessengerIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" focusable="false">
+      <path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.91 1.19 5.44 3.14 7.17.16.14.26.34.27.55l.05 1.78a.8.8 0 0 0 1.12.71l1.99-.88c.16-.07.34-.08.51-.04 1 .27 2.05.42 3.16.42 5.64 0 10-4.13 10-9.7C22 6.13 17.64 2 12 2Zm6 7.46-2.93 4.66a1.5 1.5 0 0 1-2.17.4l-2.34-1.75a.6.6 0 0 0-.72 0l-3.16 2.4c-.42.32-.97-.18-.69-.63l2.93-4.66a1.5 1.5 0 0 1 2.17-.4l2.34 1.75c.21.16.5.16.72 0l3.16-2.4c.42-.32.97.18.69.63Z" />
+    </svg>
+  );
+}
+
+const PUBLIC_FOOTER_SOCIALS = [
+  {
+    label: 'Facebook',
+    href: 'https://www.facebook.com/profile.php?id=100057209869136',
+    icon: <FacebookOutlined />,
+  },
+  {
+    label: 'Messenger',
+    href: 'https://m.me/100057209869136',
+    icon: <MessengerIcon />,
+  },
 ];
 
 const PUBLIC_FOOTER_COLUMNS = [
@@ -63,6 +85,7 @@ function NewPublicShell({ user, onLogout }: { user: ReturnType<typeof useAuth>['
       <UIFooter
         variant="public"
         columns={PUBLIC_FOOTER_COLUMNS}
+        socials={PUBLIC_FOOTER_SOCIALS}
         tagline="Curated evenings, thoughtfully seated."
       />
     </div>
