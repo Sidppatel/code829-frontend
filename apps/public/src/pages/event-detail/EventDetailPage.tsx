@@ -57,14 +57,15 @@ export default function EventDetailPage() {
   const isHydrated = useAuthStore((s) => s.isHydrated);
   const isMobile = useIsMobile();
 
-  // Event detail requires auth (Q3 = b). Redirect anonymous visitors to /login as soon as
-  // the session-cookie probe has finished and decided they're not signed in. Waiting on
-  // isHydrated is what prevents a valid session-cookie refresh from bouncing to /login.
-  useEffect(() => {
-    if (isHydrated && !isAuthenticated) {
-      const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
-      navigate(`/login?returnUrl=${returnUrl}`, { replace: true });
-    }
+  // Page is public. Auth is enforced action-by-action via requireAuthOrRedirect below —
+  // any handler that hits an authenticated endpoint bounces anonymous visitors to /login
+  // with returnUrl preserving the current step.
+  const requireAuthOrRedirect = useCallback((): boolean => {
+    if (!isHydrated) return false;
+    if (isAuthenticated) return true;
+    const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+    navigate(`/login?returnUrl=${returnUrl}`, { replace: false });
+    return false;
   }, [isHydrated, isAuthenticated, navigate]);
 
   // Booking flow state — step lives in the URL so browser back and refresh both work
@@ -265,6 +266,7 @@ export default function EventDetailPage() {
   useEffect(() => {
     if (!purchaseIdParam || clientSecret) return;
     if (step !== 'checkout' && step !== 'checkout-open') return;
+    if (!requireAuthOrRedirect()) return;
 
     let cancelled = false;
     (async () => {
@@ -286,7 +288,7 @@ export default function EventDetailPage() {
       }
     })();
     return () => { cancelled = true; };
-  }, [purchaseIdParam, clientSecret, step, setSearchParams]);
+  }, [purchaseIdParam, clientSecret, step, setSearchParams, requireAuthOrRedirect]);
 
   // Load ticket types for Open events.
   // If the endpoint returns 5xx we show a user-visible error so we don't silently fall back
@@ -322,6 +324,7 @@ export default function EventDetailPage() {
   useEffect(() => {
     if (!event || event.layoutMode !== 'Grid' || tablesData) return;
     if (step !== 'select-table' && step !== 'checkout') return;
+    if (!requireAuthOrRedirect()) return;
 
     const restore = async () => {
       try {
@@ -337,7 +340,7 @@ export default function EventDetailPage() {
       }
     };
     void restore();
-  }, [event, step, tablesData]);
+  }, [event, step, tablesData, requireAuthOrRedirect]);
 
   const loadTables = useCallback(async () => {
     if (!event) return;
@@ -359,9 +362,8 @@ export default function EventDetailPage() {
       message.error('Ticket types are unavailable. Please refresh the page and try again.');
       return;
     }
-    // Auth is enforced by the top-level redirect effect above; by the time the user can
-    // click Book Now they're guaranteed to be signed in.
     if (!event) return;
+    if (!requireAuthOrRedirect()) return;
 
     setIsStartingPurchase(true);
     try {
@@ -386,6 +388,7 @@ export default function EventDetailPage() {
 
   const handleLockTable = async (table: EventTableDto) => {
     if (!event) return;
+    if (!requireAuthOrRedirect()) return;
     setLockingTableId(table.id);
     try {
       const { data } = await tablePurchaseApi.lockTable(event.eventId, table.id);
@@ -402,6 +405,7 @@ export default function EventDetailPage() {
 
   const handleUnlockTable = async (table: EventTableDto) => {
     if (!event) return;
+    if (!requireAuthOrRedirect()) return;
     try {
       await tablePurchaseApi.releaseTable(event.eventId, table.id);
       setTableLocks(prev => prev.filter(l => l.tableId !== table.id));
@@ -415,6 +419,7 @@ export default function EventDetailPage() {
 
   const handleProceedToCheckout = async () => {
     if (tableLocks.length === 0 || !event) return;
+    if (!requireAuthOrRedirect()) return;
     setConfirming(true);
     setCheckoutError(null);
     try {
@@ -504,6 +509,7 @@ export default function EventDetailPage() {
 
   useEffect(() => {
     if (step !== 'checkout-open' || !event || clientSecret) return;
+    if (!requireAuthOrRedirect()) return;
     const createPurchase = async () => {
       setConfirming(true);
       setCheckoutError(null);
@@ -524,7 +530,7 @@ export default function EventDetailPage() {
       }
     };
     void createPurchase();
-  }, [step, event, seatCount, selectedTicketTypeId, clientSecret, setPurchaseId, setStep]);
+  }, [step, event, seatCount, selectedTicketTypeId, clientSecret, setPurchaseId, setStep, requireAuthOrRedirect]);
 
   const handleCancelOpen = async () => {
     if (purchaseId) {
