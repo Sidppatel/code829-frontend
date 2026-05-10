@@ -24,24 +24,9 @@ interface Props {
   open: boolean;
   organization: OrganizationDetail | null;
   onClose: () => void;
-  /** Notify parent so it can re-fetch the org list (state may have moved). */
   onAccountStarted?: () => void;
 }
 
-/**
- * Hosts the Stripe onboarding flow for one organization.
- *
- * Two surfaces here:
- *  - "Start onboarding" — only shown when the org has no connected
- *    account yet. Hits `developerStartOnboarding` which is idempotent
- *    on the BE.
- *  - "Generate link" — picks a scope (identity vs bank) and returns
- *    a fresh AccountLink. Stripe links live ~5 min so we always re-mint
- *    rather than caching.
- *
- * The minted URL is rendered + copy-to-clipboard + emailable to a
- * specific member via Resend (BE-templated).
- */
 export default function StripeOnboardingModal({
   open,
   organization,
@@ -57,8 +42,6 @@ export default function StripeOnboardingModal({
   const [emailRecipient, setEmailRecipient] = useState<string | undefined>();
   const [prefillForm] = Form.useForm<StartStripeOnboardingRequest>();
 
-  // Prefill defaults match the backend defaults so what the developer sees
-  // is exactly what Stripe receives unless they edit.
   const prefillDefaults = useMemo<StartStripeOnboardingRequest>(() => {
     const legalName = organization?.legalName ?? organization?.name ?? '';
     return {
@@ -134,7 +117,6 @@ export default function StripeOnboardingModal({
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(link.url);
       } else {
-        // Legacy fallback for non-secure contexts.
         const ta = document.createElement('textarea');
         ta.value = link.url;
         ta.style.position = 'fixed';
@@ -161,9 +143,6 @@ export default function StripeOnboardingModal({
       return;
     }
 
-    // If the typed value matches an org member's email, send via the BU id so
-    // the audit trail records the membership; otherwise treat it as a
-    // free-form override.
     const memberMatch = (organization.members ?? []).find(
       (m: OrganizationMemberSummary) => m.email.toLowerCase() === trimmed.toLowerCase(),
     );
@@ -184,10 +163,6 @@ export default function StripeOnboardingModal({
     }
   };
 
-  // Autocomplete suggestions seeded from existing members. The developer can
-  // pick one OR type any other email — the dropdown is purely a hint, not a
-  // gate, so orgs whose only member is the developer themselves are no longer
-  // a dead end.
   const memberOptions = (organization.members ?? []).map((m: OrganizationMemberSummary) => ({
     value: m.email,
     label: `${m.firstName} ${m.lastName} <${m.email}>`,
@@ -293,7 +268,7 @@ export default function StripeOnboardingModal({
           <div>
             <Typography.Paragraph>
               Generate a fresh AccountLink for this org. Stripe links expire
-              after roughly 5 minutes — always mint a new one before sharing.
+              after roughly 5 minutes - always mint a new one before sharing.
             </Typography.Paragraph>
             <Space
               direction={isMobile ? 'vertical' : 'horizontal'}
@@ -332,7 +307,7 @@ export default function StripeOnboardingModal({
           >
             <Space direction="vertical" size="small" style={{ width: '100%' }}>
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                Onboarding URL — expires {new Date(link.expiresAt).toLocaleString()}
+                Onboarding URL - expires {new Date(link.expiresAt).toLocaleString()}
               </Typography.Text>
               <Typography.Text
                 copyable={false}
@@ -363,7 +338,7 @@ export default function StripeOnboardingModal({
               Or email the link to a contact
             </Typography.Title>
             <Typography.Paragraph type="secondary" style={{ marginTop: 0 }}>
-              Type any email — picks from existing members are suggested but
+              Type any email - picks from existing members are suggested but
               not required. BE mints a fresh link and sends via Resend; audit
               row written to <code>email_logs</code>.
             </Typography.Paragraph>

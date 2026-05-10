@@ -9,11 +9,6 @@ interface ApiErrorShape {
   };
 }
 
-/**
- * Maps backend ApiError.errors (per-field validation errors) onto RHF setError so
- * field-level messages appear under the matching input. Returns the top-level
- * message (or null) for surfacing at the form level.
- */
 export function applyApiFieldErrors<T extends FieldValues>(
   err: unknown,
   setError: UseFormSetError<T>,

@@ -57,9 +57,6 @@ export default function EventDetailPage() {
   const isHydrated = useAuthStore((s) => s.isHydrated);
   const isMobile = useIsMobile();
 
-  // Page is public. Auth is enforced action-by-action via requireAuthOrRedirect below —
-  // any handler that hits an authenticated endpoint bounces anonymous visitors to /login
-  // with returnUrl preserving the current step.
   const requireAuthOrRedirect = useCallback((): boolean => {
     if (!isHydrated) return false;
     if (isAuthenticated) return true;
@@ -68,7 +65,6 @@ export default function EventDetailPage() {
     return false;
   }, [isHydrated, isAuthenticated, navigate]);
 
-  // Booking flow state — step lives in the URL so browser back and refresh both work
   const rawStep = searchParams.get('step');
   const step: PurchaseStep = (rawStep && VALID_STEPS.includes(rawStep as PurchaseStep))
     ? rawStep as PurchaseStep
@@ -91,7 +87,6 @@ export default function EventDetailPage() {
   const [ticketTypes, setTicketTypes] = useState<EventTicketType[]>([]);
   const [ticketTypesLoading, setTicketTypesLoading] = useState(false);
 
-  // Stripe state
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const purchaseIdParam = searchParams.get('purchaseId');
   const [purchaseId, setPurchaseIdState] = useState<string | null>(purchaseIdParam);
@@ -121,8 +116,6 @@ export default function EventDetailPage() {
     return () => observer.disconnect();
   }, []);
 
-  // Backend-authoritative pricing quote — never compute totals in the browser.
-  // Memoized so an unrelated re-render doesn't fire a new /purchases/quote request.
   const quoteSelection: PricingQuoteRequest | null = useMemo(() => {
     if (!event) return null;
     if (step === 'checkout' && tableLocks.length > 0) {
@@ -135,7 +128,6 @@ export default function EventDetailPage() {
   }, [event, step, tableLocks, seatCount, selectedTicketTypeId]);
   const { quote, isLoading: quoteLoading, error: quoteError } = useCheckoutQuote(quoteSelection);
 
-  // Refs for cleanup
   const tableLocksRef = useRef<TableLock[]>([]);
   const eventRef = useRef<EventDetail | null>(null);
   const purchaseIdRef = useRef<string | null>(null);
@@ -144,13 +136,10 @@ export default function EventDetailPage() {
   useEffect(() => { eventRef.current = event; }, [event]);
   useEffect(() => { purchaseIdRef.current = purchaseId; }, [purchaseId]);
 
-  // Release table lock and cancel pending booking on page leave
   useEffect(() => {
     const cleanup = () => {
       const apiUrl = import.meta.env.VITE_API_URL ?? '';
 
-      // Cancel pending booking (also releases table lock via sp_cancel_booking).
-      // sendBeacon sends session cookies automatically — no JWT needed in payload.
       const bid = purchaseIdRef.current;
       if (bid) {
         const payload = JSON.stringify({ purchaseId: bid });
@@ -159,7 +148,6 @@ export default function EventDetailPage() {
         return; // sp_cancel_booking handles the table release
       }
 
-      // No booking yet — just release all table locks if held
       const locks = tableLocksRef.current;
       const ev = eventRef.current;
       if (locks.length > 0 && ev) {
@@ -179,16 +167,12 @@ export default function EventDetailPage() {
     };
   }, []);
 
-  // Per-step cleanup: when the user navigates back (browser back button changes `step` in the URL)
-  // away from a critical step, release any held locks and cancel pending bookings server-side.
-  // Cancellation is best-effort via the regular (non-beacon) APIs so we see errors in logs.
   const prevStepRef = useRef<PurchaseStep>(step);
   useEffect(() => {
     const prev = prevStepRef.current;
     prevStepRef.current = step;
     if (prev === step) return;
 
-    // Left select-table or checkout while still holding a locks-based booking
     const leftLockFlow = (prev === 'select-table' || prev === 'checkout') && step !== 'checkout';
     if (leftLockFlow && event) {
       const bid = purchaseIdRef.current;
@@ -208,7 +192,6 @@ export default function EventDetailPage() {
       if (bid) setPurchaseId(null);
     }
 
-    // Left checkout-open with a pending booking
     if (prev === 'checkout-open' && step !== 'checkout-open') {
       const bid = purchaseIdRef.current;
       if (bid) {
@@ -222,21 +205,18 @@ export default function EventDetailPage() {
     }
   }, [step, event, setPurchaseId]);
 
-  // Hide the sticky mobile CTA when the virtual keyboard is open so it can't cover an input.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const vv = window.visualViewport;
     if (!vv) return;
 
     const onResize = () => {
-      // Keyboard typically reduces viewport height by >150px on mobile
       setIsKeyboardOpen(vv.height < window.innerHeight - 150);
     };
     vv.addEventListener('resize', onResize);
     return () => vv.removeEventListener('resize', onResize);
   }, []);
 
-  // Load Stripe publishable key once — no silent fallback; block checkout if unavailable.
   useEffect(() => {
     const init = async () => {
       try {
@@ -274,7 +254,6 @@ export default function EventDetailPage() {
     void load();
   }, [slug, message, navigate]);
 
-  // Restore booking context when landing on checkout via refresh or deep link.
   useEffect(() => {
     if (!purchaseIdParam || clientSecret) return;
     if (step !== 'checkout' && step !== 'checkout-open') return;
@@ -286,7 +265,6 @@ export default function EventDetailPage() {
         const { data } = await purchasesApi.getById(purchaseIdParam);
         if (cancelled) return;
         if (data.status !== 'Pending') {
-          // Stale booking — start over on the info step
           setSearchParams(new URLSearchParams(), { replace: true });
           setPurchaseIdState(null);
           return;
@@ -302,9 +280,6 @@ export default function EventDetailPage() {
     return () => { cancelled = true; };
   }, [purchaseIdParam, clientSecret, step, setSearchParams, requireAuthOrRedirect]);
 
-  // Load ticket types for Open events.
-  // If the endpoint returns 5xx we show a user-visible error so we don't silently fall back
-  // to the "no ticket types" state and let them try to book an event that actually requires one.
   const [ticketTypesError, setTicketTypesError] = useState(false);
   useEffect(() => {
     if (!event || event.layoutMode !== 'Open') return;
@@ -332,7 +307,6 @@ export default function EventDetailPage() {
     void loadTicketTypes();
   }, [event]);
 
-  // Restore table selection state on mount/refresh if already in selection steps.
   useEffect(() => {
     if (!event || event.layoutMode !== 'Grid' || tablesData) return;
     if (step !== 'select-table' && step !== 'checkout') return;
@@ -365,7 +339,7 @@ export default function EventDetailPage() {
   }, [event, message]);
 
   const handleBookNow = async () => {
-    if (isStartingPurchase) return; // guard against mobile double-tap
+    if (isStartingPurchase) return;
     if (paymentUnavailable) {
       message.error('Payment service is currently unavailable. Please try again in a moment.');
       return;
@@ -423,7 +397,6 @@ export default function EventDetailPage() {
       setTableLocks(prev => prev.filter(l => l.tableId !== table.id));
       await loadTables();
     } catch (err) {
-      // Lock will expire server-side if we can't release it now
       log.warn('Failed to release table lock', { tableId: table.id, err });
       setTableLocks(prev => prev.filter(l => l.tableId !== table.id));
     }
@@ -458,8 +431,6 @@ export default function EventDetailPage() {
   const handlePaymentSuccess = async () => {
     if (!purchaseId) return;
     try {
-      // Stripe webhook may have already flipped the purchase to Paid via /purchases/confirm-by-intent.
-      // Re-check status before issuing a duplicate confirm that would fail on a non-Pending row.
       const { data: current } = await purchasesApi.getById(purchaseId);
       if (current.status === 'Paid' || current.status === 'CheckedIn') {
         message.success('Booking confirmed!');

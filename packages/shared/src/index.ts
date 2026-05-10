@@ -1,7 +1,5 @@
-// Stores
 export { useAuthStore } from './stores/authStore';
 
-// Hooks
 export { useAuth } from './hooks/useAuth';
 export { useBreakpoint } from './hooks/useBreakpoint';
 export { useHoldTimer } from './hooks/useHoldTimer';
@@ -26,11 +24,9 @@ export { usePurchaseQuote } from './hooks/usePurchaseQuote';
 export { useGuestTickets } from './hooks/useGuestTickets';
 export type { UseGuestTicketsResult } from './hooks/useGuestTickets';
 
-// Providers
 export { QueryProvider } from './providers/QueryProvider';
 export { createQueryClient } from './providers/queryClient';
 
-// Query hooks (TanStack Query)
 export {
   queryKeys,
   useEventsQuery,
@@ -52,36 +48,28 @@ export {
   useLogoutMutation,
 } from './queries';
 
-// Form primitives + helpers
 export { TextField, SelectField, DateField, applyApiFieldErrors } from './forms';
 export type { SelectOption } from './forms';
 
-// Validation schemas
 export * from './schemas';
 export { useHomepageEvents } from './hooks/useHomepageEvents';
 export type { UseHomepageEventsResult } from './hooks/useHomepageEvents';
 export { useOrganizationStripeStatus } from './hooks/useOrganizationStripeStatus';
 export { useAdminStripeStatus } from './hooks/useAdminStripeStatus';
 
-// Context
 export { ThemeProvider } from './context/ThemeContext';
 export { ThemeContext } from './context/ThemeContextCore';
 export type { ThemeMode, ThemeContextValue } from './context/ThemeContextCore';
 
-// Utils
 export { hasRole } from './utils/roles';
 export { centsToUSD } from './utils/currency';
 export { formatEventDate, formatDateRange } from './utils/date';
 
-// Lib
 export { default as apiClient } from './lib/axios';
 export { createLogger } from './lib/logger';
 export { default as logger } from './lib/logger';
 export { initGlobalErrorListeners } from './lib/globalErrors';
 
-// Services — class-based singletons (BaseService → XService → xService)
-// plus legacy functional exports (authApi, eventsApi, …) kept for back-compat
-// until page-level callers migrate in Phase 2.
 export {
   BaseService,
   AuthService,
@@ -130,7 +118,6 @@ export {
 } from './services';
 export type { OrganizationListParams } from './services';
 
-// Controllers — singletons over services, emit domain events
 export {
   BaseController,
   AuthController, authController,
@@ -142,7 +129,6 @@ export {
   LayoutController, layoutController,
 } from './controllers';
 
-// ViewModels — class + hook pairs consumed via useSyncExternalStore
 export {
   BaseViewModel,
   useVMState,
@@ -158,12 +144,10 @@ export type {
   UseAuthVMResult,
 } from './viewmodels';
 
-// Theme
 export { STATUS_COLORS, EVENT_STATUS_COLORS, LOG_SEVERITY_COLORS, EMAIL_STATUS_COLORS } from './theme/statusColors';
 export { portalCardStyle, portalPanelStyle, portalElevatedStyle } from './theme/portalStyles';
 export { palette, semantic, status, cssVars, chartPalette, shadows, gradients, tablePickerPresets, applyThemeVars } from './theme/colors';
 
-// Components
 export { ThemedApp } from './components/ThemedApp';
 export { default as ProtectedRoute } from './components/auth/ProtectedRoute';
 export { default as AdminLoginForm } from './components/auth/AdminLoginForm';
@@ -171,7 +155,6 @@ export { default as InvitationSignupForm } from './components/auth/InvitationSig
 export { default as ForgotPasswordForm } from './components/auth/ForgotPasswordForm';
 export { default as ResetPasswordForm } from './components/auth/ResetPasswordForm';
 
-// Types (re-export for convenience)
 export type {
   AuthResponse, UserProfile, UserRole, AdminRole,
   BusinessUserProfile, BusinessUserListItem, BusinessAuthResponse, InvitationInfoDto,

@@ -56,7 +56,6 @@ export default function AdminProfilePage({ imagesApi, isInitial = false }: Props
     void load();
   }, [message]);
 
-  // Set form values only after the <Form> is in the tree (loading=false)
   useEffect(() => {
     if (!loading && initialFields) {
       form.setFieldsValue(initialFields);
@@ -85,7 +84,6 @@ export default function AdminProfilePage({ imagesApi, isInitial = false }: Props
   if (loading) return <LoadingSpinner />;
 
   return (
-    // <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 32px 64px' }}>
     <div style={{ maxWidth: 720 }}>
       <Card>
         <AvatarUpload

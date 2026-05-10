@@ -66,8 +66,8 @@ export default function CheckInPage() {
 
   return (
     <div className="spring-up">
-      <PageHeader 
-        title="Check-In" 
+      <PageHeader
+        title="Check-In"
         subtitle={[
           stats?.eventTitle ?? 'Event check-in',
           "Scan QR code to welcome your guests.",
@@ -89,14 +89,14 @@ export default function CheckInPage() {
             </div>
           </div>
           <div style={{ height: 12, width: '100%', background: 'var(--bg-soft)', borderRadius: 99, overflow: 'hidden', border: '1px solid var(--border)' }}>
-            <div style={{ 
-              height: '100%', 
-              width: `${stats.percentage}%`, 
+            <div style={{
+              height: '100%',
+              width: `${stats.percentage}%`,
               background: 'linear-gradient(90deg, var(--primary) 0%, var(--accent-green) 100%)',
               transition: 'width 0.5s var(--ease-human)'
             }} />
           </div>
-          
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16, marginTop: 24 }}>
             <HumanCard style={{ padding: '20px' }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Remaining</div>
@@ -112,8 +112,8 @@ export default function CheckInPage() {
         </div>
       )}
 
-      <HumanCard 
-        title="Ready to Scan" 
+      <HumanCard
+        title="Ready to Scan"
         className="human-noise"
         style={{ marginBottom: 32, padding: cameraActive ? 12 : 32 }}
       >
@@ -126,12 +126,12 @@ export default function CheckInPage() {
         {!cameraActive && (
           <>
             <div style={{ margin: '32px 0', borderTop: '1px solid var(--border)', position: 'relative' }}>
-              <span style={{ 
-                position: 'absolute', 
-                top: '50%', 
-                left: '50%', 
-                transform: 'translate(-50%, -50%)', 
-                background: 'var(--bg-surface)', 
+              <span style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: 'var(--bg-surface)',
                 padding: '0 16px',
                 fontSize: 12,
                 color: 'var(--text-muted)',
@@ -149,10 +149,10 @@ export default function CheckInPage() {
                 style={{ borderRadius: 'var(--radius-full)', border: '1px solid var(--border)' }}
                 onChange={(e) => { if (e.target.value.length === 8) handleScan(e.target.value); }}
               />
-              <Button 
-                type="primary" 
-                size="large" 
-                icon={<ScanOutlined />} 
+              <Button
+                type="primary"
+                size="large"
+                icon={<ScanOutlined />}
                 loading={scanning}
                 onClick={() => { /* Placeholder for manual trigger if needed */ }}
                 style={{ borderRadius: 'var(--radius-full)', padding: '0 24px' }}
@@ -165,21 +165,21 @@ export default function CheckInPage() {
       </HumanCard>
 
       {scanResult && (
-        <HumanCard 
-          style={{ 
+        <HumanCard
+          style={{
             borderLeft: `8px solid ${scanResult.success ? 'var(--accent-green)' : 'var(--accent-rose)'}`,
             background: scanResult.success ? 'var(--status-success-bg)' : 'var(--status-danger-bg)'
           }}
           className="spring-up"
         >
           <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-            <div style={{ 
-              width: 64, 
-              height: 64, 
-              borderRadius: '50%', 
-              background: scanResult.success ? 'var(--accent-green)' : 'var(--accent-rose)', 
-              display: 'flex', 
-              alignItems: 'center', 
+            <div style={{
+              width: 64,
+              height: 64,
+              borderRadius: '50%',
+              background: scanResult.success ? 'var(--accent-green)' : 'var(--accent-rose)',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
               fontSize: 32
@@ -192,7 +192,7 @@ export default function CheckInPage() {
               </div>
               {scanResult.success && (
                 <div style={{ marginTop: 8, fontSize: 16, color: 'var(--text-secondary)', fontWeight: 500 }}>
-                  Welcome, <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{scanResult.userName}</span> 
+                  Welcome, <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{scanResult.userName}</span>
                   <span style={{ margin: '0 8px', color: 'var(--border)' }}>•</span>
                   {scanResult.itemCount} tickets
                 </div>

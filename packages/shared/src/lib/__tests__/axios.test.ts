@@ -1,9 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
 
-// We test the module's behavior by mocking axios at the factory level.
-// The actual interceptors are wired inside lib/axios.ts on module load,
-// so we verify the config defaults and the exported helpers.
-
 vi.mock('axios', async (importOriginal) => {
   const actual = await importOriginal<typeof import('axios')>();
   const mockInstance = {
@@ -39,7 +35,6 @@ describe('axios client configuration', () => {
 
   it('exports PortalId type — configureApiClient accepts valid portal IDs', async () => {
     const { configureApiClient } = await import('../axios');
-    // Should not throw for valid portal IDs
     expect(() => configureApiClient('user')).not.toThrow();
     expect(() => configureApiClient('admin')).not.toThrow();
     expect(() => configureApiClient('staff')).not.toThrow();
@@ -49,7 +44,6 @@ describe('axios client configuration', () => {
   it('configureApiClient sets X-Portal header on defaults', async () => {
     const { configureApiClient, default: client } = await import('../axios');
     configureApiClient('admin');
-    // The header should be set on the client's common headers
     const c = client as { defaults?: { headers?: { common?: Record<string, string> } } };
     expect(c.defaults?.headers?.common?.['X-Portal']).toBe('admin');
   });
@@ -57,16 +51,11 @@ describe('axios client configuration', () => {
 
 describe('axios interceptor behavior (unit via mock)', () => {
   it('withCredentials is true on the axios instance config', async () => {
-    // Re-import to get a fresh module evaluation isn't reliable in vitest without isolateModules.
-    // Instead verify the documented constant from the module source.
-    // The source has `withCredentials: true` in the create() call — this is a contract test.
     const mod = await import('../axios');
-    // Default export is the axios instance
     expect(mod.default).toBeTruthy();
   });
 
   it('retry count MAX_RETRIES is 2 (documented via behavior contract)', () => {
-    // This documents the retry policy. If MAX_RETRIES changes, update this test.
     const MAX_RETRIES = 2;
     expect(MAX_RETRIES).toBe(2);
   });

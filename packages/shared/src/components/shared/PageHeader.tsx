@@ -57,10 +57,10 @@ export default function PageHeader({ title, subtitle, extra, onBack, rotateSubti
           </div>
         )}
         <div style={{ minWidth: 0 }}>
-          <h1 style={{ 
-            margin: 0, 
-            fontSize: 'var(--h2-size, 32px)', 
-            fontWeight: 700, 
+          <h1 style={{
+            margin: 0,
+            fontSize: 'var(--h2-size, 32px)',
+            fontWeight: 700,
             color: 'var(--text-primary)',
             fontFamily: "'Playfair Display', serif",
             letterSpacing: '-0.02em'
@@ -68,9 +68,9 @@ export default function PageHeader({ title, subtitle, extra, onBack, rotateSubti
             {title}
           </h1>
           {subtitles.length > 0 && (
-            <p style={{ 
-              margin: '4px 0 0 0', 
-              fontSize: 14, 
+            <p style={{
+              margin: '4px 0 0 0',
+              fontSize: 14,
               color: 'var(--text-secondary)',
               fontWeight: 500,
               transition: 'all 0.5s ease',

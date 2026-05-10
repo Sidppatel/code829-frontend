@@ -11,10 +11,6 @@ import type {
   StripeOnboardingLinkResponse,
 } from '../types/organizations';
 
-// BE currently returns a flat shape from /admin/organization/stripe-status and
-// /developer/organizations/{id}/stripe-status — no `state`, `members`,
-// `bankAccountLast4`, `expressDashboardUrl`, `fetchedAt`. Until the BE
-// contract is widened, normalize on the FE so consumers get the typed shape.
 type RawStripeStatus = Partial<OrganizationStripeStatus> & {
   organizationId?: string;
   organizationName?: string;
@@ -58,22 +54,6 @@ function normalizeStripeStatus(raw: RawStripeStatus): OrganizationStripeStatus {
   };
 }
 
-/**
- * Stripe Connect (Express) onboarding + status client.
- *
- * Two surfaces:
- *
- * - Developer-prefixed methods hit `/developer/organizations/{id}/stripe-…` and
- *   are scoped by URL path. Caller must be authenticated via the developer portal
- *   session cookie.
- * - Admin-prefixed methods hit `/admin/organization/stripe-…` (singular —
- *   the admin user is implicitly bound to the organization their BusinessUser
- *   belongs to via JWT). Caller must be authenticated via the admin portal
- *   session cookie.
- *
- * The X-Portal header is wired automatically by `configureApiClient` (see
- * `lib/axios.ts`); each app wires it once at boot.
- */
 export class StripeConnectService extends BaseService {
   private static _instance: StripeConnectService | null = null;
   static getInstance(): StripeConnectService {
@@ -83,15 +63,6 @@ export class StripeConnectService extends BaseService {
     super('StripeConnectService');
   }
 
-  // ── Developer surface ──────────────────────────────────────────────────────
-
-  /**
-   * Creates a Stripe Express connected account for the organization (idempotent —
-   * re-calling on an org that already has `acct_…` returns the same account ID
-   * plus a fresh identity-scope onboarding link). Returns the initial onboarding
-   * link in the same response so the developer UI can show it without a second
-   * round-trip.
-   */
   developerStartOnboarding = (
     organizationId: string,
     request: StartStripeOnboardingRequest,
@@ -101,11 +72,6 @@ export class StripeConnectService extends BaseService {
       request,
     );
 
-  /**
-   * Generates a fresh onboarding link for the org. Stripe links are ephemeral
-   * (~5 min TTL); always request a new one when the user is about to act, never
-   * cache.
-   */
   developerGetOnboardingLink = (organizationId: string, scope: OnboardingLinkScope) => {
     const body: StripeOnboardingLinkRequest = { scope };
     return this.post<StripeOnboardingLinkResponse>(
@@ -114,12 +80,6 @@ export class StripeConnectService extends BaseService {
     );
   };
 
-  /**
-   * Sends an onboarding link via Resend. Pass `businessUserId` to deliver to a
-   * member's recorded email, or `recipientEmail` to override with an arbitrary
-   * contact (e.g. an organizer who doesn't have a platform account yet). BE
-   * owns the templating; at least one of the two fields must be supplied.
-   */
   developerEmailOnboardingLink = (
     organizationId: string,
     target: { businessUserId?: string; recipientEmail?: string },
@@ -133,10 +93,6 @@ export class StripeConnectService extends BaseService {
     );
   };
 
-  /**
-   * Reads org-scoped Stripe status. BE refreshes from Stripe + persists when the
-   * row is older than its freshness window — callers don't need to do that here.
-   */
   developerGetStripeStatus = async (
     organizationId: string,
   ): Promise<AxiosResponse<OrganizationStripeStatus>> => {
@@ -146,23 +102,11 @@ export class StripeConnectService extends BaseService {
     return { ...res, data: normalizeStripeStatus(res.data) };
   };
 
-  // ── Admin surface ──────────────────────────────────────────────────────────
-
-  /**
-   * Reads the authenticated admin's own organization Stripe status. No path
-   * param — BE looks up `BusinessUser.OrganizationId` from the JWT subject.
-   * 403 when the admin has no Organization (UI should render the "contact
-   * platform" empty state).
-   */
   adminGetStripeStatus = async (): Promise<AxiosResponse<OrganizationStripeStatus>> => {
     const res = await this.get<RawStripeStatus>('/admin/organization/stripe-status');
     return { ...res, data: normalizeStripeStatus(res.data) };
   };
 
-  /**
-   * Mints a fresh onboarding link for the authenticated admin's org. Any admin
-   * in the org can resume — they share the underlying Stripe account.
-   */
   adminResumeOnboardingLink = (scope: OnboardingLinkScope) => {
     const body: StripeOnboardingLinkRequest = { scope };
     return this.post<StripeOnboardingLinkResponse>(
@@ -174,8 +118,6 @@ export class StripeConnectService extends BaseService {
 
 export const stripeConnectService = StripeConnectService.getInstance();
 
-/** Functional re-export to match the per-portal `*Api` convention used by the
- *  rest of the package. */
 export const stripeConnectApi = {
   developerStartOnboarding: stripeConnectService.developerStartOnboarding,
   developerGetOnboardingLink: stripeConnectService.developerGetOnboardingLink,

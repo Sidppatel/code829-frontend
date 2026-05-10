@@ -4,9 +4,6 @@ import { App } from 'antd';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import SettingsPage from './SettingsPage';
 
-// Stub child sections — both are covered by their own dedicated suites so this
-// page test only needs to confirm SettingsPage *mounts* them and threads the
-// refresh nonce into the payouts section.
 vi.mock('@code829/shared/components/auth/AdminSecuritySection', () => ({
   default: () => <div data-testid="admin-security-section">Security Section</div>,
 }));
@@ -95,7 +92,6 @@ describe('SettingsPage — Stripe return-URL handling', () => {
 
   it('does NOT show the welcome-back toast on a plain /settings visit', async () => {
     renderAt('/settings');
-    // antd renders message portals lazily; give it a tick then assert absent
     await waitFor(() => {
       expect(screen.queryByText(/welcome back/i)).not.toBeInTheDocument();
     });

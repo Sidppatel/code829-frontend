@@ -78,7 +78,7 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <Helmet><title>Profile — Code829</title></Helmet>
+      <Helmet><title>Profile - Code829</title></Helmet>
       <PagePreamble
         kicker="Your account"
         title="Profile"

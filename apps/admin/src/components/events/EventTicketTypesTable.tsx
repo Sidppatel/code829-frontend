@@ -52,10 +52,10 @@ export default function EventTicketTypesTable({ ticketTypes, loading }: EventTic
         const percent = total > 0 ? Math.round((sold / total) * 100) : 0;
         return (
           <div style={{ minWidth: 120 }}>
-            <Progress 
-              percent={percent} 
-              size="small" 
-              strokeColor="var(--primary)" 
+            <Progress
+              percent={percent}
+              size="small"
+              strokeColor="var(--primary)"
               trailColor="var(--bg-soft)"
               format={(p) => <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{p}%</span>}
             />
@@ -71,7 +71,7 @@ export default function EventTicketTypesTable({ ticketTypes, loading }: EventTic
         const sold = record.soldCount || 0;
         const total = record.maxQuantity || 0;
         const isSoldOut = total > 0 && sold >= total;
-        
+
         return isSoldOut ? (
           <Tag color="error" style={{ borderRadius: 4 }}>Sold Out</Tag>
         ) : (

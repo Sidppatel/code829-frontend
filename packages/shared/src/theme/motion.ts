@@ -1,4 +1,3 @@
-/** Animation duration & easing tokens. */
 export const duration = {
   instant: '0ms',
   fast: '120ms',

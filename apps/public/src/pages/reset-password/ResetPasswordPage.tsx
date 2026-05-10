@@ -48,7 +48,7 @@ export default function ResetPasswordPage() {
   if (!token) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 16, padding: 24 }}>
-        <Helmet><title>Reset Password — Code829</title></Helmet>
+        <Helmet><title>Reset Password - Code829</title></Helmet>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>Missing reset token</h2>
         <p style={{ color: 'var(--text-secondary)' }}>This link is invalid. Please request a new password reset.</p>
         <Link to="/forgot-password" style={{ color: 'var(--accent-violet)', fontWeight: 700 }}>
@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
       justifyContent: 'center',
       padding: '24px',
     }}>
-      <Helmet><title>Reset Password — Code829</title></Helmet>
+      <Helmet><title>Reset Password - Code829</title></Helmet>
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}

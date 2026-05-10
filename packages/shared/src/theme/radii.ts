@@ -1,4 +1,3 @@
-/** Border radius scale. `radius-full` is kept for backwards-compat with existing CSS. */
 export const radii = {
   none: '0',
   sm: '6px',

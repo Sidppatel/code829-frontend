@@ -24,8 +24,6 @@ export default defineConfig([
       },
     },
     rules: {
-      // Severity 'error': the backlog has been cleared. Intentional exceptions use
-      // `// eslint-disable-next-line event-platform/no-business-calc-in-jsx -- <reason>`.
       'event-platform/no-business-calc-in-jsx': 'error',
     },
     languageOptions: {

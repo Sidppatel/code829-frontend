@@ -110,10 +110,6 @@ export default function PublicLayout() {
     { path: '/feedback', label: 'Feedback' },
   ];
 
-
-
-
-
   const userMenuItems: MenuProps['items'] = [
     { key: 'bookings', label: 'My Purchases', icon: <BookOutlined />, onClick: () => navigate('/purchases') },
     { key: 'tickets', label: 'My Entries', icon: <QrcodeOutlined />, onClick: () => navigate('/tickets') },
@@ -134,11 +130,9 @@ export default function PublicLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'transparent' }}>
-      {/* Nebula Background */}
       <div className="nebula-bg">
         <div className="nebula-mesh" />
       </div>
-      {/* Top Navbar */}
       <Header
         style={{
           position: 'fixed',
@@ -161,7 +155,6 @@ export default function PublicLayout() {
           boxShadow: 'var(--card-shadow)',
         }}
       >
-        {/* Logo */}
         <BrandLogo size="lg" showText={!isMobile} textColor="var(--text-primary)" />
 
         {!isMobile && (
@@ -192,8 +185,8 @@ export default function PublicLayout() {
               <Avatar
                 src={user?.imageUrl}
                 icon={<UserOutlined />}
-                style={{ 
-                  cursor: 'pointer', 
+                style={{
+                  cursor: 'pointer',
                   backgroundColor: 'var(--primary)',
                   border: '2px solid var(--glass-border)',
                   boxShadow: 'var(--shadow-md)'
@@ -232,7 +225,6 @@ export default function PublicLayout() {
         </div>
       </Header>
 
-      {/* Mobile Drawer */}
       <Drawer
         placement="left"
         open={drawerOpen}
@@ -280,12 +272,12 @@ export default function PublicLayout() {
               Logout
             </Button>
           ) : (
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               onClick={() => {
                 navigate('/login');
                 setDrawerOpen(false);
-              }} 
+              }}
               style={{ borderRadius: 99 }}
             >
               Sign In
@@ -294,7 +286,6 @@ export default function PublicLayout() {
         </div>
       </Drawer>
 
-      {/* Content */}
       <Content style={{ background: 'transparent', padding: '130px 16px 100px', maxWidth: 1440, width: '100%', margin: '0 auto' }}>
         <AnimatePresence mode="wait">
           <motion.div
@@ -309,7 +300,6 @@ export default function PublicLayout() {
         </AnimatePresence>
       </Content>
 
-      {/* Footer — desktop only */}
       <Footer
         className="desktop-nav"
         style={{
@@ -355,7 +345,6 @@ export default function PublicLayout() {
         </div>
       </Footer>
 
-      {/* Mobile Bottom Nav */}
       <nav className="mobile-bottom-nav">
         {bottomNavItems.map((item) => {
           const active = item.action === 'navigate' && isActive(item.key);

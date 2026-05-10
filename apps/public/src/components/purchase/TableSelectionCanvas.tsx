@@ -101,7 +101,6 @@ export default function TableSelectionCanvas({
 
   return (
     <div className="ts-wrapper">
-      {/* Status legend */}
       <Space size="large" wrap className="ts-legend">
         <StatusLegendItem status="available" label="Available" />
         <StatusLegendItem status="reserved" label="Reserved" icon={LockOutlined} />
@@ -109,7 +108,6 @@ export default function TableSelectionCanvas({
         <StatusLegendItem status="booked" label="Your hold" icon={CheckCircleOutlined} isMine />
       </Space>
 
-      {/* Pricing legend */}
       {eventTableTypes.length > 0 && (
         <div className="ts-pricing-legend">
           <TierLegend tiers={eventTableTypes} />

@@ -38,10 +38,10 @@ export default function HumanSkeleton({
     <div style={{ width: '100%' }}>
       {Skeletons}
       {subline && (
-        <div style={{ 
-          marginTop: 12, 
-          fontSize: 12, 
-          color: 'var(--text-muted)', 
+        <div style={{
+          marginTop: 12,
+          fontSize: 12,
+          color: 'var(--text-muted)',
           textAlign: 'center',
           fontStyle: 'italic'
         }}>
@@ -62,8 +62,6 @@ export default function HumanSkeleton({
   );
 }
 
-/* Add specialized CSS to index.css for the animation if needed, but HSL gradients usually work well */
-/* Adding the keyframes style here for convenience, but ideally it should be in index.css */
 const style = document.createElement('style');
 style.textContent = `
   @keyframes skeleton-loading {

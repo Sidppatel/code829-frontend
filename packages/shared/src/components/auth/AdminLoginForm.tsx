@@ -19,13 +19,11 @@ export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath =
   const [searchParams, setSearchParams] = useSearchParams();
   const { message } = App.useApp();
 
-  // Handle insufficient role redirect — clear stale session and show error
   useEffect(() => {
     const error = searchParams.get('error');
     if (error === 'insufficient_role') {
       logout();
       message.error('Access denied — your account does not have permission for this portal');
-      // Clean up URL so the error doesn't re-trigger on refresh
       searchParams.delete('error');
       setSearchParams(searchParams, { replace: true });
     }

@@ -24,7 +24,6 @@ interface Props {
   open: boolean;
   organization: OrganizationDetail | null;
   onClose: () => void;
-  /** Bubble updated org back so the parent list/drawer share the freshest copy. */
   onChanged: (org: OrganizationDetail) => void;
 }
 
@@ -34,16 +33,6 @@ const ROLE_COLORS: Record<string, string> = {
   Staff: 'blue',
 };
 
-/**
- * Side drawer for membership management.
- *
- * - Lists current members (with role chip).
- * - Add: pulls candidates from `/admin/staff` and excludes anyone
- *   already in the org so the picker isn't redundant.
- * - Remove: confirms before calling. BE may 409 when removing the
- *   last member of an org with an active connected account; we
- *   surface that response message verbatim.
- */
 export default function MembersDrawer({
   open,
   organization,

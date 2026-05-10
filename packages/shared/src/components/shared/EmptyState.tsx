@@ -38,18 +38,18 @@ export default function EmptyState({ title = 'Nothing here yet', description, ac
         <InboxOutlined style={{ fontSize: 32, color: 'var(--primary)', opacity: 0.8 }} />
       </div>
       <div style={{ maxWidth: 400 }}>
-        <h3 style={{ 
-          margin: '0 0 8px 0', 
-          fontFamily: "'Playfair Display', serif", 
-          fontSize: 24, 
+        <h3 style={{
+          margin: '0 0 8px 0',
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 24,
           fontWeight: 700,
           color: 'var(--text-primary)'
         }}>
           {title}
         </h3>
         {description && (
-          <p style={{ 
-            fontSize: 14, 
+          <p style={{
+            fontSize: 14,
             color: 'var(--text-secondary)',
             fontWeight: 500,
             lineHeight: 1.6,
@@ -60,11 +60,11 @@ export default function EmptyState({ title = 'Nothing here yet', description, ac
         )}
       </div>
       {actionLabel && onAction && (
-        <Button 
-          type="primary" 
-          onClick={onAction} 
-          style={{ 
-            marginTop: 12, 
+        <Button
+          type="primary"
+          onClick={onAction}
+          style={{
+            marginTop: 12,
             borderRadius: 'var(--radius-full)',
             height: 48,
             padding: '0 32px',

@@ -1,11 +1,5 @@
 import type { CSSProperties } from 'react';
 
-/**
- * Thin progress bar that computes width from `current / total` via CSS calc().
- * Keeping the arithmetic in CSS (not JSX) keeps the
- * `event-platform/no-business-calc-in-jsx` rule happy for identifiers
- * like `soldCount / totalCapacity`.
- */
 interface Props {
   current: number;
   total: number;

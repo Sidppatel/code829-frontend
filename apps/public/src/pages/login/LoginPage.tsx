@@ -11,7 +11,6 @@ import { safeReturnUrl } from '@code829/shared/lib/safeRedirect';
 import Text from '@code829/shared/components/shared/Text';
 import { strings, textTemplates } from '@code829/shared/theme/strings';
 
-
 type Mode = 'password' | 'magic-link';
 
 export default function LoginPage() {

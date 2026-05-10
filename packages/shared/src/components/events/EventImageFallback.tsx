@@ -17,7 +17,6 @@ interface EventImageFallbackProps {
   fontSize?: number | string;
 }
 
-/** Category-specific icon for the background. */
 const getCategoryIcon = (category: string) => {
   const cat = (category || '').toLowerCase();
   if (cat.includes('music') || cat.includes('fest')) return <CustomerServiceOutlined />;

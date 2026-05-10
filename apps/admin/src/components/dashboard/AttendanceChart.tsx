@@ -25,7 +25,7 @@ const DEFAULT_DATA: ChartPoint[] = [
 export default function AttendanceChart({ data = DEFAULT_DATA, height = 300 }: AttendanceChartProps) {
   const maxValue = useMemo(() => Math.max(...data.map(d => d.capacity)) * 1.2, [data]);
   const width = 800;
-  
+
   const points = useMemo(() => {
     return data.map((d, i) => {
       const x = (i / (data.length - 1)) * width;
@@ -56,7 +56,6 @@ export default function AttendanceChart({ data = DEFAULT_DATA, height = 300 }: A
         style={{ width: '100%', height: '100%', overflow: 'visible' }}
         preserveAspectRatio="none"
       >
-        {/* Grids */}
         {[0, 0.25, 0.5, 0.75, 1].map((p) => (
           <line
             key={p}
@@ -70,7 +69,6 @@ export default function AttendanceChart({ data = DEFAULT_DATA, height = 300 }: A
           />
         ))}
 
-        {/* Capacity Baseline */}
         <motion.path
           initial={{ pathLength: 0, opacity: 0 }}
           animate={{ pathLength: 1, opacity: 0.3 }}
@@ -82,7 +80,6 @@ export default function AttendanceChart({ data = DEFAULT_DATA, height = 300 }: A
           strokeDasharray="8 4"
         />
 
-        {/* Main Area */}
         <motion.path
           initial={{ opacity: 0, scaleY: 0 }}
           animate={{ opacity: 1, scaleY: 1 }}
@@ -92,7 +89,6 @@ export default function AttendanceChart({ data = DEFAULT_DATA, height = 300 }: A
           fill="url(#chartGradient)"
         />
 
-        {/* Main Line */}
         <motion.path
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
@@ -105,7 +101,6 @@ export default function AttendanceChart({ data = DEFAULT_DATA, height = 300 }: A
           strokeLinejoin="round"
         />
 
-        {/* Points */}
         {points.map((p, i) => (
           <motion.circle
             key={i}
@@ -131,13 +126,12 @@ export default function AttendanceChart({ data = DEFAULT_DATA, height = 300 }: A
         </defs>
       </svg>
 
-      {/* Axis Labels */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        marginTop: 12, 
-        color: 'var(--text-muted)', 
-        fontSize: 11, 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginTop: 12,
+        color: 'var(--text-muted)',
+        fontSize: 11,
         fontWeight: 700,
         textTransform: 'uppercase',
         letterSpacing: '0.05em'
@@ -145,7 +139,6 @@ export default function AttendanceChart({ data = DEFAULT_DATA, height = 300 }: A
         {data.map((d, i) => <span key={i}>{d.day}</span>)}
       </div>
 
-      {/* Legend */}
       <div style={{ display: 'flex', gap: 20, marginTop: 24, fontSize: 12, fontWeight: 600 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 12, height: 4, borderRadius: 2, background: 'var(--primary)' }} />

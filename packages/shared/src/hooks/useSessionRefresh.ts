@@ -2,18 +2,6 @@ import { useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import apiClient from '../lib/axios';
 
-/**
- * On mount, validates the session cookie against the backend and hydrates the store.
- *
- * If user was persisted in localStorage (from a previous session), the UI is
- * unblocked immediately — isHydrated is set to true right away so ProtectedRoute
- * doesn't flash the login page. A background probe to /auth/me then validates the
- * session cookie; if it returns 401 the axios interceptor calls logout() and the
- * persisted store is cleared, redirecting the user to login.
- *
- * If there is no cached user, the probe runs first and isHydrated flips only after
- * it completes, preserving the original loading-spinner behaviour.
- */
 export function useSessionRefresh(meEndpoint = '/auth/me') {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
@@ -21,8 +9,6 @@ export function useSessionRefresh(meEndpoint = '/auth/me') {
 
   useEffect(() => {
     if (user) {
-      // Restore from cache immediately — no loading spinner for returning users.
-      // Then validate in the background; the 401 interceptor handles session expiry.
       setHydrated(true);
       const validate = async () => {
         try {
@@ -41,7 +27,7 @@ export function useSessionRefresh(meEndpoint = '/auth/me') {
         const { data } = await apiClient.get(meEndpoint);
         if (data?.id) setUser(data);
       } catch {
-        // No valid session — user needs to log in
+        // No valid session - user needs to log in
       } finally {
         setHydrated(true);
       }

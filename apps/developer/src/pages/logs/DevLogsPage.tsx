@@ -348,7 +348,6 @@ export default function DevLogsPage() {
                 </div>
               );
             })()}
-            {/* Descriptions handled by DetailModal */}
             <Descriptions
               column={2}
               size="small"

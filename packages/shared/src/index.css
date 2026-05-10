@@ -1,4 +1,4 @@
-/* Fonts */
+
 @import '@fontsource/inter/400.css';
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
@@ -6,7 +6,6 @@
 @import '@fontsource/playfair-display/400.css';
 @import '@fontsource/playfair-display/700.css';
 
-/* Reset */
 *,
 *::before,
 *::after {
@@ -15,13 +14,6 @@
   padding: 0;
 }
 
-/*
- * Color variables are injected at runtime by `packages/shared/src/theme/colors.ts`.
- * This file MUST NOT contain any hex, rgb(), rgba(), or hsl() literals for colors —
- * always reference `var(--<token>)`. Source of truth: theme/colors.ts.
- */
-
-/* Structural tokens (non-color) */
 :root {
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -83,7 +75,6 @@ body {
   display: none;
 }
 
-/* Navigation & Menu */
 .human-side-menu.ant-menu-inline {
   border-right: none !important;
 }
@@ -104,7 +95,6 @@ body {
   display: none !important;
 }
 
-/* Pagination */
 .human-pagination .ant-pagination-item {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -121,7 +111,6 @@ body {
   color: var(--primary) !important;
 }
 
-/* Utility Classes */
 .gradient-text {
   background: var(--gradient-brand);
   -webkit-background-clip: text;
@@ -154,7 +143,6 @@ body {
   box-shadow: inset 0 2px 4px var(--shadow-color-soft);
 }
 
-/* Human-Touch Animations */
 .spring-up {
   animation: springUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
@@ -171,7 +159,6 @@ body {
   }
 }
 
-/* Asymmetric / Human Layouts */
 .asymmetry-grid {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
@@ -194,7 +181,6 @@ body {
   }
 }
 
-/* Smooth Pulse for Indicators */
 .pulse-soft {
   position: relative;
 }
@@ -235,7 +221,6 @@ body {
   }
 }
 
-/* Hero section — minimalist Salt & Pepper */
 .hero-section {
   min-height: 92vh;
   display: flex;
@@ -322,7 +307,6 @@ body {
   z-index: 2;
 }
 
-/* Mobile-first page padding */
 .page-container {
   padding: 16px;
   max-width: 1440px;
@@ -348,7 +332,6 @@ body {
   }
 }
 
-/* Section heading accent */
 .section-heading {
   display: flex;
   align-items: center;
@@ -366,7 +349,6 @@ body {
   flex-shrink: 0;
 }
 
-/* Mobile bottom nav (public pages) */
 .mobile-bottom-nav {
   display: flex;
   position: fixed;
@@ -388,7 +370,6 @@ body {
   }
 }
 
-/* Hide desktop nav on mobile */
 .desktop-nav {
   display: none;
 }
@@ -399,7 +380,6 @@ body {
   }
 }
 
-/* Stat card */
 .stat-card {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -413,7 +393,6 @@ body {
   box-shadow: var(--shadow-hover);
 }
 
-/* Responsive table wrapper — horizontal scroll on mobile */
 .responsive-table .ant-table {
   overflow-x: auto;
 }
@@ -422,7 +401,6 @@ body {
   overflow-x: auto;
 }
 
-/* Responsive list items — stack on mobile */
 .responsive-list .ant-list-item {
   flex-wrap: wrap;
   gap: 12px;
@@ -442,7 +420,6 @@ body {
   margin-inline-start: 0;
 }
 
-/* Hero CTA buttons: stack on mobile, row on tablet+ */
 .hero-cta-row {
   display: flex;
   flex-direction: column;
@@ -459,7 +436,6 @@ body {
   }
 }
 
-/* Mobile-only elements */
 .mobile-only-btn {
   display: flex !important;
 }
@@ -478,7 +454,6 @@ body {
   }
 }
 
-/* Desktop-only block (vs flex default of .desktop-nav) */
 .desktop-only-block {
   display: none;
 }
@@ -505,10 +480,6 @@ body {
     animation-duration: 0.01ms !important;
   }
 }
-
-/* ═══════════════════════════════════════════
-   C829 — DESIGN-HANDOFF ANIMATIONS
-   ═══════════════════════════════════════════ */
 
 @keyframes c829-kenburns {
   0% {
@@ -634,11 +605,6 @@ body {
   }
 }
 
-/* ═══════════════════════════════════════════
-   ADMIN PANEL — UTILITY CLASSES
-   ═══════════════════════════════════════════ */
-
-/* ── Next Event Hero Card ── */
 .next-event-hero {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
@@ -740,7 +706,6 @@ body {
   letter-spacing: 0.04em;
 }
 
-/* ── Dashboard mini KPI strip ── */
 .mini-kpi-strip {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -777,7 +742,6 @@ body {
   text-overflow: ellipsis;
 }
 
-/* ── Events Table Pill Status ── */
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -842,7 +806,6 @@ body {
   background: var(--status-info);
 }
 
-/* ── Event mobile card ── */
 .event-mobile-card {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -855,7 +818,6 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-/* ── Venue / Table Type toggle card ── */
 .data-card {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -871,7 +833,6 @@ body {
   opacity: 0.55;
 }
 
-/* ── Table type color swatch ── */
 .tt-swatch {
   width: 36px;
   height: 36px;
@@ -880,7 +841,6 @@ body {
   border: 2px solid var(--border);
 }
 
-/* ── Seating Grid ── */
 .seating-grid-container {
   overflow: auto;
   padding: 16px;
@@ -948,7 +908,6 @@ body {
   opacity: 0.75;
 }
 
-/* ── Grid cell status states ── */
 .seat-cell.available {
   border-style: solid;
   border-color: var(--primary);
@@ -992,7 +951,6 @@ body {
   border-color: var(--primary);
 }
 
-/* ── Grid editor layout (legacy) ── */
 .grid-editor-wrapper {
   display: flex;
   gap: 16px;
@@ -1014,7 +972,6 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Layout Stats Bar ── */
 .layout-stats-bar {
   display: flex;
   gap: 10px;
@@ -1056,7 +1013,6 @@ body {
   }
 }
 
-/* ── Layout Editor ── */
 .layout-editor-container {
   display: flex;
   gap: 16px;
@@ -1070,7 +1026,6 @@ body {
   max-height: calc(100vh - 200px);
 }
 
-/* ── Floor Plan Grid ── */
 .fp-wrapper {
   flex: 1;
   min-width: 0;
@@ -1127,7 +1082,6 @@ body {
   border-right: 1px solid var(--border-subtle);
 }
 
-/* Grid cells */
 .fp-cell {
   flex: 1;
   min-width: 64px;
@@ -1167,8 +1121,6 @@ body {
   pointer-events: none;
 }
 
-
-/* ── Table element inside grid cell ── */
 .fp-table {
   width: 100%;
   height: 100%;
@@ -1194,7 +1146,6 @@ body {
   border-color: var(--border-strong);
 }
 
-/* Shapes */
 .fp-table-round {
   border-radius: 50%;
 }
@@ -1207,7 +1158,6 @@ body {
   border-radius: 4px;
 }
 
-/* Status borders */
 .fp-table-selected {
   border: 3px solid var(--status-warning) !important;
   box-shadow: 0 0 0 2px var(--status-warning), var(--shadow-md) !important;
@@ -1233,7 +1183,6 @@ body {
   border-color: var(--status-danger) !important;
 }
 
-/* Status badge */
 .fp-table-badge {
   position: absolute;
   top: -5px;
@@ -1271,7 +1220,6 @@ body {
   font-weight: 500;
 }
 
-/* Mobile: controls on top, floor plan below */
 @media (max-width: 768px) {
   .layout-editor-container {
     flex-direction: column;
@@ -1329,7 +1277,6 @@ body {
   }
 }
 
-/* ── Universal Floor-Plan Grid (FloorPlanGrid primitive) ── */
 .fpg-wrapper {
   display: grid;
   background: var(--bg-elevated);
@@ -1515,7 +1462,6 @@ body {
   color: var(--text-secondary);
 }
 
-/* ── Table Selection Canvas (User-facing booking grid) ── */
 .ts-wrapper {
   display: flex;
   flex-direction: column;
@@ -1613,7 +1559,6 @@ body {
   padding: 3px;
 }
 
-/* Table element inside booking grid */
 .ts-table {
   width: 100%;
   height: 100%;
@@ -1713,7 +1658,6 @@ body {
   color: var(--text-on-brand);
 }
 
-/* Detail card */
 .ts-detail-card {
   flex: 1 1 240px;
   min-width: 240px;
@@ -1760,7 +1704,6 @@ body {
   }
 }
 
-/* iOS 44px touch target floor for small phones (iPhone SE, mini). */
 @media (max-width: 374px) {
   .ts-cell {
     min-width: 44px;
@@ -1781,8 +1724,6 @@ body {
   }
 }
 
-/* Sticky Pay action on mobile so the primary CTA stays reachable while the
-   user scrolls the line-item summary above it. */
 .checkout-pay-sticky {
   width: 100%;
 }
@@ -1798,7 +1739,6 @@ body {
   }
 }
 
-/* ── Color picker display ── */
 .color-swatch-trigger {
   width: 36px;
   height: 36px;
@@ -1814,7 +1754,6 @@ body {
   border-color: var(--primary);
 }
 
-/* ── Address Autocomplete ── */
 .address-autocomplete-dropdown {
   z-index: 1050;
   background: var(--bg-surface);
@@ -1853,7 +1792,6 @@ body {
   border-radius: 8px;
 }
 
-/* ── Layout Editor Footer ── */
 .layout-editor-footer {
   display: flex;
   justify-content: flex-end;
@@ -1863,7 +1801,6 @@ body {
   border-top: 1px solid var(--border);
 }
 
-/* ── Venue image placeholder ── */
 .venue-avatar {
   width: 40px;
   height: 40px;
@@ -1876,7 +1813,6 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Page section card ── */
 .admin-section {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -1900,7 +1836,6 @@ body {
   font-size: 16px;
 }
 
-/* ── Edit mode banner ── */
 .edit-mode-banner {
   background: var(--gradient-banner-brand);
   border: 1px solid var(--border);
@@ -1918,7 +1853,6 @@ body {
   color: var(--text-primary);
 }
 
-/* ── Publish action strip ── */
 .publish-strip {
   background: var(--gradient-banner-success);
   border: 1px solid var(--status-success);
@@ -1941,7 +1875,6 @@ body {
   color: var(--text-primary);
 }
 
-/* ── Mobile / Desktop visibility ── */
 .mobile-card-list {
   display: flex;
   flex-direction: column;
@@ -1962,12 +1895,10 @@ body {
   }
 }
 
-/* ── Inactive overlay ── */
 .admin-section.inactive {
   opacity: 0.55;
 }
 
-/* ── Mobile clamp for antd Date/Time picker popup ── */
 @media (max-width: 480px) {
   .ep-picker-popup-mobile {
     left: 8px !important;

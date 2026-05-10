@@ -85,7 +85,7 @@ export default function EventTableTypesControl({
     try {
       const values = await editForm.validateFields();
       const color = typeof values.color === 'string' ? values.color : values.color?.toHexString?.();
-      
+
       if (editingEventTable.isPending) {
         onEventTableUpdated({
           ...editingEventTable,
@@ -217,7 +217,6 @@ export default function EventTableTypesControl({
         </div>
       </Card>
 
-      {/* Add Modal */}
       <Modal
         title="Add Event Table Type"
         open={addModalOpen}
@@ -272,7 +271,6 @@ export default function EventTableTypesControl({
         </Form>
       </Modal>
 
-      {/* Edit Modal */}
       <Modal
         title={`Edit: ${editingEventTable?.label ?? ''}`}
         open={editModalOpen}

@@ -113,7 +113,6 @@ export default function CheckInPage() {
           gap: 20,
         }}
       >
-        {/* Scanner column */}
         <div>
           <div
             style={{
@@ -207,7 +206,6 @@ export default function CheckInPage() {
           )}
         </div>
 
-        {/* Recent scans column */}
         <div>
           <DisplayHeading as="h2" size="sm" style={{ marginBottom: 10 }}>
             Most recent scan

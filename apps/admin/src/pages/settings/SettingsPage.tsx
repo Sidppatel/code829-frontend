@@ -9,19 +9,13 @@ export default function SettingsPage() {
   const { search, pathname } = useLocation();
   const { message } = App.useApp();
 
-  // Detect a Stripe return purely from the URL — accept either signal:
-  //   - `?status=complete` query param (preferred, set by BE return_url)
-  //   - landing on `/settings/stripe/return` (path-based fallback)
   const cameFromStripe = useMemo(() => {
     const params = new URLSearchParams(search);
     return params.get('status') === 'complete' || pathname.endsWith('/stripe/return');
   }, [search, pathname]);
 
-  // The Payouts section refetches on mount via its hook; the URL itself is the
-  // refresh nonce so any change to the search/path string fires a fresh fetch.
   const refreshNonce = `${pathname}|${search}`;
 
-  // Surface a friendly toast once per Stripe-return navigation.
   const toldOnNonce = useRef<string | null>(null);
   useEffect(() => {
     if (cameFromStripe && toldOnNonce.current !== refreshNonce) {

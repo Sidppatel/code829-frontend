@@ -57,7 +57,6 @@ function toStateAbbr(state: string): string {
   return US_STATES[state] ?? state;
 }
 
-/** Build a short display label: "600 Townsend Circle, Chickasaw, AL 36611" */
 function formatSuggestion(result: NominatimResult): string {
   const addr = result.address;
   const street = [addr.house_number, addr.road].filter(Boolean).join(' ');

@@ -18,7 +18,7 @@ export default function QrCameraScanner({ active, onScan, onToggle }: Props) {
     if (scannerRef.current) {
       try {
         const state = scannerRef.current.getState();
-        if (state === 2) { // SCANNING
+        if (state === 2) {
           await scannerRef.current.stop();
         }
       } catch { /* ignore stop errors */ }
@@ -39,7 +39,6 @@ export default function QrCameraScanner({ active, onScan, onToggle }: Props) {
       { facingMode: 'environment' },
       { fps: 10, qrbox: { width: 250, height: 250 } },
       (decodedText) => {
-        // Debounce: don't fire the same token within 3 seconds
         if (decodedText === lastScannedRef.current) return;
         lastScannedRef.current = decodedText;
         onScan(decodedText);

@@ -41,10 +41,10 @@ export default function SidebarNav({
         alignItems: 'center',
         justifyContent: collapsed ? 'center' : 'flex-start',
       }}>
-        <BrandLogo 
-          size="md" 
-          showText={!collapsed} 
-          collapsed={collapsed} 
+        <BrandLogo
+          size="md"
+          showText={!collapsed}
+          collapsed={collapsed}
         />
       </div>
 

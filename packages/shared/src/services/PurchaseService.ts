@@ -29,7 +29,6 @@ export class PurchaseService extends BaseService {
     super('PurchaseService');
   }
 
-  // ── User purchases ──────────────────────────────
   create = (request: CreatePurchaseRequest) => this.post<Purchase>('/purchases', request);
 
   confirmPayment = (id: string) => this.post<Purchase>(`/purchases/${id}/confirm`);
@@ -58,7 +57,6 @@ export class PurchaseService extends BaseService {
   getCheckoutQuote = (request: PricingQuoteRequest) =>
     this.post<CheckoutQuote>('/purchases/checkout-quote', request);
 
-  // ── Admin purchases ─────────────────────────────
   adminList = (params?: AdminPurchaseListParams) =>
     this.get<PagedResponse<Purchase>>('/admin/purchases', { params });
 
@@ -79,7 +77,6 @@ export class PurchaseService extends BaseService {
       responseType: 'blob',
     });
 
-  // ── Table locking ──────────────────────────────
   lockTable = (eventId: string, tableId: string) =>
     this.post<TableLock>('/tables/lock', { eventId, tableId });
 

@@ -52,7 +52,6 @@ export class PurchaseController extends BaseController {
   getMine = async (page = 1, pageSize = 20, search?: string) =>
     (await this.svc.getMine(page, pageSize, search)).data;
 
-  // Admin
   adminList = async (params?: AdminPurchaseListParams) => (await this.svc.adminList(params)).data;
 
   async refund(id: string) {
@@ -61,7 +60,6 @@ export class PurchaseController extends BaseController {
     return data;
   }
 
-  // Table locking
   lockTable = async (eventId: string, tableId: string) =>
     (await this.svc.lockTable(eventId, tableId)).data;
   releaseTable = async (eventId: string, tableId: string) =>

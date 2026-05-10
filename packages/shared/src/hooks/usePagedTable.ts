@@ -28,8 +28,6 @@ export function usePagedTable<T, P extends Record<string, unknown>>(
 ): UsePagedTableResult<T, P> {
   const { fetcher, defaultParams, defaultPageSize = 20 } = options;
 
-  // Store fetcher in a ref so inline arrow functions don't cause fetchData to
-  // be recreated on every render (which would trigger an infinite request loop).
   const fetcherRef = useRef(fetcher);
   useEffect(() => {
     fetcherRef.current = fetcher;

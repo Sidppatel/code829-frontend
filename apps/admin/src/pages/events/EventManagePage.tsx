@@ -126,10 +126,10 @@ export default function EventManagePage() {
 
           const displayTotalSold = isGrid ? gridBookedTables : (stats?.totalSold ?? 0);
           const displayMaxCapacity = isGrid ? gridTotalTables : (stats?.maxCapacity ?? 0);
-          const available = isGrid 
+          const available = isGrid
             ? Math.max(gridTotalTables - gridBookedTables, 0)
             : Math.max(displayMaxCapacity - displayTotalSold, 0);
-          const fillRate = isGrid 
+          const fillRate = isGrid
             ? (gridTotalTables > 0 ? Math.round((gridBookedTables / gridTotalTables) * 100) : 0)
             : (stats?.fillRatePct ?? 0);
           const projectedRevenueCents = computeProjectedRevenueCents(pricingRows);

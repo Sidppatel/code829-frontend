@@ -7,7 +7,6 @@ interface Props {
   variant?: 'default' | 'compact';
 }
 
-/** Thin wrapper that wires the shared EventCard into public-app navigation. */
 export default function EventCard({ event, variant }: Props) {
   const navigate = useNavigate();
   return (

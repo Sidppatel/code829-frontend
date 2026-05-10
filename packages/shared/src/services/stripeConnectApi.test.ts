@@ -5,8 +5,6 @@ import type {
   StripeOnboardingLinkResponse,
 } from '../types/organizations';
 
-// Mock the axios client at the module-factory level so the BaseService singleton
-// receives a stub `apiClient`. Reused pattern from `useSessionRefresh.test.ts`.
 vi.mock('../lib/axios', () => ({
   default: {
     get: vi.fn(),

@@ -60,13 +60,10 @@ describe('dollarsToCents', () => {
   });
 
   it('rounds floating point correctly (0.1 + 0.2 = 0.30 cents = 30)', () => {
-    // Math.round handles float imprecision at the boundary
     expect(dollarsToCents(0.1 + 0.2)).toBe(30);
   });
 
   it('handles float precision edge case (1.005 * 100 = 100.4999... → rounds to 100)', () => {
-    // JS float: 1.005 * 100 = 100.49999999999999, so Math.round gives 100 not 101.
-    // This documents the known float behavior — use server-side pricing for exact values.
     expect(dollarsToCents(1.005)).toBe(100);
   });
 

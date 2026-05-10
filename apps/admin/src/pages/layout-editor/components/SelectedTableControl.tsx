@@ -78,11 +78,11 @@ export default function SelectedTableControl({
             <div style={{ marginBottom: 12 }}>
               {selectedTable.status === 'Booked' ? (
                 <Tag icon={<CheckCircleOutlined />} color="error" style={{ fontSize: 12 }}>
-                  Booked — position locked
+                  Booked - position locked
                 </Tag>
               ) : (
                 <Tag icon={<LockOutlined />} color="warning" style={{ fontSize: 12 }}>
-                  Locked by user — position locked
+                  Locked by user - position locked
                 </Tag>
               )}
             </div>

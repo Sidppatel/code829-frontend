@@ -47,8 +47,6 @@ import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 
 const log = createLogger('Admin/EventWizardPage');
 
-// Must match the backend `EventCategory` enum exactly — controller rejects
-// any other value with a 400 ("Invalid category"). Order is display order.
 const categories = [
   'Music',
   'Business',
@@ -65,7 +63,6 @@ const STEPS = [
   { key: 'seating', label: 'Seating' },
 ] as const;
 
-// Which form fields must be valid to leave a given step.
 const STEP_FIELDS: Record<number, string[]> = {
   0: ['title', 'category', 'venueId', 'startDate', 'startTime', 'endDate', 'endTime'],
   1: [],
@@ -83,7 +80,7 @@ export default function EventWizardPage() {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [layoutMode, setLayoutMode] = useState<'Grid' | 'Open'>('Grid');
   const [layoutLocked, setLayoutLocked] = useState(false);
-  const [hasSoldTickets, setHasSoldTickets] = useState(false); // updated validation anchor
+  const [hasSoldTickets, setHasSoldTickets] = useState(false);
   const [images, setImages] = useState<ImageDto[]>([]);
   const [existingTables] = useState<EventTableDto[]>([]);
   const [existingTiers, setExistingTiers] = useState<EventTableTypeInfo[]>([]);
@@ -210,12 +207,10 @@ export default function EventWizardPage() {
   const onValuesChange = (changed: any, all: any) => {
     setIsDirty(true);
 
-    // Sync End Date with Start Date
     if (changed.startDate && (!all.endDate || all.endDate.isBefore(changed.startDate, 'day'))) {
       form.setFieldsValue({ endDate: changed.startDate });
     }
 
-    // Sync End Time with Start Time
     if (changed.startTime && !all.endTime) {
       form.setFieldsValue({ endTime: changed.startTime.add(2, 'hour') });
     }
@@ -336,7 +331,6 @@ export default function EventWizardPage() {
         return;
       }
     }
-    // Open seating: require at least one ticket tier before moving past the seating step
     if (step === 1 && layoutMode === 'Open') {
       const tiers = form.getFieldValue('ticketTypes') ?? [];
       if (tiers.length === 0) {
@@ -388,7 +382,6 @@ export default function EventWizardPage() {
           endTime: dayjs().add(3, 'hour').startOf('hour'),
         } : undefined}
       >
-        {/* ── Step 1: Details ─────────────────────────────────────── */}
         <div style={{ display: step === 0 ? 'block' : 'none' }}>
           <SoftCard padding={24}>
             <Form.Item name="title" label="Title" rules={[{ required: true }]}>
@@ -556,7 +549,6 @@ export default function EventWizardPage() {
           </SoftCard>
         </div>
 
-        {/* ── Step 2: Seating ─────────────────────────────────────── */}
         <div style={{ display: step === 1 ? 'block' : 'none' }}>
           <Row gutter={[14, 14]} style={{ marginBottom: 16 }}>
             <Col xs={24} sm={12}>
@@ -585,7 +577,7 @@ export default function EventWizardPage() {
 
           {layoutLocked && (
             <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 12 }}>
-              Seating type cannot be changed — this event has active bookings or locked tables.
+              Seating type cannot be changed - this event has active bookings or locked tables.
             </div>
           )}
 
@@ -793,7 +785,6 @@ export default function EventWizardPage() {
           )}
         </div>
 
-        {/* ── Navigation ──────────────────────────────────────────── */}
         <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
           {step > 0 && (
             <Button

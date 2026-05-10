@@ -98,26 +98,22 @@ export default function EventsPage() {
             {Array.from({ length: 6 }).map((_, i) => (
               <Col xs={24} sm={12} md={8} key={i}>
                 <div className="glass-card" style={{ height: 480, borderRadius: 24, padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                  {/* Image Placeholder */}
                   <div style={{ position: 'relative', height: 240, background: 'var(--bg-soft)', overflow: 'hidden' }}>
                     <div className="ant-skeleton ant-skeleton-active" style={{ height: '100%', width: '100%' }}>
                       <div className="ant-skeleton-content" style={{ height: '100%' }}>
                         <div className="ant-skeleton-title" style={{ width: '100%', height: '100%', margin: 0, borderRadius: 0 }} />
                       </div>
                     </div>
-                    {/* Status/Category Tag on Right */}
                     <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 2 }}>
                       <Skeleton.Button active size="small" shape="round" style={{ width: 80, height: 28 }} />
                     </div>
                   </div>
 
                   <div style={{ padding: 24, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    {/* Title */}
                     <div style={{ marginBottom: 16 }}>
                       <Skeleton.Button active size="small" style={{ width: '80%', height: 24 }} />
                     </div>
 
-                    {/* Details */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <Skeleton.Avatar active size="small" shape="square" />
@@ -129,7 +125,6 @@ export default function EventsPage() {
                       </div>
                     </div>
 
-                    {/* Footer */}
                     <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                         <div style={{ height: 12, width: 60, background: 'var(--bg-soft)', borderRadius: 4 }} className="ant-skeleton-active" />

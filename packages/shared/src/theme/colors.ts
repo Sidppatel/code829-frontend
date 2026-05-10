@@ -1,35 +1,18 @@
-/**
- * Premium Concierge — centralized color palette.
- *
- * This file is the single source of truth for every color used in the site.
- * CSS files and inline styles are forbidden from containing hex / rgb / hsl
- * literals — they must reference the CSS custom properties this module
- * injects via `applyThemeVars()`, or import the semantic tokens directly.
- *
- * Palette direction from the Code829 design handoff:
- *   warmer aubergine-plum surfaces, cream (not lavender) text, and a violet
- *   brand spectrum. Rose is kept as a named secondary accent so
- *   `var(--accent-rose)` references continue to resolve.
- */
 
 export const palette = {
-  // Black surfaces
   bgPage: '#0A0A0A',
   bgSurface: '#141414',
   bgElevated: '#1F1F1F',
   bgNav: '#000000',
 
-  // Silver text spectrum
   textLight: '#F5F5F5',
   textMid: '#C0C0C0',
   textDim: '#8A8A8A',
 
-  // Gold brand spectrum (keys retained as `violet*` for backwards-compat references)
   violet: '#D4AF37',
   violetLight: '#E6C460',
   violetDark: '#9C7E1E',
 
-  // Silver palette (rose keys retained as backwards-compat aliases pointing to silver)
   rose: '#C0C0C0',
   roseLight: '#D4D4D4',
   roseDark: '#8A8A8A',
@@ -111,10 +94,6 @@ export const chartPalette = [
   status.danger,
 ] as const;
 
-/**
- * Gradient strings — centralized for gradient-heavy CTAs and accents.
- * Use via `var(--gradient-*)` in CSS / inline styles, or import `gradients.*`.
- */
 export const gradients = {
   brand: `linear-gradient(135deg, ${palette.violet} 0%, ${palette.violetLight} 100%)`,
   brandVertical: `linear-gradient(180deg, ${palette.violet}, ${palette.violetDark})`,
@@ -137,7 +116,6 @@ export const shadows = {
   medium: `0 4px 12px ${semantic.shadow.medium}`,
 } as const;
 
-/** Original 12-hue swatch set for user-selectable table fill colors. */
 export const tablePickerPresets = [
   '#9B6DFF',
   '#6B3FD6',
@@ -153,11 +131,6 @@ export const tablePickerPresets = [
   '#8B5CF6',
 ] as const;
 
-/**
- * Flat map consumed by `applyThemeVars()` to populate `:root`. Every color
- * reference in CSS or inline styles must resolve to one of these keys via
- * `var(--<key>)`.
- */
 export const cssVars: Record<string, string> = {
   primary: semantic.brand,
   'primary-hover': semantic.brandHover,
@@ -243,15 +216,6 @@ function buildRootRule(vars: Record<string, string>): string {
   return `:root {\n${lines.join('\n')}\n}\n`;
 }
 
-/**
- * Synchronously inject the palette into the document as a `<style>` tag.
- *
- * Call this before React renders (top of each app's entry module). The
- * synchronous DOM write guarantees the rule is in the stylesheet before the
- * first paint, so there is no flash of unthemed content.
- *
- * No-op in non-DOM environments (SSR, tests without jsdom).
- */
 export function applyThemeVars(vars: Record<string, string> = cssVars): void {
   if (typeof document === 'undefined') return;
 

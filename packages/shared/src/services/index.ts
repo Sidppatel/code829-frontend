@@ -1,9 +1,3 @@
-/**
- * Class-based service layer. Every service extends `BaseService` and is exposed
- * as a singleton. Old functional exports (`authApi`, `eventsApi`, …) still live
- * in their respective files as thin delegates so existing callers keep working
- * until pages migrate in Phase 2.
- */
 
 export { BaseService } from './BaseService';
 
@@ -64,7 +58,6 @@ export type {
   DevEventListItem,
 } from './DeveloperService';
 
-// ── Legacy functional re-exports (kept for back-compat; migrate callers in Phase 2) ──
 export { authApi } from './authApi';
 export { adminAuthApi } from './adminAuthApi';
 export { eventsApi } from './eventsApi';

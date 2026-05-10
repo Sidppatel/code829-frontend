@@ -1,9 +1,3 @@
-/**
- * Structured logger with timestamps for the frontend.
- * All output goes through this module so we have a single
- * place to control formatting, filtering, and future transport
- * (e.g. sending error logs to a backend endpoint).
- */
 
 import { reportError } from './errorReporter';
 import { status } from '../theme/colors';
@@ -40,7 +34,6 @@ function formatEntry(level: LogLevel, source: string, message: string, data?: un
   }
 }
 
-/** Create a scoped logger for a specific module/component */
 export function createLogger(source: string) {
   return {
     debug: (msg: string, data?: unknown) => formatEntry('DEBUG', source, msg, data),
@@ -50,6 +43,5 @@ export function createLogger(source: string) {
   };
 }
 
-/** Global logger for top-level use */
 const logger = createLogger('App');
 export default logger;

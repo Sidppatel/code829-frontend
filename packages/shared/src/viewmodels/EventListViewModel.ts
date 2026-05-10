@@ -63,7 +63,6 @@ export interface UseEventListVMResult extends EventListState {
 
 export function useEventListVM(params: EventListParams = {}): UseEventListVMResult {
   const key = JSON.stringify(params);
-  // params is captured via JSON.stringify(key); adding the object would re-create vm every render.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const vm = useMemo(() => new EventListViewModel(params), [key]);
   const state = useVMState(vm);

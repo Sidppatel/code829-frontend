@@ -3,7 +3,6 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { usePurchaseQuote } from '../usePurchaseQuote';
 import type { PricingQuoteRequest, PublicQuote } from '../../types/pricing';
 
-// Mock the PurchaseController used inside the ViewModel
 vi.mock('../../controllers/PurchaseController', () => ({
   purchaseController: {
     getQuote: vi.fn(),

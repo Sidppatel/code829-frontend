@@ -41,13 +41,6 @@ const ROLE_COLORS: Record<string, string> = {
   Staff: 'blue',
 };
 
-/**
- * Read-mostly drawer presenting one organization. Surfaces:
- *   - identity (name / legal name / country)
- *   - Stripe Connect state (live status from `useOrganizationStripeStatus`)
- *   - membership preview (full add/remove lives in MembersDrawer)
- *   - inline rename of display + legal name (no separate page)
- */
 export default function OrganizationDetailDrawer({
   open,
   organization,
@@ -141,7 +134,7 @@ export default function OrganizationDetailDrawer({
             </Descriptions.Item>
             <Descriptions.Item label="Legal Name">
               {organization.legalName ?? (
-                <Typography.Text type="secondary">—</Typography.Text>
+                <Typography.Text type="secondary">-</Typography.Text>
               )}
             </Descriptions.Item>
             <Descriptions.Item label="Country">
@@ -215,7 +208,7 @@ export default function OrganizationDetailDrawer({
                 </Descriptions.Item>
                 <Descriptions.Item label="Bank Account">
                   {status.bankAccountLast4 ?? (
-                    <Typography.Text type="secondary">—</Typography.Text>
+                    <Typography.Text type="secondary">-</Typography.Text>
                   )}
                 </Descriptions.Item>
                 {status.stripeAccount?.requirementsCurrentlyDue?.length ? (

@@ -125,7 +125,6 @@ export default function DeveloperLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
-      {/* Desktop/Tablet Sider */}
       {!isMobile && (
         <Sider
           width={siderWidth}
@@ -154,7 +153,6 @@ export default function DeveloperLayout() {
         </Sider>
       )}
 
-      {/* Mobile Bottom Nav */}
       {isMobile && (
         <nav className="mobile-bottom-nav">
           {navItems.slice(0, 6).map((item) => {
@@ -178,8 +176,8 @@ export default function DeveloperLayout() {
                   overflow: 'hidden'
                 }}
               >
-                <span style={{ 
-                  fontSize: 18, 
+                <span style={{
+                  fontSize: 18,
                   background: active ? 'var(--primary-soft)' : 'transparent',
                   padding: '4px 10px',
                   borderRadius: 12,
@@ -190,7 +188,7 @@ export default function DeveloperLayout() {
                 }}>
                   {item.icon}
                 </span>
-                <span style={{ 
+                <span style={{
                   fontWeight: active ? 700 : 500,
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
@@ -207,7 +205,6 @@ export default function DeveloperLayout() {
       )}
 
       <Layout style={{ marginLeft: isMobile ? 0 : siderWidth, background: 'var(--bg-page)', transition: 'margin-left 0.3s ease' }}>
-        {/* Top Header */}
         <Header
           style={{
             height: 72,
@@ -224,7 +221,7 @@ export default function DeveloperLayout() {
             WebkitBackdropFilter: 'blur(12px)',
           }}
         >
-          <TopHeader 
+          <TopHeader
             isMobile={isMobile}
             title="Developer"
             user={user}
@@ -233,7 +230,6 @@ export default function DeveloperLayout() {
           />
         </Header>
 
-        {/* Content */}
         <Content style={{
           padding: isMobile ? '24px 16px' : isTablet ? 32 : 48,
           paddingBottom: isMobile ? 100 : 48,

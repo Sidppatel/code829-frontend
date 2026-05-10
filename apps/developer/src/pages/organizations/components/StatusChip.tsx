@@ -1,13 +1,6 @@
 import { Tag } from 'antd';
 import type { OrganizationStripeState } from '@code829/shared/types/organizations';
 
-/**
- * Visual chip for an organization's coarse Stripe Connect state.
- *
- * State -> color/label is fixed here so dev/admin/staff portals look
- * identical when this chip surfaces. The state itself is computed
- * server-side (see `OrganizationStripeState`); the FE never derives it.
- */
 const STATE_META: Record<
   OrganizationStripeState,
   { color: string; label: string }

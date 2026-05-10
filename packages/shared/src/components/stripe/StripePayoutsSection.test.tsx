@@ -9,10 +9,6 @@ import type {
   OrganizationStripeState,
 } from '../../types/organizations';
 
-// Mock the hook so we control the four state variants directly. Mocking the
-// hook (rather than the underlying axios) keeps tests focused on render output,
-// not React-Query plumbing — which has its own coverage in useAdminStripeStatus
-// integration via the Settings page test.
 vi.mock('../../hooks/useAdminStripeStatus', () => ({
   useAdminStripeStatus: vi.fn(),
 }));
@@ -183,14 +179,12 @@ describe('StripePayoutsSection — state matrix', () => {
     expect(screen.getByText(/members sharing this payout account/i)).toBeInTheDocument();
     expect(screen.getByText('Alice Adams')).toBeInTheDocument();
     expect(screen.getByText('Bob Brown')).toBeInTheDocument();
-    // Avatar initials
     expect(screen.getByText('AA')).toBeInTheDocument();
     expect(screen.getByText('BB')).toBeInTheDocument();
   });
 });
 
 describe('StripePayoutsSection — onResume integration', () => {
-  // jsdom doesn't actually navigate; assign window.location.href and assert it.
   const originalLocation = window.location;
 
   beforeEach(() => {
@@ -254,8 +248,6 @@ describe('StripePayoutsSection — refresh nonce', () => {
         <App><StripePayoutsSection refreshNonce="updated" /></App>
       </QueryClientProvider>,
     );
-    // Effect runs on the changed nonce — refresh is invoked at least once after mount
-    // (initial mount with `refreshNonce='initial'` already counts as a change vs undefined).
     expect(ret.refresh).toHaveBeenCalled();
   });
 });
@@ -277,10 +269,8 @@ describe('StripePayoutsSection — mobile snapshot (360px)', () => {
       }),
     );
     const { container } = renderWithProviders(<StripePayoutsSection />);
-    // Mobile uses the short label
     expect(screen.getByText('Open Stripe')).toBeInTheDocument();
     expect(screen.queryByText('Open Stripe Express dashboard')).not.toBeInTheDocument();
-    // Snapshot the rendered tree at the mobile breakpoint
     expect(container.firstChild).toMatchSnapshot('mobile-active-state');
   });
 
@@ -290,7 +280,6 @@ describe('StripePayoutsSection — mobile snapshot (360px)', () => {
     renderWithProviders(<StripePayoutsSection />);
     const btn = screen.getByRole('button', { name: /resume onboarding/i });
     expect(btn.getAttribute('style')).toContain('width: 100%');
-    // Min tap target 44px (Apple HIG)
     expect(btn.getAttribute('style')).toContain('min-height: 44px');
   });
 });

@@ -40,7 +40,6 @@ export interface EventDetail extends EventSummary {
   createdAt: string;
   ticketTypes?: EventTicketType[];
   tableTypes?: EventTableTypeSummary[];
-  /** Raw per-person price (pre-fee) — admin surfaces only. Public pages use displayFromAmountCents. */
   pricePerPersonCents?: number;
 }
 
@@ -70,7 +69,6 @@ export interface EventFacets {
 export interface EventTicketType {
   id: string;
   label: string;
-  /** Admin only. Public pages use displayPriceCents. */
   priceCents?: number;
   displayPriceCents: number;
   maxQuantity?: number;
@@ -86,7 +84,6 @@ export interface EventTicketTypesResponse {
   eventId: string;
   ticketTypes: EventTicketType[];
 }
-
 
 export interface EventTableTypeSummary {
   id: string;
