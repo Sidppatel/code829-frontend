@@ -85,10 +85,20 @@
 
 .ui-footer__social:hover { background: var(--primary-soft); color: var(--primary-light); }
 
+.ui-footer__social > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.ui-footer__social .anticon,
+.ui-footer__social .anticon svg,
 .ui-footer__social svg {
   width: 18px;
   height: 18px;
   display: block;
+  font-size: 18px;
 }
 
 .ui-footer__sr-only {
