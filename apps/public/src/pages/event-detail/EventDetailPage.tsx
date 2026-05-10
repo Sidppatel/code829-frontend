@@ -108,6 +108,18 @@ export default function EventDetailPage() {
   const [paymentUnavailable, setPaymentUnavailable] = useState(false);
   const [isStartingPurchase, setIsStartingPurchase] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
+
+  useEffect(() => {
+    const footer = document.querySelector('.ui-footer--public');
+    if (!footer) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsFooterVisible(entry.isIntersecting),
+      { rootMargin: '0px 0px -40px 0px' },
+    );
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   // Backend-authoritative pricing quote — never compute totals in the browser.
   // Memoized so an unrelated re-render doesn't fire a new /purchases/quote request.
@@ -673,7 +685,7 @@ export default function EventDetailPage() {
         </Row>
       </div>
 
-      {isMobile && !isSoldOut && step === 'info' && !isKeyboardOpen && (
+      {isMobile && !isSoldOut && step === 'info' && !isKeyboardOpen && !isFooterVisible && (
         <div style={{
           position: 'fixed',
           bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-height, 65px) + 12px)',
