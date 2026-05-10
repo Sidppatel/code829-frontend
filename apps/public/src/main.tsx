@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ThemeProvider } from '@code829/shared/context/ThemeContext';
 import { ThemedApp } from '@code829/shared/components/ThemedApp';
 import { QueryProvider } from '@code829/shared/providers/QueryProvider';
@@ -24,17 +25,21 @@ configureApiClient('user');
 const rootEl = document.getElementById('root');
 if (!rootEl) throw new Error('Root element not found');
 
+const googleClientId = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID ?? '';
+
 createRoot(rootEl).render(
   <StrictMode>
-    <HelmetProvider>
-      <ThemeProvider>
-        <ThemedApp>
-          <QueryProvider>
-            <App />
-          </QueryProvider>
-        </ThemedApp>
-      </ThemeProvider>
-    </HelmetProvider>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <HelmetProvider>
+        <ThemeProvider>
+          <ThemedApp>
+            <QueryProvider>
+              <App />
+            </QueryProvider>
+          </ThemedApp>
+        </ThemeProvider>
+      </HelmetProvider>
+    </GoogleOAuthProvider>
   </StrictMode>,
 );
 

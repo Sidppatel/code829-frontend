@@ -5,6 +5,7 @@ import { MailOutlined, LoginOutlined, LockOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { AxiosError } from 'axios';
+import { GoogleLogin } from '@react-oauth/google';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import { safeReturnUrl } from '@code829/shared/lib/safeRedirect';
@@ -105,6 +106,34 @@ export default function LoginPage() {
     } else {
       if (!values.password) return;
       await handlePasswordSignin({ email: values.email, password: values.password });
+    }
+  };
+
+  const handleGoogleSuccess = async (credential: string) => {
+    setLoading(true);
+    try {
+      const { data } = await authApi.googleSignIn(credential);
+      setUser(data.user);
+      message.success(textTemplates.loggedInAs(data.user.firstName).text);
+      if (!data.user.hasCompletedOnboarding) {
+        const onboardUrl = returnUrl ? `/onboarding?returnUrl=${encodeURIComponent(returnUrl)}` : '/onboarding';
+        navigate(onboardUrl);
+      } else {
+        navigate(safeReturnUrl(returnUrl));
+      }
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }>;
+      if (axiosErr.response?.status === 409) {
+        message.warning(axiosErr.response.data?.message ?? 'Sign in with your password first to link Google.');
+      } else if (axiosErr.response?.status === 401) {
+        message.error('Google sign-in failed. Please try again.');
+      } else if (axiosErr.response?.status === 503) {
+        message.error('Google sign-in is not available right now.');
+      } else {
+        message.error('Google sign-in failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -213,6 +242,21 @@ export default function LoginPage() {
             </div>
           ) : (
             <Form form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+                <GoogleLogin
+                  onSuccess={(resp) => {
+                    if (resp.credential) void handleGoogleSuccess(resp.credential);
+                  }}
+                  onError={() => message.error('Google sign-in failed. Please try again.')}
+                  useOneTap={false}
+                  width="380"
+                />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '12px 0 16px' }}>
+                <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+                <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>or</span>
+                <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+              </div>
               <Form.Item
                 name="email"
                 rules={[

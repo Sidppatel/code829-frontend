@@ -8,6 +8,7 @@ export const authApi = {
   devLogin: authService.devLogin,
   signup: authService.signup,
   signin: authService.signin,
+  googleSignIn: authService.googleSignIn,
   verifyEmail: authService.verifyEmail,
   forgotPassword: authService.userForgotPassword,
   resetPassword: authService.userResetPassword,

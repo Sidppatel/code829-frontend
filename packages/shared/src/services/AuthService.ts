@@ -60,6 +60,9 @@ export class AuthService extends BaseService {
   signin = (email: string, password: string) =>
     this.post<AuthResponse>('/auth/signin', { email, password });
 
+  googleSignIn = (credential: string) =>
+    this.post<AuthResponse>('/auth/google', { credential });
+
   verifyEmail = (token: string) =>
     this.post<AuthResponse>('/auth/verify-email', { token });
 
