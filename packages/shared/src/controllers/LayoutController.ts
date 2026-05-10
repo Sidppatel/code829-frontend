@@ -20,7 +20,6 @@ export class LayoutController extends BaseController {
     this.svc = svc;
   }
 
-  // Templates
   listTemplates = async () => (await this.svc.listTableTemplates()).data;
   createTemplate = async (data: CreateTableTemplatePayload) =>
     (await this.svc.createTableTemplate(data)).data;
@@ -28,7 +27,6 @@ export class LayoutController extends BaseController {
     (await this.svc.updateTableTemplate(id, data)).data;
   deleteTemplate = async (id: string) => (await this.svc.deleteTableTemplate(id)).data;
 
-  // Event tables
   listEventTables = async (eventId: string) =>
     (await this.svc.listEventTables(eventId)).data;
   createEventTable = async (eventId: string, data: CreateEventTablePayload) =>
@@ -38,7 +36,6 @@ export class LayoutController extends BaseController {
   deleteEventTable = async (eventId: string, id: string) =>
     (await this.svc.deleteEventTable(eventId, id)).data;
 
-  // Layout
   getLayout = async (eventId: string) => (await this.svc.getLayout(eventId)).data;
   async saveLayout(eventId: string, payload: SaveLayoutPayload) {
     const { data } = await this.svc.saveLayout(eventId, payload);

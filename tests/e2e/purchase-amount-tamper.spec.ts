@@ -1,17 +1,5 @@
 import { expect, test } from '@playwright/test';
 
-/**
- * Confirms the backend rejects a /purchases/{id}/confirm call when the PaymentIntent's
- * amount doesn't match the booking total (the Phase 1 amount-validation fix).
- *
- * This test talks to the API directly — no UI needed. It:
- *   1. Dev-logs in to get a JWT
- *   2. Creates a booking for a seeded event
- *   3. Without actually paying, pokes the confirm endpoint and asserts a 400
- *      with "Payment amount does not match" or "has not succeeded" in the message
- *
- * Requires E2E_EVENT_SLUG for a capacity/Open event (lighter than tables).
- */
 const EVENT_SLUG = process.env.E2E_EVENT_SLUG;
 const BACKEND = process.env.E2E_API_URL ?? 'http://localhost:8000';
 
@@ -41,7 +29,6 @@ test.describe('@security amount tamper', () => {
     expect(create.status(), await create.text()).toBe(201);
     const booking = await create.json();
 
-    // No payment performed — confirm must fail.
     const confirm = await request.post(`${BACKEND}/v1/purchases/${booking.id}/confirm`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -49,7 +36,6 @@ test.describe('@security amount tamper', () => {
     const body = await confirm.json();
     expect(body.message).toMatch(/amount|succeeded|payment/i);
 
-    // Clean up
     await request.post(`${BACKEND}/v1/purchases/${booking.id}/cancel`, {
       headers: { Authorization: `Bearer ${token}` },
     });

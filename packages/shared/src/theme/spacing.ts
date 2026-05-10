@@ -1,4 +1,3 @@
-/** Spacing scale — 4px base grid. */
 export const spacing = {
   0: '0',
   1: '4px',

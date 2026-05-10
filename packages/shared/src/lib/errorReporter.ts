@@ -1,13 +1,9 @@
-/**
- * Reports critical frontend errors to the backend developer log endpoint.
- * Fire-and-forget — never blocks UI and never throws.
- */
 
 const buffer: Array<{ source: string; message: string; data?: unknown }> = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let disabled = false;
 
-const FLUSH_INTERVAL = 5000; // 5 seconds
+const FLUSH_INTERVAL = 5000;
 const MAX_BUFFER = 10;
 
 function scheduleFlush() {

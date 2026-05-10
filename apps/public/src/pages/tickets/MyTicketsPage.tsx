@@ -44,10 +44,10 @@ export default function MyTicketsPage() {
       )}
 
       {!loading && !error && (!tickets || tickets.length === 0) ? (
-        <Empty 
+        <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description="You don't have any tickets yet." 
-          style={{ padding: '64px 0', background: 'var(--bg-soft)', borderRadius: 24 }} 
+          description="You don't have any tickets yet."
+          style={{ padding: '64px 0', background: 'var(--bg-soft)', borderRadius: 24 }}
         />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
@@ -62,14 +62,14 @@ export default function MyTicketsPage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ 
-                    fontWeight: 700, 
-                    fontSize: 16, 
+                  <div style={{
+                    fontWeight: 700,
+                    fontSize: 16,
                     marginBottom: 2,
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis', 
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
-                    fontFamily: 'var(--font-display)' 
+                    fontFamily: 'var(--font-display)'
                   }}>
                     {ticket.eventTitle}
                   </div>
@@ -81,13 +81,13 @@ export default function MyTicketsPage() {
                 )}
               </div>
 
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: 6, 
-                fontSize: 13, 
-                color: 'var(--text-secondary)', 
-                marginBottom: 20 
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+                fontSize: 13,
+                color: 'var(--text-secondary)',
+                marginBottom: 20
               }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <CalendarOutlined style={{ color: 'var(--primary)', fontSize: 14 }} />
@@ -110,9 +110,9 @@ export default function MyTicketsPage() {
                 onClick={() => showQr(ticket)}
                 block
                 loading={qr.loading}
-                style={{ 
-                  borderRadius: 10, 
-                  height: 40, 
+                style={{
+                  borderRadius: 10,
+                  height: 40,
                   fontWeight: 600,
                   background: 'var(--gradient-brand)',
                   border: 'none'
@@ -137,4 +137,3 @@ export default function MyTicketsPage() {
     </PageShell>
   );
 }
-

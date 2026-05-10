@@ -182,9 +182,9 @@ export function NavbarPublic({ items = [], menuItems, user, onLogout, actions }:
           </button>
         </div>
       </div>
-      
+
       {mobileMenuOpen && (
-        <div 
+        <div
           className="ui-navbar__mobile-overlay"
           onClick={(e) => {
             if (e.target === e.currentTarget) {

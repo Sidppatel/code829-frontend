@@ -1,5 +1,3 @@
-// Rolling buffer of recent console.error / console.warn messages plus
-// window-level errors. Used to attach diagnostics to feedback submissions.
 
 type Entry = { t: number; level: 'error' | 'warn' | 'uncaught' | 'rejection'; msg: string };
 
@@ -9,7 +7,6 @@ const MAX_LINE = 800;
 let buffer: Entry[] = [];
 let installed = false;
 
-// Strip obvious secrets from a line before storing.
 function scrub(s: string): string {
   if (!s) return s;
   let out = s

@@ -13,12 +13,6 @@ interface AuthVMState {
   error: string | null;
 }
 
-/**
- * AuthViewModel bridges the Zustand auth store + AuthController into the VM
- * contract. It subscribes to both the store (for login state changes from
- * other tabs / hooks) and the controller's events, and exposes command
- * methods that pages can invoke directly.
- */
 export class AuthViewModel extends BaseViewModel<AuthVMState> {
   private readonly unsubStore: () => void;
   private readonly unsubLogin: () => void;

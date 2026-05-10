@@ -19,8 +19,6 @@ export default function ProtectedRoute({ children, minRole = 'User' }: Props) {
   const { user, isHydrated } = useAuthStore();
   const location = useLocation();
 
-  // useSessionRefresh is still probing the session cookie — don't redirect yet, or a valid
-  // refresh will get bounced to /login before the store has had a chance to populate.
   if (!isHydrated) return <LoadingSpinner />;
 
   if (!user) {
@@ -31,7 +29,6 @@ export default function ProtectedRoute({ children, minRole = 'User' }: Props) {
     return <Navigate to="/login?error=insufficient_role" replace />;
   }
 
-  // Onboarding guard: don't let user access anything except /profile if they haven't set their name
   const isPendingSetup = user.firstName === 'Pending' && user.lastName === 'Setup';
   if (isPendingSetup && location.pathname !== '/profile') {
     return <Navigate to="/profile" state={{ setup: true }} replace />;

@@ -5,7 +5,6 @@ import ProtectedRoute from '../auth/ProtectedRoute';
 import { useAuthStore } from '../../stores/authStore';
 import type { UserProfile } from '../../types/auth';
 
-// LoadingSpinner rendered when not hydrated
 vi.mock('../shared/LoadingSpinner', () => ({
   default: () => <div data-testid="loading-spinner" />,
 }));
@@ -66,7 +65,6 @@ describe('ProtectedRoute', () => {
 
     it('includes returnUrl in the redirect', () => {
       useAuthStore.setState({ user: null, isHydrated: true });
-      // Navigate to /protected — the redirect URL should encode it
       renderRoute(
         <ProtectedRoute><div data-testid="content" /></ProtectedRoute>,
         '/protected',
@@ -85,7 +83,7 @@ describe('ProtectedRoute', () => {
 
   describe('role check', () => {
     it('redirects when user role is insufficient', () => {
-      useAuthStore.setState({ user: mockUser, isHydrated: true }); // User role
+      useAuthStore.setState({ user: mockUser, isHydrated: true });
       renderRoute(
         <ProtectedRoute minRole="Admin"><div data-testid="content" /></ProtectedRoute>,
       );
@@ -94,7 +92,7 @@ describe('ProtectedRoute', () => {
     });
 
     it('renders when user role satisfies minRole', () => {
-      useAuthStore.setState({ user: adminUser, isHydrated: true }); // Admin
+      useAuthStore.setState({ user: adminUser, isHydrated: true });
       renderRoute(
         <ProtectedRoute minRole="User"><div data-testid="content" /></ProtectedRoute>,
       );

@@ -45,7 +45,6 @@ function UserAvatar({ imageUrl, firstName }: { imageUrl?: string | null; firstNa
 export default function TopHeader({ isMobile, title, user, userMenuItems, showMetrics = false }: TopHeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Wrap each item's onClick to also close the dropdown
   const wrappedItems = userMenuItems?.map((item) => {
     if (!item || !('onClick' in item) || !item.onClick) return item;
     const original = item.onClick;

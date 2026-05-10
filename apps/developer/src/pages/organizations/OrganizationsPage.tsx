@@ -33,17 +33,6 @@ import OrganizationDetailDrawer from './components/OrganizationDetailDrawer';
 import MembersDrawer from './components/MembersDrawer';
 import StripeOnboardingModal from './components/StripeOnboardingModal';
 
-/**
- * Developer-only org administration surface.
- *
- * Single page that orchestrates four overlays — detail / members /
- * stripe / new — keyed off a single `selectedOrg` so reopening an
- * overlay always sees the freshest data after a mutation.
- *
- * Pagination is server-driven (`/developer/organizations`); listing
- * is intentionally simple: search + archived toggle. Stripe state per
- * row comes pre-computed from the BE (no FE derivation).
- */
 export default function OrganizationsPage() {
   const { message } = App.useApp();
   const isMobile = useIsMobile();

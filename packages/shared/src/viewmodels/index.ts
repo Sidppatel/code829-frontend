@@ -1,10 +1,3 @@
-/**
- * Class-based ViewModels. Each VM owns UI state for a page/widget, subscribes
- * to controller events, and exposes `getState` / `subscribe` so React
- * consumes it via `useSyncExternalStore` (see `useVM.ts`).
- *
- * Phase 1 seeds only — more VMs land as pages migrate in Phase 2.
- */
 
 export { BaseViewModel } from './BaseViewModel';
 export { useVMState } from './useVM';

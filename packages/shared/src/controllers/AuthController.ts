@@ -8,10 +8,6 @@ export type AuthEvent =
   | 'auth:logout'
   | 'auth:profileUpdated';
 
-/**
- * Thin orchestration layer over AuthService + useAuthStore. Wraps token /
- * profile persistence so ViewModels never touch the store directly.
- */
 export class AuthController extends BaseController {
   private static _instance: AuthController | null = null;
   static getInstance(): AuthController {
@@ -23,7 +19,6 @@ export class AuthController extends BaseController {
     this.svc = svc;
   }
 
-  // ── User flows ────────────────────────────────
   async requestMagicLink(email: string, returnUrl?: string, frontendOrigin?: string) {
     await this.svc.requestMagicLink(email, returnUrl, frontendOrigin);
   }
@@ -54,7 +49,6 @@ export class AuthController extends BaseController {
     return this.refreshMe();
   }
 
-  // ── Admin flows ───────────────────────────────
   async adminLogin(email: string, password: string): Promise<BusinessAuthResponse> {
     const { data } = await this.svc.adminLogin(email, password);
     useAuthStore.getState().setUser(data.user);

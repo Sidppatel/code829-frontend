@@ -7,7 +7,6 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        // Content-hashed filenames ensure browsers always get fresh code after deploys
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',

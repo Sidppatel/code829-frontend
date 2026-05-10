@@ -122,7 +122,7 @@ export default function PurchaseDetailPage() {
 
   return (
     <div>
-      <Helmet><title>Purchase details — Code829</title></Helmet>
+      <Helmet><title>Purchase details - Code829</title></Helmet>
       <PagePreamble
         kicker={`Purchase #${booking.purchaseNumber}`}
         title={booking.eventTitle}
@@ -143,7 +143,6 @@ export default function PurchaseDetailPage() {
       />
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 32px 64px' }}>
 
-      {/* Event Banner */}
       {booking.eventImagePath && (
         <div style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 16, maxHeight: 180 }}>
           <img
@@ -155,7 +154,6 @@ export default function PurchaseDetailPage() {
         </div>
       )}
 
-      {/* Event Info */}
       <Card size="small" style={{ marginBottom: 12, borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
         {sectionTitle('Event')}
         <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>{booking.eventTitle}</div>
@@ -163,7 +161,7 @@ export default function PurchaseDetailPage() {
           <>
             {formatEventDate(booking.eventDate)}
             {booking.eventEndDate && (
-              <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}> — {formatEventDate(booking.eventEndDate)}</span>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}> - {formatEventDate(booking.eventEndDate)}</span>
             )}
           </>
         ))}
@@ -178,7 +176,6 @@ export default function PurchaseDetailPage() {
         {booking.eventCategory && infoRow(<AppstoreOutlined />, 'Category', <Tag>{booking.eventCategory}</Tag>)}
       </Card>
 
-      {/* Purchase Details */}
       <Card size="small" style={{ marginBottom: 12, borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
         {sectionTitle('Purchase Info')}
         {infoRow(<NumberOutlined />, 'Purchase Number', booking.purchaseNumber)}
@@ -191,10 +188,6 @@ export default function PurchaseDetailPage() {
         {booking.ticketCount > 0 && infoRow(<SendOutlined />, 'Tickets', `${booking.ticketCount} ticket${booking.ticketCount !== 1 ? 's' : ''}`)}
       </Card>
 
-      {/* Price — mirrors the checkout breakdown so the receipt shape is familiar.
-          booking.totalCents is pre-tax (admin + platform fee). The charged total comes from the
-          StripeTransaction once the webhook has enriched it; amountCents is the PaymentIntent
-          amount and is already tax-inclusive, so it works as a fallback before enrichment. */}
       {(() => {
         const subtotalCents = booking.totalCents;
         const chargedCents = booking.transaction?.totalChargedCents
@@ -213,7 +206,6 @@ export default function PurchaseDetailPage() {
         );
       })()}
 
-      {/* Payment Info */}
       {booking.transaction && (
         <Card size="small" style={{ marginBottom: 12, borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
           {sectionTitle('Payment')}
@@ -225,7 +217,6 @@ export default function PurchaseDetailPage() {
         </Card>
       )}
 
-      {/* Actions */}
       <Card size="small" style={{ marginBottom: 24, borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
         <Space wrap>
           {isPaid && (
@@ -256,7 +247,6 @@ export default function PurchaseDetailPage() {
         </Space>
       </Card>
 
-      {/* QR Modal */}
       <Modal
         open={qrUrl !== null}
         onCancel={() => {

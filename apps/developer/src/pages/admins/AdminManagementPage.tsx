@@ -43,8 +43,6 @@ export default function AdminManagementPage() {
   const navigate = useNavigate();
   const { message } = App.useApp();
 
-  // Org list (lightweight) drives the picker; per-org detail builds the
-  // businessUserId -> org map shown in the Organization column.
   const [orgs, setOrgs] = useState<OrganizationListItem[]>([]);
   const [orgMap, setOrgMap] = useState<Record<string, AdminOrgEntry>>({});
   const [moveTarget, setMoveTarget] = useState<BusinessUserListItem | null>(null);
@@ -72,9 +70,6 @@ export default function AdminManagementPage() {
     return () => { cancelled = true; };
   }, [page, search, message]);
 
-  // Build the businessUserId -> organization map. We fetch the (small)
-  // org list, then per-org details so we get the members array. Orgs
-  // are scarce by design, so this is cheap.
   const loadOrgMap = useCallback(async () => {
     try {
       const { data } = await organizationsApi.list({ page: 1, pageSize: 200 });
@@ -93,7 +88,7 @@ export default function AdminManagementPage() {
       });
       setOrgMap(next);
     } catch {
-      // silent — column will just show "—" if the dev backend is offline
+      // silent - column will just show "-" if the dev backend is offline
     }
   }, []);
 
@@ -138,7 +133,6 @@ export default function AdminManagementPage() {
     setMoving(true);
     try {
       const current = orgMap[moveTarget.businessUserId];
-      // If user is already in another org, remove first.
       if (current && current.organizationId !== movePicked) {
         try {
           await organizationsApi.removeMember(
@@ -213,7 +207,7 @@ export default function AdminManagementPage() {
                 return entry ? (
                   <Link to="/organizations">{entry.organizationName}</Link>
                 ) : (
-                  <Typography.Text type="secondary">—</Typography.Text>
+                  <Typography.Text type="secondary">-</Typography.Text>
                 );
               },
             },

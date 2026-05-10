@@ -1,15 +1,3 @@
-/**
- * Universal floor-plan grid primitive.
- *
- *   Inputs: rows × cols, list of tables (each with anchor + row/col span + shape + color).
- *   Output: a CSS-Grid floor plan that places each table at its anchor cell, spans the
- *   requested footprint, blocks the covered cells from clicks (no overlap), and renders
- *   the shape (circle / rounded rect / square) as visual styling that does not warp the
- *   grid.
- *
- *   Consumers (admin editor, public booking, display preview) supply a `renderTable`
- *   slot for the inner contents and optional callbacks for click / resize.
- */
 import {
   useCallback,
   useMemo,
@@ -56,16 +44,12 @@ export interface FloorPlanGridProps<T extends FloorPlanTable> {
   cellSize?: number;
   showAxis?: boolean;
   selectedTableId?: string | null;
-  /** Inner contents of the table cell. Wrapper handles shape + color + placement. */
   renderTable?: (table: T, ctx: FloorPlanCellContext) => ReactNode;
-  /** Extra class on the table wrapper — for status borders / locked / etc. */
   tableClassName?: (table: T, ctx: FloorPlanCellContext) => string | undefined;
-  /** Extra inline style on the table wrapper. */
   tableStyle?: (table: T, ctx: FloorPlanCellContext) => CSSProperties | undefined;
   onCellClick?: (row: number, col: number) => void;
   onTableClick?: (table: T) => void;
   onTableResize?: (id: string, rowSpan: number, colSpan: number) => void;
-  /** Color used for the empty-cell hover preview when onCellClick is wired. */
   addPreviewColor?: string;
   className?: string;
   ariaLabel?: string;
@@ -97,7 +81,6 @@ export default function FloorPlanGrid<T extends FloorPlanTable>(props: FloorPlan
   } | null>(null);
   const previewRef = useRef<{ rowSpan: number; colSpan: number } | null>(null);
 
-  /** Effective tables — include resize preview if active. */
   const effectiveTables = useMemo(() => {
     if (!resizePreview) return tables;
     return tables.map((t) =>
@@ -114,7 +97,6 @@ export default function FloorPlanGrid<T extends FloorPlanTable>(props: FloorPlan
     return m;
   }, [effectiveTables]);
 
-  /** CSS grid: optional axis row/col, then `rows` × `cols` cell tracks. */
   const colTemplate = `${showAxis ? `${AXIS_W}px ` : ''}repeat(${cols}, ${cellSize}px)`;
   const rowTemplate = `${showAxis ? `${AXIS_H}px ` : ''}repeat(${rows}, ${cellSize}px)`;
   const wrapperStyle: CSSProperties = {
@@ -187,7 +169,6 @@ export default function FloorPlanGrid<T extends FloorPlanTable>(props: FloorPlan
     [onTableResize, tables, cellSize, rows, cols],
   );
 
-  /** Render the children of the grid container. */
   const cells: ReactNode[] = [];
 
   if (showAxis) {

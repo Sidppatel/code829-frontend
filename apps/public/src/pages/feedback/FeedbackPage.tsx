@@ -46,7 +46,6 @@ export default function FeedbackPage() {
 
     setSubmitting(true);
     try {
-      // Bug reports carry a diagnostics blob (UA, URL, recent console errors) to speed triage.
       const diagnostics = type === 'Bug' ? JSON.stringify(getDiagnostics()) : undefined;
       await feedbackApi.submit({
         name: name.trim(),
@@ -70,10 +69,10 @@ export default function FeedbackPage() {
 
   if (submitted) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
         background: 'var(--bg-page)',
         padding: '24px'
@@ -85,14 +84,14 @@ export default function FeedbackPage() {
           style={{ maxWidth: 500, width: '100%' }}
         >
           <Card className="glass-card" style={{ borderRadius: 24, textAlign: 'center' }} styles={{ body: { padding: 48 } }}>
-            <div style={{ 
-              width: 80, 
-              height: 80, 
+            <div style={{
+              width: 80,
+              height: 80,
               background: 'var(--bg-muted)',
-              borderRadius: 99, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
+              borderRadius: 99,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               margin: '0 auto 32px',
               color: 'var(--accent-violet)',
               fontSize: 40,
@@ -103,9 +102,9 @@ export default function FeedbackPage() {
             <p style={{ color: 'var(--text-secondary)', fontSize: 16, marginBottom: 32, lineHeight: 1.6 }}>
               Your feedback is invaluable. We've received your message and will use it to make the platform even better.
             </p>
-            <Button 
-              type="primary" 
-              size="large" 
+            <Button
+              type="primary"
+              size="large"
               onClick={() => {
                 setSubmitted(false);
                 setBody('');
@@ -114,10 +113,10 @@ export default function FeedbackPage() {
                 setPageUrl('');
                 setStepsToReproduce('');
               }}
-              style={{ 
-                height: 54, 
-                padding: '0 40px', 
-                borderRadius: 12, 
+              style={{
+                height: 54,
+                padding: '0 40px',
+                borderRadius: 12,
                 fontWeight: 700,
                 background: 'var(--gradient-brand)',
                 border: 'none',
@@ -142,19 +141,19 @@ export default function FeedbackPage() {
 
   const itemVariants = {
     initial: { opacity: 0, y: 30 },
-    animate: { 
-      opacity: 1, 
-      y: 0, 
+    animate: {
+      opacity: 1,
+      y: 0,
       transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const }
     }
   };
 
   if (submitted) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
         background: 'var(--bg-page)',
         padding: '24px'
@@ -166,14 +165,14 @@ export default function FeedbackPage() {
           style={{ maxWidth: 500, width: '100%' }}
         >
           <div className="glass-card" style={{ borderRadius: 36, textAlign: 'center', padding: 60, boxShadow: 'var(--card-shadow)' }}>
-            <div style={{ 
-              width: 80, 
-              height: 80, 
+            <div style={{
+              width: 80,
+              height: 80,
               background: 'var(--bg-muted)',
-              borderRadius: 24, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
+              borderRadius: 24,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               margin: '0 auto 32px',
               color: 'var(--accent-violet)',
               fontSize: 40,
@@ -184,9 +183,9 @@ export default function FeedbackPage() {
             <p style={{ color: 'var(--text-secondary)', fontSize: 16, marginBottom: 40, lineHeight: 1.6, fontWeight: 500 }}>
               Your perspective is essential to our evolution. We've received your feedback and will use it to refine our standard of excellence.
             </p>
-            <Button 
-              type="primary" 
-              size="large" 
+            <Button
+              type="primary"
+              size="large"
               onClick={() => {
                 setSubmitted(false);
                 setBody('');
@@ -195,10 +194,10 @@ export default function FeedbackPage() {
                 setPageUrl('');
                 setStepsToReproduce('');
               }}
-              style={{ 
-                height: 60, 
-                padding: '0 48px', 
-                borderRadius: 16, 
+              style={{
+                height: 60,
+                padding: '0 48px',
+                borderRadius: 16,
                 fontWeight: 800,
                 background: 'var(--gradient-brand)',
                 border: 'none',
@@ -231,7 +230,6 @@ export default function FeedbackPage() {
           <Col xs={24} lg={18} xl={14}>
             <motion.div variants={itemVariants}>
               <div className="glass-card" style={{ padding: '60px 48px', borderRadius: 40, boxShadow: 'var(--card-shadow)' }}>
-                {/* Feedback Type Selector */}
                 <div style={{ marginBottom: 48 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 24, color: 'var(--text-muted)' }}>
                     Category
@@ -264,15 +262,14 @@ export default function FeedbackPage() {
                   </div>
                 </div>
 
-                {/* Rating Input */}
                 <div style={{ marginBottom: 48 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 24, color: 'var(--text-muted)' }}>
                     Overall Rating
                   </label>
-                  <div style={{ 
+                  <div style={{
                     background: 'var(--bg-soft)',
-                    padding: '32px', 
-                    borderRadius: 24, 
+                    padding: '32px',
+                    borderRadius: 24,
                     border: '1px solid var(--border)',
                     textAlign: 'center'
                   }}>
@@ -287,7 +284,6 @@ export default function FeedbackPage() {
                   </div>
                 </div>
 
-                {/* Name & Email Grid */}
                 <Row gutter={24}>
                   <Col xs={24} sm={12}>
                     <div style={{ marginBottom: 32 }}>
@@ -298,11 +294,11 @@ export default function FeedbackPage() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Full name"
-                        style={{ 
-                          height: 60, 
-                          borderRadius: 18, 
+                        style={{
+                          height: 60,
+                          borderRadius: 18,
                           background: 'var(--bg-soft)',
-                          border: '1px solid var(--border)', 
+                          border: '1px solid var(--border)',
                           color: 'var(--text-primary)',
                           fontSize: 16,
                           padding: '0 20px',
@@ -321,11 +317,11 @@ export default function FeedbackPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Email address"
                         type="email"
-                        style={{ 
-                          height: 60, 
-                          borderRadius: 18, 
+                        style={{
+                          height: 60,
+                          borderRadius: 18,
                           background: 'var(--bg-soft)',
-                          border: '1px solid var(--border)', 
+                          border: '1px solid var(--border)',
                           color: 'var(--text-primary)',
                           fontSize: 16,
                           padding: '0 20px',
@@ -336,7 +332,6 @@ export default function FeedbackPage() {
                   </Col>
                 </Row>
 
-                {/* Feedback Message */}
                 <div style={{ marginBottom: type === 'Bug' ? 24 : 48 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 16, color: 'var(--text-muted)' }}>
                     {type === 'Bug' ? 'What went wrong?' : 'Your message'}
@@ -359,7 +354,6 @@ export default function FeedbackPage() {
                   />
                 </div>
 
-                {/* Bug-specific fields */}
                 {type === 'Bug' && (
                   <>
                     <div style={{ marginBottom: 24 }}>
@@ -406,7 +400,6 @@ export default function FeedbackPage() {
                   </>
                 )}
 
-                {/* Submit Action */}
                 <Button
                   type="primary"
                   size="large"
@@ -414,10 +407,10 @@ export default function FeedbackPage() {
                   onClick={handleSubmit}
                   loading={submitting}
                   block
-                  style={{ 
-                    height: 72, 
-                    borderRadius: 20, 
-                    fontWeight: 900, 
+                  style={{
+                    height: 72,
+                    borderRadius: 20,
+                    fontWeight: 900,
                     fontSize: 18,
                     background: 'var(--gradient-brand)',
                     border: 'none',

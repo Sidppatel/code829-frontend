@@ -22,8 +22,6 @@ export default function AdminPurchasesPage() {
     defaultPageSize: 15,
   });
 
-
-
   const exporter = useExport({
     csv: () => adminPurchasesApi.exportCsv().then((r) => r.data as Blob),
     xlsx: () => adminPurchasesApi.exportXlsx().then((r) => r.data as Blob),

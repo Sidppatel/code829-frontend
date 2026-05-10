@@ -71,10 +71,8 @@ describe('authStore', () => {
 
   describe('persist partialize', () => {
     it('partialize omits isHydrated from persisted state', () => {
-      // Access the store's persist options via its internal structure
-      // The partialize function should only pick `user`
       const state = useAuthStore.getState();
-      // @ts-expect-error — accessing internal persist api
+      // @ts-expect-error - accessing internal persist api
       const api = useAuthStore.persist;
       if (api && typeof api.getOptions === 'function') {
         const { partialize } = api.getOptions();
@@ -84,8 +82,6 @@ describe('authStore', () => {
           expect(persisted).not.toHaveProperty('isHydrated');
         }
       } else {
-        // Verify indirectly: isHydrated is intentionally excluded from persist
-        // (this tests the design invariant documented in authStore.ts)
         expect(useAuthStore.getState().isHydrated).toBe(false); // always starts false
       }
     });

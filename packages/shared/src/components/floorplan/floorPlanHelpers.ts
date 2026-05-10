@@ -16,7 +16,6 @@ export interface SpanCell {
   colSpan: number;
 }
 
-/** Cells covered by any spanning table EXCEPT the anchor (top-left) cell. */
 export function buildCoveredSet(tables: SpanCell[]): Set<string> {
   const set = new Set<string>();
   for (const t of tables) {
@@ -32,7 +31,6 @@ export function buildCoveredSet(tables: SpanCell[]): Set<string> {
   return set;
 }
 
-/** AABB overlap — mirrors backend sp_check_grid_overlap. */
 export function tablesOverlap(a: SpanCell, b: SpanCell): boolean {
   return (
     a.gridRow < b.gridRow + Math.max(1, b.rowSpan) &&

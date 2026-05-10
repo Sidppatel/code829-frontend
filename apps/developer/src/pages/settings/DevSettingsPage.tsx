@@ -22,8 +22,6 @@ export default function DevSettingsPage() {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const [dirty, setDirty] = useState<Record<string, boolean>>({});
-  // Default to the shared brand logo (`/logo.svg`, copied per-app at build).
-  // BE-uploaded logo (if any) overrides via the developer API call below.
   const [logoUrl, setLogoUrl] = useState<string | null>(BRAND_LOGO_URL);
   const isMobile = useIsMobile();
   const { message } = App.useApp();
@@ -44,10 +42,6 @@ export default function DevSettingsPage() {
           const { data: logo } = await imagesApi.getLogo();
           if (logo?.url) setLogoUrl(logo.url);
         } catch (err) {
-          // 404 is expected when no platform logo has been uploaded — the
-          // shared `/logo.svg` fallback already populated `logoUrl`. Log
-          // anything else (network, 5xx) at debug for ops triage without
-          // spamming the dev console as an error.
           const status = (err as { response?: { status?: number } })?.response?.status;
           if (status !== 404) log.debug('Logo fetch failed', err);
         }

@@ -23,11 +23,11 @@ export default function SelectTableStep({
   const isMobile = useIsMobile();
   return (
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-      <Button 
+      <Button
         type="text"
-        icon={<ArrowLeftOutlined />} 
+        icon={<ArrowLeftOutlined />}
         onClick={onBack}
-        style={{ 
+        style={{
           color: 'var(--text-secondary)',
           padding: 0,
           height: 'auto',

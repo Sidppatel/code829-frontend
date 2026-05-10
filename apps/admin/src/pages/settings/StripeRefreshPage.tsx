@@ -8,17 +8,6 @@ import type { OnboardingLinkScope } from '@code829/shared/types/organizations';
 
 const log = createLogger('Admin/StripeRefreshPage');
 
-/**
- * Stripe `refresh_url` landing page.
- *
- * Stripe sends the user here whenever an account-link expires or otherwise
- * fails. The job is to mint a fresh link and redirect, so the user re-enters
- * the hosted flow without having to navigate the admin app manually.
- *
- * Scope is read from `?scope=identity|bank` and defaults to `identity` (Stripe
- * preserves the original `account_link.refresh_url` we passed at link creation
- * time, so the BE controls which scope ends up here).
- */
 export default function StripeRefreshPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();

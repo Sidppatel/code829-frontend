@@ -22,21 +22,7 @@ import type {
 
 const log = createLogger('StripePayoutsSection');
 
-/**
- * Admin Settings → "Payouts" section.
- *
- * Renders one of four states (no-org / identity-pending / bank-needed / active)
- * keyed off `OrganizationStripeStatus.state`. Mobile-first: phones are the
- * primary case (admins check payout status from the field). Desktop layout
- * stretches the same content into a two-column header.
- *
- * The component owns the resume-onboarding interaction (mints a fresh Stripe
- * account-link on click + redirects). Status fetch lives in
- * `useAdminStripeStatus` so the SettingsPage can trigger refetches independently.
- */
 export interface StripePayoutsSectionProps {
-  /** Triggers a refetch when truthy — set by the parent on mount or when the
-   *  Stripe return URL contains `?status=complete`. */
   refreshNonce?: number | string;
 }
 
@@ -48,9 +34,6 @@ export default function StripePayoutsSection({ refreshNonce }: StripePayoutsSect
   const { message } = App.useApp();
   const [resumingScope, setResumingScope] = useState<'identity' | 'bank' | null>(null);
 
-  // Refresh the status whenever the parent bumps `refreshNonce`. Refetch logic
-  // lives in the hook (`refetchOnMount: 'always'`) so this only matters for
-  // manual triggers (e.g. landing on `/settings/stripe/return?status=complete`).
   const lastNonceRef = useRef<typeof refreshNonce>(undefined);
   useEffect(() => {
     if (refreshNonce !== undefined && refreshNonce !== lastNonceRef.current) {
@@ -59,12 +42,7 @@ export default function StripePayoutsSection({ refreshNonce }: StripePayoutsSect
     }
   }, [refreshNonce, refresh]);
 
-  // 403 — admin has no Organization yet. The hook returns the error as-is;
-  // detect by looking at the axios error response.
   const noOrg = isError && getStatusCode(error) === 403;
-  // Org exists but no Stripe account yet — only a developer can create one,
-  // so the admin should see the same "contact platform" empty state as no-org
-  // rather than a "Resume onboarding" button that 409s.
   const noStripeAccount = !!data && data.state === 'not_started' && !data.stripeAccount;
 
   const cardStyle: React.CSSProperties = {
@@ -134,8 +112,6 @@ export default function StripePayoutsSection({ refreshNonce }: StripePayoutsSect
   );
 }
 
-// ── State sub-views ──────────────────────────────────────────────────────────
-
 function LoadingState() {
   return (
     <div
@@ -158,7 +134,7 @@ function NoOrgState() {
       />
       <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-secondary)', margin: 0 }}>
         Your account isn't linked to a payout organization yet. Contact the platform team to get
-        set up — this is a one-time configuration done by a developer.
+        set up - this is a one-time configuration done by a developer.
       </p>
       <a
         href={`mailto:${PLATFORM_CONTACT_EMAIL}?subject=Enable%20payouts%20for%20my%20organization`}
@@ -191,7 +167,7 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
         label="Couldn't load payout status"
       />
       <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0 }}>
-        Something went wrong reading your Stripe status. Try again — if the problem keeps
+        Something went wrong reading your Stripe status. Try again - if the problem keeps
         happening, contact the platform team.
       </p>
       <Button onClick={onRetry} style={fullWidthOnMobile()} icon={<ReloadOutlined />}>
@@ -239,8 +215,6 @@ function ActiveStates({
     </div>
   );
 }
-
-// ── Sub-components ───────────────────────────────────────────────────────────
 
 interface StateChipMeta {
   label: string;
@@ -425,7 +399,7 @@ function ExplainerForState({
       return (
         <p style={baseTextStyle}>
           A payout account hasn't been started yet. Tap "Resume onboarding" to start the Stripe
-          flow — it takes about 5 minutes.
+          flow - it takes about 5 minutes.
         </p>
       );
     case 'identity_pending':
@@ -600,8 +574,6 @@ function MembersList({
   );
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
 function initials(first: string, last: string): string {
   const f = first?.[0] ?? '';
   const l = last?.[0] ?? '';
@@ -609,8 +581,6 @@ function initials(first: string, last: string): string {
 }
 
 function fullWidthOnMobile(): React.CSSProperties {
-  // Returned style is consumed inside a node that already knows mobile vs desktop,
-  // so we always emit `width:100%` and let `max-width` cap it at the parent.
   return { minHeight: 44, width: '100%', maxWidth: 320, fontWeight: 600 };
 }
 

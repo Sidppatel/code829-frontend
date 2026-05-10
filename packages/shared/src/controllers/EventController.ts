@@ -26,7 +26,6 @@ export class EventController extends BaseController {
   getTables = async (id: string) => (await this.svc.getTables(id)).data;
   getTicketTypes = async (id: string) => (await this.svc.getTicketTypes(id)).data;
 
-  // Admin
   adminList = async (params?: AdminEventListParams) => (await this.svc.adminList(params)).data;
   adminGetById = async (id: string) => (await this.svc.adminGetById(id)).data;
 

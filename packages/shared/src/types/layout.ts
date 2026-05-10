@@ -9,7 +9,6 @@ export interface LayoutTable {
   sortOrder: number;
   eventTableId: string;
   eventTableLabel?: string;
-  // Joined from EventTable (read-only in UI)
   capacity: number;
   shape: string;
   color?: string;
@@ -43,7 +42,6 @@ export interface EventTableType {
   tableTemplateId?: string;
   tableTemplateName?: string;
   tableCount?: number;
-  /** True when not yet persisted to the DB — created on first table placement */
   isPending?: boolean;
 }
 

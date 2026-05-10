@@ -10,7 +10,6 @@ export function useHoldTimer(expiresAt: string | null): number {
   const [secondsLeft, setSecondsLeft] = useState(() => calcRemaining(expiresAt));
   const [prevExpiresAt, setPrevExpiresAt] = useState(expiresAt);
 
-  // Sync state when expiresAt prop changes during render
   if (expiresAt !== prevExpiresAt) {
     setPrevExpiresAt(expiresAt);
     setSecondsLeft(calcRemaining(expiresAt));

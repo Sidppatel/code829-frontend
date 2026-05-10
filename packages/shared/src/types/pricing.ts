@@ -1,5 +1,3 @@
-// Mirrors backend PublicQuoteDto (POST /purchases/quote).
-// Single rolled-in display number — no subtotal/fee/tax breakdown.
 export interface PublicQuote {
   displayTotalCents: number;
   seatsIncluded: number;
@@ -8,8 +6,6 @@ export interface PublicQuote {
   expiresAt: string;
 }
 
-// Mirrors backend CheckoutQuoteDto (POST /purchases/checkout-quote).
-// Display total + tax + grand total. Used only on the checkout step.
 export interface CheckoutQuote {
   displayTotalCents: number;
   taxCents: number;

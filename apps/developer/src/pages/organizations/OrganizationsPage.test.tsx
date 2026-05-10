@@ -8,7 +8,6 @@ import type {
   OrganizationListItem,
 } from '@code829/shared/types/organizations';
 
-// Mock both APIs the page touches. Keeps the test hermetic — no axios at all.
 vi.mock('@code829/shared/services/organizationsApi', () => ({
   organizationsApi: {
     list: vi.fn(),
@@ -31,8 +30,6 @@ vi.mock('@code829/shared/services/stripeConnectApi', () => ({
   },
 }));
 
-// Components inside the page reach for /admin/staff list to seed the member
-// pickers; stub the raw axios client so they don't crash.
 vi.mock('@code829/shared/lib/axios', () => ({
   default: {
     get: vi.fn().mockResolvedValue({ data: { items: [] } }),
@@ -42,8 +39,6 @@ vi.mock('@code829/shared/lib/axios', () => ({
   },
 }));
 
-// Each child overlay has its own dedicated tests; stub them so the listing
-// tests don't need to wire QueryClient/router/etc. for unrelated children.
 vi.mock('./components/OrganizationDetailDrawer', () => ({
   default: ({ open, organization }: { open: boolean; organization: { id?: string } | null }) =>
     open && organization ? (
@@ -121,7 +116,6 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // jsdom doesn't ship matchMedia
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: vi.fn().mockImplementation((query: string) => ({
@@ -226,10 +220,6 @@ describe('OrganizationsPage — overlay flows', () => {
   });
 
   it('developerStartOnboarding stub is wired so future tests can invoke it', () => {
-    // The page composes a StripeOnboardingModal that calls
-    // stripeConnectApi.developerStartOnboarding under the hood. We mock the
-    // module factory above; this test guards against silent re-exports that
-    // would let the modal hit the real network in test mode.
     expect(mockStartOnboarding).toBeDefined();
     expect(vi.isMockFunction(mockStartOnboarding)).toBe(true);
   });
@@ -239,7 +229,6 @@ describe('OrganizationsPage — error path', () => {
   it('does not crash when list fails (error logged via App.message)', async () => {
     mockList.mockRejectedValueOnce(new Error('500'));
     renderPage();
-    // Should still render the page shell — failure surfaces via toast, not crash
     expect(await screen.findByText('Organizations')).toBeInTheDocument();
   });
 });

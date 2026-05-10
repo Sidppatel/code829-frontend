@@ -28,7 +28,6 @@ export default function CheckInSelectPage() {
         const { data } = await eventsApi.list({ page: 1, pageSize: 50, search: search || undefined });
         setEvents(data.items);
 
-        // Fetch check-in stats for each event
         const statsResults = await Promise.allSettled(
           data.items.map((ev) => checkInApi.getStats(ev.eventId))
         );
@@ -50,8 +49,8 @@ export default function CheckInSelectPage() {
 
   return (
     <div className="spring-up">
-      <PageHeader 
-        title="Staff Check-In" 
+      <PageHeader
+        title="Staff Check-In"
         subtitle={[
           "Select an event to start welcoming your guests.",
           "Prepare for a smooth entry experience.",
@@ -61,10 +60,10 @@ export default function CheckInSelectPage() {
       />
 
       <div style={{
-        display: 'flex', 
-        gap: 16, 
-        marginBottom: 32, 
-        flexWrap: 'wrap', 
+        display: 'flex',
+        gap: 16,
+        marginBottom: 32,
+        flexWrap: 'wrap',
         alignItems: 'center',
         padding: '24px',
         background: 'var(--bg-surface)',
@@ -98,10 +97,9 @@ export default function CheckInSelectPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 40 }}>
           {events.map((ev) => {
             const s = statsMap[ev.eventId];
-            // Simple heuristic for "happening now" pulse
             const now = new Date();
             const start = new Date(ev.startDate);
-            const isSoon = start.getTime() - now.getTime() < 1000 * 60 * 60 * 4; // 4 hours
+            const isSoon = start.getTime() - now.getTime() < 1000 * 60 * 60 * 4;
 
             return (
               <HumanCard
@@ -114,31 +112,31 @@ export default function CheckInSelectPage() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                       {isSoon && <PulseIndicator status="success" size={6} />}
-                      <h3 style={{ 
-                        fontSize: 18, 
-                        fontWeight: 700, 
-                        margin: 0, 
+                      <h3 style={{
+                        fontSize: 18,
+                        fontWeight: 700,
+                        margin: 0,
                         color: 'var(--text-primary)',
                         fontFamily: "'Playfair Display', serif",
                       }}>
                         {ev.title}
                       </h3>
                     </div>
-                    
+
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 16px', fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500, marginBottom: 20 }}>
                       <span><CalendarOutlined style={{ marginRight: 6, color: 'var(--accent-gold)' }} />{formatEventDate(ev.startDate)}</span>
                       <span><EnvironmentOutlined style={{ marginRight: 6, color: 'var(--primary)' }} />{ev.venueName || ev.venue?.name || 'Virtual'}</span>
                     </div>
 
                     {s && (
-                      <div style={{ 
-                        display: 'flex', 
-                        gap: 12, 
-                        flexWrap: 'wrap', 
-                        background: 'var(--bg-soft)', 
-                        padding: '12px 16px', 
+                      <div style={{
+                        display: 'flex',
+                        gap: 12,
+                        flexWrap: 'wrap',
+                        background: 'var(--bg-soft)',
+                        padding: '12px 16px',
                         borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--border)' 
+                        border: '1px solid var(--border)'
                       }}>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sold</div>
@@ -157,13 +155,13 @@ export default function CheckInSelectPage() {
                       </div>
                     )}
                   </div>
-                  <div style={{ 
-                    width: 44, 
-                    height: 44, 
-                    borderRadius: 'var(--radius-full)', 
-                    background: 'var(--primary-soft)', 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 'var(--radius-full)',
+                    background: 'var(--primary-soft)',
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'center',
                     color: 'var(--primary)',
                     boxShadow: 'var(--shadow-sm)',

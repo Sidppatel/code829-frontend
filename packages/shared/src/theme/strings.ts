@@ -345,13 +345,6 @@ export const strings = {
   },
 } as const satisfies Record<string, Record<string, TextToken>>;
 
-/**
- * Templated copy — functions that produce a `TextToken` from runtime values.
- * Use for pluralization, interpolation, and any copy that can't be a static
- * literal. Consumed by `<Text>` the same way as static tokens:
- *
- *   <Text token={textTemplates.eveningsAcrossSeason(total)} />
- */
 export const textTemplates = {
   eveningsAcrossSeason: (n: number): TextToken => ({
     text: `${n} ${n === 1 ? 'evening' : 'evenings'} across the season — curated and held with care.`,
@@ -377,22 +370,12 @@ export const textTemplates = {
 
 export type StringsRegistry = typeof strings;
 
-/**
- * Dotted-path keys over the strings registry — e.g. `'events.heroHeading'`.
- * The `<Text>` component uses this to constrain the `token` prop so invalid
- * keys fail at compile time.
- */
 export type TextTokenPath = {
   [D in keyof StringsRegistry]: {
     [K in keyof StringsRegistry[D]]: `${D & string}.${K & string}`;
   }[keyof StringsRegistry[D]];
 }[keyof StringsRegistry];
 
-/**
- * Resolve a dotted-path token key to its `TextToken`. Throws at runtime if
- * the path is invalid (which can only happen if the `TextTokenPath` type
- * constraint is circumvented with a cast).
- */
 export function resolveTextToken(path: TextTokenPath): TextToken {
   const [domain, key] = path.split('.') as [
     keyof StringsRegistry,

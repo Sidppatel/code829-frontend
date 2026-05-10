@@ -1,8 +1,3 @@
-/**
- * Class-based controllers. Each controller is a singleton that orchestrates
- * one or more services and emits domain events via a tiny EventTarget bus.
- * Controllers hold no React state — ViewModels subscribe and own UI state.
- */
 
 export { BaseController } from './BaseController';
 

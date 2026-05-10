@@ -22,16 +22,6 @@ interface FormValues {
   initialMemberBusinessUserId: string;
 }
 
-/**
- * Two-purpose modal:
- *   1. Capture name + (optional) legal name + country
- *   2. Pick the seed BusinessUser — required by the BE so an org never
- *      lives orphaned. Defaults country to "US" matching the BE default.
- *
- * On success we hand the freshly created `OrganizationDetail` to the
- * parent so it can pivot the user straight into the detail drawer
- * without a second list refetch.
- */
 export default function NewOrganizationModal({ open, onClose, onCreated }: Props) {
   const [form] = Form.useForm<FormValues>();
   const { message } = App.useApp();

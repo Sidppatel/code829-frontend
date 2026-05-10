@@ -1,9 +1,3 @@
-/**
- * Typography tokens — single source of truth for font families, sizes,
- * weights, line heights, and letter spacing. Consumed by `ThemedApp` at
- * boot via `applyTypographyVars()` which injects `--font-*` CSS vars, and
- * importable directly as TS constants.
- */
 
 export const fontFamily = {
   sans: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",

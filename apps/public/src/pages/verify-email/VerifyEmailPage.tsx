@@ -59,7 +59,7 @@ export default function VerifyEmailPage() {
   if (error) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 16, padding: 24 }}>
-        <Helmet><title>Verify Email — Code829</title></Helmet>
+        <Helmet><title>Verify Email - Code829</title></Helmet>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>Verification failed</h2>
         <p style={{ color: 'var(--text-secondary)', textAlign: 'center', maxWidth: 400 }}>{error}</p>
         <Link to="/signup" style={{ color: 'var(--accent-violet)', fontWeight: 700 }}>
@@ -71,7 +71,7 @@ export default function VerifyEmailPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 16, padding: 24 }}>
-      <Helmet><title>Verify Email — Code829</title></Helmet>
+      <Helmet><title>Verify Email - Code829</title></Helmet>
       <Spin size="large" />
       <p style={{ color: 'var(--text-secondary)' }}>{status}</p>
     </div>

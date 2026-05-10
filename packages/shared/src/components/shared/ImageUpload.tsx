@@ -16,7 +16,6 @@ import type { Area, Point } from 'react-easy-crop';
 import type { ImageDto } from '../../types/image';
 import { imagesApi } from '../../services/imagesApi';
 
-// ─── canvas helper (16:9, no circle clip) ────────────────────────────────────
 async function getCroppedBlob(
   imageSrc: string,
   croppedArea: Area,
@@ -59,7 +58,6 @@ async function getCroppedBlob(
   });
 }
 
-// ─── types ────────────────────────────────────────────────────────────────────
 interface ImageUploadProps {
   entityType: string;
   entityId: string | undefined;
@@ -69,7 +67,6 @@ interface ImageUploadProps {
   disabled?: boolean;
 }
 
-// ─── component ────────────────────────────────────────────────────────────────
 export default function ImageUpload({
   entityType,
   entityId,
@@ -81,7 +78,6 @@ export default function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const { message } = App.useApp();
 
-  // crop modal state
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -89,7 +85,6 @@ export default function ImageUpload({
   const pendingFileName = useRef('image.webp');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ── file selected → open crop modal (single) or upload directly (many) ─
   const handleFileSelect = (file: File) => {
     if (!entityId) {
       message.warning('Save the record first before uploading images');
@@ -127,7 +122,6 @@ export default function ImageUpload({
     setCroppedArea(areaPixels);
   }, []);
 
-  // ── confirmed crop → process → upload ────────────────────────────────────
   const handleConfirm = async () => {
     if (!cropSrc || !croppedArea || !entityId) return;
     setUploading(true);
@@ -146,7 +140,6 @@ export default function ImageUpload({
     }
   };
 
-  // ── delete & primary ──────────────────────────────────────────────────────
   const handleDelete = async (imageId: string) => {
     try {
       await imagesApi.delete(imageId);
@@ -166,10 +159,8 @@ export default function ImageUpload({
     }
   };
 
-  // ─── render ───────────────────────────────────────────────────────────────
   return (
     <div>
-      {/* ── carousel preview ─────────────────────────────────────────────── */}
       {images.length > 0 && (
         <Carousel
           autoplay
@@ -204,7 +195,6 @@ export default function ImageUpload({
         </Carousel>
       )}
 
-      {/* ── image grid ───────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: images.length > 0 ? 12 : 0 }}>
         {images.map((img) => (
           <div
@@ -212,7 +202,7 @@ export default function ImageUpload({
             style={{
               position: 'relative',
               width: 160,
-              height: 90,                   // 16:9 thumbnail preview
+              height: 90,
               borderRadius: 10,
               overflow: 'hidden',
               border: img.isPrimary
@@ -287,10 +277,8 @@ export default function ImageUpload({
         ))}
       </div>
 
-      {/* ── upload trigger ───────────────────────────────────────────────── */}
       {!disabled && images.length < maxCount && (
         <>
-          {/* Hidden native file input */}
           <input
             ref={fileInputRef}
             type="file"
@@ -316,7 +304,6 @@ export default function ImageUpload({
         </>
       )}
 
-      {/* ── crop modal ───────────────────────────────────────────────────── */}
       <Modal
         open={!!cropSrc}
         onCancel={() => setCropSrc(null)}
@@ -341,7 +328,6 @@ export default function ImageUpload({
       >
         {cropSrc && (
           <div>
-            {/* hint */}
             <div
               style={{
                 display: 'flex',
@@ -353,11 +339,10 @@ export default function ImageUpload({
               }}
             >
               <InfoCircleOutlined />
-              Crop to 16:9 — fits the event card (180 px tall) and detail banner (up to 400 px tall).
+              Crop to 16:9 - fits the event card (180 px tall) and detail banner (up to 400 px tall).
               Output saved as 1280 × 720 WebP.
             </div>
 
-            {/* cropper */}
             <div
               style={{
                 position: 'relative',
@@ -389,7 +374,6 @@ export default function ImageUpload({
               />
             </div>
 
-            {/* zoom slider */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <ZoomOutOutlined style={{ color: 'var(--text-muted)', fontSize: 16 }} />
               <Slider

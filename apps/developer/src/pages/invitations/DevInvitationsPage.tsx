@@ -115,7 +115,7 @@ export default function DevInvitationsPage() {
                   Revoke
                 </Button>
               ) : (
-                <Typography.Text type="secondary">—</Typography.Text>
+                <Typography.Text type="secondary">-</Typography.Text>
               ),
           },
         ]}

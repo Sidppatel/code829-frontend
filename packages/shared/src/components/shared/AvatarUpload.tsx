@@ -12,7 +12,6 @@ import {
 import Cropper from 'react-easy-crop';
 import type { Area, Point } from 'react-easy-crop';
 
-// ─── canvas helper ───────────────────────────────────────────────────────────
 async function getCroppedBlob(
   imageSrc: string,
   croppedArea: Area,
@@ -30,7 +29,6 @@ async function getCroppedBlob(
   canvas.height = outputSize;
   const ctx = canvas.getContext('2d')!;
 
-  // Clip to circle
   ctx.beginPath();
   ctx.arc(outputSize / 2, outputSize / 2, outputSize / 2, 0, Math.PI * 2);
   ctx.closePath();
@@ -56,7 +54,6 @@ async function getCroppedBlob(
   });
 }
 
-// ─── component ───────────────────────────────────────────────────────────────
 interface AvatarUploadProps {
   currentUrl?: string | null;
   onUpload: (file: File) => Promise<string | undefined>;
@@ -74,7 +71,6 @@ export default function AvatarUpload({
 }: AvatarUploadProps) {
   const { message } = App.useApp();
 
-  // displayed URL (after confirmed upload)
   const [url, setUrl] = useState(currentUrl);
   const [prevCurrentUrl, setPrevCurrentUrl] = useState(currentUrl);
   if (currentUrl !== prevCurrentUrl) {
@@ -82,7 +78,6 @@ export default function AvatarUpload({
     setUrl(currentUrl);
   }
 
-  // crop modal state
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -92,7 +87,6 @@ export default function AvatarUpload({
   const originalFileName = useRef('avatar.webp');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Called when user picks a file
   const handleFileSelect = (file: File) => {
     originalFileName.current = file.name;
     const reader = new FileReader();
@@ -109,7 +103,6 @@ export default function AvatarUpload({
     setCroppedArea(areaPixels);
   }, []);
 
-  // User confirms the crop
   const handleConfirm = async () => {
     if (!cropSrc || !croppedArea) return;
     setUploading(true);
@@ -141,7 +134,6 @@ export default function AvatarUpload({
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-        {/* Avatar preview */}
         <div style={{ position: 'relative', display: 'inline-block' }}>
           <Avatar
             src={url}
@@ -154,7 +146,6 @@ export default function AvatarUpload({
               display: 'block',
             }}
           />
-          {/* Hidden file input — triggered by the overlay click */}
           <input
             ref={fileInputRef}
             type="file"
@@ -167,7 +158,6 @@ export default function AvatarUpload({
             }}
           />
 
-          {/* Camera overlay — direct child of the relative container so inset:0 works */}
           <div
             style={{
               position: 'absolute',
@@ -204,7 +194,6 @@ export default function AvatarUpload({
           </div>
         </div>
 
-        {/* Side buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Upload
             accept="image/jpeg,image/png,image/webp,image/gif"
@@ -236,7 +225,6 @@ export default function AvatarUpload({
         </div>
       </div>
 
-      {/* ── Crop Modal ─────────────────────────────────────────────────────── */}
       <Modal
         open={!!cropSrc}
         onCancel={() => setCropSrc(null)}
@@ -265,7 +253,6 @@ export default function AvatarUpload({
       >
         {cropSrc && (
           <div>
-            {/* Cropper area */}
             <div
               style={{
                 position: 'relative',
@@ -297,7 +284,6 @@ export default function AvatarUpload({
               />
             </div>
 
-            {/* Zoom slider */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <ZoomOutOutlined style={{ color: 'var(--text-muted)', fontSize: 16 }} />
               <Slider

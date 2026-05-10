@@ -61,7 +61,6 @@ export class LayoutService extends BaseService {
     super('LayoutService');
   }
 
-  // ── Table templates ─────────────────────────────
   listTableTemplates = () => this.get('/admin/table-templates');
 
   createTableTemplate = (data: CreateTableTemplatePayload) =>
@@ -72,7 +71,6 @@ export class LayoutService extends BaseService {
 
   deleteTableTemplate = (id: string) => this.delete(`/admin/table-templates/${id}`);
 
-  // ── Event tables ────────────────────────────────
   listEventTables = (eventId: string) =>
     this.get<EventTableType[]>(`/admin/events/${eventId}/event-tables`);
 
@@ -85,7 +83,6 @@ export class LayoutService extends BaseService {
   deleteEventTable = (eventId: string, id: string) =>
     this.delete(`/admin/events/${eventId}/event-tables/${id}`);
 
-  // ── Layout ──────────────────────────────────────
   getLayout = (eventId: string) => this.get(`/admin/events/${eventId}/layout`);
 
   saveLayout = (eventId: string, payload: SaveLayoutPayload) =>

@@ -6,13 +6,7 @@ import ScrollToTop from '../components/shared/ScrollToTop';
 
 interface Props {
   children: ReactNode;
-  /**
-   * When true, renders a full-page maintenance notice instead of the routed
-   * app. Intended to be wired from `import.meta.env.VITE_MAINTENANCE === 'true'`
-   * in each app's entry so ops can flip a build flag without code changes.
-   */
   maintenanceMode?: boolean;
-  /** Optional custom fallback for Suspense; defaults to the shared spinner. */
   fallback?: ReactNode;
 }
 
@@ -39,12 +33,6 @@ function MaintenancePage() {
   );
 }
 
-/**
- * Cross-app chrome: router + error boundary + suspense + global gates.
- * Apps compose their routed content inside:
- *
- *   <AppShell><Routes>{buildRoutes(routes)}</Routes></AppShell>
- */
 export function AppShell({ children, maintenanceMode = false, fallback }: Props) {
   if (maintenanceMode) return <MaintenancePage />;
 

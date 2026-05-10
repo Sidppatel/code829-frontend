@@ -51,7 +51,7 @@ export default function SignupPage() {
       justifyContent: 'center',
       padding: '24px',
     }}>
-      <Helmet><title>Create Account — Code829</title></Helmet>
+      <Helmet><title>Create Account - Code829</title></Helmet>
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}

@@ -12,7 +12,6 @@ function renderConfig(config: RouteConfig, idx: number): ReactElement {
     leaf = <Lazy />;
   }
 
-  // Layout branch: Layout renders via <Outlet />, children routes live inside.
   if (Layout) {
     const layoutEl = requiredRole ? (
       <ProtectedRoute minRole={requiredRole}>
@@ -28,8 +27,6 @@ function renderConfig(config: RouteConfig, idx: number): ReactElement {
     );
   }
 
-  // Guarded group (no layout, no element): emit a pathless guard route whose
-  // children render through <ProtectedRoute>'s <Outlet />.
   if (requiredRole && !leaf) {
     return (
       <Route
@@ -41,7 +38,6 @@ function renderConfig(config: RouteConfig, idx: number): ReactElement {
     );
   }
 
-  // Guarded leaf (no layout): wrap element with ProtectedRoute.
   if (requiredRole && leaf) {
     leaf = <ProtectedRoute minRole={requiredRole}>{leaf}</ProtectedRoute>;
   }
@@ -57,10 +53,6 @@ function renderConfig(config: RouteConfig, idx: number): ReactElement {
   );
 }
 
-/**
- * Expand a `RouteConfig[]` into a react-router `<Route>` tree. Consumers wrap
- * the result in `<Routes>` from the app's `<AppShell>`.
- */
 export function buildRoutes(configs: RouteConfig[]): ReactElement[] {
   return configs.map(renderConfig);
 }

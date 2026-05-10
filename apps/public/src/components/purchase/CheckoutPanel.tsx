@@ -98,7 +98,6 @@ export default function CheckoutPanel(props: Props) {
           <Skeleton active paragraph={{ rows: 3 }} />
         ) : (
           <>
-            {/* Customers see only the admission price (admin price + platform fee rolled in) and tax. */}
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography.Text>Subtotal</Typography.Text>
               <Typography.Text>{quote.formattedDisplayTotal}</Typography.Text>

@@ -44,7 +44,6 @@ export default function LayoutEditorPage() {
 
   const selectedTable = tables.find((t) => t.id === selectedTableId) ?? null;
 
-  // Derived: set of table IDs that are locked (Booked or Locked status)
   const lockedTableIds = useMemo(
     () => new Set(tables.filter((t) => t.status === 'Booked' || t.status === 'Locked').map((t) => t.id)),
     [tables],
@@ -55,8 +54,6 @@ export default function LayoutEditorPage() {
     (tableId: string) => lockedTableIds.has(tableId),
     [lockedTableIds],
   );
-
-  // (Overlap is computed via tablesOverlap on placement / resize.)
 
   const loadAll = useCallback(async () => {
     if (!eventId) return;
@@ -93,7 +90,6 @@ export default function LayoutEditorPage() {
 
   useEffect(() => { Promise.resolve().then(() => loadAll()); }, [loadAll]);
 
-  // Debounced draft auto-save
   useEffect(() => {
     if (!isDirty || !eventId) return;
     if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
@@ -119,7 +115,6 @@ export default function LayoutEditorPage() {
     };
   }, [isDirty, eventId, tables, gridRows, gridCols]);
 
-  // beforeunload warning
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
       if (isDirty) e.preventDefault();
@@ -187,7 +182,6 @@ export default function LayoutEditorPage() {
 
     let et = et0;
 
-    // If this event table type is pending (not yet in DB), persist it now
     if (et.isPending) {
       try {
         const res = await adminLayoutApi.createEventTable(eventId!, {
@@ -201,7 +195,6 @@ export default function LayoutEditorPage() {
           colSpan: et.colSpan ?? 1,
         });
         const savedEt = res.data;
-        // Replace pending entry in eventTables list
         setEventTables((prev) => prev.map((x) => x.id === selectedEventTableId ? savedEt : x));
         setSelectedEventTableId(savedEt.id);
         et = savedEt;
@@ -212,10 +205,6 @@ export default function LayoutEditorPage() {
       }
     }
 
-    // Default label to a grid-coordinate style (A1, B3, …) so the label visible in the
-    // editor is the same string the public checkout and booking record store. Admin can
-    // still rename via SelectedTableControl. If the auto-computed coord is already taken
-    // (e.g., editing a weird layout), fall back to numeric suffixes so save doesn't fail.
     const existingLabels = new Set(tables.map((t) => t.label));
     const coordLabel = `${String.fromCharCode(65 + (col % 26))}${row + 1}`;
     let label = coordLabel;
@@ -303,7 +292,6 @@ export default function LayoutEditorPage() {
 
   const handleEventTableUpdated = useCallback((updated: EventTableType) => {
     setEventTables((prev) => prev.map((et) => et.id === updated.id ? updated : et));
-    // Also update any tables using this event table with the new properties
     updateTables((prev) => prev.map((t) =>
       t.eventTableId === updated.id
         ? { ...t, capacity: updated.capacity, shape: updated.shape, color: updated.color, priceCents: updated.priceCents, eventTableLabel: updated.label }

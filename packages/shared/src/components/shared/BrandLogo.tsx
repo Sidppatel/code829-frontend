@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-// Centralized brand name — change here to update everywhere
 export const BRAND_NAME = 'Code829';
 export const BRAND_TAGLINE = '';
 export const BRAND_LOGO_URL = '/logo.svg';
@@ -54,11 +53,11 @@ export default function BrandLogo({
         <img
           src={BRAND_LOGO_URL}
           alt={BRAND_NAME}
-          style={{ 
-            maxWidth: '100%', 
-            maxHeight: '100%', 
-            width: 'auto', 
-            height: 'auto', 
+          style={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            width: 'auto',
+            height: 'auto',
             display: 'block',
             objectFit: 'contain'
           }}

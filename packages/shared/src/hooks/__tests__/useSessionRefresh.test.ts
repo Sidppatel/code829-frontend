@@ -4,7 +4,6 @@ import { useSessionRefresh } from '../useSessionRefresh';
 import { useAuthStore } from '../../stores/authStore';
 import type { UserProfile } from '../../types/auth';
 
-// Mock the axios client so tests don't make real HTTP calls
 vi.mock('../../lib/axios', () => ({
   default: {
     get: vi.fn(),
@@ -61,12 +60,10 @@ describe('useSessionRefresh', () => {
 
   it('sets isHydrated immediately when user is cached (fast path)', async () => {
     useAuthStore.setState({ user: mockUser, isHydrated: false });
-    // Background probe resolves later
     mockGet.mockImplementationOnce(
       () => new Promise((res) => setTimeout(() => res({ data: mockUser }), 50)),
     );
     renderHook(() => useSessionRefresh());
-    // Should be hydrated right away without waiting for the probe
     expect(useAuthStore.getState().isHydrated).toBe(true);
   });
 

@@ -278,9 +278,9 @@ export default function TableTypesPage() {
               <Input placeholder="e.g. VIP Circular" />
             </FormField>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <FormField 
-                name="defaultCapacity" 
-                label="Guest Capacity" 
+              <FormField
+                name="defaultCapacity"
+                label="Guest Capacity"
                 required
                 rules={[{ type: 'number', min: 1, message: 'Capacity must be at least 1' }]}
               >
@@ -291,8 +291,8 @@ export default function TableTypesPage() {
               </FormField>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <FormField 
-                name="defaultPriceCents" 
+              <FormField
+                name="defaultPriceCents"
                 label="Default Price (USD)"
                 rules={[{ type: 'number', min: 0, message: 'Price cannot be negative' }]}
               >

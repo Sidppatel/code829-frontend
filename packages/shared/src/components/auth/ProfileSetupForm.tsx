@@ -21,8 +21,7 @@ export default function ProfileSetupForm({ isInitial = false }: { isInitial?: bo
         lastName: values.lastName,
         phone: values.phone,
       });
-      
-      // If we have an avatar to upload
+
       if (fileList.length > 0 && fileList[0].originFileObj) {
         // Assume updateProfile handles or we need separate call?
         // Checking AdminAuthController... it doesn't handle avatar in updateProfile yet.
@@ -60,8 +59,8 @@ export default function ProfileSetupForm({ isInitial = false }: { isInitial?: bo
           {isInitial ? 'Complete Your Profile' : 'Account Settings'}
         </Typography.Title>
         <Typography.Text type="secondary">
-          {isInitial 
-            ? 'Set your name and contact info to finish setting up your account.' 
+          {isInitial
+            ? 'Set your name and contact info to finish setting up your account.'
             : 'Keep your information up to date.'}
         </Typography.Text>
       </div>
@@ -69,19 +68,19 @@ export default function ProfileSetupForm({ isInitial = false }: { isInitial?: bo
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
         <Upload {...uploadProps} showUploadList={false}>
           <div style={{ cursor: 'pointer', position: 'relative' }}>
-            <Avatar 
-              size={120} 
-              icon={<UserOutlined />} 
+            <Avatar
+              size={120}
+              icon={<UserOutlined />}
               src={fileList.length > 0 ? URL.createObjectURL(fileList[0].originFileObj as Blob) : user?.imageUrl}
               style={{ border: '4px solid var(--ant-primary-color-outline)' }}
             />
-            <div style={{ 
-              position: 'absolute', 
-              bottom: 0, 
-              right: 0, 
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
               background: 'var(--ant-primary-color)',
               color: 'var(--text-on-brand)',
-              borderRadius: '50%', 
+              borderRadius: '50%',
               padding: 8,
               boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
             }}>
@@ -91,10 +90,10 @@ export default function ProfileSetupForm({ isInitial = false }: { isInitial?: bo
         </Upload>
       </div>
 
-      <Form 
+      <Form
         form={form}
-        layout="vertical" 
-        onFinish={onFinish} 
+        layout="vertical"
+        onFinish={onFinish}
         initialValues={{
           firstName: user?.firstName === 'Pending' ? '' : user?.firstName,
           lastName: user?.lastName === 'Setup' ? '' : user?.lastName,
@@ -117,11 +116,11 @@ export default function ProfileSetupForm({ isInitial = false }: { isInitial?: bo
         </Form.Item>
 
         <Form.Item style={{ marginTop: 24 }}>
-          <Button 
-            type="primary" 
-            htmlType="submit" 
-            loading={loading} 
-            block 
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            block
             icon={<SaveOutlined />}
             style={{ height: 50, borderRadius: 8 }}
           >

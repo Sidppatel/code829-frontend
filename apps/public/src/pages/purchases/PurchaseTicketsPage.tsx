@@ -152,7 +152,7 @@ export default function PurchaseTicketsPage() {
 
   return (
     <div>
-      <Helmet><title>Manage tickets — Code829</title></Helmet>
+      <Helmet><title>Manage tickets - Code829</title></Helmet>
       <PagePreamble
         kicker="Your evening"
         title="Manage tickets"
@@ -279,7 +279,6 @@ export default function PurchaseTicketsPage() {
         </div>
       )}
 
-      {/* QR Modal */}
       <Modal
         open={qrUrl !== null}
         onCancel={handleCloseQr}
@@ -302,7 +301,6 @@ export default function PurchaseTicketsPage() {
         )}
       </Modal>
 
-      {/* Invite Modal */}
       <Modal
         open={inviteModal !== null}
         onCancel={() => { setInviteModal(null); setInviteEmail(''); setInviteName(''); }}

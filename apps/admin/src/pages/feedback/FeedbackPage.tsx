@@ -101,7 +101,7 @@ export default function FeedbackPage() {
             dataIndex: 'rating',
             key: 'rating',
             width: 100,
-            render: (r: number) => r ? <span style={{ color: '#faad14' }}>{STARS[r]}</span> : <Typography.Text type="secondary">—</Typography.Text>,
+            render: (r: number) => r ? <span style={{ color: '#faad14' }}>{STARS[r]}</span> : <Typography.Text type="secondary">-</Typography.Text>,
           },
           {
             title: 'Diag',
@@ -179,14 +179,12 @@ export default function FeedbackPage() {
           const diag = parsedDiagnostics(detail.diagnostics);
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              {/* Meta */}
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {detail.rating > 0 && <span style={{ color: '#faad14', fontSize: 18 }}>{STARS[detail.rating]}</span>}
                 <Typography.Text type="secondary">{new Date(detail.createdAt).toLocaleString()}</Typography.Text>
                 {detail.email && <Typography.Text copyable>{detail.email}</Typography.Text>}
               </div>
 
-              {/* Message */}
               <div>
                 <Typography.Text strong>Message</Typography.Text>
                 <div style={{ marginTop: 8, padding: '12px 16px', background: 'var(--bg-soft)', borderRadius: 10, lineHeight: 1.6 }}>
@@ -194,7 +192,6 @@ export default function FeedbackPage() {
                 </div>
               </div>
 
-              {/* Bug-specific fields */}
               {diag?.pageUrl && (
                 <div>
                   <Typography.Text strong>Page URL</Typography.Text>
@@ -212,7 +209,6 @@ export default function FeedbackPage() {
                 </div>
               )}
 
-              {/* Client diagnostics */}
               {diag?.client && (
                 <div>
                   <Typography.Text strong>Client Info</Typography.Text>
@@ -225,7 +221,6 @@ export default function FeedbackPage() {
                 </div>
               )}
 
-              {/* Console log */}
               {diag?.client?.consoleLog && diag.client.consoleLog.length > 0 && (
                 <div>
                   <Typography.Text strong>Console Log ({diag.client.consoleLog.length} entries)</Typography.Text>
@@ -241,7 +236,6 @@ export default function FeedbackPage() {
                 </div>
               )}
 
-              {/* Raw diagnostics fallback (old format) */}
               {detail.diagnostics && !diag && (
                 <div>
                   <Typography.Text strong>Raw Diagnostics</Typography.Text>

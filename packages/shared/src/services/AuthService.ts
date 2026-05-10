@@ -45,7 +45,6 @@ export class AuthService extends BaseService {
     super('AuthService');
   }
 
-  // ── User auth ───────────────────────────────────
   requestMagicLink = (email: string, returnUrl?: string, frontendOrigin?: string) =>
     this.post('/auth/magic-link', { email, returnUrl, frontendOrigin });
 
@@ -74,7 +73,6 @@ export class AuthService extends BaseService {
 
   updateProfile = (data: UpdateProfilePayload) => this.put('/auth/profile', data);
 
-  // ── Admin auth ──────────────────────────────────
   adminLogin = (email: string, password: string) =>
     this.post<BusinessAuthResponse>('/admin/auth/login', { email, password });
 

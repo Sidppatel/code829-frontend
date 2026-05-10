@@ -71,7 +71,6 @@ export class EventService extends BaseService {
     super('EventService');
   }
 
-  // ── Public ──────────────────────────────────────
   list = (params?: EventListParams) =>
     this.get<PagedResponse<EventSummary>>('/events', { params }).then((res) => {
       res.data.items?.forEach((ev) => this.filterPublicEvent(ev));
@@ -128,7 +127,6 @@ export class EventService extends BaseService {
     }
   }
 
-  // ── Admin ───────────────────────────────────────
   adminList = (params?: AdminEventListParams) =>
     this.get<PagedResponse<EventDetail>>('/admin/events', { params });
 
