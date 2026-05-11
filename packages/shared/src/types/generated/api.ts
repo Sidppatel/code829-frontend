@@ -3527,6 +3527,45 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["GoogleSignInRequest"];
+                    "text/json": components["schemas"]["GoogleSignInRequest"];
+                    "application/*+json": components["schemas"]["GoogleSignInRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/auth/magic-link/verify": {
         parameters: {
             query?: never;
@@ -3548,6 +3587,45 @@ export interface paths {
                     "application/json": components["schemas"]["MagicLinkVerifyRequest"];
                     "text/json": components["schemas"]["MagicLinkVerifyRequest"];
                     "application/*+json": components["schemas"]["MagicLinkVerifyRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/auth/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SetPasswordRequest"];
+                    "text/json": components["schemas"]["SetPasswordRequest"];
+                    "application/*+json": components["schemas"]["SetPasswordRequest"];
                 };
             };
             responses: {
@@ -7863,6 +7941,10 @@ export interface components {
         ForgotPasswordRequest: {
             email: string;
         };
+        GoogleSignInRequest: {
+            credential?: null | string;
+            code?: null | string;
+        };
         /** Format: binary */
         IFormFile: string;
         InviteTicketRequest: {
@@ -7993,6 +8075,10 @@ export interface components {
             qrToken: string;
             /** Format: uuid */
             eventId?: null | string;
+        };
+        SetPasswordRequest: {
+            currentPassword: null | string;
+            newPassword: string;
         };
         SigninRequest: {
             email: string;
