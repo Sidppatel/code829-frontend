@@ -17,6 +17,9 @@ export interface UserProfile {
   hasCompletedOnboarding: boolean;
   imageUrl?: string;
   createdAt: string;
+  hasPassword: boolean;
+  hasGoogle: boolean;
+  emailVerified: boolean;
 }
 
 export type UserRole = 'User' | 'Staff' | 'Admin' | 'Developer';

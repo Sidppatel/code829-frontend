@@ -12,6 +12,7 @@ export const authApi = {
   verifyEmail: authService.verifyEmail,
   forgotPassword: authService.userForgotPassword,
   resetPassword: authService.userResetPassword,
+  setPassword: authService.setPassword,
   getMe: authService.getMe,
   updateProfile: authService.updateProfile,
 };

@@ -30,6 +30,7 @@ const routes: RouteConfig[] = [
           { path: 'tickets', loader: () => import('./pages/tickets/MyTicketsPage') },
           { path: 'guest-tickets', loader: () => import('./pages/tickets/GuestTicketsPage') },
           { path: 'profile', loader: () => import('./pages/profile/ProfilePage') },
+          { path: 'account/security', loader: () => import('./pages/account/SecurityPage') },
         ],
       },
     ],

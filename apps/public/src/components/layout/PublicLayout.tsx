@@ -14,6 +14,7 @@ import {
   LoginOutlined,
   GiftOutlined,
   FacebookOutlined,
+  LockOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Avatar, Grid } from 'antd';
@@ -68,6 +69,7 @@ const PUBLIC_FOOTER_COLUMNS = [
       { label: 'My entries', to: '/tickets' },
       { label: 'Guest tickets', to: '/guest-tickets' },
       { label: 'Profile', to: '/profile' },
+      { label: 'Security', to: '/account/security' },
     ],
   },
 ];
@@ -115,6 +117,7 @@ export default function PublicLayout() {
     { key: 'tickets', label: 'My Entries', icon: <QrcodeOutlined />, onClick: () => navigate('/tickets') },
     { key: 'guest-tickets', label: 'Guest Tickets', icon: <GiftOutlined />, onClick: () => navigate('/guest-tickets') },
     { key: 'profile', label: 'Profile', icon: <UserOutlined />, onClick: () => navigate('/profile') },
+    { key: 'security', label: 'Security', icon: <LockOutlined />, onClick: () => navigate('/account/security') },
     { type: 'divider' as const },
     { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, onClick: logout },
   ];
@@ -253,6 +256,7 @@ export default function PublicLayout() {
                 { key: '/tickets', label: <Link to="/tickets">My Entries</Link>, icon: <QrcodeOutlined /> },
                 { key: '/guest-tickets', label: <Link to="/guest-tickets">Guest Tickets</Link>, icon: <GiftOutlined /> },
                 { key: '/profile', label: <Link to="/profile">Profile</Link>, icon: <UserOutlined /> },
+                { key: '/account/security', label: <Link to="/account/security">Security</Link>, icon: <LockOutlined /> },
               ] : []),
             ]}
             style={{ background: 'transparent', borderRight: 'none' }}

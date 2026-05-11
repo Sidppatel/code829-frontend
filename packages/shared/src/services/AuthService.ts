@@ -72,6 +72,9 @@ export class AuthService extends BaseService {
   userResetPassword = (token: string, newPassword: string) =>
     this.post('/auth/reset-password', { token, newPassword });
 
+  setPassword = (payload: { currentPassword?: string; newPassword: string }) =>
+    this.post('/auth/password', payload);
+
   getMe = () => this.get<UserProfile>('/auth/me');
 
   updateProfile = (data: UpdateProfilePayload) => this.put('/auth/profile', data);
