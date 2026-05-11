@@ -5,7 +5,8 @@ import { MailOutlined, LoginOutlined, LockOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { AxiosError } from 'axios';
-import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
+import { GoogleOutlined } from '@ant-design/icons';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import { safeReturnUrl } from '@code829/shared/lib/safeRedirect';
@@ -109,10 +110,10 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleSuccess = async (credential: string) => {
+  const handleGoogleSuccess = async (payload: { credential?: string; code?: string }) => {
     setLoading(true);
     try {
-      const { data } = await authApi.googleSignIn(credential);
+      const { data } = await authApi.googleSignIn(payload);
       setUser(data.user);
       message.success(textTemplates.loggedInAs(data.user.firstName).text);
       if (!data.user.hasCompletedOnboarding) {
@@ -136,6 +137,14 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  const triggerGoogleLogin = useGoogleLogin({
+    flow: 'auth-code',
+    onSuccess: ({ code }) => {
+      if (code) void handleGoogleSuccess({ code });
+    },
+    onError: () => message.error('Google sign-in failed. Please try again.'),
+  });
 
   const handleDevLogin = async (values: { email: string }) => {
     setLoading(true);
@@ -242,39 +251,29 @@ export default function LoginPage() {
             </div>
           ) : (
             <Form form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
-              <div
+              <Button
+                onClick={() => triggerGoogleLogin()}
+                icon={<GoogleOutlined style={{ fontSize: 18 }} />}
+                size="large"
+                disabled={loading}
                 style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  marginBottom: 16,
                   width: '100%',
+                  height: 48,
+                  borderRadius: 9999,
+                  background: 'var(--bg-soft)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-primary)',
+                  fontWeight: 600,
+                  fontSize: 15,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 10,
+                  marginBottom: 16,
                 }}
               >
-                <div
-                  style={{
-                    width: 260,
-                    borderRadius: 9999,
-                    overflow: 'hidden',
-                    background: 'transparent',
-                    lineHeight: 0,
-                    colorScheme: 'dark',
-                  }}
-                >
-                  <GoogleLogin
-                    onSuccess={(resp) => {
-                      if (resp.credential) void handleGoogleSuccess(resp.credential);
-                    }}
-                    onError={() => message.error('Google sign-in failed. Please try again.')}
-                    useOneTap={false}
-                    theme="filled_black"
-                    shape="pill"
-                    size="large"
-                    text="continue_with"
-                    logo_alignment="center"
-                    width="260"
-                  />
-                </div>
-              </div>
+                Continue with Google
+              </Button>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '12px 0 16px' }}>
                 <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
                 <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>or</span>
