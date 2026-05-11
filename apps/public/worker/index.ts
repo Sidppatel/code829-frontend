@@ -1,10 +1,11 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { handleApiProxy, type ApiProxyEnv } from '../../../tools/cf-worker/apiProxy';
-import { handleSitemap, type SitemapEnv } from '../../../tools/cf-worker/sitemap';
+import { handleSeoProxy } from '../../../tools/cf-worker/seoProxy';
+import { tryInjectEventMeta } from '../../../tools/cf-worker/eventMeta';
 import { generateNonce, injectNonce } from '../../../tools/cf-worker/nonce';
 
-interface Env extends ApiProxyEnv, SitemapEnv {
+interface Env extends ApiProxyEnv {
   ASSETS: Fetcher;
 }
 
@@ -22,7 +23,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/sitemap.xml') {
-      return handleSitemap(request, env);
+      return handleSeoProxy(url.pathname, env);
     }
 
     if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
@@ -31,7 +32,8 @@ export default {
 
     const response = await env.ASSETS.fetch(request);
     if (response.headers.get('content-type')?.includes('text/html')) {
-      return injectNonce(response, generateNonce());
+      const withMeta = (await tryInjectEventMeta(response, url, env)) ?? response;
+      return injectNonce(withMeta, generateNonce());
     }
     return response;
   },
