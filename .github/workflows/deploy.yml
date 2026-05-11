@@ -112,6 +112,7 @@ jobs:
       VITE_API_URL: ${{ secrets.VITE_API_URL }}
       VITE_APP_NAME: code829
       VITE_DEFAULT_THEME: system
+      VITE_GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
