@@ -53,6 +53,7 @@ html,
 body {
   background-color: var(--bg-page);
   color: var(--text-primary);
+  color-scheme: dark;
   font-family: 'Inter', -apple-system, sans-serif;
   font-size: 15px;
   line-height: 1.6;

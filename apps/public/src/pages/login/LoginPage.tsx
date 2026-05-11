@@ -247,23 +247,33 @@ export default function LoginPage() {
                   display: 'flex',
                   justifyContent: 'center',
                   marginBottom: 16,
-                  colorScheme: 'dark',
                   width: '100%',
                 }}
               >
-                <GoogleLogin
-                  onSuccess={(resp) => {
-                    if (resp.credential) void handleGoogleSuccess(resp.credential);
+                <div
+                  style={{
+                    width: 260,
+                    borderRadius: 9999,
+                    overflow: 'hidden',
+                    background: 'transparent',
+                    lineHeight: 0,
+                    colorScheme: 'dark',
                   }}
-                  onError={() => message.error('Google sign-in failed. Please try again.')}
-                  useOneTap={false}
-                  theme="filled_black"
-                  shape="pill"
-                  size="medium"
-                  text="continue_with"
-                  logo_alignment="center"
-                  width="260"
-                />
+                >
+                  <GoogleLogin
+                    onSuccess={(resp) => {
+                      if (resp.credential) void handleGoogleSuccess(resp.credential);
+                    }}
+                    onError={() => message.error('Google sign-in failed. Please try again.')}
+                    useOneTap={false}
+                    theme="filled_black"
+                    shape="pill"
+                    size="large"
+                    text="continue_with"
+                    logo_alignment="center"
+                    width="260"
+                  />
+                </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '12px 0 16px' }}>
                 <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
