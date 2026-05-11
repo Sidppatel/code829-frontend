@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card, Form, Input, Button, App, Space, Tag, Typography, Alert } from 'antd';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
@@ -20,29 +20,12 @@ interface FormValues {
 
 export default function SecurityPage() {
   const [form] = Form.useForm<FormValues>();
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [topError, setTopError] = useState<string | null>(null);
   const { message } = App.useApp();
+  const profile = useAuthStore((s) => s.user) as UserProfile | null;
   const setUser = useAuthStore((s) => s.setUser);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await authApi.getMe();
-        setProfile(data as UserProfile);
-        setUser(data as UserProfile);
-      } catch (err) {
-        log.error('Failed to load profile', err);
-        message.error('Failed to load security settings');
-      } finally {
-        setLoading(false);
-      }
-    };
-    void load();
-  }, [message, setUser]);
 
   const hasPassword = profile?.hasPassword ?? false;
 
@@ -64,7 +47,6 @@ export default function SecurityPage() {
       message.success(hasPassword ? 'Password updated' : 'Password set');
       form.resetFields();
       const { data: me } = await authApi.getMe();
-      setProfile(me as UserProfile);
       setUser(me as UserProfile);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
@@ -104,7 +86,7 @@ export default function SecurityPage() {
     }
   };
 
-  if (loading || !profile) return <LoadingSpinner />;
+  if (!profile) return <LoadingSpinner />;
 
   return (
     <div>
@@ -116,7 +98,7 @@ export default function SecurityPage() {
       />
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 32px 64px' }}>
         <Card title="Sign-in methods" style={{ marginBottom: 24 }}>
-          <Space direction="vertical" size={12} style={{ width: '100%' }}>
+          <Space orientation="vertical" size={12} style={{ width: '100%' }}>
             <div>
               <Typography.Text type="secondary">Email</Typography.Text>
               <div>
@@ -147,7 +129,7 @@ export default function SecurityPage() {
           {!hasPassword && (
             <Alert
               type="info"
-              message="Set a password to also sign in without Google."
+              title="Set a password to also sign in without Google."
               showIcon
               style={{ marginBottom: 16 }}
             />
@@ -155,7 +137,7 @@ export default function SecurityPage() {
           {topError && (
             <Alert
               type="error"
-              message={topError}
+              title={topError}
               showIcon
               closable
               onClose={() => setTopError(null)}

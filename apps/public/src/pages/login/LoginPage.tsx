@@ -242,14 +242,27 @@ export default function LoginPage() {
             </div>
           ) : (
             <Form form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  marginBottom: 16,
+                  colorScheme: 'dark',
+                  width: '100%',
+                }}
+              >
                 <GoogleLogin
                   onSuccess={(resp) => {
                     if (resp.credential) void handleGoogleSuccess(resp.credential);
                   }}
                   onError={() => message.error('Google sign-in failed. Please try again.')}
                   useOneTap={false}
-                  width="380"
+                  theme="filled_black"
+                  shape="pill"
+                  size="medium"
+                  text="continue_with"
+                  logo_alignment="center"
+                  width="260"
                 />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '12px 0 16px' }}>
