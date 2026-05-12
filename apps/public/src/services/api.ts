@@ -6,3 +6,4 @@ export { purchasesApi } from '@code829/shared/services/purchasesApi';
 export { tablePurchaseApi } from '@code829/shared/services/tablePurchaseApi';
 export { ticketsApi } from '@code829/shared/services/ticketsApi';
 export { feedbackApi } from '@code829/shared/services/feedbackApi';
+export { performerService } from '@code829/shared/services/PerformerService';

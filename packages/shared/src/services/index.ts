@@ -29,6 +29,8 @@ export { CheckInService, checkInService } from './CheckInService';
 export { VenueService, venueService } from './VenueService';
 export type { CreateVenuePayload } from './VenueService';
 
+export { PerformerService, performerService } from './PerformerService';
+
 export { LayoutService, layoutService } from './LayoutService';
 export type {
   TablePayload,

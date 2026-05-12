@@ -84,6 +84,8 @@ export {
   checkInService,
   VenueService,
   venueService,
+  PerformerService,
+  performerService,
   LayoutService,
   layoutService,
   DashboardService,
@@ -160,6 +162,15 @@ export type {
   BusinessUserProfile, BusinessUserListItem, BusinessAuthResponse, InvitationInfoDto,
 } from './types/auth';
 export type { Purchase, PurchaseStatus } from './types/purchase';
+export type {
+  Performer,
+  PerformerMetaItem,
+  EventPerformer,
+  EventPerformerLink,
+  CreatePerformerPayload,
+  UpdatePerformerPayload,
+  SetEventPerformersPayload,
+} from './types/performer';
 export type {
   OnboardingLinkScope,
   OrganizationStripeState,

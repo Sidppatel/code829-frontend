@@ -21,6 +21,7 @@ import { useCheckoutQuote } from '@code829/shared/hooks/useCheckoutQuote';
 import EventHero from './components/EventHero';
 import EventAbout from './components/EventAbout';
 import EventSidebar from './components/EventSidebar';
+import EventLineup from './components/EventLineup';
 import SelectTableStep from './steps/SelectTableStep';
 import CapacityStep from './steps/CapacityStep';
 import CheckoutStep from './steps/CheckoutStep';
@@ -642,6 +643,7 @@ export default function EventDetailPage() {
         <Row gutter={isMobile ? [24, 24] : [60, 60]}>
           <Col xs={24} lg={15}>
             <EventAbout event={event} itemVariants={itemVariants} />
+            {event?.slug && <EventLineup eventSlug={event.slug} />}
           </Col>
           <Col xs={24} lg={9}>
             <EventSidebar
