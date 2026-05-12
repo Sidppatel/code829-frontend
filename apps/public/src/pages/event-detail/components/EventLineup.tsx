@@ -30,7 +30,7 @@ export default function EventLineup({ eventSlug }: Props) {
     <div className="glass-card" style={{ padding: 24, borderRadius: 16, marginTop: 24, border: '1px solid var(--border)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
         <div style={{ width: 6, height: 32, borderRadius: 10, background: 'var(--gradient-brand, var(--primary))' }} />
-        <h3 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>Lineup</h3>
+        <h3 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>Performers</h3>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 16 }}>
         {performers.map((p) => {

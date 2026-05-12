@@ -321,7 +321,7 @@ export default function EventManagePage() {
 
               <div className="admin-section">
                 <div className="admin-section-title">
-                  <UserOutlined /> Lineup
+                  <UserOutlined /> Performers
                 </div>
                 <EventLineupEditor eventId={event.eventId} />
               </div>

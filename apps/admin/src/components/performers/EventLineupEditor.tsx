@@ -37,7 +37,7 @@ export default function EventLineupEditor({ eventId }: Props) {
       setDirty(false);
     } catch (err) {
       log.error('load lineup failed', err);
-      message.error('Failed to load lineup');
+      message.error('Failed to load performers');
     } finally {
       setLoading(false);
     }
@@ -78,7 +78,7 @@ export default function EventLineupEditor({ eventId }: Props) {
     const p = Array.isArray(performer) ? performer[0] : performer;
     if (!p) return;
     if (entries.find((e) => e.performerId === p.id)) {
-      message.info(`${p.name} already in lineup`);
+      message.info(`${p.name} already in performers`);
       return;
     }
     setEntries((prev) => [
@@ -129,7 +129,7 @@ export default function EventLineupEditor({ eventId }: Props) {
             .map((m, i) => ({ ...m, key: m.key.trim(), sortOrder: i })),
         })),
       });
-      message.success('Lineup saved');
+      message.success('Performers saved');
       await load();
     } catch (err) {
       log.error('save lineup failed', err);
@@ -207,7 +207,7 @@ export default function EventLineupEditor({ eventId }: Props) {
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16, gap: 8 }}>
         <Button onClick={load} disabled={saving || !dirty}>Discard</Button>
         <Button type="primary" icon={<SaveOutlined />} onClick={save} loading={saving} disabled={!dirty}>
-          Save lineup
+          Save performers
         </Button>
       </div>
     </div>
