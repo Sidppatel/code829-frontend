@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, App } from 'antd';
-import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
+import { MailOutlined, LockOutlined, UserOutlined, GoogleOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { AxiosError } from 'axios';
+import { useGoogleLogin } from '@react-oauth/google';
 import { authApi } from '../../services/api';
+import { useAuthStore } from '@code829/shared/stores/authStore';
 
 interface SignupForm {
   firstName: string;
@@ -20,6 +22,36 @@ export default function SignupPage() {
   const [submitted, setSubmitted] = useState(false);
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const setUser = useAuthStore((s) => s.setUser);
+
+  const handleGoogleSuccess = async (code: string) => {
+    setLoading(true);
+    try {
+      const { data } = await authApi.googleSignIn({ code });
+      setUser(data.user);
+      message.success(`Welcome, ${data.user.firstName}!`);
+      navigate(data.user.hasCompletedOnboarding ? '/' : '/onboarding');
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }>;
+      if (axiosErr.response?.status === 409) {
+        message.warning(axiosErr.response.data?.message ?? 'Account exists. Sign in with your password to link Google.');
+      } else if (axiosErr.response?.status === 401) {
+        message.error('Google sign-up failed. Please try again.');
+      } else {
+        message.error('Google sign-up failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const triggerGoogleSignup = useGoogleLogin({
+    flow: 'auth-code',
+    onSuccess: ({ code }) => {
+      if (code) void handleGoogleSuccess(code);
+    },
+    onError: () => message.error('Google sign-up failed. Please try again.'),
+  });
 
   const handleSignup = async (values: SignupForm) => {
     setLoading(true);
@@ -101,6 +133,34 @@ export default function SignupPage() {
             </div>
           ) : (
             <Form form={form} layout="vertical" onFinish={handleSignup} requiredMark={false}>
+              <Button
+                onClick={() => triggerGoogleSignup()}
+                icon={<GoogleOutlined style={{ fontSize: 18 }} />}
+                size="large"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  height: 48,
+                  borderRadius: 9999,
+                  background: 'var(--bg-soft)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-primary)',
+                  fontWeight: 600,
+                  fontSize: 15,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 10,
+                  marginBottom: 16,
+                }}
+              >
+                Continue with Google
+              </Button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '0 0 16px' }}>
+                <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+                <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>or</span>
+                <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+              </div>
               <div style={{ display: 'flex', gap: 12 }}>
                 <Form.Item
                   name="firstName"
