@@ -30,6 +30,11 @@ export class PerformerService extends BaseService {
 
   getAdminById = (id: string) => this.get<Performer>(`/admin/performers/${id}`);
 
+  checkSlug = (slug: string, excludeId?: string) =>
+    this.get<{ available: boolean; suggested: string }>('/admin/performers/slug-check', {
+      params: { slug, excludeId },
+    });
+
   create = (payload: CreatePerformerPayload) =>
     this.post<Performer>('/admin/performers', payload);
 

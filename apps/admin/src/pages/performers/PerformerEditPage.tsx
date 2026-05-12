@@ -1,13 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Form, Input, message, Upload } from 'antd';
 import type { UploadProps } from 'antd';
-import { ArrowLeftOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, CheckCircleTwoTone, UploadOutlined, UserOutlined, WarningTwoTone } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { performerService } from '../../services/api';
 import type { Performer, PerformerMetaItem } from '@code829/shared/types/performer';
 import { PageShell } from '@code829/shared/components/ui';
 import MetaListEditor from '../../components/performers/MetaListEditor';
 import { createLogger } from '@code829/shared/lib/logger';
+
+type SlugStatus =
+  | { kind: 'idle' }
+  | { kind: 'available' }
+  | { kind: 'taken'; suggested: string };
+
+const SLUG_REGEX = /^[a-z0-9-]+$/;
 
 const log = createLogger('Admin/PerformerEditPage');
 
@@ -27,6 +34,9 @@ export default function PerformerEditPage() {
   const [meta, setMeta] = useState<PerformerMetaItem[]>([]);
   const [performer, setPerformer] = useState<Performer | null>(null);
   const [slugTouched, setSlugTouched] = useState(false);
+  const [slugStatus, setSlugStatus] = useState<SlugStatus>({ kind: 'idle' });
+  const slugCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const slugCheckSeq = useRef(0);
 
   const load = useCallback(async () => {
     if (isNew) return;
@@ -37,6 +47,7 @@ export default function PerformerEditPage() {
       form.setFieldsValue({ name: data.name, slug: data.slug });
       setMeta(data.meta);
       setSlugTouched(true);
+      setSlugStatus({ kind: 'available' });
     } catch (err) {
       log.error('load performer failed', err);
       message.error('Failed to load performer');
@@ -50,9 +61,47 @@ export default function PerformerEditPage() {
   const slugify = (input: string) =>
     input.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
+  const scheduleSlugCheck = useCallback((slug: string) => {
+    if (slugCheckTimer.current) {
+      clearTimeout(slugCheckTimer.current);
+      slugCheckTimer.current = null;
+    }
+    if (!slug || !SLUG_REGEX.test(slug)) {
+      setSlugStatus({ kind: 'idle' });
+      return;
+    }
+    if (!isNew && performer && slug === performer.slug) {
+      setSlugStatus({ kind: 'available' });
+      return;
+    }
+    const seq = ++slugCheckSeq.current;
+    slugCheckTimer.current = setTimeout(async () => {
+      try {
+        const excludeId = !isNew && id ? id : undefined;
+        const { data } = await performerService.checkSlug(slug, excludeId);
+        if (seq !== slugCheckSeq.current) return;
+        if (data.available) {
+          setSlugStatus({ kind: 'available' });
+        } else {
+          setSlugStatus({ kind: 'taken', suggested: data.suggested });
+        }
+      } catch (err) {
+        if (seq !== slugCheckSeq.current) return;
+        log.error('slug check failed', err);
+        setSlugStatus({ kind: 'idle' });
+      }
+    }, 300);
+  }, [id, isNew, performer]);
+
+  useEffect(() => () => {
+    if (slugCheckTimer.current) clearTimeout(slugCheckTimer.current);
+  }, []);
+
   const onNameChange = (val: string) => {
     if (!slugTouched && isNew) {
-      form.setFieldValue('slug', slugify(val));
+      const next = slugify(val);
+      form.setFieldValue('slug', next);
+      scheduleSlugCheck(next);
     }
   };
 
@@ -176,10 +225,33 @@ export default function PerformerEditPage() {
                 label="URL slug"
                 tooltip="Auto-generated from name. Edit only if you need a custom URL."
                 rules={[{ pattern: /^[a-z0-9-]*$/, message: 'Lowercase letters, numbers, and hyphens only' }, { max: 220 }]}
+                validateStatus={
+                  slugStatus.kind === 'available'
+                    ? 'success'
+                    : slugStatus.kind === 'taken'
+                    ? 'warning'
+                    : undefined
+                }
+                help={
+                  slugStatus.kind === 'available' ? (
+                    <span style={{ color: '#52c41a', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <CheckCircleTwoTone twoToneColor="#52c41a" />
+                      Available
+                    </span>
+                  ) : slugStatus.kind === 'taken' ? (
+                    <span style={{ color: '#faad14', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <WarningTwoTone twoToneColor="#faad14" />
+                      Already in use. We&apos;ll save as <code>{slugStatus.suggested}</code>.
+                    </span>
+                  ) : undefined
+                }
               >
                 <Input
                   placeholder="david-j"
-                  onChange={() => setSlugTouched(true)}
+                  onChange={(e) => {
+                    setSlugTouched(true);
+                    scheduleSlugCheck(e.target.value);
+                  }}
                   maxLength={220}
                 />
               </Form.Item>
