@@ -334,3 +334,9 @@ For direct URL access to work, ensure `public/_redirects` exists:
 ### Full Deployment Guide
 
 See [DEPLOYMENT_GUIDE.md](../DEPLOYMENT_GUIDE.md) for complete instructions covering Cloudflare Pages setup, custom domains, and DNS configuration.
+
+---
+
+## Related Repositories
+- [code829-backend](https://github.com/Sidppatel/code829-backend)
+- [code829-db](https://github.com/Sidppatel/code829-db)
