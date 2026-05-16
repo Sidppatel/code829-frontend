@@ -84,3 +84,9 @@ graphify-out/
 
 # graphify local interpreter pointer
 .graphify_python
+
+# AI Assistant output & state
+.gemini/
+.antigravity/
+.claude/
+.cursor/
