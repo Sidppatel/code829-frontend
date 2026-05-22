@@ -2,7 +2,7 @@
 
 exports[`StripePayoutsSection — mobile snapshot (360px) > mobile flag swaps the dashboard CTA label > mobile-active-state 1`] = `
 <div
-  class="css-dev-only-do-not-override-xogyor ant-app css-var-root"
+  class="css-dev-only-do-not-override-ypkju9 ant-app css-var-root"
 >
   <div
     aria-labelledby="payouts-section-heading"
@@ -57,7 +57,7 @@ exports[`StripePayoutsSection — mobile snapshot (360px) > mobile flag swaps th
         >
           <button
             aria-label="Refresh payout status"
-            class="ant-btn css-dev-only-do-not-override-xogyor css-var-root ant-btn-text ant-btn-color-default ant-btn-variant-text ant-btn-sm ant-btn-icon-only"
+            class="ant-btn css-dev-only-do-not-override-ypkju9 css-var-root ant-btn-text ant-btn-color-default ant-btn-variant-text ant-btn-sm ant-btn-icon-only"
             style="min-height: 44px; min-width: 44px;"
             type="button"
           >
