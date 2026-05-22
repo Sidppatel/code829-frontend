@@ -8,7 +8,6 @@ import { DisplayHeading, Kicker } from '@code829/shared/components/ui';
 interface EventSidebarProps {
   event: EventDetail;
   isSoldOut: boolean;
-  remaining: number;
   handleBookNow: () => void;
   isStartingPurchase?: boolean;
   itemVariants: Variants;
@@ -17,7 +16,6 @@ interface EventSidebarProps {
 export default function EventSidebar({
   event,
   isSoldOut,
-  remaining,
   handleBookNow,
   isStartingPurchase,
   itemVariants,

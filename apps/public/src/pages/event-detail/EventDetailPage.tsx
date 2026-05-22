@@ -633,7 +633,6 @@ export default function EventDetailPage() {
   }
 
   const isSoldOut = event.isSoldOut ?? false;
-  const remaining = event.availableCount ?? 0;
 
   return (
     <motion.div
@@ -655,7 +654,6 @@ export default function EventDetailPage() {
             <EventSidebar
               event={event}
               isSoldOut={isSoldOut}
-              remaining={remaining}
               handleBookNow={handleBookNow}
               isStartingPurchase={isStartingPurchase}
               itemVariants={itemVariants}
