@@ -2,6 +2,19 @@ packages:
   - 'packages/*'
   - 'apps/*'
 
+allowBuilds:
+  '0': esbuild
+  '1': sharp
+  '2': workerd
+  esbuild: true
+  sharp: true
+  workerd: true
+
+minimumReleaseAgeExclude:
+  - '@cloudflare/workers-types@4.20260522.1'
+  - miniflare@4.20260521.0
+  - wrangler@4.94.0
+
 overrides:
   brace-expansion: ">=5.0.6"
   ws: ">=8.20.1"

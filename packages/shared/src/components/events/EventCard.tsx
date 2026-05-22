@@ -9,7 +9,6 @@ import EventImageFallback from './EventImageFallback';
 import DisplayHeading from '../ui/DisplayHeading';
 import StatusBadge, { type StatusKind } from '../ui/StatusBadge';
 import MetaRow from '../ui/MetaRow';
-import ProgressBar from '../ui/ProgressBar';
 
 interface Props {
   event: EventSummary;
@@ -168,33 +167,20 @@ export default function EventCard({ event, onClick, variant = 'default' }: Props
             gap: 16,
           }}
         >
-          <div>
-            <div
-              style={{
-                fontSize: 10,
-                color: 'var(--text-muted)',
-                letterSpacing: 0.5,
-                textTransform: 'uppercase',
-                fontWeight: 600,
-              }}
-            >
-              From
-            </div>
-            <DisplayHeading as="div" size="sm">
-              {priceLabel}
-            </DisplayHeading>
+          <div
+            style={{
+              fontSize: 11,
+              color: 'var(--text-muted)',
+              letterSpacing: 0.5,
+              textTransform: 'uppercase',
+              fontWeight: 600,
+            }}
+          >
+            From
           </div>
-          <div style={{ flex: 1, textAlign: 'right' }}>
-            {/* <div
-              style={{
-                fontSize: 11,
-                color: 'var(--text-muted)',
-                marginBottom: 4,
-              }}
-            >
-              {event.totalSold} of {event.totalCapacity} seated
-            </div>
-            <ProgressBar current={event.totalSold || 0} total={event.totalCapacity || 1} height={4} /> */}
+          <DisplayHeading as="div" size="sm" style={{ margin: 0 }}>
+            {priceLabel}
+          </DisplayHeading>
         </div>
       </div>
     </div>
