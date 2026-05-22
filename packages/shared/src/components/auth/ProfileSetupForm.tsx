@@ -66,7 +66,13 @@ export default function ProfileSetupForm({ isInitial = false }: { isInitial?: bo
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
-        <Upload {...uploadProps} showUploadList={false}>
+        <Upload
+          beforeUpload={uploadProps.beforeUpload}
+          onRemove={uploadProps.onRemove}
+          fileList={uploadProps.fileList}
+          maxCount={uploadProps.maxCount}
+          showUploadList={false}
+        >
           <div style={{ cursor: 'pointer', position: 'relative' }}>
             <Avatar
               size={120}

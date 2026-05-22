@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from '../auth/ProtectedRoute';
@@ -18,6 +19,9 @@ const mockUser: UserProfile = {
   optInLocationEmail: false,
   hasCompletedOnboarding: true,
   createdAt: '2025-01-01T00:00:00Z',
+  hasPassword: true,
+  hasGoogle: false,
+  emailVerified: true,
 };
 
 const adminUser: UserProfile = { ...mockUser, id: 'u-2', role: 'Admin' };

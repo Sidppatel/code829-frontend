@@ -44,7 +44,7 @@ export default function ForgotPasswordForm({
             status="success"
             title="Check Your Email"
             subTitle="If an account exists with that email, we've sent a password reset link. Please check your inbox."
-            extra={<Link to={loginPath}>Back to sign in</Link>}
+            extra={<Link to={loginPath}>{'Back to sign in'}</Link>}
           />
         </Card>
       </div>
@@ -80,7 +80,7 @@ export default function ForgotPasswordForm({
         </Form>
 
         <div style={{ textAlign: 'center' }}>
-          <Link to={loginPath}>Back to sign in</Link>
+          <Link to={loginPath}>{'Back to sign in'}</Link>
         </div>
       </Card>
     </div>

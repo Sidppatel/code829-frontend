@@ -83,7 +83,7 @@ export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath =
             />
           </Form.Item>
           <div style={{ textAlign: 'right', marginBottom: 16, marginTop: -8 }}>
-            <Link to={forgotPasswordPath} style={{ fontSize: 13, color: 'var(--primary-light)' }}>Forgot password?</Link>
+            <Link to={forgotPasswordPath} style={{ fontSize: 13, color: 'var(--primary-light)' }}>{'Forgot password?'}</Link>
           </div>
           <Form.Item>
             <Button
