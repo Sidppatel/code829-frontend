@@ -329,6 +329,12 @@ export default function EventDetailPage() {
     void restore();
   }, [event, step, tablesData, requireAuthOrRedirect]);
 
+  useEffect(() => {
+    if (step === 'capacity') {
+      requireAuthOrRedirect();
+    }
+  }, [step, requireAuthOrRedirect]);
+
   const loadTables = useCallback(async () => {
     if (!event) return;
     try {

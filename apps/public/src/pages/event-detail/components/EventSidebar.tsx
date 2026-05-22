@@ -60,7 +60,7 @@ export default function EventSidebar({
   const availabilityLabel = !isSoldOut
     ? event.layoutMode === 'Grid'
       ? `${event.noOfAvailableTables} tables available`
-      : `${remaining} spots remaining`
+      : 'Available'
     : 'Sold out';
 
   return (
@@ -116,7 +116,7 @@ export default function EventSidebar({
               background: isSoldOut ? 'var(--status-danger)' : 'var(--status-success)',
             }}
           />
-          {/* {availabilityLabel} */}
+          {availabilityLabel}
         </div>
 
         <Button
