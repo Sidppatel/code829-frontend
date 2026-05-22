@@ -185,7 +185,7 @@ export default function EventCard({ event, onClick, variant = 'default' }: Props
             </DisplayHeading>
           </div>
           <div style={{ flex: 1, textAlign: 'right' }}>
-            <div
+            {/* <div
               style={{
                 fontSize: 11,
                 color: 'var(--text-muted)',
@@ -194,8 +194,7 @@ export default function EventCard({ event, onClick, variant = 'default' }: Props
             >
               {event.totalSold} of {event.totalCapacity} seated
             </div>
-            <ProgressBar current={event.totalSold || 0} total={event.totalCapacity || 1} height={4} />
-          </div>
+            <ProgressBar current={event.totalSold || 0} total={event.totalCapacity || 1} height={4} /> */}
         </div>
       </div>
     </div>
