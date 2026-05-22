@@ -116,7 +116,7 @@ export default function EventSidebar({
               background: isSoldOut ? 'var(--status-danger)' : 'var(--status-success)',
             }}
           />
-          {availabilityLabel}
+          {/* {availabilityLabel} */}
         </div>
 
         <Button
