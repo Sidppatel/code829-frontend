@@ -195,8 +195,21 @@ export default function PerformerDetailPage() {
                   textDecoration: 'none',
                 }}
               >
-                <div style={{ aspectRatio: '16 / 9', background: 'var(--bg-soft)', overflow: 'hidden' }}>
-                  {e.imageUrl && <img src={e.imageUrl} alt={e.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                <div style={{ position: 'relative', height: 200, overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
+                  {e.imageUrl && (
+                    <img 
+                      src={e.imageUrl} 
+                      alt={e.title} 
+                      loading="lazy"
+                      style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        objectFit: 'cover',
+                        transition: 'transform 0.5s var(--ease-human)',
+                        transform: 'scale(1)'
+                      }} 
+                    />
+                  )}
                 </div>
                 <div style={{ padding: 14 }}>
                   <h3 style={{ margin: '0 0 4px 0', fontSize: 16, fontWeight: 700 }}>{e.title}</h3>
