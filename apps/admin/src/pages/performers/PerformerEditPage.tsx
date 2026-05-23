@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Form, Input, message, Upload } from 'antd';
-import type { UploadProps } from 'antd';
-import { ArrowLeftOutlined, CheckCircleTwoTone, UploadOutlined, UserOutlined, WarningTwoTone } from '@ant-design/icons';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Button, Form, Input, message } from 'antd';
+import { ArrowLeftOutlined, CheckCircleTwoTone, WarningTwoTone } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { performerService } from '../../services/api';
 import type { Performer, PerformerMetaItem } from '@code829/shared/types/performer';
 import { PageShell } from '@code829/shared/components/ui';
+import AvatarUpload from '@code829/shared/components/shared/AvatarUpload';
 import MetaListEditor from '../../components/performers/MetaListEditor';
 import { createLogger } from '@code829/shared/lib/logger';
 
@@ -35,6 +35,8 @@ export default function PerformerEditPage() {
   const [performer, setPerformer] = useState<Performer | null>(null);
   const [slugTouched, setSlugTouched] = useState(false);
   const [slugStatus, setSlugStatus] = useState<SlugStatus>({ kind: 'idle' });
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const slugCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const slugCheckSeq = useRef(0);
 
@@ -121,6 +123,11 @@ export default function PerformerEditPage() {
           slug: values.slug || undefined,
           meta: cleanedMeta,
         });
+        
+        if (pendingFile) {
+          await performerService.uploadImage(data.id, pendingFile);
+        }
+
         message.success('Performer created');
         navigate(`/performers/${data.id}`, { replace: true });
       } else {
@@ -129,7 +136,16 @@ export default function PerformerEditPage() {
           slug: values.slug,
           meta: cleanedMeta,
         });
-        setPerformer(data);
+        
+        if (pendingFile) {
+          const res = await performerService.uploadImage(data.id, pendingFile);
+          setPerformer(res.data);
+          setPendingFile(null);
+          setPreviewUrl(null);
+        } else {
+          setPerformer(data);
+        }
+
         message.success('Saved');
       }
     } catch (err) {
@@ -140,25 +156,20 @@ export default function PerformerEditPage() {
     }
   };
 
-  const uploadProps: UploadProps = useMemo(() => ({
-    name: 'file',
-    accept: 'image/*',
-    showUploadList: false,
-    beforeUpload: async (file) => {
-      if (isNew || !performer) {
-        message.warning('Save the performer first to upload a photo');
-        return Upload.LIST_IGNORE;
-      }
-      try {
-        const { data } = await performerService.uploadImage(performer.id, file);
-        setPerformer(data);
-        message.success('Photo uploaded');
-      } catch {
-        message.error('Upload failed');
-      }
-      return Upload.LIST_IGNORE;
-    },
-  }), [isNew, performer]);
+  const handleAvatarUpload = async (file: File) => {
+    if (isNew) {
+      setPendingFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      return url;
+    } else {
+      const { data } = await performerService.uploadImage(performer!.id, file);
+      setPerformer(data);
+      return data.primaryImageUrl || undefined;
+    }
+  };
+
+
 
   return (
     <PageShell
@@ -185,29 +196,12 @@ export default function PerformerEditPage() {
 
           <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-              <div
-                style={{
-                  width: 160,
-                  height: 160,
-                  borderRadius: 16,
-                  background: 'var(--bg-soft)',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid var(--border)',
-                }}
-              >
-                {performer?.primaryImageUrl ? (
-                  <img src={performer.primaryImageUrl} alt={performer.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <UserOutlined style={{ fontSize: 48, color: 'var(--text-muted)' }} />
-                )}
-              </div>
-              <Upload {...uploadProps}>
-                <Button icon={<UploadOutlined />} disabled={isNew}>Upload photo</Button>
-              </Upload>
-              {isNew && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Save first to upload photo</div>}
+              <AvatarUpload
+                currentUrl={previewUrl || performer?.primaryImageUrl}
+                shape="square"
+                size={160}
+                onUpload={handleAvatarUpload}
+              />
             </div>
 
             <div style={{ flex: '1 1 320px', display: 'flex', flexDirection: 'column', gap: 12 }}>
