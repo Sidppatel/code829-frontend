@@ -206,12 +206,18 @@ export default function EventWizardPage() {
   const onValuesChange = (changed: Record<string, unknown>, all: Record<string, unknown>) => {
     setIsDirty(true);
 
-    if (changed.startDate && (!all.endDate || all.endDate.isBefore(changed.startDate, 'day'))) {
-      form.setFieldsValue({ endDate: changed.startDate });
+    const changedStartDate = changed.startDate as dayjs.Dayjs | undefined;
+    const allEndDate = all.endDate as dayjs.Dayjs | undefined;
+
+    if (changedStartDate && (!allEndDate || allEndDate.isBefore(changedStartDate, 'day'))) {
+      form.setFieldsValue({ endDate: changedStartDate });
     }
 
-    if (changed.startTime && !all.endTime) {
-      form.setFieldsValue({ endTime: changed.startTime.add(2, 'hour') });
+    const changedStartTime = changed.startTime as dayjs.Dayjs | undefined;
+    const allEndTime = all.endTime as dayjs.Dayjs | undefined;
+
+    if (changedStartTime && !allEndTime) {
+      form.setFieldsValue({ endTime: changedStartTime.add(2, 'hour') });
     }
   };
 
