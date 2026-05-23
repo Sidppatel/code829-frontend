@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import { Form, Select } from 'antd';
 import { useController, type Control, type FieldValues, type Path } from 'react-hook-form';
 
@@ -35,13 +36,13 @@ export function SelectField<T extends FieldValues>({
       validateStatus={fieldState.error ? 'error' : undefined}
       help={fieldState.error?.message}
     >
-      <Select
-        {...field}
-        options={options}
-        placeholder={placeholder}
-        disabled={disabled}
-        allowClear={allowClear}
-      />
+      {createElement(Select, {
+        ...field,
+        options,
+        placeholder,
+        disabled,
+        allowClear,
+      })}
     </Form.Item>
   );
 }

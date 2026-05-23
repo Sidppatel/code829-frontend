@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { BaseViewModel } from './BaseViewModel';
 import { useVMState } from './useVM';
 import { purchaseController, PurchaseController } from '../controllers/PurchaseController';
@@ -71,17 +71,23 @@ export interface UsePurchaseQuoteVMResult extends PurchaseQuoteState {
 }
 
 export function usePurchaseQuoteVM(selection: PricingQuoteRequest | null): UsePurchaseQuoteVMResult {
-  const key = JSON.stringify(selection);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const vm = useMemo(() => new PurchaseQuoteViewModel(selection), []);
+  const [vm] = useState(() => new PurchaseQuoteViewModel(selection));
   const state = useVMState(vm);
 
+  const selectionStr = JSON.stringify(selection);
+  const [memo, setMemo] = useState({ str: selectionStr, obj: selection });
   useEffect(() => {
-    vm.setSelection(selection);
-    return () => { /* keep VM alive across selection edits; dispose on unmount below */ };
-    // selection identity changes are tracked via JSON.stringify(key).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vm, key]);
+    if (memo.str !== selectionStr) {
+      const t = setTimeout(() => setMemo({ str: selectionStr, obj: selection }), 0);
+      return () => clearTimeout(t);
+    }
+  }, [selectionStr, selection, memo.str]);
+  const selectionObj = memo.str === selectionStr ? memo.obj : selection;
+
+  useEffect(() => {
+    vm.setSelection(selectionObj);
+    return () => { }
+  }, [vm, selectionObj]);
 
   useEffect(() => () => vm.dispose(), [vm]);
 

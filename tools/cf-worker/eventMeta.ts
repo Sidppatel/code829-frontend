@@ -39,7 +39,7 @@ export async function tryInjectEventMeta(
   url: URL,
   env: ApiProxyEnv,
 ): Promise<Response | null> {
-  const match = url.pathname.match(/^\/events\/([^\/]+)\/?$/);
+  const match = url.pathname.match(/^\/events\/([^/]+)\/?$/);
   if (!match) return null;
   const slug = decodeURIComponent(match[1]);
   if (!SLUG_PATTERN.test(slug)) return null;

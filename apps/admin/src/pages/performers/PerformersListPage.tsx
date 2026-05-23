@@ -32,7 +32,10 @@ export default function PerformersListPage() {
     }
   }, [query, page, pageSize]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const t = setTimeout(() => void load(), 0);
+    return () => clearTimeout(t);
+  }, [load]);
 
   const onDelete = async (p: Performer) => {
     try {

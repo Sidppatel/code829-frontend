@@ -49,8 +49,8 @@ export default function ProfilePage() {
 
   const handleSubmit = async () => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { email: _email, ...values } = await form.validateFields();
+      const values = await form.validateFields();
+      delete values.email;
       setSaving(true);
       await authApi.updateProfile(values);
       const { data } = await authApi.getMe();
@@ -85,69 +85,69 @@ export default function ProfilePage() {
         subtitle="Manage your contact details, preferences, and avatar."
       />
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 32px 64px' }}>
-      <Card>
-        <AvatarUpload
-          currentUrl={imageUrl}
-          onUpload={async (file) => {
-            const { data } = await imagesApi.uploadImage(file);
-            setImageUrl(data.url);
-            const { data: me } = await authApi.getMe();
-            setUser(me as UserProfile);
-            return data.url;
-          }}
-          onDelete={async () => {
-            await imagesApi.deleteImage();
-            setImageUrl(null);
-            const { data: me } = await authApi.getMe();
-            setUser(me as UserProfile);
-          }}
-        />
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <Row gutter={16}>
-            <Col xs={24} sm={12}>
-              <Form.Item name="firstName" label="First Name" rules={[{ required: true }]}>
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={12}>
-              <Form.Item name="lastName" label="Last Name" rules={[{ required: true }]}>
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item name="email" label="Email Address">
-            <Input disabled />
-          </Form.Item>
-          <Form.Item name="phone" label="Phone">
-            <Input />
-          </Form.Item>
-          <Form.Item name="address" label="Address">
-            <AddressAutocomplete onSelect={handleAddressSelect} />
-          </Form.Item>
-          <Row gutter={16}>
-            <Col xs={24} sm={8}>
-              <Form.Item name="city" label="City">
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Form.Item name="state" label="State">
-                <Input maxLength={2} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Form.Item name="zipCode" label="ZIP Code">
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={saving}>
-              Save Changes
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
+        <Card>
+          <AvatarUpload
+            currentUrl={imageUrl}
+            onUpload={async (file) => {
+              const { data } = await imagesApi.uploadImage(file);
+              setImageUrl(data.url);
+              const { data: me } = await authApi.getMe();
+              setUser(me as UserProfile);
+              return data.url;
+            }}
+            onDelete={async () => {
+              await imagesApi.deleteImage();
+              setImageUrl(null);
+              const { data: me } = await authApi.getMe();
+              setUser(me as UserProfile);
+            }}
+          />
+          <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            <Row gutter={16}>
+              <Col xs={24} sm={12}>
+                <Form.Item name="firstName" label="First Name" rules={[{ required: true }]}>
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item name="lastName" label="Last Name" rules={[{ required: true }]}>
+                  <Input />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Form.Item name="email" label="Email Address">
+              <Input disabled />
+            </Form.Item>
+            <Form.Item name="phone" label="Phone">
+              <Input />
+            </Form.Item>
+            <Form.Item name="address" label="Address">
+              <AddressAutocomplete onSelect={handleAddressSelect} />
+            </Form.Item>
+            <Row gutter={16}>
+              <Col xs={24} sm={8}>
+                <Form.Item name="city" label="City">
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Form.Item name="state" label="State">
+                  <Input maxLength={2} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Form.Item name="zipCode" label="ZIP Code">
+                  <Input />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={saving}>
+                Save Changes
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
       </div>
     </div>
   );

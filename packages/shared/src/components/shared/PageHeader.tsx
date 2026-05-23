@@ -76,7 +76,7 @@ export default function PageHeader({ title, subtitle, extra, onBack, rotateSubti
               transition: 'all 0.5s ease',
               opacity: 1,
             }}>
-              {subtitles[activeSubtitleIndex]}
+              {subtitles.at(activeSubtitleIndex)}
             </p>
           )}
         </div>

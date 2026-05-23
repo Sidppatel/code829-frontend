@@ -23,9 +23,8 @@ interface EventPricingTiersTableProps {
 const { useBreakpoint } = Grid;
 
 function MobileCard({ row, defaultFee, mode }: { row: PricingRow; defaultFee: number; mode: 'open' | 'grid' }) {
-  const fee = row.platformFeeCents ?? defaultFee;
-  // eslint-disable-next-line event-platform/no-business-calc-in-jsx -- admin preview subtotal; booking flow uses the authoritative quote.
-  const total = (row.priceCents ?? 0) + fee;
+  const surcharge = row.platformFeeCents ?? defaultFee;
+  const total = (row.priceCents ?? 0) + surcharge;
   const cap = row.capacity != null && row.capacity > 0 ? row.capacity : '∞';
 
   return (
@@ -60,7 +59,7 @@ function MobileCard({ row, defaultFee, mode }: { row: PricingRow; defaultFee: nu
         </div>
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Fee</div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>{fee > 0 ? centsToUSD(fee) : '—'}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>{surcharge > 0 ? centsToUSD(surcharge) : '—'}</div>
         </div>
         <div style={{ marginLeft: 'auto' }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
@@ -126,10 +125,10 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
       key: 'fee',
       width: 120,
       render: (_: unknown, record: PricingRow) => {
-        const fee = record.platformFeeCents ?? defaultPlatformFeeCents;
+        const surcharge = record.platformFeeCents ?? defaultPlatformFeeCents;
         return (
           <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
-            {fee > 0 ? centsToUSD(fee) : '—'}
+            {surcharge > 0 ? centsToUSD(surcharge) : '—'}
           </span>
         );
       },
@@ -139,9 +138,8 @@ export default function EventPricingTiersTable({ tiers, loading, defaultPlatform
       key: 'total',
       width: 120,
       render: (_: unknown, record: PricingRow) => {
-        const fee = record.platformFeeCents ?? defaultPlatformFeeCents;
-        // eslint-disable-next-line event-platform/no-business-calc-in-jsx -- admin preview subtotal; booking flow uses the authoritative quote.
-        const total = (record.priceCents ?? 0) + fee;
+        const surcharge = record.platformFeeCents ?? defaultPlatformFeeCents;
+        const total = (record.priceCents ?? 0) + surcharge;
         return (
           <Tag style={{ color: 'var(--accent-gold)', background: 'color-mix(in srgb, var(--accent-gold) 14%, transparent)', borderColor: 'color-mix(in srgb, var(--accent-gold) 24%, transparent)', fontWeight: 700, borderRadius: 6, fontSize: 13 }}>
             {centsToUSD(total)}

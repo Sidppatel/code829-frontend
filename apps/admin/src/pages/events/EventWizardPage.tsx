@@ -203,8 +203,7 @@ export default function EventWizardPage() {
     void loadEvent();
   }, [id, form, message, navigate]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onValuesChange = (changed: any, all: any) => {
+  const onValuesChange = (changed: Record<string, unknown>, all: Record<string, unknown>) => {
     setIsDirty(true);
 
     if (changed.startDate && (!all.endDate || all.endDate.isBefore(changed.startDate, 'day'))) {
@@ -225,8 +224,7 @@ export default function EventWizardPage() {
     return current && current.isBefore(watchedStartDate.startOf('day'));
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const disabledStartTime = (_: dayjs.Dayjs | null) => {
+  const disabledStartTime = () => {
     if (!watchedStartDate || !watchedStartDate.isSame(dayjs(), 'day')) return {};
 
     const now = dayjs();
@@ -241,8 +239,7 @@ export default function EventWizardPage() {
     };
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const disabledEndTime = (_: dayjs.Dayjs | null) => {
+  const disabledEndTime = () => {
     if (!watchedStartDate || !watchedEndDate || !watchedEndDate.isSame(watchedStartDate, 'day') || !watchedStartTime) {
       return {};
     }

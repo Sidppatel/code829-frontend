@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { BaseViewModel } from './BaseViewModel';
 import { useVMState } from './useVM';
 import { eventController, EventController } from '../controllers/EventController';
@@ -62,15 +62,23 @@ export interface UseEventListVMResult extends EventListState {
 }
 
 export function useEventListVM(params: EventListParams = {}): UseEventListVMResult {
-  const key = JSON.stringify(params);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const vm = useMemo(() => new EventListViewModel(params), [key]);
+  const [vm] = useState(() => new EventListViewModel(params));
   const state = useVMState(vm);
 
+  const paramsStr = JSON.stringify(params);
+  const [memo, setMemo] = useState({ str: paramsStr, obj: params });
   useEffect(() => {
-    void vm.load();
+    if (memo.str !== paramsStr) {
+      const t = setTimeout(() => setMemo({ str: paramsStr, obj: params }), 0);
+      return () => clearTimeout(t);
+    }
+  }, [paramsStr, params, memo.str]);
+  const paramsObj = memo.str === paramsStr ? memo.obj : params;
+
+  useEffect(() => {
+    vm.setParams(paramsObj);
     return () => vm.dispose();
-  }, [vm]);
+  }, [vm, paramsObj]);
 
   return { ...state, vm, refresh: vm.refresh };
 }

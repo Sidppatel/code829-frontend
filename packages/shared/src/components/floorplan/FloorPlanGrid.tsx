@@ -9,12 +9,12 @@ import {
 } from 'react';
 import { buildCoveredSet, colLetter, tablesOverlap } from './floorPlanHelpers';
 
-const SHAPE_RADIUS: Record<string, string> = {
-  Round: '50%',
-  Cocktail: '50%',
-  Square: '4px',
-  Rectangle: '6px',
-};
+const SHAPE_RADIUS = new Map<string, string>([
+  ['Round', '50%'],
+  ['Cocktail', '50%'],
+  ['Square', '4px'],
+  ['Rectangle', '6px'],
+]);
 
 const DEFAULT_CELL_PX = 64;
 const AXIS_W = 36;
@@ -216,7 +216,7 @@ export default function FloorPlanGrid<T extends FloorPlanTable>(props: FloorPlan
           rowSpan: table.rowSpan,
           colSpan: table.colSpan,
         };
-        const radius = SHAPE_RADIUS[table.shape] ?? SHAPE_RADIUS.Square;
+        const radius = SHAPE_RADIUS.get(table.shape) ?? SHAPE_RADIUS.get('Square');
         const extraCls = tableClassName?.(table, ctx) ?? '';
         const extraStyle = tableStyle?.(table, ctx) ?? {};
         const showHandle = Boolean(onTableResize) && isSelected;

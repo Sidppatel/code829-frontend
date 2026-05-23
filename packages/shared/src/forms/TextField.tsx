@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import { Form, Input } from 'antd';
 import type { InputProps } from 'antd';
 import { useController, type Control, type FieldValues, type Path } from 'react-hook-form';
@@ -34,15 +35,15 @@ export function TextField<T extends FieldValues>({
       validateStatus={fieldState.error ? 'error' : undefined}
       help={fieldState.error?.message}
     >
-      <Component
-        {...field}
-        {...inputProps}
-        type={type === 'password' ? undefined : type}
-        placeholder={placeholder}
-        disabled={disabled}
-        autoComplete={autoComplete}
-        value={field.value ?? ''}
-      />
+      {createElement(Component, {
+        ...field,
+        ...inputProps,
+        type: type === 'password' ? undefined : type,
+        placeholder,
+        disabled,
+        autoComplete,
+        value: field.value ?? '',
+      })}
     </Form.Item>
   );
 }

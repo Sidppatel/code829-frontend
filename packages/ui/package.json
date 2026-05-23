@@ -12,13 +12,13 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3"
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3"
   },
   "peerDependencies": {
     "@code829/shared": "workspace:*",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.14.2"
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-router-dom": "7.14.2"
   }
 }

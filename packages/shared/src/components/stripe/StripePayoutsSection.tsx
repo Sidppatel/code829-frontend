@@ -222,36 +222,37 @@ interface StateChipMeta {
   icon: React.ReactNode;
 }
 
-const STATE_META: Record<OrganizationStripeState, StateChipMeta> = {
-  not_started: {
+const STATE_META = new Map<OrganizationStripeState, StateChipMeta>([
+  ['not_started', {
     label: 'Not started',
     tone: 'neutral',
     icon: <ExclamationCircleFilled aria-hidden="true" />,
-  },
-  identity_pending: {
+  }],
+  ['identity_pending', {
     label: 'Identity pending',
     tone: 'warning',
     icon: <IdcardOutlined aria-hidden="true" />,
-  },
-  needs_bank: {
+  }],
+  ['needs_bank', {
     label: 'Bank account required',
     tone: 'info',
     icon: <BankOutlined aria-hidden="true" />,
-  },
-  active: {
+  }],
+  ['active', {
     label: 'Payouts active',
     tone: 'success',
     icon: <CheckCircleFilled aria-hidden="true" />,
-  },
-  rejected: {
+  }],
+  ['rejected', {
     label: 'Account rejected',
     tone: 'danger',
     icon: <CloseCircleFilled aria-hidden="true" />,
-  },
-};
+  }],
+]);
 
 function StateChip({ state }: { state: OrganizationStripeState }) {
-  const meta = STATE_META[state];
+  const meta = STATE_META.get(state);
+  if (!meta) return null;
   return <StatusRow tone={meta.tone} icon={meta.icon} label={meta.label} />;
 }
 
@@ -264,13 +265,11 @@ function StatusRow({
   icon: React.ReactNode;
   label: string;
 }) {
-  const color = {
-    success: 'var(--status-success, #16a34a)',
-    warning: 'var(--status-warning, #ca8a04)',
-    info: 'var(--status-info, #2563eb)',
-    danger: 'var(--status-danger, #dc2626)',
-    neutral: 'var(--status-neutral, #6b7280)',
-  }[tone];
+  let color = 'var(--status-neutral, #6b7280)';
+  if (tone === 'success') color = 'var(--status-success, #16a34a)';
+  else if (tone === 'warning') color = 'var(--status-warning, #ca8a04)';
+  else if (tone === 'info') color = 'var(--status-info, #2563eb)';
+  else if (tone === 'danger') color = 'var(--status-danger, #dc2626)';
 
   return (
     <div
@@ -435,7 +434,7 @@ function ExplainerForState({
               }}
             >
               <BankOutlined aria-hidden="true" style={{ color: 'var(--text-secondary)' }} />
-              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Connected bank</span>
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{'Connected bank'}</span>
               <span
                 style={{
                   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',

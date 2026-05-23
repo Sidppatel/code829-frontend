@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { BaseViewModel } from './BaseViewModel';
 import { useVMState } from './useVM';
 import { eventController, EventController } from '../controllers/EventController';
@@ -20,6 +20,11 @@ export class EventDetailViewModel extends BaseViewModel<EventDetailState> {
     super({ event: null, loading: false, error: null });
     this.identifier = identifier;
     this.ctrl = ctrl;
+  }
+
+  setIdentifier(identifier: { id?: string; slug?: string }): void {
+    this.identifier = identifier;
+    void this.load();
   }
 
   async load(): Promise<void> {
@@ -50,15 +55,23 @@ export interface UseEventDetailVMResult extends EventDetailState {
 }
 
 export function useEventDetailVM(identifier: { id?: string; slug?: string }): UseEventDetailVMResult {
-  const key = JSON.stringify(identifier);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const vm = useMemo(() => new EventDetailViewModel(identifier), [key]);
+  const [vm] = useState(() => new EventDetailViewModel(identifier));
   const state = useVMState(vm);
 
+  const key = JSON.stringify(identifier);
+  const [memo, setMemo] = useState({ str: key, obj: identifier });
   useEffect(() => {
-    if (identifier.id || identifier.slug) void vm.load();
+    if (memo.str !== key) {
+      const t = setTimeout(() => setMemo({ str: key, obj: identifier }), 0);
+      return () => clearTimeout(t);
+    }
+  }, [key, identifier, memo.str]);
+  const identObj = memo.str === key ? memo.obj : identifier;
+
+  useEffect(() => {
+    if (identObj.id || identObj.slug) vm.setIdentifier(identObj);
     return () => vm.dispose();
-  }, [vm, identifier.id, identifier.slug]);
+  }, [vm, identObj]);
 
   return { ...state, vm, refresh: vm.refresh };
 }

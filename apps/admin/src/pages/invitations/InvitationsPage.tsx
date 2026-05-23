@@ -17,11 +17,14 @@ import {
 } from '@code829/shared/hooks';
 import type { Invitation } from '@code829/shared/types/auth';
 
-const STATUS_COLORS: Record<string, string> = {
-  Pending: 'blue',
-  Accepted: 'green',
-  Revoked: 'default',
-  Expired: 'orange',
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Pending': return 'blue';
+    case 'Accepted': return 'green';
+    case 'Revoked': return 'default';
+    case 'Expired': return 'orange';
+    default: return 'default';
+  }
 };
 
 export default function InvitationsPage() {
@@ -97,9 +100,9 @@ export default function InvitationsPage() {
               onChange={setRoleFilter}
               allowClear
             >
-              <Select.Option value="Admin">Admin</Select.Option>
-              <Select.Option value="Staff">Staff</Select.Option>
-              {isDeveloper && <Select.Option value="Developer">Developer</Select.Option>}
+              <Select.Option value="Admin">{'Admin'}</Select.Option>
+              <Select.Option value="Staff">{'Staff'}</Select.Option>
+              {isDeveloper && <Select.Option value="Developer">{'Developer'}</Select.Option>}
             </Select>
             <Select
               placeholder="All Statuses"
@@ -108,17 +111,17 @@ export default function InvitationsPage() {
               onChange={setStatusFilter}
               allowClear
             >
-              <Select.Option value="Pending">Pending</Select.Option>
-              <Select.Option value="Accepted">Accepted</Select.Option>
-              <Select.Option value="Revoked">Revoked</Select.Option>
-              <Select.Option value="Expired">Expired</Select.Option>
+              <Select.Option value="Pending">{'Pending'}</Select.Option>
+              <Select.Option value="Accepted">{'Accepted'}</Select.Option>
+              <Select.Option value="Revoked">{'Revoked'}</Select.Option>
+              <Select.Option value="Expired">{'Expired'}</Select.Option>
             </Select>
           </div>
         }
         columns={[
           { title: 'Email', dataIndex: 'email', key: 'email' },
           { title: 'Role', dataIndex: 'role', key: 'role', render: (r: string) => <Tag>{r}</Tag> },
-          { title: 'Status', dataIndex: 'status', key: 'status', render: (s: string) => <Tag color={STATUS_COLORS[s]}>{s}</Tag> },
+          { title: 'Status', dataIndex: 'status', key: 'status', render: (s: string) => <Tag color={getStatusColor(s)}>{s}</Tag> },
           { title: 'Invited By', dataIndex: 'invitedByName', key: 'invitedByName' },
           { title: 'Expires', dataIndex: 'expiresAt', key: 'expiresAt', render: (d: string) => new Date(d).toLocaleDateString() },
           {
@@ -176,9 +179,9 @@ export default function InvitationsPage() {
             </FormField>
             <FormField name="role" label="Role" required>
               <Select>
-                <Select.Option value="Staff">Staff</Select.Option>
-                <Select.Option value="Admin">Admin</Select.Option>
-                {isDeveloper && <Select.Option value="Developer">Developer</Select.Option>}
+                <Select.Option value="Staff">{'Staff'}</Select.Option>
+                <Select.Option value="Admin">{'Admin'}</Select.Option>
+                {isDeveloper && <Select.Option value="Developer">{'Developer'}</Select.Option>}
               </Select>
             </FormField>
           </>

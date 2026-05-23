@@ -29,22 +29,6 @@ export default function EventLineupEditor({ eventId }: Props) {
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data } = await performerService.getEventLineup(eventId);
-      setEntries(await hydrate(data));
-      setDirty(false);
-    } catch (err) {
-      log.error('load lineup failed', err);
-      message.error('Failed to load performers');
-    } finally {
-      setLoading(false);
-    }
-  }, [eventId]);
-
-  useEffect(() => { void load(); }, [load]);
-
   const hydrate = async (linkRows: EventPerformer[]): Promise<LineupEntry[]> => {
     const sorted = [...linkRows].sort((a, b) => a.sortOrder - b.sortOrder);
     return Promise.all(sorted.map(async (row) => {
@@ -73,6 +57,27 @@ export default function EventLineupEditor({ eventId }: Props) {
       };
     }));
   };
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await performerService.getEventLineup(eventId);
+      setEntries(await hydrate(data));
+      setDirty(false);
+    } catch (err) {
+      log.error('load lineup failed', err);
+      message.error('Failed to load performers');
+    } finally {
+      setLoading(false);
+    }
+  }, [eventId]);
+
+  useEffect(() => {
+    const t = setTimeout(() => void load(), 0);
+    return () => clearTimeout(t);
+  }, [load]);
+
+
 
   const addPerformer = (_id: string | string[] | undefined, performer?: Performer | Performer[]) => {
     const p = Array.isArray(performer) ? performer[0] : performer;

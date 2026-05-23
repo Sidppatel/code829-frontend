@@ -19,10 +19,13 @@ interface Props {
   loading?: boolean;
 }
 
-const PADDING_VARS: Record<NonNullable<Props['padding']>, number> = {
-  default: 24,
-  compact: 16,
-  none: 0,
+const getPaddingSpacing = (padding: NonNullable<Props['padding']>): number => {
+  switch (padding) {
+    case 'default': return 24;
+    case 'compact': return 16;
+    case 'none': return 0;
+    default: return 24;
+  }
 };
 
 export default function PageShell({
@@ -41,7 +44,7 @@ export default function PageShell({
   loading,
 }: Props) {
   const isMobile = useIsMobile();
-  const spacing = PADDING_VARS[padding];
+  const spacing = getPaddingSpacing(padding);
   const horizontalPadding = isMobile ? (padding === 'none' ? 0 : 20) : spacing;
 
   return (

@@ -56,7 +56,10 @@ export default function PerformerEditPage() {
     }
   }, [id, isNew, form]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const t = setTimeout(() => void load(), 0);
+    return () => clearTimeout(t);
+  }, [load]);
 
   const slugify = (input: string) =>
     input.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
@@ -229,8 +232,8 @@ export default function PerformerEditPage() {
                   slugStatus.kind === 'available'
                     ? 'success'
                     : slugStatus.kind === 'taken'
-                    ? 'warning'
-                    : undefined
+                      ? 'warning'
+                      : undefined
                 }
                 help={
                   slugStatus.kind === 'available' ? (

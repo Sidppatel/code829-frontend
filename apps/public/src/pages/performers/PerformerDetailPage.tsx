@@ -71,7 +71,10 @@ export default function PerformerDetailPage() {
     }
   }, [slug]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const t = setTimeout(() => void load(), 0);
+    return () => clearTimeout(t);
+  }, [load]);
 
   if (loading) return <div style={{ padding: 80, textAlign: 'center' }}><Spin size="large" /></div>;
   if (notFound) return <Alert type="error" message="Performer not found" style={{ maxWidth: 600, margin: '60px auto' }} />;

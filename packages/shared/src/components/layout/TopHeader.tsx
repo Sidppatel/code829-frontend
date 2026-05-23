@@ -74,15 +74,15 @@ export default function TopHeader({ isMobile, title, user, userMenuItems, showMe
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <PulseIndicator status="success" size={6} />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>API</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>{'API'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <PulseIndicator status="success" size={6} />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>Worker</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>{'Worker'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <PulseIndicator status="warning" size={6} />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>Storage</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>{'Storage'}</span>
                   </div>
                 </div>
               </>

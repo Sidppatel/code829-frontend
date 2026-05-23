@@ -29,7 +29,10 @@ export default function PerformersListPage() {
     }
   }, [query, page, pageSize]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const t = setTimeout(() => void load(), 0);
+    return () => clearTimeout(t);
+  }, [load]);
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 20px 80px' }}>

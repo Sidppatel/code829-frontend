@@ -27,7 +27,7 @@ export default function AdminLoginForm({ title = 'Sign In', forgotPasswordPath =
       searchParams.delete('error');
       setSearchParams(searchParams, { replace: true });
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [logout, message, searchParams, setSearchParams]);
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);

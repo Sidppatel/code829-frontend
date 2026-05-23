@@ -26,12 +26,12 @@ export function useSessionRefresh(meEndpoint = '/auth/me') {
       try {
         const { data } = await apiClient.get(meEndpoint);
         if (data?.id) setUser(data);
-      } catch {
-        // No valid session - user needs to log in
+      } catch (err) {
+        console.error('Session refresh error', err);
       } finally {
         setHydrated(true);
       }
     };
     void refresh();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [meEndpoint, setHydrated, setUser, user]);
 }

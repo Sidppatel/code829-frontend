@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 
 export interface UseAsyncResourceResult<T> {
   data: T | null;
@@ -16,6 +16,12 @@ export function useAsyncResource<T>(
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
+  const depsKey = JSON.stringify(deps);
+  const fetcherRef = useRef(fetcher);
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+  }, [fetcher]);
+
   useEffect(() => {
     let cancelled = false;
     queueMicrotask(() => {
@@ -23,7 +29,7 @@ export function useAsyncResource<T>(
       setLoading(true);
       setError(null);
     });
-    fetcher()
+    fetcherRef.current()
       .then((res) => {
         if (!cancelled) setData(res);
       })
@@ -36,8 +42,7 @@ export function useAsyncResource<T>(
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tick, ...deps]);
+  }, [tick, depsKey]);
 
   const refresh = useCallback(() => setTick((t) => t + 1), []);
 

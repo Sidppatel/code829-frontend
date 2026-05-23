@@ -13,6 +13,9 @@ const mockUser: UserProfile = {
   optInLocationEmail: false,
   hasCompletedOnboarding: true,
   createdAt: '2025-01-01T00:00:00Z',
+  hasPassword: true,
+  hasGoogle: false,
+  emailVerified: true,
 };
 
 const adminUser: UserProfile = {

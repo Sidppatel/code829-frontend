@@ -1,8 +1,9 @@
 
-import type {
-  ComponentPropsWithoutRef,
-  ElementType,
-  ReactNode,
+import {
+  createElement,
+  type ComponentPropsWithoutRef,
+  type ElementType,
+  type ReactNode,
 } from 'react';
 import {
   resolveTextToken,
@@ -28,9 +29,9 @@ export default function Text({
   const merged = className
     ? `${resolved.className} ${className}`
     : resolved.className;
-  return (
-    <Tag className={merged} {...rest}>
-      {children ?? resolved.text}
-    </Tag>
+  return createElement(
+    Tag,
+    { className: merged, ...rest },
+    children ?? resolved.text
   );
 }

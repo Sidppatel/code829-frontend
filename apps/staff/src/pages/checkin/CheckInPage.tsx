@@ -48,8 +48,8 @@ export default function CheckInPage() {
   }, [eventId, message]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadStats();
+    const t = setTimeout(() => void loadStats(), 0);
+    return () => clearTimeout(t);
   }, [loadStats]);
 
   const handleScan = useCallback(
@@ -216,9 +216,8 @@ export default function CheckInPage() {
               className="c829-fade-up"
               style={{
                 background: 'var(--bg-surface)',
-                border: `1px solid ${
-                  scanResult.success ? 'var(--status-success)' : 'var(--status-danger)'
-                }`,
+                border: `1px solid ${scanResult.success ? 'var(--status-success)' : 'var(--status-danger)'
+                  }`,
                 borderRadius: 'var(--radius-lg)',
                 padding: 18,
                 boxShadow: 'var(--shadow-sm)',

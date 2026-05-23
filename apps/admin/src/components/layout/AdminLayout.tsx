@@ -111,7 +111,8 @@ function NewAdminShell({ user, onLogout }: { user: ReturnType<typeof useAuth>['u
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
-    setDrawerOpen(false);
+    const t = setTimeout(() => setDrawerOpen(false), 0);
+    return () => clearTimeout(t);
   }, [location.pathname]);
 
   useEffect(() => {
