@@ -63,9 +63,12 @@ const STEPS = [
   { key: 'seating', label: 'Seating' },
 ] as const;
 
-const STEP_FIELDS: Record<number, string[]> = {
-  0: ['title', 'category', 'venueId', 'startDate', 'startTime', 'endDate', 'endTime'],
-  1: [],
+const getStepFields = (step: number): string[] => {
+  switch (step) {
+    case 0: return ['title', 'category', 'venueId', 'startDate', 'startTime', 'endDate', 'endTime'];
+    case 1: return [];
+    default: return [];
+  }
 };
 
 export default function EventWizardPage() {
@@ -325,7 +328,7 @@ export default function EventWizardPage() {
   };
 
   const handleNext = async () => {
-    const fields = STEP_FIELDS[step] ?? [];
+    const fields = getStepFields(step);
     if (fields.length) {
       try {
         await form.validateFields(fields);
@@ -361,7 +364,7 @@ export default function EventWizardPage() {
       {isEditMode && (
         <div className="edit-mode-banner">
           <EditOutlined />
-          <span>Editing: <strong>{form.getFieldValue('title') || 'Event'}</strong></span>
+          <span>{'Editing: '}<strong>{form.getFieldValue('title') || 'Event'}</strong></span>
           <Button
             size="small"
             onClick={() => navigate(`/events/${id}`)}
@@ -642,7 +645,7 @@ export default function EventWizardPage() {
               <Form.List name="ticketTypes">
                 {(fields, { add, remove }) => (
                   <>
-                    {fields.map(({ key, name, ...restField }) => (
+                    {fields.map(({ key, name }) => (
                       <Card
                         key={key}
                         size="small"
@@ -664,16 +667,16 @@ export default function EventWizardPage() {
                           })()
                         }
                       >
-                        <Form.Item {...restField} name={[name, 'id']} hidden>
+                        <Form.Item name={[name, 'id']} hidden>
                           <Input />
                         </Form.Item>
-                        <Form.Item {...restField} name={[name, "soldCount"]} hidden>
+                        <Form.Item name={[name, "soldCount"]} hidden>
                           <InputNumber />
                         </Form.Item>
                         <Row gutter={16}>
                           <Col xs={24} sm={12}>
                             <Form.Item
-                              {...restField}
+                              
                               name={[name, 'name']}
                               label="Tier name"
                               rules={[
@@ -712,7 +715,7 @@ export default function EventWizardPage() {
                           </Col>
                           <Col xs={12} sm={6}>
                             <Form.Item
-                              {...restField}
+                              
                               name={[name, 'price']}
                               label="Price ($)"
                               rules={[{ required: true, message: 'Price required' }]}
@@ -722,7 +725,7 @@ export default function EventWizardPage() {
                           </Col>
                           <Col xs={12} sm={6}>
                             <Form.Item
-                              {...restField}
+                              
                               name={[name, 'capacity']}
                               label="Capacity"
                               rules={[
@@ -747,7 +750,7 @@ export default function EventWizardPage() {
                           </Col>
                           <Col xs={24}>
                             <Form.Item
-                              {...restField}
+                              
                               name={[name, 'description']}
                               label="Description (optional)"
                               style={{ marginBottom: 0 }}

@@ -35,7 +35,7 @@ export default function CrudModal<V extends object = Record<string, unknown>>({
   useEffect(() => {
     if (open) {
       form.resetFields();
-      if (initialValues) form.setFieldsValue(initialValues as any);
+      if (initialValues) form.setFieldsValue(initialValues as never);
     }
   }, [open, initialValues, form]);
 
@@ -58,7 +58,7 @@ export default function CrudModal<V extends object = Record<string, unknown>>({
       cancelText={cancelLabel}
       centered
       destroyOnHidden
-      mask={{ closable: false }}
+      maskClosable={false}
     >
       <Form<V> form={form} layout="vertical" preserve={false} initialValues={initialValues as V}>
         {children(form)}
