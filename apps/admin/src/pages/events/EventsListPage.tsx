@@ -26,16 +26,16 @@ const log = createLogger('Admin/EventsListPage');
 
 const STATUS_FILTERS: EventDetail['status'][] = ['Draft', 'Published', 'SoldOut', 'Completed'];
 
-const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  Draft: { label: 'Draft', color: EVENT_STATUS_COLORS.Draft },
-  Published: { label: 'Published', color: EVENT_STATUS_COLORS.Published },
-  SoldOut: { label: 'Sold Out', color: EVENT_STATUS_COLORS.SoldOut },
-  Cancelled: { label: 'Cancelled', color: EVENT_STATUS_COLORS.Cancelled },
-  Completed: { label: 'Completed', color: EVENT_STATUS_COLORS.Completed },
-};
+const STATUS_MAP = new Map<string, { label: string; color: string }>([
+  ['Draft', { label: 'Draft', color: EVENT_STATUS_COLORS.Draft }],
+  ['Published', { label: 'Published', color: EVENT_STATUS_COLORS.Published }],
+  ['SoldOut', { label: 'Sold Out', color: EVENT_STATUS_COLORS.SoldOut }],
+  ['Cancelled', { label: 'Cancelled', color: EVENT_STATUS_COLORS.Cancelled }],
+  ['Completed', { label: 'Completed', color: EVENT_STATUS_COLORS.Completed }],
+]);
 
 function StatusBadge({ status }: { status: string }) {
-  const s = STATUS_MAP[status] ?? { label: status, color: 'var(--status-neutral)' };
+  const s = STATUS_MAP.get(status) ?? { label: status, color: 'var(--status-neutral)' };
   const isPulse = status === 'Published';
 
   return (
@@ -108,13 +108,13 @@ export default function EventsListPage() {
         }}
         chips={STATUS_FILTERS.map((status) => ({
           key: status,
-          label: STATUS_MAP[status]?.label ?? status,
+          label: STATUS_MAP.get(status)?.label ?? status,
           active: paged.filters.status === status,
           onClick: () => {
             log.info('Filter by status', { status });
             paged.setFilters({ status: paged.filters.status === status ? undefined : status });
           },
-          dot: STATUS_MAP[status]?.color,
+          dot: STATUS_MAP.get(status)?.color,
         }))}
       />
       <DataTableSection<EventDetail>
@@ -190,7 +190,7 @@ export default function EventsListPage() {
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'flex-end' }}>
                 <Button
                   size="small"
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     navigate(`/events/${record.eventId}`);
                   }}
@@ -201,7 +201,7 @@ export default function EventsListPage() {
                   <Button
                     size="small"
                     icon={<MoreOutlined />}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
                   />
                 </Tooltip>
               </div>
@@ -290,7 +290,7 @@ export default function EventsListPage() {
                 type="primary"
                 block
                 style={{ borderRadius: 'var(--radius-full)', fontWeight: 600 }}
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   navigate(`/events/${record.eventId}`);
                 }}
@@ -301,7 +301,7 @@ export default function EventsListPage() {
                 <Button
                   icon={<MoreOutlined />}
                   style={{ borderRadius: 'var(--radius-full)', width: 40 }}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
                 />
               </Tooltip>
             </div>

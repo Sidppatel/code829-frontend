@@ -427,7 +427,7 @@ export default function EventWizardPage() {
                     options={venues.map((v) => ({ label: v.name, value: v.venueId }))}
                     placeholder="Select venue"
                     showSearch
-                    filterOption={(input, option) =>
+                    filterOption={(input: any, option: any) =>
                       (option?.label as string)?.toLowerCase().includes(input.toLowerCase()) ?? false
                     }
                   />
@@ -483,8 +483,8 @@ export default function EventWizardPage() {
                   tooltip={hasSoldTickets ? "Date cannot be changed because tickets have been sold" : undefined}
                   rules={[
                     { required: true, message: 'Required' },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
+                    ({ getFieldValue }: any) => ({
+                      validator(_: any, value: any) {
                         const startDate = getFieldValue('startDate');
                         if (!value || !startDate) return Promise.resolve();
                         if (value.isBefore(startDate, 'day')) {
@@ -514,8 +514,8 @@ export default function EventWizardPage() {
                   tooltip={hasSoldTickets ? "Time cannot be changed because tickets have been sold" : undefined}
                   rules={[
                     { required: true, message: 'Required' },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
+                    ({ getFieldValue }: any) => ({
+                      validator(_: any, value: any) {
                         const startDate = getFieldValue('startDate');
                         const endDate = getFieldValue('endDate');
                         const startTime = getFieldValue('startTime');
@@ -643,9 +643,9 @@ export default function EventWizardPage() {
                 Ticket tiers
               </Typography.Text>
               <Form.List name="ticketTypes">
-                {(fields, { add, remove }) => (
+                {(fields: any[], { add, remove }: any) => (
                   <>
-                    {fields.map(({ key, name }) => (
+                    {fields.map(({ key, name }: any) => (
                       <Card
                         key={key}
                         size="small"
@@ -682,7 +682,7 @@ export default function EventWizardPage() {
                               rules={[
                                 { required: true, message: 'Missing tier name' },
                                 () => ({
-                                  validator(_, value) {
+                                  validator(_: any, value: any) {
                                     const nameVal = Array.isArray(value) ? value[0] : value;
                                     if (!nameVal) return Promise.resolve();
                                     const count = ticketTypes.filter((t: { name?: string | string[] }) =>
@@ -731,7 +731,7 @@ export default function EventWizardPage() {
                               rules={[
                                 { required: true, message: 'Qty required' },
                                 () => ({
-                                  validator(_, value) {
+                                  validator(_: any, value: any) {
                                     const sold = form.getFieldValue(['ticketTypes', name, 'soldCount']) || 0;
                                     if (value != null && value < sold) {
                                       return Promise.reject(new Error(`Capacity cannot be less than sold tickets (${sold})`));

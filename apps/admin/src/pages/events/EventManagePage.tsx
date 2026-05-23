@@ -36,16 +36,16 @@ import { createLogger } from '@code829/shared/lib/logger';
 
 const log = createLogger('Admin/EventManagePage');
 
-const STATUS_MAP: Record<string, { className: string; label: string }> = {
-  Draft: { className: 'status-pill status-draft', label: 'Draft' },
-  Published: { className: 'status-pill status-published', label: 'Published' },
-  SoldOut: { className: 'status-pill status-soldout', label: 'Sold Out' },
-  Cancelled: { className: 'status-pill status-cancelled', label: 'Cancelled' },
-  Completed: { className: 'status-pill status-completed', label: 'Completed' },
-};
+const STATUS_MAP = new Map<string, { className: string; label: string }>([
+  ['Draft', { className: 'status-pill status-draft', label: 'Draft' }],
+  ['Published', { className: 'status-pill status-published', label: 'Published' }],
+  ['SoldOut', { className: 'status-pill status-soldout', label: 'Sold Out' }],
+  ['Cancelled', { className: 'status-pill status-cancelled', label: 'Cancelled' }],
+  ['Completed', { className: 'status-pill status-completed', label: 'Completed' }],
+]);
 
 function StatusPill({ status }: { status: string }) {
-  const s = STATUS_MAP[status] ?? { className: 'status-pill status-draft', label: status };
+  const s = STATUS_MAP.get(status) ?? { className: 'status-pill status-draft', label: status };
   return (
     <span className={s.className}>
       <span className="status-pill-dot" />
@@ -230,7 +230,7 @@ export default function EventManagePage() {
                   >
                     <AppstoreOutlined />
                   </div>
-                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '-0.3px' }}>Seating & Pricing</h3>
+                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '-0.3px' }}>{'Seating & Pricing'}</h3>
                 </div>
                 <HumanCard
                   className="human-noise"
