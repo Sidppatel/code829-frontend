@@ -535,6 +535,42 @@ export default function EventDetailPage() {
     setStep('info');
   };
 
+  const structuredData = useMemo(() => {
+    if (!event) return null;
+    const sd = {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "name": event.title,
+      "startDate": event.startDate,
+      "endDate": event.endDate,
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "eventStatus": event.status === 'Cancelled' ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
+      "location": {
+        "@type": "Place",
+        "name": event.venue?.name,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": event.venue?.address,
+          "addressLocality": event.venue?.city,
+          "addressRegion": event.venue?.state,
+          "postalCode": event.venue?.zipCode,
+          "addressCountry": "US"
+        }
+      },
+      "image": event.imageUrl ? [event.imageUrl] : undefined,
+      "description": event.description,
+      "offers": {
+        "@type": "Offer",
+        "url": `https://code829.com/events/${event.slug}`,
+        "price": event.displayFromAmountCents ? (event.displayFromAmountCents / 100).toFixed(2) : "0.00",
+        "priceCurrency": "USD",
+        "availability": event.isSoldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+        "validFrom": event.publishedAt || event.createdAt
+      }
+    };
+    return JSON.stringify(sd);
+  }, [event]);
+
   if (loading) {
     return (
       <div className="page-container" style={{ paddingTop: isMobile ? 32 : 60 }}>
@@ -634,41 +670,6 @@ export default function EventDetailPage() {
 
   const isSoldOut = event.isSoldOut ?? false;
 
-  const structuredData = useMemo(() => {
-    if (!event) return null;
-    const sd = {
-      "@context": "https://schema.org",
-      "@type": "Event",
-      "name": event.title,
-      "startDate": event.startDate,
-      "endDate": event.endDate,
-      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-      "eventStatus": event.status === 'Cancelled' ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
-      "location": {
-        "@type": "Place",
-        "name": event.venue?.name,
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": event.venue?.address,
-          "addressLocality": event.venue?.city,
-          "addressRegion": event.venue?.state,
-          "postalCode": event.venue?.zipCode,
-          "addressCountry": "US"
-        }
-      },
-      "image": event.imageUrl ? [event.imageUrl] : undefined,
-      "description": event.description,
-      "offers": {
-        "@type": "Offer",
-        "url": `https://code829.com/events/${event.slug}`,
-        "price": event.displayFromAmountCents ? (event.displayFromAmountCents / 100).toFixed(2) : "0.00",
-        "priceCurrency": "USD",
-        "availability": event.isSoldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-        "validFrom": event.publishedAt || event.createdAt
-      }
-    };
-    return JSON.stringify(sd);
-  }, [event]);
 
   return (
     <motion.div
