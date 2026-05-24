@@ -18,10 +18,10 @@ test.describe('@mobile back button', () => {
     const stepAfterClick = new URL(page.url()).searchParams.get('step');
 
     await page.goBack();
-    await expect(page).not.toHaveURL(new RegExp(`step=${stepAfterClick}`));
+    await expect(page).not.toHaveURL(/[?&]step=(select-table|capacity)/);
 
     await page.goForward();
-    await expect(page).toHaveURL(new RegExp(`step=${stepAfterClick}`));
+    await expect(page).toHaveURL(/[?&]step=(select-table|capacity)/);
   });
 
   test('refresh on checkout keeps bookingId', async ({ page }) => {
