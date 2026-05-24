@@ -2,7 +2,7 @@ import { Input, Select } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import type { EventFacets } from '@code829/shared/types/event';
 
-export interface FilterValues {
+interface FilterValues {
   search?: string;
   category?: string;
   city?: string;

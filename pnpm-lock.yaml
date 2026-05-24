@@ -99,9 +99,6 @@ importers:
       axios:
         specifier: 1.15.2
         version: 1.15.2
-      clsx:
-        specifier: 2.1.1
-        version: 2.1.1
       dayjs:
         specifier: 1.11.13
         version: 1.11.13
@@ -127,9 +124,6 @@ importers:
         specifier: 5.0.12
         version: 5.0.12(@types/react@19.2.14)(react@19.2.6)
     devDependencies:
-      '@eslint/js':
-        specifier: 10.0.1
-        version: 10.0.1(eslint@10.4.0)
       '@types/node':
         specifier: 25.9.1
         version: 25.9.1
@@ -145,21 +139,9 @@ importers:
       eslint:
         specifier: 10.4.0
         version: 10.4.0
-      eslint-plugin-react-hooks:
-        specifier: 7.1.1
-        version: 7.1.1(eslint@10.4.0)
-      eslint-plugin-react-refresh:
-        specifier: 0.5.2
-        version: 0.5.2(eslint@10.4.0)
-      globals:
-        specifier: 17.6.0
-        version: 17.6.0
       typescript:
         specifier: 6.0.3
         version: 6.0.3
-      typescript-eslint:
-        specifier: 8.59.4
-        version: 8.59.4(eslint@10.4.0)(typescript@6.0.3)
       vite:
         specifier: 8.0.14
         version: 8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(tsx@4.22.3)
@@ -212,9 +194,6 @@ importers:
         specifier: 5.0.12
         version: 5.0.12(@types/react@19.2.14)(react@19.2.6)
     devDependencies:
-      '@eslint/js':
-        specifier: 10.0.1
-        version: 10.0.1(eslint@10.4.0)
       '@types/node':
         specifier: 25.9.1
         version: 25.9.1
@@ -230,21 +209,9 @@ importers:
       eslint:
         specifier: 10.4.0
         version: 10.4.0
-      eslint-plugin-react-hooks:
-        specifier: 7.1.1
-        version: 7.1.1(eslint@10.4.0)
-      eslint-plugin-react-refresh:
-        specifier: 0.5.2
-        version: 0.5.2(eslint@10.4.0)
-      globals:
-        specifier: 17.6.0
-        version: 17.6.0
       typescript:
         specifier: 6.0.3
         version: 6.0.3
-      typescript-eslint:
-        specifier: 8.59.4
-        version: 8.59.4(eslint@10.4.0)(typescript@6.0.3)
       vite:
         specifier: 8.0.14
         version: 8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(tsx@4.22.3)
@@ -281,15 +248,9 @@ importers:
       axios:
         specifier: 1.15.2
         version: 1.15.2
-      clsx:
-        specifier: 2.1.1
-        version: 2.1.1
       dayjs:
         specifier: 1.11.13
         version: 1.11.13
-      dompurify:
-        specifier: 3.4.1
-        version: 3.4.1
       framer-motion:
         specifier: 12.38.0
         version: 12.38.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -315,9 +276,6 @@ importers:
         specifier: 5.0.12
         version: 5.0.12(@types/react@19.2.14)(react@19.2.6)
     devDependencies:
-      '@eslint/js':
-        specifier: 10.0.1
-        version: 10.0.1(eslint@10.4.0)
       '@types/node':
         specifier: 25.9.1
         version: 25.9.1
@@ -333,21 +291,9 @@ importers:
       eslint:
         specifier: 10.4.0
         version: 10.4.0
-      eslint-plugin-react-hooks:
-        specifier: 7.1.1
-        version: 7.1.1(eslint@10.4.0)
-      eslint-plugin-react-refresh:
-        specifier: 0.5.2
-        version: 0.5.2(eslint@10.4.0)
-      globals:
-        specifier: 17.6.0
-        version: 17.6.0
       typescript:
         specifier: 6.0.3
         version: 6.0.3
-      typescript-eslint:
-        specifier: 8.59.4
-        version: 8.59.4(eslint@10.4.0)(typescript@6.0.3)
       vite:
         specifier: 8.0.14
         version: 8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(tsx@4.22.3)
@@ -400,9 +346,6 @@ importers:
         specifier: 5.0.12
         version: 5.0.12(@types/react@19.2.14)(react@19.2.6)
     devDependencies:
-      '@eslint/js':
-        specifier: 10.0.1
-        version: 10.0.1(eslint@10.4.0)
       '@types/node':
         specifier: 25.9.1
         version: 25.9.1
@@ -418,21 +361,9 @@ importers:
       eslint:
         specifier: 10.4.0
         version: 10.4.0
-      eslint-plugin-react-hooks:
-        specifier: 7.1.1
-        version: 7.1.1(eslint@10.4.0)
-      eslint-plugin-react-refresh:
-        specifier: 0.5.2
-        version: 0.5.2(eslint@10.4.0)
-      globals:
-        specifier: 17.6.0
-        version: 17.6.0
       typescript:
         specifier: 6.0.3
         version: 6.0.3
-      typescript-eslint:
-        specifier: 8.59.4
-        version: 8.59.4(eslint@10.4.0)(typescript@6.0.3)
       vite:
         specifier: 8.0.14
         version: 8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(tsx@4.22.3)
@@ -500,9 +431,6 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.14)
-      vite:
-        specifier: 8.0.14
-        version: 8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(tsx@4.22.3)
 
   packages/ui:
     dependencies:
