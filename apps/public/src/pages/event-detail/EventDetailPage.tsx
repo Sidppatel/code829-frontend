@@ -634,6 +634,42 @@ export default function EventDetailPage() {
 
   const isSoldOut = event.isSoldOut ?? false;
 
+  const structuredData = useMemo(() => {
+    if (!event) return null;
+    const sd = {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "name": event.title,
+      "startDate": event.startDate,
+      "endDate": event.endDate,
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "eventStatus": event.status === 'Cancelled' ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
+      "location": {
+        "@type": "Place",
+        "name": event.venue?.name,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": event.venue?.address,
+          "addressLocality": event.venue?.city,
+          "addressRegion": event.venue?.state,
+          "postalCode": event.venue?.zipCode,
+          "addressCountry": "US"
+        }
+      },
+      "image": event.imageUrl ? [event.imageUrl] : undefined,
+      "description": event.description,
+      "offers": {
+        "@type": "Offer",
+        "url": `https://code829.com/events/${event.slug}`,
+        "price": event.displayFromAmountCents ? (event.displayFromAmountCents / 100).toFixed(2) : "0.00",
+        "priceCurrency": "USD",
+        "availability": event.isSoldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+        "validFrom": event.publishedAt || event.createdAt
+      }
+    };
+    return JSON.stringify(sd);
+  }, [event]);
+
   return (
     <motion.div
       initial="initial"
@@ -653,6 +689,7 @@ export default function EventDetailPage() {
         <meta name="twitter:description" content={event.description ? event.description.slice(0, 160) : 'Event details on Code829'} />
         {event.imageUrl ? <meta name="twitter:image" content={event.imageUrl} /> : null}
         {event.slug ? <link rel="canonical" href={`https://code829.com/events/${event.slug}`} /> : null}
+        {structuredData ? <script type="application/ld+json">{structuredData}</script> : null}
       </Helmet>
       <EventHero event={event} itemVariants={itemVariants} />
 
