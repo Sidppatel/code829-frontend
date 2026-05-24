@@ -160,7 +160,7 @@ export default function PerformerDetailPage() {
 
       {otherMeta.length > 0 && (
         <section className="glass-card" style={sectionStyle}>
-          <h2 style={sectionHeadStyle}>Details</h2>
+          <h2 style={sectionHeadStyle}>{'Details'}</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             {otherMeta.map((m: PerformerMetaItem) => (
               <div key={m.key}>
@@ -175,7 +175,7 @@ export default function PerformerDetailPage() {
       )}
 
       <section className="glass-card" style={sectionStyle}>
-        <h2 style={sectionHeadStyle}>Upcoming events</h2>
+        <h2 style={sectionHeadStyle}>{'Upcoming events'}</h2>
         {events.length === 0 ? (
           <Empty description="No upcoming events" />
         ) : (
