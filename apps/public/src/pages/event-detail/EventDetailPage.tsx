@@ -641,7 +641,10 @@ export default function EventDetailPage() {
       variants={containerVariants}
       style={{ paddingBottom: 150, minHeight: '100vh', position: 'relative' }}
     >
-      <Helmet><title>{event?.title ?? 'Event'} - Code829</title></Helmet>
+      <Helmet>
+        <title>{event?.title ?? 'Event'} - Code829</title>
+        {event?.slug && <link rel="canonical" href={`https://code829.com/events/${event.slug}`} />}
+      </Helmet>
       <EventHero event={event} itemVariants={itemVariants} />
 
       <div className="page-container" style={{ marginTop: isMobile ? 32 : 60 }}>
@@ -687,7 +690,7 @@ export default function EventDetailPage() {
             }}
           >
             <div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>From</div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>{'From'}</div>
               <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)' }}>
                 {event.displayFromFormatted ?? 'Free'}
               </div>

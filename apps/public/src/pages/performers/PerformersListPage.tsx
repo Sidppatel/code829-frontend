@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Col, Empty, Input, Pagination, Row, Spin } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
@@ -36,6 +37,10 @@ export default function PerformersListPage() {
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 20px 80px' }}>
+      <Helmet>
+        <title>{'Performers - Code829'}</title>
+        <link rel="canonical" href="https://code829.com/performers" />
+      </Helmet>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 24 }}>
         <div style={{ width: 6, height: 56, borderRadius: 10, background: 'var(--gradient-brand, var(--primary))' }} />
         <div>
