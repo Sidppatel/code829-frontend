@@ -537,6 +537,7 @@ export default function EventDetailPage() {
 
   const structuredData = useMemo(() => {
     if (!event) return null;
+
     const sd = {
       "@context": "https://schema.org",
       "@type": "Event",
@@ -559,6 +560,11 @@ export default function EventDetailPage() {
       },
       "image": event.imageUrl ? [event.imageUrl] : undefined,
       "description": event.description,
+      "organizer": event.organizerName ? {
+        "@type": "Organization",
+        "name": event.organizerName,
+        "url": "https://code829.com"
+      } : undefined,
       "offers": {
         "@type": "Offer",
         "url": `https://code829.com/events/${event.slug}`,
