@@ -642,8 +642,17 @@ export default function EventDetailPage() {
       style={{ paddingBottom: 150, minHeight: '100vh', position: 'relative' }}
     >
       <Helmet>
-        <title>{event?.title ?? 'Event'} - Code829</title>
-        {event?.slug && <link rel="canonical" href={`https://code829.com/events/${event.slug}`} />}
+        <title>{`${event.title} - Code829`}</title>
+        <meta name="description" content={event.description ? event.description.slice(0, 160) : 'Event details on Code829'} />
+        <meta property="og:title" content={event.title} />
+        <meta property="og:description" content={event.description ? event.description.slice(0, 160) : 'Event details on Code829'} />
+        {event.imageUrl ? <meta property="og:image" content={event.imageUrl} /> : null}
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={event.title} />
+        <meta name="twitter:description" content={event.description ? event.description.slice(0, 160) : 'Event details on Code829'} />
+        {event.imageUrl ? <meta name="twitter:image" content={event.imageUrl} /> : null}
+        {event.slug ? <link rel="canonical" href={`https://code829.com/events/${event.slug}`} /> : null}
       </Helmet>
       <EventHero event={event} itemVariants={itemVariants} />
 
