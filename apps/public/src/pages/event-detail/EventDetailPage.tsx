@@ -17,6 +17,7 @@ import type { PricingQuoteRequest } from '@code829/shared/types/pricing';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import { useCheckoutQuote } from '@code829/shared/hooks/useCheckoutQuote';
+import { centsToDollars } from '@code829/shared/utils/currency';
 
 import EventHero from './components/EventHero';
 import EventAbout from './components/EventAbout';
@@ -568,7 +569,7 @@ export default function EventDetailPage() {
       "offers": {
         "@type": "Offer",
         "url": `https://code829.com/events/${event.slug}`,
-        "price": event.displayFromAmountCents ? (event.displayFromAmountCents / 100).toFixed(2) : "0.00",
+        "price": event.displayFromAmountCents ? centsToDollars(event.displayFromAmountCents).toFixed(2) : "0.00",
         "priceCurrency": "USD",
         "availability": event.isSoldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
         "validFrom": event.publishedAt || event.createdAt
