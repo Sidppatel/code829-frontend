@@ -427,8 +427,8 @@ export default function EventWizardPage() {
                     options={venues.map((v) => ({ label: v.name, value: v.venueId }))}
                     placeholder="Select venue"
                     showSearch
-                    filterOption={(input: any, option: any) =>
-                      (option?.label as string)?.toLowerCase().includes(input.toLowerCase()) ?? false
+                    filterOption={(input: string, option: unknown) =>
+                      ((option as { label?: string })?.label)?.toLowerCase().includes(input.toLowerCase()) ?? false
                     }
                   />
                 </Form.Item>
@@ -483,8 +483,8 @@ export default function EventWizardPage() {
                   tooltip={hasSoldTickets ? "Date cannot be changed because tickets have been sold" : undefined}
                   rules={[
                     { required: true, message: 'Required' },
-                    ({ getFieldValue }: any) => ({
-                      validator(_: any, value: any) {
+                    ({ getFieldValue }: { getFieldValue: (f: string) => dayjs.Dayjs | undefined }) => ({
+                      validator(_: unknown, value: dayjs.Dayjs | null) {
                         const startDate = getFieldValue('startDate');
                         if (!value || !startDate) return Promise.resolve();
                         if (value.isBefore(startDate, 'day')) {
@@ -514,8 +514,8 @@ export default function EventWizardPage() {
                   tooltip={hasSoldTickets ? "Time cannot be changed because tickets have been sold" : undefined}
                   rules={[
                     { required: true, message: 'Required' },
-                    ({ getFieldValue }: any) => ({
-                      validator(_: any, value: any) {
+                    ({ getFieldValue }: { getFieldValue: (f: string) => dayjs.Dayjs | undefined }) => ({
+                      validator(_: unknown, value: dayjs.Dayjs | null) {
                         const startDate = getFieldValue('startDate');
                         const endDate = getFieldValue('endDate');
                         const startTime = getFieldValue('startTime');
@@ -643,9 +643,9 @@ export default function EventWizardPage() {
                 Ticket tiers
               </Typography.Text>
               <Form.List name="ticketTypes">
-                {(fields: any[], { add, remove }: any) => (
+                {(fields: { key: number; name: number }[], { add, remove }: { add: () => void; remove: (name: number) => void }) => (
                   <>
-                    {fields.map(({ key, name }: any) => (
+                    {fields.map(({ key, name }: { key: number; name: number }) => (
                       <Card
                         key={key}
                         size="small"
@@ -682,7 +682,7 @@ export default function EventWizardPage() {
                               rules={[
                                 { required: true, message: 'Missing tier name' },
                                 () => ({
-                                  validator(_: any, value: any) {
+                                  validator(_: unknown, value: string | string[]) {
                                     const nameVal = Array.isArray(value) ? value[0] : value;
                                     if (!nameVal) return Promise.resolve();
                                     const count = ticketTypes.filter((t: { name?: string | string[] }) =>
@@ -731,7 +731,7 @@ export default function EventWizardPage() {
                               rules={[
                                 { required: true, message: 'Qty required' },
                                 () => ({
-                                  validator(_: any, value: any) {
+                                  validator(_: unknown, value: number | null | undefined) {
                                     const sold = form.getFieldValue(['ticketTypes', name, 'soldCount']) || 0;
                                     if (value != null && value < sold) {
                                       return Promise.reject(new Error(`Capacity cannot be less than sold tickets (${sold})`));
