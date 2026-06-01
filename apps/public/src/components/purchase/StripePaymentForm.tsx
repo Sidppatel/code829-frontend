@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Button, Alert, Space } from 'antd';
 
@@ -13,10 +13,12 @@ export default function StripePaymentForm({ onSuccess, onCancel, confirming, set
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState<string | null>(null);
+  const submittingRef = useRef(false);
 
   const handleSubmit = async () => {
-    if (!stripe || !elements) return;
+    if (!stripe || !elements || confirming || submittingRef.current) return;
 
+    submittingRef.current = true;
     setConfirming(true);
     setError(null);
 
@@ -24,6 +26,7 @@ export default function StripePaymentForm({ onSuccess, onCancel, confirming, set
     if (submitError) {
       setError(submitError.message ?? 'Validation failed');
       setConfirming(false);
+      submittingRef.current = false;
       return;
     }
 
@@ -38,6 +41,7 @@ export default function StripePaymentForm({ onSuccess, onCancel, confirming, set
     if (confirmError) {
       setError(confirmError.message ?? 'Payment failed');
       setConfirming(false);
+      submittingRef.current = false;
       return;
     }
 
