@@ -18,6 +18,7 @@ import {
   IdcardOutlined,
   MenuOutlined,
   CloseOutlined,
+  ShopOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@code829/shared/hooks/useAuth';
@@ -28,6 +29,7 @@ import { USE_NEW_SHELL } from '@code829/shared/lib/featureFlags';
 import { Navbar, Footer as UIFooter, type NavItem } from '@code829/ui';
 
 const { Sider, Header, Content } = Layout;
+const BRAND_NAME = 'Code829';
 
 const navGroups = [
   {
@@ -42,6 +44,7 @@ const navGroups = [
     items: [
       { key: '/events', shortLabel: 'Events', label: 'Events List', icon: <CalendarOutlined /> },
       { key: '/performers', shortLabel: 'Acts', label: 'Performers', icon: <UserOutlined /> },
+      { key: '/sponsors', shortLabel: 'Sponsors', label: 'Sponsors', icon: <ShopOutlined /> },
       { key: '/purchases', shortLabel: 'Sales', label: 'Purchases', icon: <BookOutlined /> },
     ]
   },
@@ -176,7 +179,7 @@ function NewAdminShell({ user, onLogout }: { user: ReturnType<typeof useAuth>['u
             >
               {drawerOpen ? <CloseOutlined /> : <MenuOutlined />}
             </button>
-            <div style={{ fontWeight: 700, fontSize: 16 }}>Code829</div>
+            <div style={{ fontWeight: 700, fontSize: 16 }}>{BRAND_NAME}</div>
             <div style={{ width: 36 }} />
           </header>
         )}

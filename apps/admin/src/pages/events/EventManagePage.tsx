@@ -13,6 +13,7 @@ import {
   LayoutOutlined,
   LockOutlined,
   SendOutlined,
+  ShopOutlined,
   ThunderboltOutlined,
   UserOutlined,
 } from '@ant-design/icons';
@@ -24,6 +25,7 @@ import type { EventDetail } from '@code829/shared/types/event';
 import type { EventStats } from '@code829/shared/services/adminEventsApi';
 import EventPricingTiersTable from '../../components/events/EventPricingTiersTable';
 import EventLineupEditor from '../../components/performers/EventLineupEditor';
+import EventSponsorsEditor from '../../components/sponsors/EventSponsorsEditor';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import {
   LoadingBoundary,
@@ -324,6 +326,13 @@ export default function EventManagePage() {
                   <UserOutlined /> Performers
                 </div>
                 <EventLineupEditor eventId={event.eventId} />
+              </div>
+
+              <div className="admin-section">
+                <div className="admin-section-title">
+                  <ShopOutlined /> Sponsors
+                </div>
+                <EventSponsorsEditor eventId={event.eventId} />
               </div>
 
               <div className="admin-section">

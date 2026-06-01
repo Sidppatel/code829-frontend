@@ -30,6 +30,7 @@ export { VenueService, venueService } from './VenueService';
 export type { CreateVenuePayload } from './VenueService';
 
 export { PerformerService, performerService } from './PerformerService';
+export { SponsorService, sponsorService } from './SponsorService';
 
 export { LayoutService, layoutService } from './LayoutService';
 export type {

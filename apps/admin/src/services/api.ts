@@ -7,3 +7,4 @@ export { adminLayoutApi } from '@code829/shared/services/adminLayoutApi';
 export { adminDashboardApi } from '@code829/shared/services/adminDashboardApi';
 export { eventsApi } from '@code829/shared/services/eventsApi';
 export { performerService } from '@code829/shared/services/PerformerService';
+export { sponsorService } from '@code829/shared/services/SponsorService';

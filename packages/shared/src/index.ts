@@ -86,6 +86,8 @@ export {
   venueService,
   PerformerService,
   performerService,
+  SponsorService,
+  sponsorService,
   LayoutService,
   layoutService,
   DashboardService,
@@ -171,6 +173,15 @@ export type {
   UpdatePerformerPayload,
   SetEventPerformersPayload,
 } from './types/performer';
+export type {
+  Sponsor,
+  SponsorMetaItem,
+  EventSponsor,
+  EventSponsorLink,
+  CreateSponsorPayload,
+  UpdateSponsorPayload,
+  SetEventSponsorsPayload,
+} from './types/sponsor';
 export type {
   OnboardingLinkScope,
   OrganizationStripeState,

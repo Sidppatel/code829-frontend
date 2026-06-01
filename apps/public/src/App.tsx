@@ -13,6 +13,7 @@ const routes: RouteConfig[] = [
       { path: 'events/:slug', loader: () => import('./pages/event-detail/EventDetailPage') },
       { path: 'performers', loader: () => import('./pages/performers/PerformersListPage') },
       { path: 'performers/:slug', loader: () => import('./pages/performers/PerformerDetailPage') },
+      { path: 'sponsors/:slug', loader: () => import('./pages/sponsors/SponsorDetailPage') },
       { path: 'login', loader: () => import('./pages/login/LoginPage') },
       { path: 'signup', loader: () => import('./pages/signup/SignupPage') },
       { path: 'forgot-password', loader: () => import('./pages/forgot-password/ForgotPasswordPage') },
