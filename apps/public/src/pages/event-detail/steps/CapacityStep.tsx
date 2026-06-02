@@ -40,7 +40,6 @@ export default function CapacityStep({ event, ticketTypes, ticketTypesLoading, o
           ) : (
             <CapacityPurchaseForm
               eventId={event.eventId}
-              maxCapacity={event.maxCapacity ?? 0}
               availableCount={event.availableCount}
               pricePerPersonCents={event.displayFromAmountCents ?? 0}
               ticketTypes={ticketTypes.length > 0 ? ticketTypes : undefined}

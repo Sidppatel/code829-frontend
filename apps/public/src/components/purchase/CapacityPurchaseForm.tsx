@@ -7,7 +7,6 @@ import { usePurchaseQuote } from '@code829/shared/hooks/usePurchaseQuote';
 
 interface Props {
   eventId: string;
-  maxCapacity: number;
   availableCount: number;
   pricePerPersonCents: number;
   ticketTypes?: EventTicketType[];
@@ -16,7 +15,6 @@ interface Props {
 
 export default function CapacityPurchaseForm({
   eventId,
-  maxCapacity,
   availableCount,
   pricePerPersonCents,
   ticketTypes,
@@ -76,7 +74,7 @@ export default function CapacityPurchaseForm({
                           )}
                           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                             {tt.availableCount > 0
-                              ? `${tt.availableCount} available`
+                              ? 'Available'
                               : 'Sold out'}
                           </div>
                         </div>
@@ -94,7 +92,7 @@ export default function CapacityPurchaseForm({
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px' }}>
             <TeamOutlined />
-            <Typography.Text>{available} of {maxCapacity} seats available</Typography.Text>
+            <Typography.Text>{available > 0 ? 'Available' : 'Sold out'}</Typography.Text>
           </div>
         )}
 
@@ -114,14 +112,14 @@ export default function CapacityPurchaseForm({
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography.Text type="secondary">Price per person</Typography.Text>
+          <Typography.Text type="secondary">{'Price per person'}</Typography.Text>
           <Typography.Text>{centsToUSD(priceCents)}</Typography.Text>
         </div>
 
         <Divider style={{ margin: '8px 0' }} />
 
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography.Text strong>Total</Typography.Text>
+          <Typography.Text strong>{'Total'}</Typography.Text>
           <Typography.Text strong style={{ fontSize: 18 }}>
             {quoteLoading || !quote ? '—' : quote.formattedDisplayTotal}
           </Typography.Text>
