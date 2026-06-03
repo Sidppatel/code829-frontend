@@ -19,7 +19,9 @@ export function PageViewTracker() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-Portal': portal,
           },
+          credentials: 'include',
           body: JSON.stringify({
             Path: location.pathname,
             Referrer: document.referrer || null,

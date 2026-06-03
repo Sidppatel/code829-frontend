@@ -1,4 +1,6 @@
 
+import { getPortalId } from './axios';
+
 type Entry = { t: number; level: 'error' | 'warn' | 'uncaught' | 'rejection'; msg: string };
 
 const MAX_ENTRIES = 25;
@@ -53,12 +55,15 @@ async function reportTelemetry(level: 'Warning' | 'Error', message: string, stac
     const envObj = (import.meta as unknown as { env?: Record<string, string> }).env;
     const baseUrl = isLocal ? (envObj?.VITE_API_URL || '/api/v1') : '/api/v1';
     const url = baseUrl.endsWith('/') ? `${baseUrl}telemetry/log` : `${baseUrl}/telemetry/log`;
+    const portal = getPortalId() || 'public';
 
     await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Portal': portal,
       },
+      credentials: 'include',
       body: JSON.stringify({
         Level: level,
         Message: message,
