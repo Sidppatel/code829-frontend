@@ -31,6 +31,10 @@ export function configureApiClient(portal: PortalId) {
   apiClient.defaults.headers.common['X-Portal'] = portal;
 }
 
+export function getPortalId(): PortalId | null {
+  return portalId;
+}
+
 apiClient.interceptors.request.use((config) => {
   if (portalId) config.headers['X-Portal'] = portalId;
 

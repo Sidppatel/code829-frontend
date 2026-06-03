@@ -10,6 +10,10 @@ export type {
   DevUser,
   EventFeeInfo,
   DevEventListItem,
+  SiteVisitEntry,
+  VisitorChartPoint,
+  VisitorStatItem,
+  VisitorStats,
 } from './DeveloperService';
 
 export const developerApi = {
@@ -25,4 +29,6 @@ export const developerApi = {
   getEventFees: developerService.getEventFees,
   updateTableTypeFees: developerService.updateTableTypeFees,
   updateTicketTypeFees: developerService.updateTicketTypeFees,
+  getVisitorLogs: developerService.getVisitorLogs,
+  getVisitorStats: developerService.getVisitorStats,
 };

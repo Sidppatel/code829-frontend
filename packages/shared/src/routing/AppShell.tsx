@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import ErrorBoundary from '../components/shared/ErrorBoundary';
 import LoadingSpinner from '../components/shared/LoadingSpinner';
 import ScrollToTop from '../components/shared/ScrollToTop';
+import { PageViewTracker } from './PageViewTracker';
 
 interface Props {
   children: ReactNode;
@@ -39,6 +40,7 @@ export function AppShell({ children, maintenanceMode = false, fallback }: Props)
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <PageViewTracker />
       <ErrorBoundary>
         <Suspense fallback={fallback ?? <LoadingSpinner />}>{children}</Suspense>
       </ErrorBoundary>

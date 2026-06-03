@@ -12,6 +12,7 @@ import {
   SendOutlined,
   SafetyOutlined,
   BankOutlined,
+  EyeOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@code829/shared/hooks/useAuth';
@@ -28,6 +29,7 @@ const navGroups = [
     title: 'Monitoring',
     items: [
       { key: '/', shortLabel: 'Logs', label: 'Error Logs', icon: <CodeOutlined /> },
+      { key: '/visitors', shortLabel: 'Visitors', label: 'Visitor Logs', icon: <EyeOutlined /> },
       { key: '/email-logs', shortLabel: 'Email', label: 'Email Delivery', icon: <MailOutlined /> },
       { key: '/system-logs', shortLabel: 'System', label: 'System Health', icon: <FileTextOutlined /> },
     ]
@@ -63,7 +65,7 @@ const navGroups = [
 
 const navItems = navGroups.flatMap(g => g.items);
 
-const PILL_PRIMARY_KEYS = ['/', '/email-logs', '/organizations', '/admins', '/staff', '/settings'];
+const PILL_PRIMARY_KEYS = ['/', '/visitors', '/email-logs', '/organizations', '/admins', '/staff', '/settings'];
 const DEVELOPER_PILL_ITEMS: NavItem[] = navGroups
   .flatMap((g) => g.items)
   .filter((item) => PILL_PRIMARY_KEYS.includes(item.key))
@@ -77,6 +79,7 @@ const DEVELOPER_PILL_ITEMS: NavItem[] = navGroups
 
 const DEVELOPER_MENU_ITEMS = [
   { key: 'profile', to: '/profile', label: 'Profile' },
+  { key: 'visitors', to: '/visitors', label: 'Visitor Logs' },
   { key: 'system-logs', to: '/system-logs', label: 'System Health' },
   { key: 'invitations', to: '/invitations', label: 'Invitations' },
   { key: 'users', to: '/users', label: 'User Roles' },

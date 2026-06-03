@@ -13,6 +13,7 @@ const routes: RouteConfig[] = [
     layout: DeveloperLayout,
     children: [
       { index: true, loader: () => import('./pages/logs/DevLogsPage') },
+      { path: 'visitors', loader: () => import('./pages/visitors/VisitorLogsPage') },
       { path: 'email-logs', loader: () => import('./pages/email-logs/EmailLogsPage') },
       { path: 'system-logs', loader: () => import('./pages/system-logs/SystemLogsPage') },
       { path: 'admins', loader: () => import('./pages/admins/AdminManagementPage') },

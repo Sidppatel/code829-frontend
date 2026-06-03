@@ -65,7 +65,7 @@ export { hasRole } from './utils/roles';
 export { centsToUSD } from './utils/currency';
 export { formatEventDate, formatDateRange } from './utils/date';
 
-export { default as apiClient } from './lib/axios';
+export { default as apiClient, configureApiClient, getPortalId } from './lib/axios';
 export { createLogger } from './lib/logger';
 export { default as logger } from './lib/logger';
 export { initGlobalErrorListeners } from './lib/globalErrors';

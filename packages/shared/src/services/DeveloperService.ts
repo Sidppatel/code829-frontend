@@ -135,6 +135,51 @@ export class DeveloperService extends BaseService {
 
   updateTicketTypeFees = (eventId: string, ticketTypeFees: Record<string, number | null>) =>
     this.put(`/developer/events/${eventId}/ticket-type-fees`, { ticketTypeFees });
+
+  getVisitorLogs = (params?: { page?: number; pageSize?: number; portal?: string; search?: string }) =>
+    this.get<PagedResponse<SiteVisitEntry>>('/developer/visits', { params });
+
+  getVisitorStats = () =>
+    this.get<VisitorStats>('/developer/visits/stats');
+}
+
+export interface SiteVisitEntry {
+  id: string;
+  timestamp: string;
+  path: string;
+  ipAddress?: string;
+  userAgent?: string;
+  referrer?: string;
+  screenResolution?: string;
+  portal?: string;
+  browser?: string;
+  os?: string;
+  userId?: string;
+  businessUserId?: string;
+  userEmail?: string;
+  userFullName?: string;
+  userRole?: string;
+}
+
+export interface VisitorChartPoint {
+  date: string;
+  count: number;
+}
+
+export interface VisitorStatItem {
+  name: string;
+  count: number;
+}
+
+export interface VisitorStats {
+  totalPageViews: number;
+  uniqueVisitors: number;
+  pageViewsToday: number;
+  pageViewsYesterday: number;
+  visitsByDate: VisitorChartPoint[];
+  visitsByBrowser: VisitorStatItem[];
+  visitsByPortal: VisitorStatItem[];
+  visitsByOs: VisitorStatItem[];
 }
 
 export const developerService = DeveloperService.getInstance();
