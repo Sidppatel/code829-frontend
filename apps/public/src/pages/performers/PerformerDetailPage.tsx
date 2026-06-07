@@ -13,6 +13,7 @@ import { Link, useParams } from 'react-router-dom';
 import type { Performer, PerformerMetaItem } from '@code829/shared/types/performer';
 import { performerService } from '../../services/api';
 import { createLogger } from '@code829/shared/lib/logger';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 const log = createLogger('Public/PerformerDetailPage');
 
@@ -97,8 +98,8 @@ export default function PerformerDetailPage() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 20px 80px' }}>
       <Helmet>
-        <title>{performer.name} - Code829</title>
-        <link rel="canonical" href={`https://code829.com/performers/${performer.slug}`} />
+        <title>{`${performer.name} - ${ORGANIZER_NAME}`}</title>
+        <link rel="canonical" href={`https://${ORGANIZER_NAME.toLowerCase()}.com/performers/${performer.slug}`} />
       </Helmet>
       <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: 40 }}>
         <div

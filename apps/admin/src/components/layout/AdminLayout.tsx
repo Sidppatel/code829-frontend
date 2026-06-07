@@ -27,9 +27,10 @@ import SidebarNav from '@code829/shared/components/layout/SidebarNav';
 import TopHeader from '@code829/shared/components/layout/TopHeader';
 import { USE_NEW_SHELL } from '@code829/shared/lib/featureFlags';
 import { Navbar, Footer as UIFooter, type NavItem } from '@code829/ui';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 const { Sider, Header, Content } = Layout;
-const BRAND_NAME = 'Code829';
+const BRAND_NAME = ORGANIZER_NAME;
 
 const navGroups = [
   {

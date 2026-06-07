@@ -18,6 +18,7 @@ import { useAuth } from '@code829/shared/hooks/useAuth';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import { useCheckoutQuote } from '@code829/shared/hooks/useCheckoutQuote';
 import { centsToDollars } from '@code829/shared/utils/currency';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 import EventHero from './components/EventHero';
 import EventAbout from './components/EventAbout';
@@ -565,11 +566,11 @@ export default function EventDetailPage() {
       "organizer": event.organizerName ? {
         "@type": "Organization",
         "name": event.organizerName,
-        "url": "https://code829.com"
+        "url": `https://${ORGANIZER_NAME.toLowerCase()}.com`
       } : undefined,
       "offers": {
         "@type": "Offer",
-        "url": `https://code829.com/events/${event.slug}`,
+        "url": `https://${ORGANIZER_NAME.toLowerCase()}.com/events/${event.slug}`,
         "price": event.displayFromAmountCents ? centsToDollars(event.displayFromAmountCents).toFixed(2) : "0.00",
         "priceCurrency": "USD",
         "availability": event.isSoldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
@@ -687,17 +688,17 @@ export default function EventDetailPage() {
       style={{ paddingBottom: 150, minHeight: '100vh', position: 'relative' }}
     >
       <Helmet>
-        <title>{`${event.title} - Code829`}</title>
-        <meta name="description" content={event.description ? event.description.slice(0, 160) : 'Event details on Code829'} />
+        <title>{`${event.title} - ${ORGANIZER_NAME}`}</title>
+        <meta name="description" content={event.description ? event.description.slice(0, 160) : `Event details on ${ORGANIZER_NAME}`} />
         <meta property="og:title" content={event.title} />
-        <meta property="og:description" content={event.description ? event.description.slice(0, 160) : 'Event details on Code829'} />
+        <meta property="og:description" content={event.description ? event.description.slice(0, 160) : `Event details on ${ORGANIZER_NAME}`} />
         {event.imageUrl ? <meta property="og:image" content={event.imageUrl} /> : null}
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={event.title} />
-        <meta name="twitter:description" content={event.description ? event.description.slice(0, 160) : 'Event details on Code829'} />
+        <meta name="twitter:description" content={event.description ? event.description.slice(0, 160) : `Event details on ${ORGANIZER_NAME}`} />
         {event.imageUrl ? <meta name="twitter:image" content={event.imageUrl} /> : null}
-        {event.slug ? <link rel="canonical" href={`https://code829.com/events/${event.slug}`} /> : null}
+        {event.slug ? <link rel="canonical" href={`https://${ORGANIZER_NAME.toLowerCase()}.com/events/${event.slug}`} /> : null}
         {structuredData ? <script type="application/ld+json">{structuredData}</script> : null}
       </Helmet>
       <EventHero event={event} itemVariants={itemVariants} />

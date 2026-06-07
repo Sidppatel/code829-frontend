@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { AxiosError } from 'axios';
 import { authApi } from '../../services/api';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 interface ForgotForm {
   email: string;
@@ -45,7 +46,7 @@ export default function ForgotPasswordPage() {
       justifyContent: 'center',
       padding: '24px',
     }}>
-      <Helmet><title>Forgot Password - Code829</title></Helmet>
+      <Helmet><title>{`Forgot Password - ${ORGANIZER_NAME}`}</title></Helmet>
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}

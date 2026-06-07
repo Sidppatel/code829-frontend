@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { UserProfile, BusinessUserProfile, UserRole, AdminRole } from '../types/auth';
 
+import { organizerName } from '../config';
+
 interface AuthState {
   user: UserProfile | BusinessUserProfile | null;
   isHydrated: boolean;
@@ -35,7 +37,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null }),
     }),
     {
-      name: 'code829-auth',
+      name: `${organizerName.toLowerCase()}-auth`,
       partialize: (state) => ({
         user: toPersistedUser(state.user) as UserProfile | BusinessUserProfile | null,
       }),

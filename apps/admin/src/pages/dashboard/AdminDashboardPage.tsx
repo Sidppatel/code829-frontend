@@ -5,6 +5,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { adminDashboardApi } from '../../services/api';
 import { useAuth } from '@code829/shared/hooks/useAuth';
+import { ORGANIZER_NAME } from '@code829/shared';
 import { useAsyncResource } from '@code829/shared/hooks';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { formatEventDate } from '@code829/shared/utils/date';
@@ -67,7 +68,7 @@ export default function AdminDashboardPage() {
     <PageShell
       title={`${greeting}, ${firstName}.`}
       subtitle={today}
-      documentTitle="Dashboard — Code829 Admin"
+      documentTitle={`Dashboard — ${ORGANIZER_NAME} Admin`}
       extra={
         <Button
           type="primary"

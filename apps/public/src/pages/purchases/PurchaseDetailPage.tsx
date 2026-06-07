@@ -25,6 +25,7 @@ import PurchaseStatusTag from '../../components/purchases/PurchaseStatusTag';
 import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import PagePreamble from '../../components/layout/PagePreamble';
 import { createLogger } from '@code829/shared/lib/logger';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 const log = createLogger('Public/PurchaseDetailPage');
 
@@ -122,7 +123,7 @@ export default function PurchaseDetailPage() {
 
   return (
     <div>
-      <Helmet><title>Purchase details - Code829</title></Helmet>
+      <Helmet><title>{`Purchase details - ${ORGANIZER_NAME}`}</title></Helmet>
       <PagePreamble
         kicker={`Purchase #${booking.purchaseNumber}`}
         title={booking.eventTitle}

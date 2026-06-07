@@ -1,12 +1,13 @@
 import { Button, Result } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { ORGANIZER_NAME } from '../../config';
 
 export default function NotFoundPage() {
   const navigate = useNavigate();
   return (
     <>
-      <Helmet><title>Page Not Found - Code829</title></Helmet>
+      <Helmet><title>{`Page Not Found - ${ORGANIZER_NAME}`}</title></Helmet>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <Result
           status="404"

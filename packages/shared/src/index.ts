@@ -198,3 +198,6 @@ export type {
   StripeAccountStatus,
   OrganizationStripeStatus,
 } from './types/organizations';
+
+export { ORGANIZER_NAME, organizerName } from './config';
+

@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import type { NavbarProps, NavItem } from './Navbar';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 function groupItems(items: NavItem[]): Array<{ title: string | null; items: NavItem[] }> {
   const groups = new Map<string | null, NavItem[]>();
@@ -28,7 +29,7 @@ export function NavbarSidebar({
     >
       <div className="ui-navbar__sidebar-brand">
         <span className="ui-navbar__brand-mark" aria-hidden="true" />
-        {!collapsed && <span className="ui-navbar__brand-name">Code829</span>}
+        {!collapsed && <span className="ui-navbar__brand-name">{ORGANIZER_NAME}</span>}
       </div>
 
       <nav className="ui-navbar__sidebar-nav">

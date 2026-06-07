@@ -18,6 +18,8 @@ interface FormValues {
   confirmNewPassword: string;
 }
 
+import { ORGANIZER_NAME } from '@code829/shared';
+
 export default function SecurityPage() {
   const [form] = Form.useForm<FormValues>();
   const [saving, setSaving] = useState(false);
@@ -90,7 +92,7 @@ export default function SecurityPage() {
 
   return (
     <div>
-      <Helmet><title>Security - Code829</title></Helmet>
+      <Helmet><title>{`Security - ${ORGANIZER_NAME}`}</title></Helmet>
       <PagePreamble
         kicker="Your account"
         title="Security"

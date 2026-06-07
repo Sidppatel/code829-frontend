@@ -19,6 +19,7 @@ import LoadingSpinner from '@code829/shared/components/shared/LoadingSpinner';
 import { formatEventDate } from '@code829/shared/utils/date';
 import { createLogger } from '@code829/shared/lib/logger';
 import { useAuthStore } from '@code829/shared/stores/authStore';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 const log = createLogger('Public/PurchaseTicketsPage');
 
@@ -152,7 +153,7 @@ export default function PurchaseTicketsPage() {
 
   return (
     <div>
-      <Helmet><title>Manage tickets - Code829</title></Helmet>
+      <Helmet><title>{`Manage tickets - ${ORGANIZER_NAME}`}</title></Helmet>
       <PagePreamble
         kicker="Your evening"
         title="Manage tickets"

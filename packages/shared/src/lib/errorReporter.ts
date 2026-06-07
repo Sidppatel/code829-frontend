@@ -1,4 +1,6 @@
 
+import { organizerName } from '../config';
+
 const buffer: Array<{ source: string; message: string; data?: unknown }> = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let disabled = false;
@@ -30,7 +32,7 @@ async function flush() {
       body: JSON.stringify({
         name: 'frontend-error-reporter',
         type: 'Bug',
-        email: 'frontend-errors@code829.local',
+        email: `frontend-errors@${organizerName.toLowerCase()}.local`,
         message,
         context: JSON.stringify(batch.map(e => e.data).filter(Boolean)),
       }),

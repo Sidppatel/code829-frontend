@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ORGANIZER_NAME } from '../../config';
 
-export const BRAND_NAME = 'Code829';
+export const BRAND_NAME = ORGANIZER_NAME;
 export const BRAND_TAGLINE = '';
 export const BRAND_LOGO_URL = '/logo.svg';
 

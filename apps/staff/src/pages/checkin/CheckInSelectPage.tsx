@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarOutlined, EnvironmentOutlined, ScanOutlined } from '@ant-design/icons';
 import { checkInApi, eventsApi } from '../../services/api';
 import { formatEventDate } from '@code829/shared/utils/date';
+import { ORGANIZER_NAME } from '@code829/shared';
 import type { EventSummary } from '@code829/shared/types/event';
 import type { CheckInStats } from '@code829/shared/types/checkin';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
@@ -50,7 +51,7 @@ export default function CheckInSelectPage() {
   return (
     <PageShell
       title="Staff Check-In"
-      documentTitle="Select Event - Code829 Staff"
+      documentTitle={`Select Event - ${ORGANIZER_NAME} Staff`}
       subtitle={[
         'Select an event to start welcoming your guests.',
         'Prepare for a smooth entry experience.',

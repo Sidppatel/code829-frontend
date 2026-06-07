@@ -8,6 +8,7 @@ import { AxiosError } from 'axios';
 import { useGoogleLogin } from '@react-oauth/google';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 interface SignupForm {
   firstName: string;
@@ -83,7 +84,7 @@ export default function SignupPage() {
       justifyContent: 'center',
       padding: '24px',
     }}>
-      <Helmet><title>Create Account - Code829</title></Helmet>
+      <Helmet><title>{`Create Account - ${ORGANIZER_NAME}`}</title></Helmet>
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}

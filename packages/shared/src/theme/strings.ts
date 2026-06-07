@@ -1,4 +1,6 @@
 
+import { ORGANIZER_NAME } from '../config';
+
 export type TextTokenTag =
   | 'h1'
   | 'h2'
@@ -91,7 +93,7 @@ export const strings = {
       as: 'span',
     },
     signInPageTitle: {
-      text: 'Sign In - Code829',
+      text: `Sign In - ${ORGANIZER_NAME}`,
       className: '',
       as: 'span',
     },
@@ -128,7 +130,7 @@ export const strings = {
       as: 'div',
     },
     yourHostsName: {
-      text: 'The Code 829 Collective',
+      text: `The ${ORGANIZER_NAME} Collective`,
       className: "font-display italic text-[15px] text-textLight",
       as: 'div',
     },
@@ -154,7 +156,7 @@ export const strings = {
       as: 'h2',
     },
     homePageTitle: {
-      text: 'Curated evenings, thoughtfully seated — Code829',
+      text: `Curated evenings, thoughtfully seated — ${ORGANIZER_NAME}`,
       className: '',
       as: 'span',
     },
@@ -174,7 +176,7 @@ export const strings = {
       as: 'p',
     },
     eventsPageTitle: {
-      text: 'All events — Code829',
+      text: `All events — ${ORGANIZER_NAME}`,
       className: '',
       as: 'span',
     },
@@ -297,7 +299,7 @@ export const strings = {
       as: 'p',
     },
     myPurchasesPageTitle: {
-      text: 'My Purchases - Code829',
+      text: `My Purchases - ${ORGANIZER_NAME}`,
       className: '',
       as: 'span',
     },

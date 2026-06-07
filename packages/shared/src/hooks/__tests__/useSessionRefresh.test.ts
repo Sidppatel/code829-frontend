@@ -22,6 +22,9 @@ const mockUser: UserProfile = {
   optInLocationEmail: false,
   hasCompletedOnboarding: true,
   createdAt: '2025-01-01T00:00:00Z',
+  hasPassword: true,
+  hasGoogle: false,
+  emailVerified: true,
 };
 
 beforeEach(() => {
@@ -38,12 +41,14 @@ describe('useSessionRefresh', () => {
     mockGet.mockResolvedValueOnce({ data: mockUser });
     renderHook(() => useSessionRefresh());
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/auth/me'));
+    await waitFor(() => expect(useAuthStore.getState().user?.id).toBe('refresh-1'));
   });
 
   it('sets isHydrated true after probe resolves (no cached user)', async () => {
     mockGet.mockResolvedValueOnce({ data: mockUser });
     renderHook(() => useSessionRefresh());
     await waitFor(() => expect(useAuthStore.getState().isHydrated).toBe(true));
+    await waitFor(() => expect(useAuthStore.getState().user?.id).toBe('refresh-1'));
   });
 
   it('populates store with user from /auth/me response', async () => {
@@ -53,23 +58,32 @@ describe('useSessionRefresh', () => {
   });
 
   it('sets isHydrated true even when /auth/me returns 401', async () => {
-    mockGet.mockRejectedValueOnce(Object.assign(new Error('401'), { response: { status: 401 } }));
+    mockGet.mockRejectedValueOnce(Object.assign(new Error('401'), { response: { status: 401 }, isAxiosError: true }));
     renderHook(() => useSessionRefresh());
     await waitFor(() => expect(useAuthStore.getState().isHydrated).toBe(true));
   });
 
   it('sets isHydrated immediately when user is cached (fast path)', async () => {
     useAuthStore.setState({ user: mockUser, isHydrated: false });
-    mockGet.mockImplementationOnce(
-      () => new Promise((res) => setTimeout(() => res({ data: mockUser }), 50)),
-    );
+    const promise = new Promise((res) => setTimeout(() => res({ data: mockUser }), 10));
+    mockGet.mockReturnValueOnce(promise);
     renderHook(() => useSessionRefresh());
     expect(useAuthStore.getState().isHydrated).toBe(true);
+    await promise;
+    await waitFor(() => expect(useAuthStore.getState().user?.id).toBe('refresh-1'));
   });
 
   it('uses custom meEndpoint when provided', async () => {
     mockGet.mockResolvedValueOnce({ data: mockUser });
     renderHook(() => useSessionRefresh('/admin/auth/me'));
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/admin/auth/me'));
+    await waitFor(() => expect(useAuthStore.getState().user?.id).toBe('refresh-1'));
+  });
+
+  it('clears cached user if /auth/me returns 404 or 401', async () => {
+    useAuthStore.setState({ user: mockUser, isHydrated: false });
+    mockGet.mockRejectedValueOnce(Object.assign(new Error('404'), { response: { status: 404 }, isAxiosError: true }));
+    renderHook(() => useSessionRefresh());
+    await waitFor(() => expect(useAuthStore.getState().user).toBeNull());
   });
 });

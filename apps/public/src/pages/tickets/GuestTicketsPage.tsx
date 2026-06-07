@@ -14,6 +14,7 @@ import { formatEventDate } from '@code829/shared/utils/date';
 import { PageShell, QrModal } from '@code829/shared/components/ui';
 import PagePreamble from '../../components/layout/PagePreamble';
 import { useAsyncResource, useQrCode } from '@code829/shared/hooks';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 export default function GuestTicketsPage() {
   const { data: tickets, loading, error } = useAsyncResource<GuestTicket[]>(
@@ -31,7 +32,7 @@ export default function GuestTicketsPage() {
 
   return (
     <PageShell
-      documentTitle="Guest Tickets — Code829"
+      documentTitle={`Guest Tickets — ${ORGANIZER_NAME}`}
       loading={loading}
       preamble={
         <PagePreamble

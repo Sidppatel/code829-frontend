@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { adminEventsApi } from '../../services/api';
+import { ORGANIZER_NAME } from '@code829/shared';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { formatEventDate } from '@code829/shared/utils/date';
@@ -74,7 +75,7 @@ export default function EventsListPage() {
   return (
     <PageShell
       title="Events"
-      documentTitle="Events - Code829 Admin"
+      documentTitle={`Events - ${ORGANIZER_NAME} Admin`}
       subtitle={[
         'Design unforgettable nights for your guests.',
         'Track ticket sales and check-in progress in real-time.',

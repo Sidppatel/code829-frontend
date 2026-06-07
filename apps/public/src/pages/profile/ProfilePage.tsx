@@ -13,6 +13,8 @@ import AddressAutocomplete from '@code829/shared/components/shared/AddressAutoco
 import type { AddressParts } from '@code829/shared/components/shared/AddressAutocomplete';
 import AvatarUpload from '@code829/shared/components/shared/AvatarUpload';
 
+import { ORGANIZER_NAME } from '@code829/shared';
+
 export default function ProfilePage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
@@ -78,7 +80,7 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <Helmet><title>Profile - Code829</title></Helmet>
+      <Helmet><title>{`Profile - ${ORGANIZER_NAME}`}</title></Helmet>
       <PagePreamble
         kicker="Your account"
         title="Profile"

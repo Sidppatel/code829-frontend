@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import type { NavbarMenuItem, NavbarProps } from './Navbar';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 const DEFAULT_PUBLIC_MENU: NavbarMenuItem[] = [
   { key: 'profile', to: '/profile', label: 'Profile' },
@@ -58,7 +59,7 @@ export function NavbarPublic({ items = [], menuItems, user, onLogout, actions }:
       <div className="ui-navbar__inner">
         <NavLink to="/" className="ui-navbar__brand" aria-label="Home">
           <img src="/logo.svg" alt="" className="ui-navbar__brand-mark" />
-          <span className="ui-navbar__brand-name">Code829</span>
+          <span className="ui-navbar__brand-name">{ORGANIZER_NAME}</span>
         </NavLink>
 
         <ul className="ui-navbar__links">

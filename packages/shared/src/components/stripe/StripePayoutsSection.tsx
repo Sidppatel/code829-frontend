@@ -20,13 +20,15 @@ import type {
   OrganizationStripeState,
 } from '../../types/organizations';
 
+import { organizerName } from '../../config';
+
 const log = createLogger('StripePayoutsSection');
 
 export interface StripePayoutsSectionProps {
   refreshNonce?: number | string;
 }
 
-const PLATFORM_CONTACT_EMAIL = 'support@code829.com';
+const PLATFORM_CONTACT_EMAIL = `support@${organizerName.toLowerCase()}.com`;
 
 export default function StripePayoutsSection({ refreshNonce }: StripePayoutsSectionProps) {
   const { data, isLoading, isFetching, isError, error, refresh } = useAdminStripeStatus();

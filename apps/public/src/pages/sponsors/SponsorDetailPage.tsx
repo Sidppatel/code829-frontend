@@ -6,6 +6,7 @@ import { Link, useParams } from 'react-router-dom';
 import type { Sponsor, SponsorMetaItem } from '@code829/shared/types/sponsor';
 import { sponsorService } from '../../services/api';
 import { createLogger } from '@code829/shared/lib/logger';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 const log = createLogger('Public/SponsorDetailPage');
 const SPONSOR_NOT_FOUND_TEXT = 'Sponsor not found';
@@ -70,8 +71,8 @@ export default function SponsorDetailPage() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 20px 80px' }}>
       <Helmet>
-        <title>{sponsor.name} - Code829</title>
-        <link rel="canonical" href={`https://code829.com/sponsors/${sponsor.slug}`} />
+        <title>{`${sponsor.name} - ${ORGANIZER_NAME}`}</title>
+        <link rel="canonical" href={`https://${ORGANIZER_NAME.toLowerCase()}.com/sponsors/${sponsor.slug}`} />
       </Helmet>
       <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: 40 }}>
         <div

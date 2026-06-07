@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import type { NavbarProps } from './Navbar';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 export function NavbarStaff({ items = [], user, onLogout, actions }: NavbarProps) {
   return (
@@ -7,7 +8,7 @@ export function NavbarStaff({ items = [], user, onLogout, actions }: NavbarProps
       <div className="ui-navbar__staff-inner">
         <NavLink to="/" className="ui-navbar__brand" aria-label="Home">
           <span className="ui-navbar__brand-mark" aria-hidden="true" />
-          <span className="ui-navbar__brand-name">Code829</span>
+          <span className="ui-navbar__brand-name">{ORGANIZER_NAME}</span>
         </NavLink>
         <ul className="ui-navbar__links ui-navbar__links--compact">
           {items.map((item) => (

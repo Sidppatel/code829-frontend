@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { ORGANIZER_NAME } from '@code829/shared';
 import './Footer.css';
 
 export type FooterVariant = 'public' | 'admin' | 'staff' | 'developer';
@@ -67,7 +68,7 @@ export function Footer({
   variant,
   columns = [],
   tagline,
-  copyright = `© ${new Date().getFullYear()} Code829`,
+  copyright = `© ${new Date().getFullYear()} ${ORGANIZER_NAME}`,
   socials = [],
 }: FooterProps) {
   if (variant === 'public') {
@@ -76,8 +77,8 @@ export function Footer({
         <div className="ui-footer__inner">
           <div className="ui-footer__brand-col">
             <Link to="/" className="ui-footer__brand">
-              <img src="/logo.svg" alt="Code829 logo" className="ui-footer__brand-mark" />
-              <span className="ui-footer__brand-name">Code829</span>
+              <img src="/logo.svg" alt={`${ORGANIZER_NAME} logo`} className="ui-footer__brand-mark" />
+              <span className="ui-footer__brand-name">{ORGANIZER_NAME}</span>
             </Link>
             {tagline && <p className="ui-footer__tagline">{tagline}</p>}
             {socials.length > 0 && (

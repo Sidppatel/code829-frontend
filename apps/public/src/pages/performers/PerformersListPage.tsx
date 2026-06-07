@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import type { Performer } from '@code829/shared/types/performer';
 import { performerService } from '../../services/api';
 import { createLogger } from '@code829/shared/lib/logger';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 const log = createLogger('Public/PerformersListPage');
 
@@ -38,8 +39,8 @@ export default function PerformersListPage() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 20px 80px' }}>
       <Helmet>
-        <title>{'Performers - Code829'}</title>
-        <link rel="canonical" href="https://code829.com/performers" />
+        <title>{`Performers - ${ORGANIZER_NAME}`}</title>
+        <link rel="canonical" href={`https://${ORGANIZER_NAME.toLowerCase()}.com/performers`} />
       </Helmet>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 24 }}>
         <div style={{ width: 6, height: 56, borderRadius: 10, background: 'var(--gradient-brand, var(--primary))' }} />

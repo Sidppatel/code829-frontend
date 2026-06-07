@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { AxiosError } from 'axios';
 import { authApi } from '../../services/api';
+import { ORGANIZER_NAME } from '@code829/shared';
 
 interface ResetForm {
   newPassword: string;
@@ -48,7 +49,7 @@ export default function ResetPasswordPage() {
   if (!token) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 16, padding: 24 }}>
-        <Helmet><title>Reset Password - Code829</title></Helmet>
+        <Helmet><title>{`Reset Password - ${ORGANIZER_NAME}`}</title></Helmet>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>Missing reset token</h2>
         <p style={{ color: 'var(--text-secondary)' }}>This link is invalid. Please request a new password reset.</p>
         <Link to="/forgot-password" style={{ color: 'var(--accent-violet)', fontWeight: 700 }}>
@@ -66,7 +67,7 @@ export default function ResetPasswordPage() {
       justifyContent: 'center',
       padding: '24px',
     }}>
-      <Helmet><title>Reset Password - Code829</title></Helmet>
+      <Helmet><title>{`Reset Password - ${ORGANIZER_NAME}`}</title></Helmet>
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
