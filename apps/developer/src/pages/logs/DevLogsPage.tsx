@@ -4,6 +4,7 @@ import { InfoCircleOutlined, RedoOutlined } from '@ant-design/icons';
 import type { DescriptionsItemType } from 'antd/es/descriptions';
 import { developerApi } from '../../services/api';
 import { usePagedTable } from '@code829/shared/hooks/usePagedTable';
+import { ORGANIZER_NAME } from '@code829/shared';
 import type { DevLogEntry, DevLogParams } from '@code829/shared/services/developerApi';
 import HumanCard from '@code829/shared/components/shared/HumanCard';
 import {
@@ -98,7 +99,7 @@ export default function DevLogsPage() {
   return (
     <PageShell
       title="Error Logs"
-      documentTitle="Error Logs - Code829 Developer"
+      documentTitle={`Error Logs - ${ORGANIZER_NAME} Developer`}
       subtitle={[
         'Real-time application health and error tracking.',
         'Analyzing request throughput and endpoint latency.',

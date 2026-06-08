@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons';
 import { useIsMobile } from '@code829/shared/hooks/useIsMobile';
 import { stripeConnectApi } from '@code829/shared/services/stripeConnectApi';
+import { ORGANIZER_NAME } from '@code829/shared';
 import type {
   OnboardingLinkScope,
   OrganizationDetail,
@@ -18,7 +19,7 @@ import type {
 
 const DEFAULT_MCC = '7922';
 const DEFAULT_BUSINESS_TYPE: 'individual' | 'company' = 'individual';
-const APP_BRAND_FOR_PRODUCT_DESCRIPTION = 'Code829';
+const APP_BRAND_FOR_PRODUCT_DESCRIPTION = ORGANIZER_NAME;
 
 interface Props {
   open: boolean;

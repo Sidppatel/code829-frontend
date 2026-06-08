@@ -20,6 +20,7 @@ import type { MenuProps } from 'antd';
 import { Avatar, Grid } from 'antd';
 import { useAuth } from '@code829/shared/hooks/useAuth';
 import BrandLogo from '@code829/shared/components/shared/BrandLogo';
+import { ORGANIZER_NAME } from '@code829/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import { USE_NEW_SHELL } from '@code829/shared/lib/featureFlags';
 import { Navbar, Footer as UIFooter } from '@code829/ui';
@@ -340,12 +341,12 @@ export default function PublicLayout() {
             </Typography.Text>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <Typography.Text style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Mobile, Alabama</Typography.Text>
-              <Typography.Text style={{ color: 'var(--text-secondary)', fontSize: 13 }}>hello@code829.com</Typography.Text>
+              <Typography.Text style={{ color: 'var(--text-secondary)', fontSize: 13 }}>hello@{ORGANIZER_NAME.toLowerCase().replace(/\s+/g, '')}.com</Typography.Text>
             </div>
           </Col>
         </Row>
         <div style={{ textAlign: 'center', marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: 13 }}>
-          © 2025 Code829. Built for Mobile, AL.
+          © {new Date().getFullYear()} {ORGANIZER_NAME}. Built for Mobile, AL.
         </div>
       </Footer>
 

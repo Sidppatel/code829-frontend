@@ -10,6 +10,7 @@ import { GoogleOutlined } from '@ant-design/icons';
 import { authApi } from '../../services/api';
 import { useAuthStore } from '@code829/shared/stores/authStore';
 import { safeReturnUrl } from '@code829/shared/lib/safeRedirect';
+import { ORGANIZER_NAME } from '@code829/shared';
 import Text from '@code829/shared/components/shared/Text';
 import { strings, textTemplates } from '@code829/shared/theme/strings';
 
@@ -205,7 +206,7 @@ export default function LoginPage() {
             }}>
               <img
                 src="/logo.svg"
-                alt="Code829 Logo"
+                alt={`${ORGANIZER_NAME} Logo`}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
@@ -405,7 +406,7 @@ export default function LoginPage() {
               >
                 <Input
                   prefix={<LoginOutlined style={{ color: 'var(--text-muted)', marginRight: 8 }} />}
-                  placeholder="admin@code829.com"
+                  placeholder={`admin@${ORGANIZER_NAME.toLowerCase().replace(/\s+/g, '')}.com`}
                   size="large"
                   style={{ borderRadius: 14, height: 50, background: 'var(--bg-soft)' }}
                 />
