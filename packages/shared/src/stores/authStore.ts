@@ -19,8 +19,9 @@ type PersistedUser =
 
 function toPersistedUser(user: UserProfile | BusinessUserProfile | null): PersistedUser | null {
   if (!user) return null;
+  const u = user as unknown as Record<string, unknown>;
   return {
-    id: user.id,
+    id: (u.id || u.businessUserId || u.userId) as string,
     firstName: user.firstName,
     lastName: user.lastName,
     role: user.role,

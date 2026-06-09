@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Tag, Descriptions, Select, Button, Spin, Empty } from 'antd';
 import { ReloadOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -249,25 +249,37 @@ export default function VisitorLogsPage() {
     defaultPageSize: 20,
   });
 
-  const loadStats = useCallback(async () => {
-    try {
-      const { data } = await developerApi.getVisitorStats();
-      setStats(data);
-    } catch {
-      // Silent error fallback
-    } finally {
-      setStatsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadStats();
-  }, [loadStats]);
+    let ignore = false;
+    const fetchStats = async () => {
+      try {
+        const { data } = await developerApi.getVisitorStats();
+        if (!ignore) setStats(data);
+      } catch {
+        // Silent error fallback
+      } finally {
+        if (!ignore) setStatsLoading(false);
+      }
+    };
+    void fetchStats();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const handleRefresh = () => {
     setStatsLoading(true);
-    void loadStats();
+    const fetchStats = async () => {
+      try {
+        const { data } = await developerApi.getVisitorStats();
+        setStats(data);
+      } catch {
+        // Silent error fallback
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+    void fetchStats();
     paged.refresh();
   };
 

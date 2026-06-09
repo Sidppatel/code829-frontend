@@ -15,7 +15,7 @@ test.describe('@mobile back button', () => {
     await page.locator('button:has-text("Reserve")').first().click();
 
     await expect(page).toHaveURL(/[?&]step=(select-table|capacity)/);
-    const stepAfterClick = new URL(page.url()).searchParams.get('step');
+
 
     await page.goBack();
     await expect(page).not.toHaveURL(/[?&]step=(select-table|capacity)/);
