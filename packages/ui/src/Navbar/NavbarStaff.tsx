@@ -7,7 +7,7 @@ export function NavbarStaff({ items = [], user, onLogout, actions }: NavbarProps
     <header className="ui-navbar ui-navbar--staff" aria-label="Primary">
       <div className="ui-navbar__staff-inner">
         <NavLink to="/" className="ui-navbar__brand" aria-label="Home">
-          <span className="ui-navbar__brand-mark" aria-hidden="true" />
+          <img src="/logo.svg" alt="" className="ui-navbar__brand-mark" />
           <span className="ui-navbar__brand-name">{ORGANIZER_NAME}</span>
         </NavLink>
         <ul className="ui-navbar__links ui-navbar__links--compact">

@@ -28,7 +28,7 @@ export function NavbarSidebar({
       aria-label="Primary"
     >
       <div className="ui-navbar__sidebar-brand">
-        <span className="ui-navbar__brand-mark" aria-hidden="true" />
+        <img src="/logo.svg" alt="" className="ui-navbar__brand-mark" />
         {!collapsed && <span className="ui-navbar__brand-name">{ORGANIZER_NAME}</span>}
       </div>
 

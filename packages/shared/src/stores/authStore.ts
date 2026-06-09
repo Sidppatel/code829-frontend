@@ -41,6 +41,9 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: toPersistedUser(state.user) as UserProfile | BusinessUserProfile | null,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
     },
   ),
 );
