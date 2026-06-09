@@ -6,13 +6,12 @@ import apiClient from '../lib/axios';
 export function useSessionRefresh(meEndpoint = '/auth/me') {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
-  const isHydrated = useAuthStore((s) => s.isHydrated);
+  const setHydrated = useAuthStore((s) => s.setHydrated);
   const logout = useAuthStore((s) => s.logout);
 
   useEffect(() => {
-    if (!isHydrated) return;
-
     if (user) {
+      setHydrated(true);
       const validate = async () => {
         try {
           const { data } = await apiClient.get(meEndpoint, { _skipAuthRetry: true } as never);
@@ -48,8 +47,11 @@ export function useSessionRefresh(meEndpoint = '/auth/me') {
             logout();
           }
         }
+      } finally {
+        setHydrated(true);
       }
     };
     void refresh();
-  }, [meEndpoint, isHydrated, user, setUser, logout]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meEndpoint, setHydrated, setUser, logout]);
 }
