@@ -39,14 +39,14 @@ export default function PasswordForm({ mode, onSubmit, submitLabel = 'Submit', s
           name="currentPassword"
           rules={[{ required: true, message: 'Please enter your current password' }]}
         >
-          <Input.Password prefix={<LockOutlined />} placeholder="Current password" size="large" />
+          <Input.Password prefix={<LockOutlined />} placeholder="Current password" size="large" autoComplete="current-password" />
         </Form.Item>
       )}
       <Form.Item
         name="newPassword"
         rules={[{ required: true, min: 8, message: 'Password must be at least 8 characters' }]}
       >
-        <Input.Password prefix={<LockOutlined />} placeholder="New password" size="large" />
+        <Input.Password prefix={<LockOutlined />} placeholder="New password" size="large" autoComplete="new-password" />
       </Form.Item>
       <Form.Item
         name="confirmNewPassword"
@@ -63,7 +63,7 @@ export default function PasswordForm({ mode, onSubmit, submitLabel = 'Submit', s
           }),
         ]}
       >
-        <Input.Password prefix={<LockOutlined />} placeholder="Confirm password" size="large" />
+        <Input.Password prefix={<LockOutlined />} placeholder="Confirm password" size="large" autoComplete="new-password" />
       </Form.Item>
       <Form.Item>
         <Button type="primary" htmlType="submit" block size="large" loading={loading}>
