@@ -11,11 +11,18 @@ const getProcessEnv = (): Record<string, string> => {
 
 const processEnv = getProcessEnv();
 
+const isSet = (val: string | undefined): val is string => {
+  return typeof val === 'string' && val !== '' && val !== 'undefined';
+};
+
+const metaEnv = (import.meta as unknown as { env?: Record<string, string> }).env || {};
+
 export const ORGANIZER_NAME =
-  (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_ORGANIZER_NAME ||
-  (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_APP_NAME ||
-  processEnv.VITE_ORGANIZER_NAME ||
-  processEnv.VITE_APP_NAME ||
-  'Code829';
+  [
+    metaEnv.VITE_ORGANIZER_NAME,
+    metaEnv.VITE_APP_NAME,
+    processEnv.VITE_ORGANIZER_NAME,
+    processEnv.VITE_APP_NAME,
+  ].find(isSet) || 'Code829';
 
 export const organizerName = ORGANIZER_NAME;

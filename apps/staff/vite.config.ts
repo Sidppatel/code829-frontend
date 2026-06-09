@@ -4,8 +4,12 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
-  process.env.VITE_ORGANIZER_NAME = env.VITE_ORGANIZER_NAME;
-  process.env.VITE_APP_NAME = env.VITE_APP_NAME;
+  if (env.VITE_ORGANIZER_NAME) {
+    process.env.VITE_ORGANIZER_NAME = env.VITE_ORGANIZER_NAME;
+  }
+  if (env.VITE_APP_NAME) {
+    process.env.VITE_APP_NAME = env.VITE_APP_NAME;
+  }
 
   return {
     plugins: [
