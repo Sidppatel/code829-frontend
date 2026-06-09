@@ -38,7 +38,7 @@ function normalizeColor(v: TemplateFormValues['defaultColor']): string {
 export default function TableTypesPage() {
   const fetchTypes = useCallback(async () => {
     const { data } = await adminLayoutApi.listTableTemplates();
-    return data;
+    return (data as TableTemplate[]) ?? [];
   }, []);
   const { data: types, loading, refresh } = useAsyncResource(fetchTypes);
 

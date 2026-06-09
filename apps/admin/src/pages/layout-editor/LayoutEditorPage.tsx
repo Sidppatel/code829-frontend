@@ -75,9 +75,9 @@ export default function LayoutEditorPage() {
       setGridRows(layoutData.gridRows ?? 10);
       setGridCols(layoutData.gridCols ?? 10);
       setTables(layoutData.tables ?? []);
-      setTemplates(templatesRes.data ?? []);
-      setEventTables(eventTablesRes.data ?? []);
-      setStats(statsRes.data);
+      setTemplates((templatesRes.data as TableTemplate[]) ?? []);
+      setEventTables((eventTablesRes.data as EventTableType[]) ?? []);
+      setStats((statsRes.data as LayoutStatsResponse) ?? null);
       log.info('Layout loaded', { eventId, tableCount: (layoutData.tables ?? []).length, gridRows: layoutData.gridRows, gridCols: layoutData.gridCols });
     } catch (err) {
       log.error('Failed to load layout', err);
@@ -146,7 +146,7 @@ export default function LayoutEditorPage() {
       log.info('Layout saved', { eventId, tableCount: tables.length });
       message.success('Layout saved');
       const statsRes = await adminLayoutApi.getLayoutStats(eventId);
-      setStats(statsRes.data);
+      setStats((statsRes.data as LayoutStatsResponse) ?? null);
     } catch (err: unknown) {
       log.error('Failed to save layout', err);
       const axiosErr = err as { response?: { data?: { message?: string } } };
